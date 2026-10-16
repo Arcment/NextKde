@@ -1,3 +1,76 @@
+# R049 — E03 clause 3 ("tall blocks top align"): **BLOCKED on a ruling — no tall block exists in any view** (2026-10-16)
+
+Atomic step: R048's Next-round #1 = judge E03 clause 3 in a view that has tall blocks. Measurement + judgment
+only, **no product code touched, no build**.
+
+Route, light, one restart: `start-review-vm.sh light` (from **repo root** ⇒ `captureClient` landed at repo root,
+moved in after) → `date 2026-04-02` → `view month` → `captureClient r049-month.png` (1100x692).
+
+### What was measured
+
+**Month grid (`CalendarMonthView.qml`), 1100x692 light:**
+- Row pitch **60.7px** — day-number ink tops at **y 165 / 226 / 287 / 348 / 408** (diffs 61/61/60/61).
+- Day-number ink top → chip fill top = **+18px**.
+- Every populated day cell shows **exactly one** chip; its fill band is **y 183 → 200, h = 18px** in *all six*
+  populated columns. Chip x-runs **(6,148) (164,305) (321,463) (636,778) (794,935)** ⇒ column pitch **157.5**,
+  chip width **143**, inter-cell gap **16**. 周四 2's run (473,626) w154 is the **selected-day rect**, 5px proud
+  each side — not a wider chip.
+- Overflow is rendered as a `+N` counter (**+8 +8 +11 +9 +7**), never as extra chips.
+- Chip fill is **per-list tinted**, not the week view's uniform colour: **(241,247,251)** for 周一30's
+  "Multi-day review", **(222,236,246)** for 周四2's "Morning planning".
+
+**Only two grid components exist** (`apps/calendar/qml/`): `CalendarMonthView.qml` and
+`CalendarScheduleView.qml`. The latter serves **both** week and day — `Main.qml:2502` `dayCount: 7`,
+`Main.qml:2532` `dayCount: 1`. R048 measured it: timed chip fixed `Layout.preferredHeight: 21`, hour row fixed
+`54` (`:353`), all-day chip fixed `18` (`:277`). A duration / startTime / endTime / span grep across all five
+calendar QML files returns **nothing height-related**.
+
+Line-number drift note: R048 cited the timed chip at `:388`/`:389`; by content it is now `:394`/`:395`.
+
+### Verdict
+
+Clause 3's precondition — a tall block — **never occurs in any of the three views**: month 18px fixed, week and
+day 21px fixed, and no code path maps a duration to a height. So the clause **cannot be verified as PASS**, and it
+is **not a text-alignment bug** either: there is no tall block whose text could be mis-aligned.
+
+Against the ref this is a **structural divergence, not a vacuous clause**. `.loop/refs/macos-calendar.png` is the
+**Week** view (`Day|Week|Month|Year`, Week active) and its timed blocks are unmistakably duration-proportional and
+**top-aligned**: "Stretchin… 11AM–1PM" spans ~2 hour rows with its label at the top, "Writing s…" ~3–6PM,
+"Drop off… 5:30–7PM", "Hike with… 10AM–12…" and "Plant gar…" are tall blocks, each with a top-anchored title and
+its time caption **below** it.
+
+⇒ Owner's call, same class as 仍差 #1/#2/#3 (declared criterion the build does not satisfy):
+- **(a)** clause 3 presumes a proportional-block model the app replaced with fixed 21px agenda chips ⇒ **reword or
+  drop clause 3**; or
+- **(b)** the week/day view should gain duration-proportional, top-aligned blocks ⇒ a feature, not a tweak.
+
+**E03 stays PENDING; clauses 1+2 remain PASS (R048). Do not mark E03 PASS, and do not "fix" this silently.**
+
+### Negative finding recorded, to stop a future false defect
+`ui-review-multiday` (`profile/pim/calendar.ics:570-575`, `DTSTART;VALUE=DATE:20260330`,
+`DTEND;VALUE=DATE:20260403`) renders as **three separate 143px chips with a 16px gap** on 周一30 / 周二31 / 周三1,
+not one bar spanning the row. **This is NOT a defect.** A 2x crop of the ref's all-day row
+(`_r049-ref-allday2x.png`, ref x205–815 y125–180) shows the ref also uses **per-day-column chips**, stacked up to
+**3** per column, with **no** spanning bar. "Multi-day events should be one continuous bar" is not a finding.
+
+### New 仍差 #8 (measured, needs a ruling)
+**Month day cell holds 1 chip + `+N`; the ref holds 3 stacked chips.** Ref columns show 3 chips each
+("Antonio…"×2 + "Palm Sun…"; "April Fool…" + "Passover" + "Take out t…"), ours show 1 (`+8/+8/+11/+9/+7`). Same
+family as 仍差 #7 (schedule view `slice(0,2)`): both are silent per-cell caps with no affordance.
+
+### Instrument notes added this round
+- **`captureClient` has no `file` field — the key is `path`**: `{"action":"captureClient","path":"x.png"}`;
+  `view` is `{"action":"view","view":"month"}`; `date` is `{"action":"date","date":"2026-04-02"}`
+  (`harness/Main.qml:122/217/221`).
+- **Do not locate a month chip by fill colour.** Month chips are list-tinted ((241,247,251) and (222,236,246)
+  measured for two different lists) and one of them sits inside the selected-day rect. Use row/column geometry.
+- **The month grid draws no cell borders at all** — a column scan at x=1010 over y 140–500 returns pure white
+  through every row boundary. Cell geometry must be inferred from day-number ink and chip runs, never from rules.
+- Sampling a chip's mid row hits text ink: at x=60 the 18px chip reads (241,247,251) at y184-188 but (187,187,195)
+  at y190. Sample y = chip_top+2, not chip_mid.
+
+---
+
 # R048 — **E03 row elision, week view: clauses 1+2 PASS measured; clause 3 ("tall blocks top align") not judgeable here** (2026-10-16)
 
 ## 本轮 (R048)

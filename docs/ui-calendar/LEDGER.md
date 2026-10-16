@@ -1,3 +1,17 @@
+## R101 — C05's segment pill **radius**, measured: `LiquidSegmentedControl.qml:121` `height * 0.42` → `height * 0.48`
+The R100 Next #1 asked for the pill's radius as a per-row fill-start inset fit. Two of its premises were wrong and were
+corrected first: the **reference's pill is h = 24, not ~17** (ours is also 24 ⇒ the comparison is 1:1, not a ratio transfer),
+and ours measures 64 wide on the dark leg but 62 on the light one (the 2 px is the lens's own 1px `white@16%` border at
+`:123-124`, bright on the dark plane and invisible on the light one).
+**The method is validated by recovering our own token.** Same fit, same interior rows, threshold = the midpoint of each
+image's own two constants: `0.42`→10.1 (token 10.08), `0.46`→11.2 (11.04), `0.48`→11.4 (11.52), **reference → 11.7**
+(sse 4.51 vs our 19.51; 13/14 rows within ±0.5). A per-row probe threshold gives the ref 11.1 instead, so the honest answer
+is the band **11.4–11.7** (ratio 0.475–0.49) — our old 0.42 sat outside it, 0.48 sits inside.
+**The residual top-row misfit is material, not radius**: the lens gradient opens at `white@9%` and the 1px `white@16%` border
+lift the top rows above the threshold. Figures: `r101-seg-radius-3panel.png` (ref ×5 / 0.46 ×5 / 0.48 ×5), `r101-seg-light.png`.
+**Not chased:** the track's radius (`:87`, 0.38) — the ref's track edge is 249 on a 255 plane, unmeasurable; the concentric
+hypothesis would want the same 0.48 there.
+**Still差 #3 (new, next round):** the pill's WIDTH — ref 51 in a 56.75 slot (2.9 px/side), ours 64 in a 65.33 slot (1.2 px/side).
 # R100 — C05/L03's segment **label order**: the reference ascends `Day · Week · Month · Year`; ours was the exact reverse. **Fixed (a remap, not a token).**
 
 **Why this round.** Next #1 was C05's label *list* — the reading round R099 prescribed: grep `viewIndex` + `labels` consumers,

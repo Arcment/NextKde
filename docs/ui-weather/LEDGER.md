@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **AQ 卡 rating→渐变条间距 +7px（本轮，前端，零 Go/C++ 改动，仍差 10 残差复核轮）**：复核仍差 10 记载的"rating→渐变条 ink gap 残差 ~3px"——用两条独立口径重测推翻：a) 基线口径（rating 基线→条顶，避开 "Unhealthy...Groups" 的 y/p 下伸部、ref "Good" 无下伸部故天然可比）：ref-main "Good" 基线 y256 → 条顶 y271.5 = **15.5px**，×1.4598 目标 ≈**23.3px**；我方改前基线 y285.5 → 条顶 y302 = **16.5px**（**−6.8px**）。b) cap 顶口径（rating cap 顶→条顶，免基线估计）：ref y250→y272 = **22px** ×1.4598 = 32.1；我方 y276→y301 = **25px**（−7.1px）。两口径一致指向差 ~7px，旧"~3px 残差"记载系 line-box 混算低估。`apps/weather/qml/Main.qml:1513` AQ 条容器 Item 加 `Layout.topMargin: 7`（注释标明实测依据；spacing 10/条 height 9/渐变 stops/白点/其余 gap 一律未动）。
+  **实测**（本轮二进制截图 tmp/shots/1792185484.png 过体检闸 1180x727，同阈值 ink band 扫描）：条带 y301-308→**y308-315** 精确 +7px；rating cap 顶 y276 → 条顶 y308 = **32px**（目标 32.1，Δ0.1）；数字→rating gap 10px 不变（上轮成果未回退）；bar 下方 desc 同步 +7（y323→y330/332）。**回归**（vs 改动前 1792185188，2px 步进 diff>8）：hero/天空区 y0-200 **0 变化**；AQ 卡区 3200px = 条带+desc 位移本体+卡底缘；卡下方 y360-690 做 shift-7 补偿后仅 644/97350（0.66%，星空闪烁+时钟分钟已知噪声基线）——下方内容为纯 7px 下移（卡变高的预期布局后果），无其他位移。qmllint 0 error。测试 6/6 绿、go test ok。
+  **注**：bar→desc gap 各口径差 3-6px 与上轮已校准值口径冲突（ink 顶底口径敏感性），按"同一处不连改两轮"不再动；ref desc 两行/我方一行（半宽 vs 全宽卡）line-box 不同进一步压低该残差可比性。本轮无动效改动，无帧差义务。
 - **AQ 卡数字→rating 间距收紧 22→10px（本轮，前端，零 Go/C++ 改动，巡检轮）**：巡检新截图（dev env，见下注）对照 ref-main 发现 AQ 卡数字与 rating 文字（"Unhealthy for Sensitive Groups"）之间空隙过大——Pillow 大写 cap 顶口径实测：ref-main（814×498）数字 "40" 字形底 y243 → rating "Good" cap 顶 y250，ink gap **7px**（×1.46 窗高比 ≈10px）；我方改前截图 1792184837 数字 "114" 底 y266 → rating cap 顶 y288，gap **22px**（偏差 +12，来自 ColumnLayout spacing 10 + 两行字体行高 padding）。`apps/weather/qml/Main.qml:1507` rating Label 加 `Layout.topMargin: -12`（镜像 hero 区 Main.qml:1350/:1393 既有负 margin 先例，只抵行高 padding，spacing:10 不动），注释标明 ref 实测依据。其余一律未动（数字 Label 22px、rating 字号 13、渐变条、desc、头部点阵）。
   **实测**（本轮二进制截图 tmp/shots/1792185019.png 过体检闸 1180x727）：数字底 y266 → rating cap 顶 y276，gap **10px**（目标 ~10 精确）；顺带 bar→desc gap 16→**21px**（ref 14×1.46≈20.4，也吻合——整体上移后节奏对齐）。
   **回归**（vs 改动前 1792184837）：AQ 文字区 y276-350 变化 3547px（改动本体）+ mid 区 y350-660 平移带——**shift-12 补偿后仅 19 个噪声点**（3px 网格采样，星空闪烁底噪），即下方内容为纯 12px 上移（卡变矮的预期布局后果，同 hero 收紧轮先例）；top 区 0 变化。qmllint 0 error（158 warning 与基线一致）。测试 6/6 绿、go test ok。
@@ -182,7 +185,7 @@
 7. ~~滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐~~（**已做**，见已改——`scrollEdgeBottom` 与顶边镜像对称，TEMP 下推卡片取证渲染、终态验证门控；滚动态实拍仍未见，见外推待确认）。
 8. ~~指标瓦片（白@0.12）与同级全宽卡（AQ/10 天，白@0.16）填充 alpha 不一致~~（**已做**，见已改——瓦片统一到 0.16/0.22、符号盒 0.20 保 +0.04 关系；日景材质方向差异另见外推待确认首条（**已执行**，见已改"昼夜分材质"））。
 9. ~~B.4 卡片 hover 只剩 10 天卡一处（指标容器实例随本轮容器移除删去）；瓦片级 hover（玻璃高光+抬升移到每块瓦片）为候选补法~~（**已做**，见已改——hover 同参数族已加到 WeatherMetric 组件 6 瓦 + directionTile/moonPhaseTile/sunsetTile，带帧差 MAE 证据；真实鼠标悬停未在真机点过，见外推待确认）。
-10. AQ 卡 rating 邻域残差（视觉冲击低，见已改"数字→rating 间距"条注）：rating cap 高 9px vs ref 折算 10.2（1px AA 内）；rating→渐变条 ink gap 13px vs ref 折算 ~22 的 line-box 残差 ~3px。逐小时区"逐小时"区头+分段控件在卡外（ref 是 Conditions 卡内右上），系结构性版式适配，是否贴回卡内待用户裁定。
+10. AQ 卡 rating 邻域残差（视觉冲击低，见已改“数字→rating 间距”条注）：rating cap 高 9px vs ref 折算 10.2（1px AA 内）；~~rating→渐变条 ink gap 残差~~（**已做**，见已改“+7px”——cap 顶口径 25→32px，目标 32.1；旧“~3px 残差”记载系 line-box 混算低估，本轮两口径复测推翻）。逐小时区“逐小时”区头+分段控件在卡外（ref 是 Conditions 卡内右上），系结构性版式适配，是否贴回卡内待用户裁定。
 
 ## 外推待确认
 - **侧栏收起态外观无参考**：Apple 天气没有侧栏收起概念，收起轨道（~33px 半透明深海军蓝叠天空、仅浮一枚开关钮）全系沿用本项目 sidebarSurface/KosSidebarToggle 族外推；收起/展开动画时长与缓动未测（--screenshot 650ms 帧落在动画中段的事实说明动画 >650ms 起步或持续，非缺陷但未被量化）；真机 Ctrl+B 切换手感未复核。若后续要打磨收起态（如轨道加玻璃高光、开关钮居中规则）需用户先裁定目标形态。

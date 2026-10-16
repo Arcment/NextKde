@@ -1,400 +1,230 @@
-# R098 — C05's **dark leg**, captured: the view segment renders a distinct selection on the dark plane too. **VERDICT: PASS**, no code changed.
+# R098 — C05's **dark leg**, captured and **PASSED**: the segment's extrapolated dark tokens render at exactly their values. **No code changed.**
 
-**The gap.** R097 fixed the light leg's capsule with an **opaque** pill and left the dark pair (`segmentTrack` white@6%, `segmentPill` `#3C3C3C`) as **extrapolation — no dark reference exists** — while the *old* dark pill was `contentPlane` = `#1E1E1E` = **the dark canvas itself**, i.e. exactly the vanished-selection defect the light leg had. One dark leg, one pass: `kill` → `start-review-vm.sh dark` → `resize 1100x692` → `sidebar{expanded:true}` → `view week` → `date 2026-10-15` → `captureClient r098-seg-dark.png` (flag `true`) → `stop`; probe `contentY 280`.
+**Why this round.** R097 fixed the light leg's capsule with an **opaque** pill; the dark values (`segmentTrack` white@6%, `segmentPill`
+`#3C3C3C`) were **extrapolation — no dark reference exists** — and the *old* dark pill was `contentPlane` = `#1E1E1E` = **the dark canvas
+itself**, i.e. the same vanished-selection defect. One dark leg, one pass, no iteration: `kill` → `start-review-vm.sh dark` →
+`resize 1100x692` → `sidebar{expanded:true}` → `view week` → `date 2026-10-15` → `captureClient r098-seg-dark.png` (**flag `true`**) →
+`stop`; probe `contentY 280`. Figure (light-after 1:1 / dark 1:1 / dark ×3 `NEAREST`, one crop): `docs/ui-calendar/r098-seg-dark.png`.
 
-**Measured — capsule x562..757 (196), lens x629..690 (62): the SAME x in both legs** (the pill is on segment 2 = Week). Fill = the **mode over the body rows y45..61**, never the top row.
+**Measured — capsule x562..757 (196), lens x629..690 (62); the SAME x in both legs (the pill is on segment 2 = Week).** Fill = the
+**mode over the body rows y45..61**, never the top row (see the new instrument in 外推).
 
 | leg | plane | track | pill | pill−track | the two right round buttons (x1023..1048 / x1059..1084) |
 |---|---|---|---|---|---|
-| light, after R097 | 255 | 249 | 232 | **−17** | 248 |
-| dark | 30 | **43** | **60** | **+17** | 96 |
+| light, after R097 (`r097b-seg.png`) | 255 | 249 | 232 | **−17** | 248 |
+| dark (`r098-seg-dark.png`) | 30 | **43** | **60** | **+17** | 96 |
 
-**Both dark tokens land exactly on their arithmetic** — track 43 = `white@6% over 30` = 43.5 ✓; pill 60 = `#3C3C3C` ✓ (**an opaque fill renders its absolute value**, so R097's shadow-reachability trap cannot bite it). **Δ30 above the plane, Δ17 above its own track** ⇒ **the selection does not vanish. C05's dark leg PASSES.** The polarity flip (light −17, dark +17) is the extrapolation — a symmetric mirror of the ref's measured sink — with no dark reference to confirm it against.
+**Both dark tokens land exactly on their arithmetic** — track 43 = `white@6% over 30` = 43.5 ✓; pill 60 = `#3C3C3C` ✓ (an **opaque** fill
+renders its absolute value, so R097's shadow-reachability trap cannot bite it). The pill is **Δ30 over the plane and Δ17 over its own track**
+⇒ **the selection does not vanish. C05's dark leg PASSES.** The polarity flip (light −17, dark +17) is the *extrapolation* — a symmetric
+mirror of the ref's measured sink — with **no dark reference to confirm it against**. Recorded, not claimed.
 
-**The instrument that had to be built first — A SEGMENT FILL IS THE MODE OVER ITS BODY ROWS, NEVER THE TOP ROW.** `LiquidSegmentedControl.qml:94-99` gives the *track* a specular `Gradient` (white@4% → black@2%) and `:128-136` gives the *lens* a stronger one (white@9% → white@2.5%@0.58 → black@2.5%), while `:124` adds a 1px `border.color: white@16%`. The top row reads **99** where the body is **60** (dark) — a phantom 39-level error that would have been filed as a defect. The identical overlay is measurable on the **light** leg (track 234 → 229 top-to-bottom) and **in both hosts** ⇒ **it is the shared control's own material, never a C05 host divergence.**
+**Structure re-confirmed on the dark plane.** Non-plane runs in the row: the sidebar (x0..220), the segment capsule (x562..757), and
+exactly **two** round buttons (x1023..1048, x1059..1084) — the **same x as the light leg** (1026..1045 / 1062..1081; the light run reads
+narrower only because a 248-on-255 glass fill falls inside the `<250` threshold) ⇒ **the dark plane moved no chrome geometry**, and
+"exactly one capsule" holds on both planes.
 
-**Structure re-confirmed on the dark plane, and our own map corrected.** Non-plane runs in the row: the sidebar (x0..220), the segment capsule (x562..757), exactly **two** round buttons (x1023..1048, x1059..1084) — the **same x as the light leg** (1026..1045 / 1062..1081; the light run reads narrower only because a 248-on-255 glass fill falls inside the `<250` threshold) ⇒ **the dark plane moved no chrome geometry**, and "exactly one capsule" holds on both planes. **Correction: the capsule is y36..63 (28 tall, a 1px `AppTheme.border` hairline top and bottom) and the lens y38..61 (24 = `height − 4`) — in BOTH legs; the earlier "toolbar row y≈22..58" is wrong by 14.** Figure (light-after 1:1 / dark 1:1 / dark ×3 `NEAREST`, one crop): `r098-seg-dark.png`.
+## ## 本轮 (R098)
+Atomic step: **C05's own regression half — capture the dark leg and read it.** No implementation, no `code-writer`. **Nothing was edited
+except this state file, `rounds.md` and `LEDGER.md`.** **Verdict: PASS** (numbers above). **Map correction produced by the round: our
+toolbar capsule is `y36..63` (28 tall, a 1px `AppTheme.border` hairline top and bottom) and the lens `y38..61` (24 = `height − 4`), in
+**both** legs — the earlier "toolbar row y≈22..58" is wrong by 14.** C05 is now settled as far as it *can* be: **clause 1's structural
+half (R097) + its dark leg (R098) are closed**; what remains of C05 is the label-token residue (仍差 #2) and the pointer half, which no
+harness action can drive.
 
-**C05 now: clause 1's structural half (R097) + its dark leg (R098) CLOSED.** Remaining: the label-token residue (the segment's `textColor`/`mutedTextColor` are calendar-local — 仍差 #2, now the next round) and the **pointer half**, which no harness action can drive and which is structurally host-invariant (hover/press lives in the shared delegate).
-
-# R097 — C05 clause 1 (the toolbar): the view segment rendered the reference's capsule with its **two fills exchanged** — fixed with 2 tokens + 2 lines.
-
-**The clause (C05, verbatim).** "Hover/pressed/inactive chrome matches actual settings; **no second capsule or conflicting controls**" — the last unmeasured row of `spec.md`.
-
-**"Settings" = the settings app, settled by evidence.** `rounds.md`'s R001 note says the C01–C04 window dots match **`apps/settings/main.qml`** ⇒ "settings" is the settings app. Its chrome is `KosSettingsDialog.qml:174`/`:212` — two `LiquidSegmentedControl`s that pass **no colour overrides** (defaults `AppTheme.button` / `cardHover` / `text` / `mutedText`). Our calendar's instance (`Main.qml:1678`) overrode **four** of them ⇒ **one shared control, two chromes: that is the "conflicting control".**
-
-**The reference, read 1:1 (`r097-ref-segment-4x.png` = crop x380..630 y4..36).** Day/Week/Month/Year capsule: **track 249..253**, the **selected** pill **230..235** ⇒ **the pill is DARKER than its own track by Δ≈20**. The pill sits over **"Week"** and the ref grid IS the week view ⇒ **it is the selection indicator, not a hover artifact** (the one rival reading, killed). Same construction as ours: a 51-wide pill inset 2/side in a 226-wide 4-segment track (ours 60 in 196/3). **Both toolbars stand on white 255** ⇒ the Δ's transfer (R096's vibrancy caveat does not apply — neither side is a vibrancy layer at that row).
-
-**Ours before (light 1100x692, y=44):** track **229..233**, pill **254..255** ⇒ **the fills were exchanged.** Our track was the ref's pill (Δ25 below the plane vs the ref's Δ2..6), and our pill was `root.tahoe.contentPlane` = **#FFFFFF = the canvas itself**, so the selected segment **vanished into the white canvas**. Root cause is a plane mismatch, and the token's own comment admits it: `Main.qml:76-82` documents `controlFill` as *"#787880 @16% **over the sidebar plane** resolves to the #D2D2D2 the reference measures"* — a **#E4E4E4-plane** token consumed by a **white-plane** control. Corroboration from inside our own toolbar: the round glass buttons beside it read **247..253** ⇒ the toolbar disagreed with itself by 20 levels.
-
-**Fix (`apps/calendar/qml/Main.qml`; nothing else touched).** `:94-103` adds content-plane tokens `segmentTrack` (light `#787880@2.5%` → 252; dark `white@6%`) and `segmentPill` (**opaque** `#E7E7E7` = 231; dark `#3C3C3C` = 54) with a measured comment; `:1715-1716` repoint `backgroundColor`/`selectionColor`. `controlFill`/`selectionFill`/`contentPlane` and `shared/qml/controls/` untouched.
-
-**The trap iteration 1 walked into — now an instrument.** A `#787880@17.5%` pill rendered **210**, not the 231 that over-white arithmetic predicts: `LiquidSegmentedControl.qml:105-114` paints a `lensShadow` (**black@10% light / 24% dark**) **directly under the lens**, so the composite is `plane − 0.10·plane` first, then the veil (255 → 227 → 210). ⇒ **under that shadow the pill's reachable range is [120, 227] — a translucent pill can never be lighter than 227 on a white plane. Composite the stack, or go opaque, whenever a target fill sits on a component that draws its own shadow.**
-
-**Verified (light, `contentY 280`, capture flag `true`, `stop` probe `contentY 280`).** track **250..252** (ref 249..253 ✓), pill **231..233** (ref 230..235 ✓), step **Δ20 = the ref's Δ20**. `r097-segment-beforeafter.png` (a black-bar old-above/new-below ×3 `NEAREST` stack of the same region) is the one-read before/after proof; `r097-toolbar-segment.png` is the full capture.
-
-**Structure — the "no second capsule" half.** Rendered capsules in the whole window: **exactly one** (the segment track, x≈561..757). The other four toolbar controls are 28x28 **round** glass buttons (one 40-px row: sidebar toggle · add · segment · search · more). **`GlassPill` (`Main.qml:848`, `pillHeight` 44, "fully rounded") is DEFINED BUT NEVER INSTANTIATED** ⇒ no second capsule can render. ⚠ **Next #1's premise "the ref toolbar has no glass pill anywhere" is REFUTED** — the ref carries **two** capsules (the sidebar's 2-icon Calendar/Reminders switcher at x≈122..190, and the centre 4-segment control at x≈389..615). ⇒ **"no second capsule" is an app-level redundancy check (cf. L04's "no duplicate prominent New Event button"), never a count against the ref.**
-
-**C05's pointer half — recorded, not passed.** No harness pointer action exists (R096) ⇒ `hovered`/`pressed` chrome is undrivable. But the calendar *cannot* diverge from the settings app on interaction: hover/press is the **shared delegate**'s code (`:187-211`, `_visualIndex`, `_pressedIndex`, `scale 0.96`), identical in every host — **the only host-variable of a shared control is its palette**, and the two divergent entries were the fills fixed here. Residue: `textColor`/`mutedTextColor` stay calendar-local. "Inactive": `ToolbarButton` dims `enabled ? 1 : 0.5`; the segment has no disabled styling and nothing binds `enabled` ⇒ unobservable.
-
-**Verdict: C05's structural half CLOSED; its dark leg and its pointer half stay open.** The dark values are extrapolation (no dark reference exists) and were never captured — the old dark pill was `contentPlane` = `#1E1E1E` = **the dark canvas**, the same vanished-selection defect, so the dark leg is the honest next step, not a formality.
-
-# R096 — verdict + **first-ever expanded-sidebar capture**: S04's "selected row gray radius 6" governs the **compact category row**, not the capsule nav row; ours is already r=6 and the other two clauses hold ⇒ **0 code changes.**
-
-**The clause (S04, verbatim).** "Checked/unchecked checkbox distinct; **selected row gray radius 6**; hover lighter than selection."
-S01's: "Neutral sidebar surface in settings palette; brighter flat calendar canvas, no blue cast/gradient."
-
-**The ref anchor, read FIRST.** Exactly **one** rounded selection shape exists in the whole ref sidebar: the calendar row **"Personal"**
-(fill **(226,226,226)**, **R == G == B**, rows **y102..129 ⇒ h 28**, x **10..182 ⇒ w 173**). Its per-row fill-start inset over the first
-five rows is **4, 2, 1, 1, 0** ⇒ **radius 6** (a circle of r=6 predicts 3.6, 2.0, 1.1, 0.55, 0.19 — fits to ≤0.4 px). Plane
-**(237,237,237)** ⇒ **selection ΔL = −11**. Ref row pitch ≈ **26–27**. The ref's only *unchecked* row (Siri Suggestions) is a hollow
-1 px coloured border at the **same x18** as the checked boxes ⇒ **the ref does not indent an unchecked row.** **No hovered row exists in
-the ref** (no pointer) ⇒ clause 3 has **no ref anchor** — only the ΔL ordering does.
-
-**Which delegate S04 governs — `CategoryRow`, not `SidebarRow`.** The ref's highlighted row is a *compact checkbox row* (~28 tall,
-r=6, inset 10). `CategoryRow` (`Main.qml:362`, **`radius: 6`**, `hoverEnabled: true`, 30 tall, 12 px box at inset 12) is that class.
-`SidebarRow` (`Main.qml:234`) is **44 tall, inset 20/11, `radius: height / 2` = capsule 22** — a row class **the ref does not contain
-at all** — and `SidebarRow.selected` is **never set true** (`todayNavigation` at `:1960` binds no `selected`), so its capsule is
-**dead chrome: changing its radius would move zero pixels.**
-
-**Ours, measured (first ever expanded-sidebar capture).** `r096-sidebar.png` (light 1100x692, `sidebar{expanded}`, `view week`,
-`date 2026-10-15`, `contentY 280`): sidebar **x0..219**, plane **(228,228,228)** neutral R==G==B, uniform within ±3 over y118..683
-⇒ **no gradient, no blue cast**; canvas **255** at x221. Boxes **x12..24**, row pitch **30**. `selectionFill` #767680@12% over 228 =
-**(215,215,216)** ⇒ ΔL **−13**; `rowHoverFill` #747480@8% = **(219,219,220)** ⇒ ΔL **−9** ⇒ **hover (9) < selection (13) ⇒ clause 3
-holds**; our Δ13 vs the ref's Δ11 is 0.8 % of range. Clauses: **1 PASS** (filled+white check vs hollow 1 px border, both in the
-capture), **2 = already r=6 on the class the ref anchors**, **3 PASS**. Everything else in the sidebar (inset 12, box 12, row 30,
-heading 11 pt) is **S02/S03-locked and PASSing** ⇒ nothing to change.
-
-**Why 237 vs our 228 is NOT a defect — and the instrument that says so.** The ref sidebar is a **vibrancy material**; R093 already
-caught the same token reading (207,51,35) there vs (235,76,70) in the grid. ⇒ **the ref sidebar's absolute greys do not transfer;
-only Δ's and orderings do.** S01's clause is relational ("neutral plane + brighter flat canvas") and ours holds.
-
-## ## 本轮 (R096)
-Atomic step: **Next #1's reading step — read S04/S01 verbatim, crop the ref's sidebar, measure the selected row, rule which delegate
-S04 governs.** **0 code changes** (every sidebar dimension is spec-locked; the one clause that could fail — #2 — is already satisfied
-and its rival delegate is dead chrome). **1 leg** (~4 Bash): kill pid → `start-review-vm.sh light` → `review-command.py`
-`resize/sidebar/view/date/captureClient/stop` → capture flag **true**, `contentY 280`. 1 figure + ~10 measurement reads ≈ **22 Bash**.
-**`code-writer` is still NOT registered — do not retry it each round.** **Ruling H is STILL unanswered** ⇒ the band ring icon **stays
-blocked and unbuilt**. **The app LAUNCHES WITH ITS SIDEBAR COLLAPSED** — `{"action":"sidebar","expanded":true}` must be in the drive
-list. The R087 fixture (4 all-day items on Thu) is **still live**. **NEW INSTRUMENT (R096): the ref sidebar is a vibrancy material —
-never compare an absolute grey across it, compare ΔL against the sidebar's own plane.** **THE HARNESS HAS NO POINTER-MOVE ACTION**
-(`captureClient/escape/resize/sidebar/view/date/position/wheel/flick/stop/openItem`) ⇒ `hovered`/`pressed` chrome **cannot be driven**
-— any clause phrased as "hover …"/"pressed …" is **static-only** unless a new harness action lands.
-
-
-## The chip-ink hoist (R089, structural — read this before touching a chip)
-**`inkColor` reached its THIRD consumer** (timedChip R079, allDayChip R080, the band's `+N` row R089), so the rule lives **once**
-at `CalendarScheduleView.qml`'s root as **`chipInk(item)`**; both chip delegates are `readonly property color inkColor:
-root.chipInk(modelData)`. **If a fourth consumer appears, call `root.chipInk(item)`; do not inline the expression again.**
-**R093 is the same shape for colour:** `AppTheme.todayRed` has FIVE consumers (week header disc, now-line, now-dot, time pill,
-mini-month disc) — **do not re-inline `"#E5484D"` anywhere.**
-
-## E01/E02 + N02 status (unchanged R077–R094)
-Timed chip — **bar PASS (R077), no border PASS (R078), dark same-hue ink PASS (R079)**. Band chip — **ink PASS (R080)**.
-**The band chip's ring icon is MEASURED (R081) but NOT built — blocked on ruling H.** **N02 — line + dot + pill PASS on the
-light leg (R084) AND the dark leg (R085).** Open residue: the **dark faint rule's ΔL is half the light leg's** (7.4 vs 15.5) — a
-theme fact, **not a defect**. **N02's today header disc CLOSED R086** (22 px, the ref's own diameter). **M04 CLOSED R093 (colour)
-+ R094 (size).**
-
-## 仍差 (top 6, visual-impact order)
+## 仍差 (top 8, visual-impact order)
 1. **The all-day BAND chip's icon — ours has NONE. Fully MEASURED, blocked on ruling H (R081).** Ref: **12x12 ring, stroke 3 / hole 6,
    inset 3 from the chip's fill on left/top/bottom, colour = `itemColor` at full saturation (no alpha)**, text ink 17-19 ref px right of
    the ring's outer-left edge. @x1.33 ⇒ **16 / stroke 4 / inset 4 / text at fill_left + 28**. **Also unanswered: the thin-stroke family**
    (stroke ~1.5, hole ~9) on the neutral-248 chips. **Do NOT build either until H is answered.**
-2. **Ref gutter labels are 12-hour and two-tone** (dark hour number + smaller lighter `AM`/`PM`), right-aligned on the **suffix's** right
+2. **C05's residual divergence: the segment's `textColor`/`mutedTextColor` are calendar-local** (`root.tahoe.labelPrimary`/
+   `labelSecondary`) where the settings app takes `AppTheme.text`/`mutedText`. **Not ruling-blocked — a reading round** (the label pair is
+   the last host-variable left in that control). **This is Next #1.**
+3. **The segment pill's RADIUS is unmeasured 1:1.** Ours `height * 0.42` ≈ 10; the ref's pill *looks* near-full-round in the 4x crop, which
+   at ref scale (pill h ≈ 17) is indistinguishable from 0.42·h by eye ⇒ **measure the pill's per-row fill-start inset before claiming either.**
+   *(R098 note: the pill is 62 wide × 24 tall at our scale, so its per-row inset is readable directly from `r098-seg-dark.png`.)*
+4. **Ref gutter labels are 12-hour and two-tone** (dark hour number + smaller lighter `AM`/`PM`), right-aligned on the **suffix's** right
    edge (digit (89,89,89), suffix (176..193)); ours is single-size 24-hour `07:00`. **Needs ruling F.**
-3. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated `Rectangle`. App-wide.
+5. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated `Rectangle`. App-wide.
    **Needs ruling A.**
-4. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. App-wide. **Needs ruling B.**
-5. **Month day cell `slice(0, 2)` — 1 chip + `N` where the ref stacks 3.** **Needs ruling D — and a 3-all-day-item *month* day before it
-   can be reproduced at all** (the live fixture is a week-view fixture). **The only remaining `slice(0, 2)` with a content cap** (`:689` is
-   the grid hour cell — no ref counter-example either). **The band's own cap is gone (R089); this is the last one.**
-6. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (near-identical, ~3.7 px at our scale). Rides on
+6. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. App-wide. **Needs ruling B.**
+7. **Month day cell `slice(0, 2)` — 1 chip + `N` where the ref stacks 3.** **Needs ruling D — and a 3-all-day-item *month* day before it
+   can be reproduced at all.** **The only remaining `slice(0, 2)` with a content cap** (`:689` is the grid hour cell — no ref counter-example
+   either). **The band's own cap is gone (R089); this is the last one.**
+8. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (near-identical, ~3.7 px at our scale). Rides on
    **ruling G**. Do not chase without a ruling.
+- **CLOSED in R098: C05's dark leg** — the selection pill renders as a distinct step on the dark plane (60 vs track 43 vs plane 30); chrome geometry unchanged from the light leg.
+- **CLOSED in R097: C05 clause 1's structural half** — one capsule renders, `GlassPill` is dead source, and the fills no longer conflict.
 - **CLOSED in R094: M04's size clause** — the mini today disc's **20 → 15 px**, with the header disc re-measured as the control (22x22).
 - **CLOSED in R093: M04's colour clause** — the mini today disc's blue → `AppTheme.todayRed`.
-- **CLOSED in R092: R091's fix holds in the DARK leg** — 0 px / 0 y-runs between two fresh dark legs, `contentY 240` in both probes,
-  and the 0 is structural (no today column ⇒ no now-line ink at all). **R091's fix is now regression-covered on BOTH themes.**
-- **CLOSED in R091: the initial-scroll nondeterminism** — fixed; the 154,551 px pair is gone (0 px between two fresh light legs).
-- **CLOSED in R089: A04 step 2 — the band's silent overflow** (spec-only; `+2` row proved contained by the whole-page diff). **A04 fully PASS.**
-- **CLOSED in R088: A04 step 1 — the band's 2-item cap.** Ref-anchored and byte-contained.
+- **CLOSED in R092: R091's fix holds in the DARK leg** (0 px between two fresh dark legs; the 0 is structural — no today column).
+- **CLOSED in R091: the initial-scroll nondeterminism** (0 px between two fresh light legs).
+- **CLOSED in R089: A04 step 2 — the band's silent overflow. A04 fully PASS.**
 - *Cosmetic / settled, no ID:* `secondary` hover = neutral grey 79 no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. D02
   radius **16** vs spec 24/32 — **keep 16**. Topmost visible gutter label is **half-clipped** when a scroll offset lands an hour line
   exactly on the viewport top (R066; scroll artifact). Band-chip fill alpha ref **0.16** vs ours **0.17** (R080) — not worth a round.
-  **CLOSED in R095: the mini month's weekday header does NOT tint today's column letter** — the ref's seven letters are all
-  R==G==B and ours are all `labelSecondary`; the "red 六" was a ×2 `LANCZOS` upscale artifact. **No mini-month question is open.**
-- **MEASURED in R096: S04 — the sidebar's row chrome.** Clauses 1 (checked vs unchecked) and 3 (hover lighter than selection) **hold**;
-  clause 2's "gray radius 6" is **already satisfied** on `CategoryRow` (`Main.qml:362`, `radius: 6`), which is the class the ref's own
-  selected row anchors, and its only rival (`SidebarRow`'s capsule, `:263`) is **dead chrome — nothing ever sets `selected`**.
-  S01 also holds (plane 228 neutral R==G==B, uniform ±3 ⇒ no gradient/blue cast; canvas 255 flat). **Not a defect; no code change.**
+  **CLOSED R095: the mini month's weekday header does not tint today's column letter** (the "red 六" was a ×2 `LANCZOS` artifact).
+  **MEASURED R096: S04 — clauses 1 and 3 hold; clause 2 is already `radius: 6` on `CategoryRow`; `SidebarRow`'s capsule is dead chrome.**
 
 ## ## 最近已改 (most recent 8)
-0. R096 — **verdict only, NO code changed**: S04's "selected row gray radius 6" governs **`CategoryRow`** (already `radius: 6`); the
-   ref's only selection shape is the compact **"Personal"** row (fill 226 on plane 237 ⇒ ΔL −11, **r=6**, h 28, inset 10). Clause 3
-   (hover lighter than selection) **holds** numerically (ours −9 vs −13). `SidebarRow`'s capsule is **dead chrome** (`selected` never
-   set). First-ever expanded-sidebar capture: `r096-sidebar.png`.
-1. R095 — **verdict only, NO code changed**: the mini month's weekday header **does not tint** the today column's letter. Ref 7/7
-   letters R==G==B; ours 7/7 neutral (六 = x161-170, ink (150,148,153), warm 18 / cool 19); `Main.qml:2137-2156` is one
-   unconditional `labelSecondary`. **R094's Next #1 refuted.**
-2. R094 — **M04 size**: `Main.qml:2199-2200` `width/height: 20` → `15` (+ the M03 comment). `radius` follows. Selected-day ring
-   shares the Rectangle ⇒ also 15. Font untouched. Disc re-measured **15x15** vs the ref's **15x15**, header disc control **22x22**.
-3. R093 — **M04 colour**: `AppTheme.qml` gains `readonly property color todayRed: "#E5484D"`; `CalendarScheduleView.qml:111`
-   repointed at it (same value); **`Main.qml:2204` `root.tahoe.accent` → `AppTheme.todayRed`**. 1 literal left in the tree.
-4. R092 — **verdict only, NO code changed**: the dark leg was run as R091's missing acceptance half. `contentY 240` both probes,
-   whole-page diff **0 px**, Mon x60 bar runs identical, and the driven week carries no today ⇒ no now-line ⇒ a true structural zero.
-5. R091 — **`CalendarScheduleView.qml:276`**: `repositionTimeline()` (immediate `positionTimeline()` + `autoScrollTimer.restart()`)
-   replaces the bare `autoScrollTimer.restart()` on firstDate/dayCount/visible ⇒ the 450 ms window is closed. Two fresh light legs, **0 px**.
-6. R090 — **verdict + diagnosis, NO code changed**: the regression leg was one `hourHeight` off (154,551 px); the accused mechanism
-   (PIM-arrival race) is **corrected in R091** — it is a capture-vs-450 ms-timer window.
-7. R089 — **A04 step 2**: band `ColumnLayout` → `id: allDayStack` + `allDayOverflow`/`allDayVisible`; Repeater model
-   `slice(0, allDayStack.allDayVisible)`; trailing `+N` `Label`; chip ink hoisted to root **`chipInk(item)`** (3rd consumer).
-   *(archived to rounds.md tail: R088 — A04 step 1, `:454 slice(0, 2)` → `slice(0, root.allDayBandRows)`; R087 — 3 all-day VEVENTs added.)*
+0. R098 — **verdict only, NO code changed**: C05's dark leg captured (`r098-seg-dark.png`). plane 30 / track **43** / pill **60**
+   (pill−track +17; light was −17). Both dark tokens exact. Chrome geometry identical to the light leg. Capsule `y36..63` (map correction).
+1. R097 — **C05 clause 1's chrome**: `Main.qml:94-103` `segmentTrack` (light #787880@2.5%→252 / dark white@6%) + `segmentPill` (**opaque**
+   #E7E7E7=231 / dark #3C3C3C); `Main.qml:1715-1716` repointed. Track 229..233→**250..252**, pill 254→**231..233**, step Δ20 = the ref's.
+   Iteration 1 (a 17.5% veil pill) rendered **210** — see the lens-shadow instrument. Nothing else touched.
+2. R096 — **verdict only, NO code changed**: S04's "selected row gray radius 6" governs **`CategoryRow`** (already `radius: 6`); the ref's
+   only selection shape is the compact **"Personal"** row (ΔL −11, r=6, h 28, inset 10). Clause 3 holds (ours −9 vs −13). First-ever
+   expanded-sidebar capture: `r096-sidebar.png`.
+3. R095 — **verdict only, NO code changed**: the mini month's weekday header does not tint the today column (ref 7/7 letters R==G==B).
+4. R094 — **M04 size**: `Main.qml:2199-2200` `width/height: 20` → `15`. Disc re-measured **15x15** vs the ref's 15x15; header disc 22x22.
+5. R093 — **M04 colour**: `AppTheme.todayRed: "#E5484D"`; `CalendarScheduleView.qml:111` repointed; `Main.qml:2204` → `AppTheme.todayRed`.
+6. R092 — **verdict only**: the dark leg as R091's missing acceptance half — whole-page diff **0 px**, a true structural zero.
+7. R091 — **`CalendarScheduleView.qml:276`**: `repositionTimeline()` replaces the bare `autoScrollTimer.restart()`; two legs, **0 px**.
+   *(archived to rounds.md tail: R090 — verdict + diagnosis of the 154,551 px capture-window artifact; R089 — A04 step 2.)*
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
-- **THE REF'S SIDEBAR IS A VIBRANCY MATERIAL — ITS ABSOLUTE GREYS DO NOT TRANSFER (R096).** The ref plane reads **237** and its
-  selected row **226** (ΔL **−11**, exactly neutral, **r=6**, **h 28**, fill x10..182); ours is plane **228** with `selectionFill`
-  **215** (ΔL **−13**) over a **flat opaque** plane. The same token reads differently on each layer (R093: `todayRed` = (207,51,35) on
-  the sidebar vs (235,76,70) in the grid) ⇒ **compare only ΔL against the sidebar's own plane and the ordering of Δ's, never the
-  absolute value.** S01's clause is relational, so 237-vs-228 is **not** a defect.
-- **A RADIUS IS MEASURED AS THE PER-ROW FILL-START INSET, AND r=6 FITS 4,2,1,1,0 (R096).** Over the first five rows of a corner a
-  circle of radius r predicts `r − sqrt(r² − (r − (dy+0.5))²)`; read the fill's per-row first/last x with a tight tolerance around the
-  fill's own colour and compare. Do **not** eyeball a radius off an upscaled crop.
+- **A SEGMENT FILL IS THE MODE OVER ITS BODY ROWS, NEVER THE TOP ROW (R098, new and load-bearing).**
+  `LiquidSegmentedControl.qml:94-99` gives the *track* a specular `Gradient` (white@4% → black@2%) and `:128-136` gives the *lens* a
+  stronger one (white@9% → white@2.5%@0.58 → black@2.5%), while `:124` adds a 1px `border.color: white@16%` to the lens. Reading the top row
+  yields **99** where the body is **60** (dark) — a phantom 39-level error. **The same overlay is present on the light leg (track 234 → 229
+  top-to-bottom) and in both hosts** ⇒ **it is the shared control's own material, never a C05 host divergence.** Read light fills the same
+  way: the light-after pill is 232 at the body and 239 at the top.
+- **A TRANSLUCENT FILL CANNOT REACH AN ABSOLUTE VALUE WHEN A SHADOW SITS UNDER IT (R097).**
+  `LiquidSegmentedControl.qml:105-114` paints `lensShadow` (black@**10%** light / **24%** dark) **directly under the lens**, so a pill's
+  composite is `plane − 0.10·plane` first, then the veil: 255 → 227 → a #787880@17.5% veil lands at **210**, not the 231 the over-white
+  arithmetic predicts (R097 iteration 1 is that exact error). ⇒ **read the composite, or use an OPAQUE fill when the target is absolute.**
+  Corollary: the pill's reachable range under that shadow is **[120, 227]** on a white plane. **R098 confirms the other side: an opaque fill
+  (the dark #3C3C3C) lands exactly on its token, 60.**
+- **A SHARED CONTROL'S PALETTE IS THE ONLY THING A HOST CAN DIVERGE ON (R097).** `LiquidSegmentedControl`'s interaction (`_visualIndex`,
+  `_pressedIndex`, `scale 0.96`, the `Behavior`) is one code path for every host ⇒ **"chrome matches actual settings" reduces to: do the
+  four palette properties equal the defaults?** The settings app passes none; the calendar passed four. **Any future shared-control chrome
+  question: diff the property list, not the pixels.**
+- **THE REF'S SIDEBAR IS A VIBRANCY MATERIAL — ITS ABSOLUTE GREYS DO NOT TRANSFER (R096).** Ref plane **237**, selected row **226** (ΔL −11,
+  neutral, r=6, h 28); ours plane **228** with `selectionFill` **215** (ΔL −13) over a **flat opaque** plane. Same token reads (207,51,35) on
+  the sidebar vs (235,76,70) in the grid ⇒ **compare only ΔL against the layer's own plane.** **R097 bounds this: the toolbar row is NOT a
+  vibrancy layer — the ref's toolbar plane and ours are both white 255, so absolute Δ's DO transfer there. Check the plane before invoking
+  the caveat.**
+- **A RADIUS IS MEASURED AS THE PER-ROW FILL-START INSET, AND r=6 FITS 4,2,1,1,0 (R096).** A circle of radius r predicts
+  `r − sqrt(r² − (r − (dy+0.5))²)`; read the fill's per-row first/last x with a tight tolerance around the fill's own colour. **Do not
+  eyeball a radius off an upscaled crop** (this is why 仍差 #3 is still unmeasured). **R098: pick the rows by the **body** mode, not the top —
+  the lens's own specular ramp otherwise reads as a corner.**
 - **THE HARNESS HAS NO POINTER-MOVE ACTION (R096).** The flat action set is
   `captureClient{path}` / `escape` / `resize{width,height}` / `sidebar{expanded}` / `view{view}` / `date{date}` / `position{contentY}` /
-  `wheel{angleY}` / `flick{velocity,cancelFirst}` / `stop` / `openItem{kind,titleContains}`. ⇒ **`hovered` and `pressed` chrome cannot
-  be driven** — every clause phrased as "hover …"/"pressed …" is **static-only** (its token ordering can still be checked numerically)
-  unless a new harness action lands. **A static screenshot can never settle an animation or a hover clause.**
-- **A DISC'S DIAMETER IS AN ENVELOPE, NOT A TOKEN-PIXEL COUNT (R094).** Read it as `r > 150 and r > 1.6*g and b < 1.2*g`,
-  per-row min/max, and take **max row width + the first/last rows**. A **strict token match under-reports**: the white numeral
-  carves ~40 % out and R093's strict read gave "74 px" for a disc whose envelope is 15x15 (its "20x20" and this "15x15" are
-  therefore *not* directly comparable — **this envelope is the reproducible number**). A **loose "reddish" mask over-reports**:
-  **Oct 17 is a Saturday and the weekend cell is tinted** — the mask merges the disc with its own cell.
+  `wheel{angleY}` / `flick{velocity,cancelFirst}` / `stop` / `openItem{kind,titleContains}`. ⇒ **`hovered`/`pressed` chrome cannot be
+  driven** — every clause phrased as "hover …"/"pressed …" is **static-only** unless a new harness action lands. **A static screenshot can
+  never settle an animation or a hover clause.**
 - **THE APP LAUNCHES WITH THE SIDEBAR COLLAPSED (R093).** Every R082–R092 leg therefore contains **no sidebar and no mini calendar**;
-  `{"action":"sidebar","expanded":true}` must be in the drive list for any sidebar/mini-month evidence. The harness applies it
-  *before* the capture command, so the order in the flat list is what matters.
-- **A 10-PX CJK GLYPH IS NOT AN INK INSTRUMENT UNDER AN UPSCALE (R095).** Grey glyphs carry **RGB-subpixel AA**, and an
-  upscale (×2 `LANCZOS` was enough) smears the fringe into apparent colour — the mini month's today-column letter `六` *looked* red
-  in R093/R094's crops while being pure `labelSecondary` grey. **Read the warm/cool balance instead:** `count(r−b>6)` vs
-  `count(b−r>6)` over the glyph's bbox — a real red tint makes warm dominate ~10:1; subpixel AA keeps them within ±10 % (六 18/19,
-  四 22/20, 日 16/17). **Corollary: R093/R094's ×2 `LANCZOS` mini-month crops are colour-unsafe** — their *geometric* reads stand
-  (R094 re-verified the 15 px disc with the envelope predicate, not with an eyeball).
-- **THE REF'S "TODAY" RED IS ONE RED APP-WIDE (R093).** The `9:41` pill and the now-line row both read **(235,76,70)**; the mini
-  disc reads **(207,51,35)** — same token, split by the sidebar's translucency. ⇒ **never name a second red token off the mini disc.**
-  Our equivalent is `AppTheme.todayRed` = `#E5484D` = **(229,72,77)**, Δ≈(6,4,7) from the ref's pill.
-- **A LEG'S `contentY` IS A FIRST-CLASS INSTRUMENT — PUT `{"action":"stop"}` AT THE END OF THE DRIVE LIST (R091).** The harness logs
-  the **pre-command** `contentY`/`contentWidth`/`contentHeight` of the timeline for any timeline action (`harness/Main.qml:263`), and
-  `stop` perturbs nothing. **The 2026-10-17 pair: the pixel diff said 154,551 px while the probe said `240` in BOTH legs** ⇒ the diff was
-  a capture-window artifact. `contentHeight 960` = 24 h × 40. **Before blaming any binding, read the probe.**
+  `{"action":"sidebar","expanded":true}` must be in the drive list (the harness applies it *before* the capture command).
+- **A LEG'S `contentY` IS A FIRST-CLASS INSTRUMENT — PUT `{"action":"stop"}` AT THE END OF THE DRIVE LIST (R091).** The harness logs the
+  **pre-command** timeline geometry for any timeline action (`harness/Main.qml:263`). **The 2026-10-17 pair: the pixel diff said 154,551 px
+  while the probe said `240` in BOTH legs** ⇒ the diff was a capture-window artifact. `contentHeight 960` = 24 h × 40.
 - **A WHOLE-PAGE `ImageChops.difference` WITH A PER-ROW DIFF COUNT IS STILL THE CHEAPEST CONTAINMENT PROOF (R088, re-used R091).**
   Threshold per pixel at **>6 RGB-sum** (kills AA), group the differing rows into contiguous y-runs, read each run's x-range.
-  Caveat: a now-line artifact is full-width, a content change is column-bounded.
-- **THE REF ALL-DAY BAND DOES NOT EXPAND WITH ITS ROW COUNT (R087).** All 7 ref columns share **one uniform 3-row strip** while carrying
-  **0, 1, 2 and 3** chips; bottom separator y183-184 row-mean **217.0 constant over x250..810**. ⇒ **any "the band should grow/shrink per
-  column" claim is spec-only.** The ref never exceeds 3 ⇒ **A04 step 2 has no ref anchor and must be labelled spec-only.**
 - **NEVER SCALE A REF *TYPE* ELEMENT BY THE WINDOW RATIO — FIND A SAME-CLASS INK IN BOTH IMAGES FIRST (R086).** Our window is 1.33× the
-  ref's (522→692) and our grid pitch 1.48× (27→40), **but our type is at the ref's own physical size**: gutter-label ink **9 = 9**,
-  day-number ink in the disc **9 = 9**. So "ref 22 × 1.33 = 29" overshot by 30%. **The instrument: measure one text ink height in both
-  images with the same threshold (digits are cleanest); if it is 1:1, every size is 1:1 too.** Corollary: our header row is 36 tall vs the
-  ref's ~28 — a *layout* difference, not a licence to inflate the type or the disc inside it. **R093/R094 extend this to the mini month:
-  our mini row pitch ≈25.4 vs the ref's ≈26.7 ⇒ the mini month is ~1:1, so the ref's 15 px disc is a 15 px disc for us — and the ref's
-  9 px numeral ink in a 15 px disc is ours too (60 % height coverage on both sides).**
-- **THE CURRENT-TIME OBJECT IS FOUR PARTS WITH ONE GEOMETRY SOURCE (R084).** `nowRow` / `nowInHour` / `nowLineY` / `nowLabel` /
-  `todayColumn` / `nowLabelClearance` at `CalendarScheduleView.qml`'s root. **Do not re-derive a y per part.**
-- **OUR NOW-LINE, MEASURED (R084, light 1100x692, `contentY 0`):** pill **42×20 at x4..45**; **line 2px at y303-304**; strong segment =
-  today's column **802..951** `(229,72,77)`; faint `(252,236,237)` (= 0.10 alpha) across **52..1101**; **dot 9px centred x=802**.
-  **Column boundaries are 52/202/352/502/652/802/952/1102** — `dayColumnWidth = (1102−52)/7 = 150`.
-- **THE DARK FAINT RULE IS HALF THE LIGHT ONE IN LUMINANCE — A THEME FACT, NOT A BUG (R085).** Same 0.10 alpha, opposite poles: light
-  `(252,236,237)` vs white ⇒ **ΔL 15.5**; dark `(50,34,35)` vs (30,30,30) ⇒ **ΔL 7.4**. ⇒ **never judge a faint overlay by eye in either
-  theme — take the row mean over an empty span against a control row 4 px away.**
-- **THE REF'S NOW-LINE IS CONTINUOUS ACROSS THE WHOLE WEEK (R084)** — a green chip sat under it ⇒ **a faint overlay over a coloured chip is
-  indistinguishable from a tint by eye: sample a known-empty column too.** **THE REF'S PILL DROPS THE HOUR LABEL IT COLLIDES WITH (R084)**
-  (9AM ink survives, 10AM gone) ⇒ ours hides a label when `|label tick − nowLineY| ≤ 14`, and only when `todayColumn >= 0`.
-- **A CURRENT-TIME CAPTURE NEEDS `position contentY` (R084).** The launcher opens at hour 7 (`usefulStartHour()`'s fallback). Drive
-  `{"action":"position","contentY":0}` (`harness/Main.qml:263`) before the capture.
-- **AN EQUAL-START TIE IS NOW DECIDED BY US, AND THE KEY IS THE UID (R083).** `Main.qml`'s sort falls back to `itemStableId` (record
-  `seriesId` = the VEVENT UID, then `id`) then `itemTitle` — a **total order**. **Any "same-time items are in the wrong order" report:
-  read this line.** No ref anchor exists for the winner; it is a *stability* choice.
-- **TWO SAME-THEME LAUNCHES CAN HAVE DIFFERENT md5s AND 0 DIFFERING PIXELS (R083, re-confirmed R091).** ⇒ **never treat a differing md5
-  as evidence of a content difference; diff the region** (and now: read the `contentY` probe).
-- **THE BAND CHIP'S ICON IS A 12x12 RING, INSET 3 FROM THE CHIP'S FILL (R081).** Outer **12**, **stroke 3**, **hole 6**, vertically
-  centred (fill 18 ⇒ 3/3), outer left edge **3 px right of the fill's left edge**, **colour = `itemColor`, full saturation, no alpha**.
-  Text ink starts **17-19 ref px** right of the ring's outer-left edge ⇒ **ours @x1.33: 16 / stroke 4 / inset 4 / text at fill_left + 28**.
-  The ring is **not a stripe** — R077's x491-493 read was this ring's left arc.
-- **THE REF HAS TWO RING WEIGHTS AND THE RULE IS UNKNOWN (R081).** Stroke **3 / hole 6** on the tinted-wash chips; stroke **~1.5 / hole ~9**
-  on the **neutral-248** chips. ⇒ **record the correlation only, never encode a rule off it.** Needs ruling H first.
-- **OUR SCALE IS ANISOTROPIC: x1.33 VERTICAL, x1.83 HORIZONTAL (R081).** Any circular or square icon must pick one axis — **use the
-  vertical ratio for anything that must fit the 24-px row**; the horizontal one only for things that span the column.
-- **THE REF'S INK RULE IS ONE PARAMETER: HALFWAY TO THE POLE (R079 + R080).** Measured on **five** ref colours, all **1:2 on every
-  channel**, plus nine of our chips in both legs. ⇒ **any future "same-hue text/tint" on a chip is `c + (pole − c) * 0.5`.** Corollary: the
-  *dark* leg is the ref's rule mirrored, not a ref measurement — **dark chip colours are extrapolation** and must be labelled as such.
-- **IN A CHIP, THE RING ICON'S COLOUR IS THE ITEM COLOUR (R080).** ⇒ when the band icon is built, its colour is `itemColor(item)` with no
-  `withAlpha`. **AN INK IS SETTLED BY THE COVERAGE TEST PLUS THE B−R GAP (R079/R080)** — `t = (fill − pixel)/(fill − ink)` must agree per
-  channel (±0.05); **THE HULL FAILS AS AN INK INSTRUMENT (R079/R080/R083)** — never read an ink off the extreme pixel; **R083's
-  top-5%-coverage MEAN is the reproducible scalar.** **R093: the equivalent for a MARK is a STRICT per-channel match to the token over a
-  bbox — a loose "reddish" mask merges the disc with the weekend tint and the category swatches.**
-- **THE REF'S ALL-DAY BAND HAS TWO CHIP FAMILIES, AND ONE IS UNEXPLAINED (R080).** (a) *Coloured*: same-hue wash + same-hue ink at 1:2 +
-  same-hue ring. (b) *Neutral*: fill **248**, ink **(38,38,38)** — a pair that **cannot** be `itemColor`/`itemColor/2` — while the **ring**
-  is strongly coloured. **Do not cite the neutral chips for any ink or fill rule.**
-- **A CROSS-ROUND PNG IS NOT POSITION-ALIGNED (R079, strengthened R082/R083).** **R083's refinement: the layout map and, for a same-theme
-  pair, even the content can be pixel-stable — but MEASURE it per region, never assume; the file hash is not the instrument.**
+  ref's but **our type is at the ref's own physical size**: gutter-label ink **9 = 9**, day-number ink in the disc **9 = 9**. ⇒ "ref 22 ×
+  1.33 = 29" overshot by 30 %. Corollary: our header row is 36 tall vs the ref's ~28 — a *layout* difference, not a licence to inflate type.
+- **THE REF'S INK RULE IS ONE PARAMETER: HALFWAY TO THE POLE (R079 + R080).** Measured on five ref colours, all 1:2 on every channel.
+  ⇒ **any future "same-hue text/tint" on a chip is `c + (pole − c) * 0.5`.** Corollary: **dark chip colours are extrapolation.**
+- **MEASURING A CORNER, A JOINT, A STRIPE, A BORDER OR AN INK (R075–R098).** Corner: per-row **fill-start inset** (body mode, R098).
+  Joint: per-row **`!= white` envelope**. Stripe: a saturated run whose **width is constant over the chip's full height**. Border:
+  **monotonicity of a raw profile across an edge that abuts no rule**. Ink: **the per-channel coverage agreement test PLUS the channel-gap
+  argument**; for a cross-capture comparison the **top-5%-coverage mean**. Mark/token: **a strict per-channel match to the token over a
+  bbox, with a control region of the same token elsewhere in the same capture**. Ordering/content: a per-column deviation-from-fill ASCII
+  ramp. **For a *fill under a shadow* neither an ink test nor an alpha calculation works — composite the stack or go opaque; for a fill
+  under the control's own specular `Gradient`, take the body mode.** **Ask the app what its `contentY` is before attributing a cross-leg
+  difference to any binding.**
+- **`captureClient` RETURNS `false` ON A NESTED RELATIVE PATH AND THE PNG IS SILENTLY NOT WRITTEN (R075).** Pass a **flat filename**;
+  **always read the success flag in `live-runtime-vm.log`** and then `ls` the actual CWD.
 - **THE LAUNCHER REFUSES WHEN A LIVED INSTANCE IS ALIVE (R079), AND `>/dev/null` HIDES IT.** `start-review-vm.sh` exits **1** with
   `Owned review instance still running: <pid>`. ⇒ kill the pid from `live-app.pid`, keep the launcher's stderr, check the pid changed.
-  **`leg.sh <theme> <name>` does the whole leg (kill, launch, sleep 30, one flat drive list, `contentY` probe, md5, capture flag) in one
-  call — but its drive list has NO `sidebar` action (R093) and its date is `2026-04-02`; for a mini-month leg run the four steps by hand.**
-- **A CHIP EDGE CAN ONLY PROVE "NO BORDER" IF IT DOES NOT ABUT A RULE (R078).** Read a **top or bottom** edge as a RAW profile and check
-  monotonicity — a real border is a row darker *and* more saturated than the fill; a corner/AA row is *lighter*.
-- **THE REF BAR IS AN ABSOLUTE STROKE, NOT A FRACTION OF THE CHIP (R077).** 2.4 ref px on both an 11 px and a 22 px chip ⇒ ours stays
-  `chipHeight/4` = 4 **regardless of duration**. Use the horizontal scale for its width (×1.85 on the column).
-- **OUR `timedChip` GEOMETRY AFTER R079/R080 (light 1100x692):** chip = column + 3; **fill 505-508, bar 509-512** (4 px, capsule), text ink
-  from **518**. Light fill `(216,234,245)`, dark fill `(36,69,90)`, bar `(48,140,198)` both. **Our chip calendar colours are NOT the ref's**:
-  blue **(48,140,198)** / green **(57,196,135)** / gold **(215,166,44)**.
-- **OUR `allDayChip` AFTER R080 (re-confirmed R088):** fill `withAlpha(itemColor, dark ? 0.32 : 0.17)` — light blue **(220,236,246)**, dark
-  **(35,65,83)**; ink halfway to the pole — light **(24,70,99)**, dark **(152,198,227)**. **Band rows 157-180 / 182-205 / 207-230** (gap 1,
-  inset 1, height 24, per R088's corrected geometry); band chip inset 1 ⇒ fills 53..200 / 203..350 / 353..500 / 503..650…; Label
-  `leftMargin: 5`. **R083: the Thu band region is byte-reproducible across two same-theme launches.** **R089: the model is
-  `slice(0, allDayStack.allDayVisible)` — 3 chips when a column holds ≤3 items, else 2 chips + a `+N` row; there is no cap left to hit.**
-- **THE BAND'S OVERFLOW ROW IS A SPEC-ONLY FORM, AND ITS GEOMETRY IS THE CHIP SLOT'S (R089).** When a column exceeds `allDayBandRows`,
-  `allDayStack.allDayVisible = allDayBandRows − 1` and the last slot renders `"+" + allDayOverflow` — **plain `root.chipInk(hidden item)`
-  ink on the band's own background, NO fill, `leftPadding: 5`, `font.pixelSize: 9`, height bound to `allDayRowHeight`.** Measured: Thu slot
-  3 = y207..230, x503..650. **The ref's 7 columns carry ≤3 chips ⇒ NO ref anchor exists for `+N`'s form, its ink, or whether it should be
-  `+N` at all — label every future change here spec-only.**
-- **THE REFERENCE WEEK CONTAINS NO MULTI-DAY ALL-DAY EVENT (R076)** ⇒ **A03's clause has no ref anchor; say "spec-only".**
-  **ALL-DAY RANGE ARITHMETIC SUBTRACTS EXACTLY ONE DAY — NEVER TWO (R076).** The record's end is the **inclusive last day**.
-- **A SQUARE JOINT ONLY READS AS "ONE BAR" BECAUSE THE COLUMN RULE IS DRAWN THROUGH THE BAND (R074 + R076).** ⇒ if the R074 separators
-  are ever removed, A03's rendering collapses back into "one pill per day". **The two changes are a pair.** **`itemRecord` IS AN INJECTED
-  PROPERTY ON `CalendarScheduleView` (R076)**, bound in `Main.qml`'s two schedule views; a view that omits it gets `({})` ⇒ every chip
-  fully rounded.
-- **MEASURING A CORNER, A JOINT, A STRIPE, A BORDER OR AN INK (R075–R094).** Corner: per-row **fill-start inset**. Joint: per-row
-  **`!= white` envelope**. Stripe: a saturated run whose **width is constant over the chip's full height**. Border: **monotonicity of a raw
-  profile across an edge that abuts no rule**. Ink: **the per-channel coverage agreement test PLUS the channel-gap argument**, and for a
-  cross-capture comparison the **top-5%-coverage mean**. Mark/token: **a strict per-channel match to the token over a bbox, with a control
-  region of the same token elsewhere in the same capture** (R093 used the week header disc as the control for the mini disc; **R094: for a
-  *size*, use the red-dominance envelope instead — see the first item in this section**). Ordering/
-  content: **a per-column deviation-from-fill ASCII ramp**; a word-space GAP in it gives the word-length signature. **R087: for "does the
-  layout respond to content", new fixture + a row-mean scan of one populated and one empty column — and grep the model expression first.
-  R088: prove containment with the whole-page diff-count, not a rule re-read. R091: ask the app what its `contentY` is (trailing `stop`
-  probe) BEFORE attributing a cross-leg pixel difference to any binding.**
-- **`captureClient` RETURNS `false` ON A NESTED RELATIVE PATH AND THE PNG IS SILENTLY NOT WRITTEN (R075).** Pass a **FLAT filename**;
-  **always read the success flag in `live-runtime-vm.log`** and then `ls` the actual CWD.
-- **THE BAND RULES ITS COLUMNS WITH THE GRID'S TOKEN (R074).** `allDayColumn`: left-edge 1px `gridLine` per column + right rim on
-  `index === root.dayCount - 1`; measured y=215 (band) and y=250 (grid) give the SAME run list (52/202/352/502/652/802, all 237).
-- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED R074–R094.** `sectionRule` **y=155** (242 light / 39 dark,
+  **`leg.sh <theme> <name>` does the whole leg in one call — but its drive list has NO `sidebar` action (R093) and its date is
+  `2026-04-02`; for a mini-month leg run the four steps by hand.** **R097/R098's working leg (ONE Bash call): kill `live-app.pid` →
+  `nohup ./start-review-vm.sh light|dark &` → `sleep 32–34` → `review-command.py` with `resize`/`sidebar`/`view`/`date`/`captureClient`/
+  `stop` → grep `capture <name>.png true` + the `manual stop contentY` probe in `live-runtime-vm.log`.**
+- **OUR COLUMN MAP AT 1100x692 (R071/R072/R074–R098):** x=0 rim; gutter x 1..51; separators at **x=52/202/352/502/652/802 in BOTH the
+  band and the grid**, **pitch 150**, 7×150px delegates starting at 52. Weekend = the last two. **Sidebar x0..219; the toolbar's segment
+  track spans x≈562..757 (w 196) centred on the main region; the lens x629..690 (w 62) on segment 2 = Week; the capsule is y36..63 (28 tall,
+  1px `AppTheme.border` hairline top and bottom), the lens y38..61 (24); the two right round glass buttons are x1023..1048 / x1059..1084.**
+  **Fixture day: Thu Apr 2 = 4 all-day items ⇒ 3 chips; Fri Apr 3 = 1. The launch week (Oct 12–18) carries NOTHING, so `date 2026-10-15`
+  is the cheapest way to get a month that CONTAINS today.**
+- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED R074–R098.** `sectionRule` **y=155** (242 light / 39 dark,
   1px); band interior **156..231 = 76**; `allDaySeparator` **232-233** (217, 2px); first hour line **234** (237). Chips **157-180**, gap
-  **181**, **182-205**, gap 206, **207-230**. **Net +28 vs R070 — the grid has permanently lost ~28px of viewport.**
-- **REF ALL-DAY BAND, MEASURED 1:1 (R072/R073/R075–R081 + R087).** Rows **y126-143, 145-162, 164-181** ⇒ **row 18, gap 1, pitch 19**;
-  top rule **y=124** 1px (242); bottom separator **y=183-184** 2px (217), **row-mean constant 217.0 over x250..810**; **inset ≈1 both
-  legs**; content **125..182 = 58**. Chip radius **≈6 = row/3**; fill alpha **≈0.16**; **ink = itemColor/2**; **ring icon 12x12, stroke 3,
-  hole 6, 3 px inside the fill edge**. **R087: all 7 columns live in the SAME 3-row strip and carry 0/1/2/3 chips — the band never
-  expands.** Ours: row 24 / gap 1 / inset 1 / radius 8 / band 76 / separators present / hue ink — every *form* item matched **except the
-  icon (仍差 #1)**; capacity now matches too (R088).
-- **REF TIMED CHIP, MEASURED 1:1 (R077–R080).** Outer pitch **27 px/hour**; a 1-hour chip spans **y331..356 = 26 px**; span = its column's
-  full width minus ~1 px each side. Fill = light desaturated same-hue wash (blue (222,237,254), red (251,228,227)); **text = dark same-hue =
-  the bar at 1:2** (R079); **left bar 2.4 px, ~3 px in, round caps**; **no border/ring on any edge** (R078). Ours: fill
-  `withAlpha(itemColor, .19 light / .36 dark)`, ink halfway to the pole, bar done, border deleted. Ref chip ink starts **7 ref px** in from
-  the fill edge; ours: chip = column + 3, text ink from column + 16.
-- **REF EVENT CHIP COLOUR IDIOM (R063/R075/R077/R079/R080).** Light desaturated same-hue fill + dark same-hue text + saturated same-hue
-  left bar (timed) or ring icon (band) + small radius. **The ref has NO popover, menu, tooltip or hover frame** ⇒ the D/O families are
-  HIG+token-anchored only. The ref's tinted chips carry their icon at the LEFT INSIDE EDGE ⇒ **crop the *second* chip row for a clean
-  corner, or read the numeric profile instead.**
-- **OUR COLUMN MAP AT 1100x692 (R071/R072/R074–R094):** x=0 rim (53,53,53) dark / (224,224,224) light; gutter x 1..51; separators at
-  **x=52/202/352/502/652/802 in BOTH the band and the grid**, **pitch 150**, 7×150px delegates starting at 52. Columns **Mon 30 · Tue 31 ·
-  Wed 1 · Thu 2 · Fri 3 · Sat 4 · Sun 5** for the fixture week ⇒ **weekend = the last two**; the band's right rim is on Sun's right edge
-  (x=1102) and is clipped at 1100. **Fixture day: Thu Apr 2 (x502..651) = 4 all-day items ⇒ 3 chips; Fri Apr 3 (x652..801) = 1.**
-  **R093/R094: for the launch week (Oct 12–18, today = Sat 17) the header's today disc sits at x928..948/y126..147 = 21x22 (strict) /
-  rows 126..147 maxw 22 (envelope), fill (229,72,77), and the mini month's today disc is 15x15 at x158..172/y599..613.**
-- **FOUR LOCAL TOKENS OWN THE GRID'S RULES (R065/R067/R069).** `CalendarScheduleView.qml:51-75`: `gridLine` (light `#EDEDED` / dark
-  white@0.13), `gridLineMinor` (light `#F4F4F4` / dark white@0.06), `allDaySeparator` (light `#D9D9D9` / dark white@0.24), `sectionRule`
-  (light `#F2F2F2` / dark white@0.04). **`AppTheme.border` has ZERO consumers in this view.** Requirement is the ORDERING: ref 242 < 237 <
-  217; ours light 242 < 237 < 217, dark 39 < 59 < 84. `gridLineMinor` is a **half-hour line**, a different role. **R074: `gridLine` is
-  consumed by THREE things — the grid's top/left/right edges AND the band's column separators.** **THE ALL-DAY SEPARATOR IS 2px AND SPANS
-  THE GUTTER (R067).** A `ColumnLayout` sibling of the `ScrollView` with `Layout.fillWidth: true`. **ONE LINE PER BOUNDARY (R065).**
-  **R093 adds a fifth app-wide marker token, but NOT here: `AppTheme.todayRed` (see the hoist note above).**
+  **181**, **182-205**, gap 206, **207-230**.
+- **REF ALL-DAY BAND, MEASURED 1:1 (R072/R073/R075–R081 + R087).** Rows **y126-143, 145-162, 164-181** ⇒ **row 18, gap 1, pitch 19**; top
+  rule **y=124** 1px (242); bottom separator **y=183-184** 2px (217), row-mean **217.0 constant over x250..810**; **inset ≈1 both legs**;
+  content **125..182 = 58**. Chip radius **≈6 = row/3**; fill alpha **≈0.16**; **ink = itemColor/2**; **ring icon 12x12, stroke 3, hole 6,
+  3 px inside the fill edge**. **R087: the band never expands.** Ours: row 24 / gap 1 / inset 1 / radius 8 / band 76 / hue ink — every
+  *form* item matched **except the icon (仍差 #1)**.
+- **REF TIMED CHIP, MEASURED 1:1 (R077–R080).** Outer pitch **27 px/hour**; a 1-hour chip spans **y331..356 = 26 px**. Fill = light
+  desaturated same-hue wash (blue (222,237,254)); **text = dark same-hue = the bar at 1:2**; **left bar 2.4 px, ~3 px in, round caps**;
+  **no border on any edge**.
+- **OUR COLUMN RULES + TOKENS (R065/R067/R069/R074).** `CalendarScheduleView.qml:51-75`: `gridLine` (light `#EDEDED` / dark white@0.13),
+  `gridLineMinor` (light `#F4F4F4` / dark white@0.06), `allDaySeparator` (light `#D9D9D9` / dark white@0.24), `sectionRule` (light
+  `#F2F2F2` / dark white@0.04). **`AppTheme.border` has ZERO consumers in that view** (but the *shared* segmented control draws its own
+  hairline with it — R097). Requirement is the ORDERING: ref 242 < 237 < 217; ours light 242 < 237 < 217, dark 39 < 59 < 84.
+  **`gridLine` is consumed by THREE things — the grid's top/left/right edges AND the band's column separators.**
 - **Our schedule grid field is pure WHITE (255,255,255)** light / **(30,30,30)** dark. **Weekend columns are 249 light / 37 dark; the gutter
-  is NOT tinted. The all-day band shares the column's fill.** (R088: a row-mean over a Sat/Sun span reads 249 and never dips below the
-  250 threshold — a weekend span looks like "one continuous band"; check the fill, not just the threshold.) **Sidebar plane light = (228,228,228);
-  the mini month's weekend cells are tinted (214,214,215) (R093).**
-- **THE GUTTER LABEL IS RIGHT-ANCHORED AND SIZE-DERIVED (R066).** font 11, `anchors.right` + `rightMargin: 7`, vertical centring via
-  `-Math.round(implicitHeight/2)`. **A gutter scan must start at x ≥ 3** or the x=0 rim merges every text band into one — **and a band scan
-  finds the label's *ink rows*, never its *text*: two legs whose labels read one hour apart return the SAME band list (R091). Compare the
-  digits, not the bands.**
-- **`hourHeight` is THE pitch constant (R064).** `CalendarScheduleView.qml:49`. Chip height = `Math.round(root.hourHeight * 21 / 54)` = **16**.
-  Half-hour line = `Math.round(parent.height / 2)` = **20**. **R072 added the four `allDay*` tokens; R077 the chip's `stripeWidth`/
-  `stripeInset`; R079 `timedChip.inkColor`; R080 `allDayChip.inkColor`; R088 the band model; R083 `Main.qml:itemStableId`; R091 the
-  timeline's reposition trigger (`:276`); R093 `AppTheme.todayRed` + its 5th consumer at `Main.qml:2204`; R094 the mini disc's `15` at
-  `Main.qml:2199-2200`.**
-- **MINI MONTH GEOMETRY (R093 + R094, light 1100x692, sidebar expanded, `date 2026-10-15`).** `Main.qml:2084` `miniCalendar`; day delegate
-  `Main.qml:2162`; today/selected disc `Main.qml:2198-2206`. Sidebar `x0..219`; mini month rows start y≈545; **row pitch ≈25.4, column pitch
-  ≈27.7, Monday-first** (`一二三四五六日`); `Main.qml:2177-2178` place cells at `headingRow.height + 18`. **The disc `Rectangle` is SHARED by
-  the today marker (a `todayRed` fill + white numeral) and the selected marker (a 1px accent ring, no fill) ⇒ `width/height` is now 15 for
-  BOTH (R094: rows 599..613; today at x158..172, selected (Oct 15) at x102..116).** Numeral `font.pixelSize: 11`, DemiBold when today or
-  selected, 9 px ink ≈ the ref's 9 px in its 15 px disc; **the two-digit numeral fits — no white ink outside x158..172.**
+  is NOT tinted.** **Sidebar plane light = (228,228,228); the mini month's weekend cells are tinted (214,214,215).**
+- **THE GUTTER LABEL IS RIGHT-ANCHORED AND SIZE-DERIVED (R066).** font 11, `anchors.right` + `rightMargin: 7`. **A gutter scan must start
+  at x ≥ 3** or the x=0 rim merges every text band into one — **and a band scan finds the label's *ink rows*, never its *text*.**
+  **Compare the digits, not the bands.**
+- **`hourHeight` is THE pitch constant (R064).** `CalendarScheduleView.qml:49`. Chip height = **16**. Half-hour line = **20**. **R072 added
+  the four `allDay*` tokens; R077 the chip's `stripeWidth`/`stripeInset`; R079 `timedChip.inkColor`; R080 `allDayChip.inkColor`; R088 the
+  band model; R083 `Main.qml:itemStableId`; R091 the timeline's reposition trigger (`:276`); R093 `AppTheme.todayRed` + its 5th consumer at
+  `Main.qml:2204`; R094 the mini disc's `15`; R097 `tahoe.segmentTrack`/`segmentPill` + the segment's repoint at `Main.qml:1715-1716`.**
 - **REF FACT SHEET (R063, compacted).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026, **today = Wed Apr 1**) +
   243px sidebar + mini calendar. Day headers (text y108-116) → **all-day band (y 124–184)** → hour grid 8 AM–8 PM. Gutter labels
   193/220/247/274/301/328 = **pitch 27**; the red `9:41` pill **replaces** the 10 AM label. Now-line y=238, pill/line red **(235,76,70)**.
   **7 equal day columns, 1px separators at x=324/406/487/569/650/732, grid x=243..812 ⇒ 81.3px/column.** **Scale to our 1100x692:
-  w 1.35, h 1.33** ⇒ ref pitch 27 ≈ **36** (the contract says 40; 40 was chosen). Hour lines and vertical separators are both
-  **1px (237,237,237)**. Gutter label (ref x 215..238): digit **(89,89,89)**, `AM`/`PM` suffix **(176..193)**, right ink edge 238 vs grid
-  line 243 ⇒ 5 ref-px. **Columns: Sun 29 · Mon 30 · Tue 31 · Wed 1 · Thu 2 · Fri 3 · Sat 4.** **Mini month (R093/R094): red today disc
-  envelope 15x15 at x91..105 / y395..409 (rows 395..409, maxw 15), fill (207,51,35), white numeral ≈9 px ink; row pitch ≈26.7.**
-- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R094).** `harness/Main.qml` matches `command.action` only
-  (`captureClient{path}`, `escape`, `resize{width,height}`, `sidebar{expanded}`, `view{view}`, `date{date}`, `position{contentY}`,
-  `wheel{angleY}`, `flick{velocity,cancelFirst}`, `stop`, `openItem{kind,titleContains}`); a command with no `action` **silently hits the
-  fallback**. `review-command.py` takes **ONE argv that is a JSON list**, bumps `sequence` itself, writes **in place** (never
-  `os.replace`), and **sleeps 0.6 s between commands** — that 0.6 s is what used to land the capture inside the 450 ms reposition window.
-  **launch/re-launch:** `start-review-vm.sh light|dark` blocks on `wait "$app_pid"` — background it. **It EXITS 1 without launching if
-  `live-app.pid` still points at a live `kos-calendar`** — kill that pid first (never `pkill`). A rebuilt binary needs a **kill+relaunch**;
-  ~24 s to the new pid. Include `resize 1100x692`; it starts in `--view week --date 2026-10-15` **with the sidebar COLLAPSED**, so every
-  drive list must re-send `view week` + the date (+ `sidebar` if the sidebar matters). **The theme is fixed at launch — a dark leg costs a
-  full kill+relaunch.** **App stderr goes to `live-runtime-vm.log`** — read the capture flags there. **`leg.sh <theme> <name>` does the
-  whole leg in one call (but its drive list has no `sidebar` and dates `2026-04-02`).** **R094's working mini-month leg (one Bash call):
-  kill `live-app.pid` → `nohup ./start-review-vm.sh light &` → `sleep 30` → `review-command.py` with `resize`/`sidebar`/`view`/`date`/
-  `captureClient`/`stop` → grep `UIReview` + the capture flag in `live-runtime-vm.log`.**
+  w 1.35, h 1.33** ⇒ ref pitch 27 ≈ **36** (the contract says 40; 40 was chosen). **Columns: Sun 29 · Mon 30 · Tue 31 · Wed 1 · Thu 2 ·
+  Fri 3 · Sat 4.** **R097/R098 add the toolbar row: y4..36 in the ref, holding (left→right) the traffic dots, a 2-icon capsule at
+  x≈122..190, a round `+` at x≈205..230, the Day/Week/Month/Year capsule at x≈389..615 (track 249..253, selected pill 230..235), and two
+  round glass buttons (radar, search) at x≈735..810.**
+- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R098).** `harness/Main.qml` matches `command.action` only; a command with no
+  `action` **silently hits the fallback**. `review-command.py` takes **ONE argv that is a JSON list**, bumps `sequence` itself, writes
+  **in place** (never `os.replace`), and **sleeps 0.6 s between commands**. **launch/re-launch:** `start-review-vm.sh light|dark` blocks on
+  `wait "$app_pid"` — background it; a rebuilt binary needs a **kill+relaunch** (~24 s to the new pid). Include `resize 1100x692`; the app
+  starts in `--view week --date 2026-10-15` **with the sidebar COLLAPSED**. **The theme is fixed at launch — a dark leg costs a full
+  kill+relaunch. App stderr goes to `live-runtime-vm.log`.**
 - **Fixtures on 2026-04-02** (live = `profile/pim/calendar.ics` **under `tmp/ui-acceptance/calendar/`** — the repo-root
   `calendar-fixture.ics` is **stale, no VTODOs**): VEVENTs **08:00 / 10:15 / 11:00 / 14:30 / 18:00 on EVERY day 2026-03-30 … 2026-04-06**
-  plus a **`Multi-day review`** all-day strip **`20260330` → `20260403`** ⇒ Mon 30 · Tue 31 · Wed 1 render as ONE chip each (identical row
-  mean, R088) and Thursday does NOT carry it. **R087 ADDED**: `R087 card C`, `R087 card D` (both `20260402`) and `R087 sole`
-  (`20260403`) ⇒ **Apr 2 carries 4 all-day items, Apr 3 exactly 1.** UID-ordered since R083 ⇒ **Thu's order is `Design sync` /
-  `Release notes` / `R087 card C` / (`R087 card D`, hidden)**. VTODOs (kind `"todo"`): `[UI] Green planning` 09:00, `[UI] Gold review`
-  12:00, `[UI] Red review` 16:00, `A deliberately long task title to inspect elision` 11:00, **`[R019 LONG TASK] 任务长标题与编辑表单检查`**.
-  **The rendered week also shows `[R019 LONG EVENT]`, `Prepare notes`, `Review checklist` — re-read the ICS before predicting a cell.**
-  **The launch week (2026-10-12..18) carries NOTHING — R091 — so `date 2026-10-15` is the cheapest way to get a month that CONTAINS
-  today (R093/R094).**
-- **Pillow crops need ABSOLUTE paths**; a glob and a literal path in the same `for` list crashes the crop script — assert `im.size` first.
-  **A composite (1:1 strip above a 2–4× zoom) answers "overall form + local detail" in ONE image read.** **R076: label the rows in the
-  composite (`ImageDraw.text`).** **R077: `LANCZOS` for a ×1.8 upscale of a ref crop; `NEAREST` when the point is pixel structure.**
-  **R080: a `Counter` mode over a cell gives the fill in one call.** **R082/R083: a ×3 `LANCZOS` stacked composite with a black label bar
-  per leg is the whole verdict in ONE image read; it can make two IDENTICAL inks *look* different across panels — confirm with numbers.
-  R087: a ×2 two-panel stack at each panel's own 1:1 scale is enough for "how many rows / where is the shared edge". R091: a 1:1 full-width
-  two-panel stack of y150..470 with a black label bar per panel is enough to see TWO LEGS' HOUR LABELS disagree. R093: a **×2 `LANCZOS`
-  crop of `x0..230, y520..692`** is one image read and settles the whole mini month. R094: a **×8 `NEAREST` side-by-side of a 26x26 crop
-  around each disc, with a black label bar** settles "same diameter?" in one read — and the numbers settle it in one script.**
-  **No `numpy` in this interpreter — use `Image.load()` + a `Counter`.**
+  plus a **`Multi-day review`** all-day strip **`20260330` → `20260403`** (Mon/Tue/Wed render as ONE chip each; Thursday does NOT carry
+  it). **R087 ADDED**: `R087 card C`, `R087 card D` (both `20260402`) and `R087 sole` (`20260403`) ⇒ **Apr 2 carries 4 all-day items,
+  Apr 3 exactly 1.** UID-ordered since R083 ⇒ **Thu's order is `Design sync` / `Release notes` / `R087 card C` / (`R087 card D`, hidden)**.
+  VTODOs: `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00, `A deliberately long task title to inspect
+  elision` 11:00, `[R019 LONG TASK] …`. **The rendered week also shows `[R019 LONG EVENT]`, `Prepare notes`, `Review checklist`.**
+- **Pillow crops need ABSOLUTE paths**; a glob and a literal path in the same `for` list crashes the crop script. **A composite (a 1:1 strip
+  above a 2–4× zoom) answers "overall form + local detail" in ONE image read**, and **labelling the rows (`ImageDraw.text`) is what makes
+  it self-describing.** **R077: `LANCZOS` for a ×1.8 upscale of a ref crop; `NEAREST` when the point is pixel structure.** **R080: a
+  `Counter` mode over a cell gives the fill in one call (R098: use it for a segment fill — over the *body* rows).** **R097: a black-bar
+  two-panel `old-above / new-below` ×3 `NEAREST` stack of the *same* region is the whole before/after verdict in one read (and it is what
+  caught the exchange); R098: the same stack with the light-after strip added is the whole *both-leg* verdict in one read.** **No `numpy` in
+  this interpreter.**
 - **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in (name them
   **`r0NN-<slug>.png`**) and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first) — **prepend with
   `Path.write_text(entry + old)`; an `Edit` whose only `old_string` is the previous round's heading deletes that heading.**
   `state.md`/`rounds.md` can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## ## Next round (pick ONLY #1)
-**#1 — C05 clause 1: the TOOLBAR chrome. Not ruling-blocked, never measured.** Literal: "Hover/pressed/inactive chrome matches actual
-settings; **no second capsule or conflicting controls**". **First step is a reading step that needs NO new leg:** crop the toolbar
-(`y0..~70`) out of `r096-sidebar.png`, which is already on disk, and count the capsules/controls; `grep -n "| C05 " spec.md`; then
-`grep -n "toolbar\|ToolBar\|glassPill" apps/calendar/qml/Main.qml` to find the chrome's QML. The ref anchor for "no second capsule": the
-ref toolbar is macOS Calendar's — a **flat** bar with a view segmented control, Today, ‹ › chevrons and a search field — **no glass
-pill anywhere** ⇒ any second rounded container of ours is ref-checkable, and its *absence* similarly. ⚠ **C05's hover/pressed half is
-NOT drivable** (R096: the harness has no pointer-move action) — read the tokens' ordering numerically (`selectionFill` for pressed,
-`rowHoverFill` for hover) and record the pointer half as **needs a harness action**, never as PASS. **Do NOT touch the mini month**
-(closed: M04 colour R093 + size R094 + header R095) **or the sidebar rows** (measured R096 — 0 code changes due).
+**#1 — C05's label-token residue (仍差 #2), a READING round.** The segment's `textColor`/`mutedTextColor` are **calendar-local**
+(`Main.qml`'s `tahoe.labelPrimary`/`labelSecondary`) while the settings app's two `LiquidSegmentedControl`s
+(`KosSettingsDialog.qml:174`/`:212`) pass **none** ⇒ they take `AppTheme.text`/`mutedText`. **The method is settled (外推 #3: diff the
+property list, not the pixels):** read `Main.qml`'s calendar instance and the settings instance side by side, then **measure the label ink in
+both hosts in ONE capture** — the toolbar segment's selected label and an unselected one, in `r098-seg-dark.png` (dark) and `r097b-seg.png`
+(light), against the same captures' own plane, and decide whether the two label pairs are the same two colours. **Verdict-only unless they
+differ; if they differ, repoint the two properties at `AppTheme.text`/`mutedText` (2 tokens, nothing else).**
+⚠ Read the *unselected* label too — the selected one sits on the pill and its ink is the higher-contrast pair.
 
-**Then (all still ruling-blocked, in visual-impact order):** #2 the band ring icon (ruling H — no rulings channel exists anywhere in the
-tree, so it stays unbuilt); #3 12-hour two-tone gutter labels (ruling F); #4 dim snap (`KosWorkspaceDialog.qml:24-27`, ruling A); #5
-shadow magnitude (ruling B); #6 month `slice(0, 2)` (ruling D + a 3-all-day-item *month* day). **Also untouched and NOT ruling-blocked: the toolbar chrome (C05 — now Next #1). The sidebar rows are MEASURED (R096).**
+**Then:** #2 the segment pill's radius (per-row fill-start inset at the **body** mode, 仍差 #3 — `r098-seg-dark.png` has a 62x24 pill at
+1:1, so it is cheap now); #3 the ruling-blocked list in 仍差 order — the band ring icon (H), the 12-hour two-tone gutter labels (F), the dim
+snap (A), the shadow magnitude (B), the month `slice(0,2)` (D), the band chips' inset (G).
 
 **Blocked on rulings A–H:** the **band icon (H, R081)**, dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E;
-clauses 1+2 PASS R048), month `slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs
-the ref's measured 1**. **The `code-writer` subagent is NOT registered in this session — do not retry it each round.**
-**Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04 fully PASS** —
-step 1 R088, step 2 R089 spec-only + byte-contained, R091's light 0 px pair and R092's dark 0 px pair the byte-level reconfirmations;
-**E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**; **M04 closed
-R093 (colour) + R094 (size)**; **S01 + S04 MEASURED R096** (2 clauses hold, clause 2 already satisfied on `CategoryRow`); everything else
-PENDING or ruling-blocked. **R096 changed NOTHING — a verdict round: S04's rival delegate is dead chrome and the ref anchor is already
-r=6; the tree is byte-identical to R095. The sidebar rows, the mini month and the band's ink are all now measured.**)
+clauses 1+2 PASS R048), month `slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs the
+ref's measured 1**. **No rulings channel exists anywhere in the tree.**
+**`code-writer` is STILL not registered in this session (do not retry it each round) — R097 used `general-purpose` as the stand-in
+implementer; R098 needed no implementer at all.**
+**Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04 fully PASS**;
+**E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**; **M04 closed R093 +
+R094**; **M03/M02/M01/S02/S03/S05/L01–L07/C01–C04/C06 PASS-pending-final-regression**; **S01 + S04 MEASURED R096**; **C05 clause 1's
+structural half CLOSED R097 and its dark leg CLOSED R098 (this round); its label-token residue + its pointer half remain open.**)

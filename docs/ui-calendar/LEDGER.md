@@ -1,3 +1,24 @@
+# R089 — A04 step 2 PASS: the all-day band's overflow is explicit. Thu Apr 2 (4 items, 3 slots) now renders `Design sync` / `Release notes` / **`+2`** — nothing is dropped silently.
+
+**Spec-only, NOT ref-anchored:** `refs/macos-calendar.png`'s 7 columns carry at most 3 chips, so it cannot anchor an overflow form. The form
+(three-slot band ⇒ `rows−1` chips + a `+N` remainder row) is the macOS week-view convention read off the HIG, not off this reference.
+
+**Measured (light 1100x692, `view week`, `date 2026-04-02`).** Thu (x502..651): slot 1 `Design sync` (y157-180), slot 2 `Release notes`
+(y182-205), slot 3 **`+2`** (y207-230) — the band's ink colour, no fill, so a count of hidden items does not read as an event chip. Fri
+(x652..801) keeps its single `R087 sole` chip and gets **no** `+N` (1 item ≤ 3 slots). Dark leg: the same `+2` in the dark chip ink.
+**Regression proof: whole-page `ImageChops.difference` vs `capture-r088.png`, per-pixel threshold >6 (RGB sum) ⇒ exactly ONE contiguous
+y-group, y207..230, x503..650 (Thu's third slot alone), max 148 px/row; every other pixel of the 1100x692 page is byte-identical.** The run's
+x-range is column-bounded, not full-width, so it is the content change and not a now-line artifact.
+
+**Code:** `apps/calendar/qml/CalendarScheduleView.qml` — the band's `ColumnLayout` gained `id: allDayStack` with `allDayOverflow =
+max(0, columnItems.length − allDayBandRows + 1)` and `allDayVisible = allDayBandRows − (overflow > 0 ? 1 : 0)`; the `Repeater`'s model is now
+`slice(0, allDayStack.allDayVisible)`; a trailing `Label` renders `"+" + allDayOverflow` in a chip-height slot. The chip-ink expression reached
+its **third** consumer, so R079/R080's duplicated `inkColor` body was hoisted to a root `chipInk(item)` function — both chip delegates are
+**binding-equivalent**, which the byte-identical whole-page diff confirms. `allDayBandRows`, `allDayBandHeight`, the grid-cell slice and the
+month cell are untouched.
+
+Figures: `docs/ui-calendar/r089-band-overflow-light3x.png`, `r089-band-overflow-dark3x.png`. (2026-10-17)
+
 # R088 — **A04 step 1 PASS: the band's 2-item cap is gone. ONE line (`:454 slice(0, 2)` → `slice(0, root.allDayBandRows)`), and Thu Apr 2 renders 3 chips; the whole page outside Thu's 3rd slot is byte-identical.**
 
 Measured (light 1100x692, `view week`, `date 2026-04-02`, md5 `4c59ed839306aa0d8fc7621e17db70b4`), on R087's fixture (still in the live

@@ -1,3 +1,62 @@
+# R051 — **P01 dark narrow leg PASS ⇒ P01 CLOSED (2 themes × 2 window sizes)** (2026-10-16)
+
+## 本轮 (R051)
+Atomic step: R050's Next round #1 = **P01's narrow-window (760x540) popover, dark**. Measurement + judgment
+only — **no product code touched, no build**.
+
+The live instance was **light** (`/proc/95488/environ` → `KOS_APPEARANCE=light`), so it was killed and
+`./start-review-vm.sh dark` cold-started (pid 98047, dark confirmed from `/proc`). Method copied from R050
+exactly: `date 2026-04-02` → `view week` → `resize 760x540` → `openItem titleContains "Long review"` →
+`nativeRecord r051-narrow-dark` (15 frames); then `escape` → `resize 1100x692` → `openItem` the **same
+fixture** → `nativeRecord r051-wide-dark` (14 frames). Same-fixture A/B ⇒ content cannot confound it.
+
+**Steadiness:** every follow-up frame is **byte-identical** to frame 0000 in both series
+(`ImageChops.difference` bbox `None`, 14/14 and 13/13) ⇒ the popover is fully static over 1.5 s — no reflow, no
+shake, no animation.
+
+**Card fill bbox** (flood-fill over the dark (38,38,38) fill):
+
+| window | fill bbox | w | h |
+|---|---|---|---|
+| 760x540 | x 210–549, y 226–413 | **340** | **188** |
+| 1100x692 | x 380–719, y 252–438 | **340** | **187** |
+
+(The 1px height delta is a flood-fill edge artifact, not content.) Horizontally the card is **exactly centred**
+in both windows (gaps 210/210 and 380/380).
+
+**Content bands, card-relative** — identical offsets *and* identical ink lengths in both legs:
+
+| band | rel x | rel y | ink run narrow | ink run wide |
+|---|---|---|---|---|
+| title, 2 lines h38 | 14 | 19 | 14–318 (305) | 14–318 (305) |
+| date · 11:00 – 13:00 | 14 | 70 | 14–214 (201) | 14–214 (201) |
+| location | 15 | 96 | 15–121 (107) | 15–121 (107) |
+| notes | 15 | 122 | 15–288 (274) | 15–288 (274) |
+| 编辑 label | 278 | 148 | 278–325 (48) | 278–325 (48) |
+
+Top-edge material **byte-identical** in both: y0−1 border (43,43,43), y0−2/−3 shadow ramp (16,16,16)/(17,17,17),
+y0 fill (38,38,38). Dark baseline re-confirmed against R047: fill (38,38,38) ✓, border 43≈42 ✓, title ink
+(242,242,242) ✓, secondary ink (164,164,164) ✓.
+
+**The one apparent narrow/wide difference was an artifact.** The wide frame's extra band at rel y 179–185 exists
+at **only rel x 1,2,5,6 and 333–338** — the card's own rounded corners + border over a blue-tinted backdrop
+(that row is pure fill at card centre-x in *both* frames). Backdrop, not material.
+
+**Status dot:** 10×10 at card-relative **x 14–23, y 31–40**, peak **(48,140,198)** accent blue, identical in
+narrow dark, wide dark and narrow light. **R047's recorded "(57,196,135) green dot" does NOT reproduce** — 0
+pixels within ±30 of it anywhere in either dark frame.
+
+⇒ **P01 dark narrow leg = PASS**, and with it **P01 is CLOSED**: PASS at 1100x692 light (R046), 1100x692 dark
+(R047), 760x540 light (R050), 760x540 dark (R051). The popover does not compress in either theme at either size;
+it is the standing **counter-example to 仍差 #3**, which stays a *dialog-only* finding.
+
+Evidence: `round-51-popover-dark-narrow-vs-wide.png` (2x side-by-side, aligned on the fill bbox),
+`round-51-popover-dark-760x540.png`, `round-51-popover-dark-1100x692.png`.
+
+**Next round #1:** fix **仍差 #3** — the editor dialogs compress instead of scrolling at 760x540
+(`CalendarTaskEditorDialog.qml:32-33` plus the event-editor sibling); the top-ranked 仍差 item that needs no
+ruling.
+
 # R050 — **P01 narrow leg PASS: the popover does not compress; card is size-invariant** (2026-10-16)
 
 ## 本轮 (R050)

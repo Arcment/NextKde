@@ -1,3 +1,47 @@
+# R066 — **T03 PASS: gutter hour labels are 11px, right-aligned 8px from the grid, centred exactly on their tick.**
+Pre-round they were font **9** and **centred** in the 52px gutter (ink right edge x=36 ⇒ a **16px** gap), shifted by
+a hardcoded `topMargin: -7` that was only correct at font 9. (2026-10-17)
+
+## 本轮 (R066)
+Atomic step: **T03 — "Time labels 10–11, right aligned 6–8 from grid, aligned with their actual hour tick"**.
+**Code change**, one file, 3 edits. 1 build, 2 kill+relaunch (light, then dark), 2 drives, 2 measurements, 3 crops
+read, ~16 Bash calls ≈ 12 min.
+
+Change — `apps/calendar/qml/CalendarScheduleView.qml`, gutter `Label` now at **lines 367-383** (was 367-377):
+`font.pixelSize: 9 → 11`; `anchors.horizontalCenter: parent.horizontalCenter` →
+**`anchors.right: parent.right` + `anchors.rightMargin: 7`**; `anchors.topMargin: -7` →
+**`-Math.round(implicitHeight / 2)`**.
+
+Why each: the gutter cell's `parent.right` **is** the grid's left edge line (the day columns draw their own left
+edge at that same x), so `rightMargin` reads directly against the grid — the label stops being centred in a 52px
+trough and starts being aligned to the line, which is what the ref does. And this font's line box is **~1.47em**,
+so a constant -7 centres font 9 and nothing else; `implicitHeight` is text-derived, so deriving the offset from it
+keeps the digit band on the tick at any size with no binding loop. The Label **stays anchored** (top + right) so it
+still cannot contribute to the cell's implicit height — the 40px pitch is structurally safe, not accidentally safe.
+
+**Measured PASS.** Light: ink bands **241..249 / 281..289 / 321..329** (cap **9px**, was 7) at x **18..44**;
+centres **245.0 / 285.0 / 325.0** — *exactly* on the hour lines 245/285/325, pitch **40** ⇒ T01 unregressed.
+Right ink edge 44 vs the grid line at x=52 ⇒ **gap 8** (text box gap 7) — contract 6–8. Dark: gutter (30,30,30),
+**identical geometry** ⇒ no dark regression. Crops `r066-gutter-light-5x.png` / `r066-gutter-dark-5x.png` /
+`r066-ref-gutter-5x.png`.
+
+**Ref, measured before touching code:** the ref's label is **12-hour and two-tone** — dark **(89,89,89)** digits in
+a **9 ref-px cap band centred exactly on the hour line**, plus a **(176..193) light-grey `AM`/`PM` suffix flush
+right**; ink right edge 238 vs grid line 243 ⇒ **5 ref-px** gap. Ours is single-size 24-hour `07:00`. **No spec ID
+covers format or the two-tone split** (the T family is only T01 pitch / T02 grid lines / T03 label form), so this is
+**not a T03 failure** — filed as **ruling F**.
+
+**Ref caveat (recorded):** our gap is 8 vs the ref's 5 ref-px (≈6.8 scaled), and our cap 9px matches the ref's 9
+ref-px even though our hour pitch is 40 vs the ref's 27 — i.e. font 11 is the *floor* of a scale-matched ref
+(which would want ~15px and would violate T03's 10–11). The contract wins.
+**Process notes:** the window's x=0 rim column (224,224,224) light / (53,53,53) dark merges every text band into
+one if a gutter scan starts at x<3; and our text uses **subpixel (RGB) antialiasing**, so a single-pixel glyph
+probe comes back colour-fringed — never read a text colour off one pixel.
+**Scope guards:** `hourHeight` (40), the grid-line Rectangles, the half-hour line, the all-day separator and the
+chips are all untouched; `AppTheme.qml` untouched.
+
+---
+
 # R065 — **T02 PASS: grid lines are now 1px and neutral, with half-hour lines lighter than hours.**
 The pre-round grid drew a `border.width: 1` box on every 40px cell, so neighbours stacked into **2px** bands.
 (2026-10-17)

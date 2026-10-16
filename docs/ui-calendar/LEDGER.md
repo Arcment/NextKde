@@ -1,3 +1,49 @@
+# R065 — **T02 PASS: grid lines are now 1px and neutral, with half-hour lines lighter than hours.**
+The pre-round grid drew a `border.width: 1` box on every 40px cell, so neighbours stacked into **2px** bands.
+(2026-10-17)
+
+## 本轮 (R065)
+Atomic step: **T02 — "Grid lines 1, neutral light gray; half-hour lighter than hours, lines below event emphasis"**.
+**Code change**, one file, 2 edits. 1 build, 2 kill+relaunch (light, then dark), 2 drives, 2 measurements,
+2 crops read, ~16 Bash calls ≈ 14 min.
+
+Why it was a real FAIL, not a re-read: every hour cell was
+`Rectangle { anchors.fill: parent; border.width: 1; border.color: AppTheme.border }`, so a cell's bottom border
+and its neighbour's top border **both** landed on the same boundary ⇒ measured band was **4 rows at 2x =
+2px of (223,225,228)** (blue-tinted, Δ32 from white). Interior day-column separators doubled the same way
+(left+right), while the outer edges stayed 1px — so the grid was internally inconsistent *and* had **no
+half-hour lines at all**.
+
+Change — `apps/calendar/qml/CalendarScheduleView.qml`:
+- **new lines 51-58**: two tokens next to `hourHeight`.
+  `gridLine` = light `#EDEDED` / dark `Qt.rgba(1,1,1,0.13)`; `gridLineMinor` = light `#F4F4F4` / dark
+  `Qt.rgba(1,1,1,0.06)`. **Local to the schedule view on purpose** — `AppTheme.border` is app-wide (cards,
+  fields, buttons) and must not move; leaving the all-day band separator on `AppTheme.border` also preserves
+  the ref's *stronger-than-grid* hierarchy there.
+- **lines 383-415**, hour-cell delegate: the border box is replaced by four bare 1px `Rectangle` siblings —
+  **own top edge only** (hour line), **`y: Math.round(parent.height / 2)`** (half-hour line), **own left edge**,
+  and a right edge only when `columnIndex === root.dayCount` (the outer rim). One line per boundary ⇒ no
+  stacking. `MouseArea` (click = select day, double-click = create) and the chip `ColumnLayout` are unchanged
+  children of the same Rectangle, declared after the lines, so chips still paint **above** the grid.
+
+**Measured PASS, both themes.** Light, `x=1000`, every full-width row: hour lines at y **205 / 245 / 285 / 325**
+= **(237,237,237)**, half-hour lines at y **225 / 265 / 305** = **(244,244,244)** ⇒ alternating pitch 20/20,
+darker/lighter hierarchy exact. Vertical separators at x **52 (gutter/day) / 202 / 352 / 502 / …** = 1px
+(237,237,237). Dark: background (30,30,30); hour (59,59,59) = 30+0.13·225 (the *old* dark border value ⇒
+**zero regression**), half (43,43,43), separators 1px. Chips start at x=55 = 3px inset from the x=52
+separator — no overlap. Crops: `r065-grid-light-2x.png`, `r065-grid-dark-2x.png`.
+
+**Ref anchor.** `.loop/refs/macos-calendar.png` hour lines and day-column separators both measure 1px
+**(237,237,237)** on a (249,249,249) field — we now match the colour exactly. Caveat recorded: our grid field
+is **white 255** where the ref's is 249, so our contrast reads 18/255 = 7.1% vs the ref's 12/249 = 4.8%.
+The ref's half-hour lines are not measurable (≥248 at 13.5px offsets) — our "lighter than hours" is
+**contract-driven (T02), not ref-measured**.
+
+**Not done, and deliberately so (atomic discipline).** The ref's **all-day band bottom separator is 2px
+(217,217,217)** while ours is 1px (223,225,228) = `AppTheme.border`; that is 仍差 #1's second half, not T02.
+T03 (gutter label form: 10–11px, right-aligned 6–8 from the grid, tick-aligned — currently centred in a
+52px gutter at font 9) is **untouched** and is next round's #1.
+
 # R064 — **T01 FIXED: hour pitch 54 → 40.** One source of truth `hourHeight`; measured 10 consecutive 40.0px diffs.
 Plus a **harness tooling defect found**: `review-command.py` writes the *nested* command form, the harness wants
 *flat* `action` ⇒ captures silently no-op. Worked around this round. (2026-10-17)

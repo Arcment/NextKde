@@ -1,62 +1,33 @@
-## R084 — N02: the current-time line becomes the ref's four-part object (light leg, 2026-10-17)
-`apps/calendar/qml/CalendarScheduleView.qml`. Before: a **1px `AppTheme.destructive` rule drawn per hour-cell, today's column only,
-no dot, no time badge**. After: **`nowLine`** (2px — full strength across today's column, `Qt.rgba(todayRed, 0.10)` across the rest
-of the grid), **`nowDot`** (9px, centred on today's left column rule), **`nowPill`** (42×20 `todayRed` capsule in the gutter, white
-time text, `rightMargin 6`), plus a gutter Label that hides when the pill would collide with it. Geometry comes from six new root
-properties (`nowRow`, `nowInHour`, `nowLineY`, `nowLabel`, `todayColumn`, `nowLabelClearance`).
-Ref measurements (`.loop/refs/macos-calendar.png`, 1:1, now = 9:41): line **2 ref px** at **y238-239**; **strong x487..569** (Wed 1's
-column, `(235,76,70)`); **faint ~10% x243..813** (`(253,237,236)`); **dot d≈6.5 centred x488.5 vs the column rule at 487**; pill
-**31×15, x209..239** — right edge on the hour labels' ink edge (238), centre y238 = the **true** now y (9:41 ⇒ 238.4, **not** the
-220/247 ticks); **the pill's row drops the label it collides with** (9AM ink y216-224 survives, 10AM is gone).
-Ours after (light 1100x692, `contentY 0`, clock 01:43): pill **42×20 x4..45**, line **y303-304**, strong **802..951 `(229,72,77)`**,
-faint **`(252,236,237)`**, dot **9px centred x=802**, `01:00` ink **y270-278** survives / the next label suppressed. Colour moved
-`AppTheme.destructive` (216,59,59) → `root.todayRed` `#E5484D` (229,72,77) — **6/255** off the ref's (235,76,70), where the old token
-was **19** off. Dark leg not captured this round. Figure: `docs/ui-calendar/r084-nowline-compare.png`.
+# R084 — **N02: the current-time line is now the ref's four-part object (faint rule + today's strong rule + dot + gutter pill).**
+One change, `apps/calendar/qml/CalendarScheduleView.qml`: six root properties (`nowRow`, `nowInHour`, `nowLineY`, `nowLabel`,
+`todayColumn`, `nowLabelClearance`) + the gutter Label's `visible` + a new `nowPill` + the old per-cell 1px line replaced by
+**`nowLine` (2px) + `nowDot` (9px)**. Before this round the line was **1px, today-column-only, `AppTheme.destructive`, no dot, no
+badge**. Ref, measured: a **2-ref-px rule — full strength across today's column (x487..569 = Wed 1), ~10% across the whole grid
+x243..813**, a **d≈6.5 dot centred on today's left rule (488.5 vs 487)**, and a **31×15 capsule pill** in the gutter whose right
+edge (239) sits on the hour labels' ink edge (238) and whose centre (**y238**) is the **TRUE now y for 9:41 — not a tick**. The
+pill's row **drops the hour label it collides with**: in the ref 9AM (ink y216-224) survives while 10AM is gone. Ours after: pill
+**42×20, x4..45** (= ref ×1.35/×1.33), `01:00` ink **y270-278** survives and the next label is suppressed, line **y303-304**
+strong over **Sat 802..951** `(229,72,77)` / faint `(252,236,237)` elsewhere, dot **9px centred x=802**. Colour
+**`AppTheme.destructive` → `root.todayRed`**: `#E5484D` (229,72,77) vs the ref's (235,76,70), where the old token is (216,59,59).
+Band, chips, separators, `itemStableId` untouched. Figure `docs/ui-calendar/r084-nowline-compare.png`. (2026-10-17)
 
-# R083 — **the Thu band-chip order is DETERMINISTIC: the equal-start tiebreak is in, and `Design sync` is r0 in all three legs.**
-One code change, the smallest the R082 verdict unlocked, in the sort at **`apps/calendar/qml/Main.qml:1159-1166`**: when
-`itemDateTime().localeCompare()` returns 0 the comparator now falls back to a new **`itemStableId(item)`** (= the record's `seriesId`,
-i.e. the VEVENT UID, which `PimStore.cpp:376` sets from `event->uid()`), then to `itemTitle`. UIDs are unique by construction ⇒ the
-comparator is a **total order** ⇒ the result is unique whether or not the engine's sort is stable. **Nothing else touched.**
-**Regression = exactly R082's 3-leg experiment** (same build, same fixture, `view week` + `date 2026-04-02`, each cropped to the Thu
-column's band): all three legs read **r0 = `Design sync`, r1 = `Release notes`** — R082's swap is GONE. All three logged `capture …
-true`, all 3050463 bytes, three distinct md5.
-**Two independent instruments agree.** (a) The R082 per-column max-deviation ASCII strings: `light1.r0 == light2.r0` and `light1.r1 ==
-light2.r1` **character for character** (dark1 differs in ramp *value* only — a dark fill has a different dynamic range; the run *shape*
-is the same). (b) **Raw pixels: the two light legs are IDENTICAL in the band** — fill (220,236,246) at n=502 (r0) / 515 (r1), top-5%
-coverage ink mean (78.9,103.2,149.8) / (79.0,102.3,148.5), extreme pixel (50,90,118) / (63,86,123) — all four equal to the last digit.
-⇒ **the band is pixel-reproducible across same-theme launches; the differing md5s come from the now-line moving between launches a
-minute apart.**
-**Title identity proved without reading a font:** the ASCII run splits each row at a word space — r0 = 28 px + 19 px of ink, r1 = 33 px
-+ 24 px — i.e. 6+4 chars (`Design sync`) and 7+5 (`Release notes`) at a constant ~4.7-4.8 px/char, in all three legs.
-**The winner is `Design sync`** (UID `…allday-a` < `…allday-b`), as predicted: this is a *stability* fix, not a ref match — no ref
-anchor exists for the order of two equal-start all-day items. Figure: `docs/ui-calendar/r083-thu-band-3legs.png`. (2026-10-17)
+## 本轮 (R084)
+Atomic step: **one code change + its light-leg regression.** Budget: 1 ref composite + 5 measurement calls + 3 Edits + 1 build (7
+targets, clean) + 1 new leg driver + 2 analysis calls = ~21 Bash. **The now-line needs the CURRENT week AND a scroll:** local time
+was **01:43**, so `usefulStartHour()` returns 7 and the hour-1 line sits off-screen ⇒ new `r084-leg.sh` appends
+`{"action":"position","contentY":0}` (`harness/Main.qml:263`) — **every future current-time capture must send `position` or the
+line is invisible**. Leg: pid 145631 → 147363, `capture-r084-light.png true`, 3050463 bytes, md5 `075f80b4…`. `code-writer` still
+NOT registered; the edit was made directly (R072–R083 precedent). **Dark leg NOT captured (budget) — see 仍差 #1.**
 
-# R082 — **the Thu band-chip order swap is RUN-TO-RUN, not theme-dependent. R080's "light vs dark" reading was confounded by the run.**
-Three launches of the **SAME build**, same fixture and view/date (`view week` + `date 2026-04-02`), each cropped to the Thu column's band:
-**light1 = `Release notes` r0 / `Design sync` r1; dark1 = the SAME; light2 = REVERSED.** Two same-theme legs disagreeing is the whole
-proof. **No code changed, no build.** Mechanism read, not guessed: the model *does* sort (`Main.qml:1159-1166`, all-day first then
-`itemDateTime.localeCompare`), `allDayItems()` is an order-preserving filter, and the fixture's two Thu all-day VEVENTs have
-**identical DTSTART/DTEND** ⇒ the comparator returns 0 ⇒ a stable sort keeps an **upstream order that is nondeterministic** (it is
-neither file order nor its reverse). Figure: `docs/ui-calendar/r082-thu-band-3legs.png`. (2026-10-17)
-
-## 本轮 (R082)
-Atomic step: **classify the swap — no edit, no build.** Budget: 3 launches (pids 141747 → 143818 → 144014 → 144185) + 1 scan script +
-1 composite read = well under budget. Each leg: kill `live-app.pid`, `start-review-vm.sh <theme>`, sleep 30, then ONE flat drive list
-(`resize 1100x692` + `view week` + `date 2026-04-02` + `captureClient`). All three logged `capture … true`. **The three PNGs are the
-same byte size, 3050463, and different md5** — the R069/R079 "same size ⇒ stale" trap checked and cleared.
-**The numbers.** light1 r0 = `Release notes`, r1 = `Design sync`; **dark1 identical**; **light2 r0 = `Design sync`, r1 = `Release notes`.**
-**The numeric form of the same fact:** per-column max-deviation-from-fill over x504..648 is a **character-identical ASCII string**
-between legs — light1.r0 == light2.r1 and light1.r1 == light2.r0.
-**Band y-map held on all three legs** (row0 157-180, gap 181, row1 182-205, third slot 206-231 empty; rule y155 = 242 light / 39 dark;
-fill (220,236,246) light / (35,65,83) dark) ⇒ the swap is **content**, not layout; R073's y-map is exact two rounds on.
-**What this kills.** R080's stated rule "the two Thu band chips swap order between the light and dark launches" is **withdrawn** — the
-theme was confounded with the run. Never again attribute an ordering difference to the theme without two legs of the same theme.
-
-## E01/E02 status (tester's call, R082)
-Timed chip — **bar PASS (R077), no border PASS (R078), dark same-hue ink PASS (R079)**. Band chip — **ink PASS on the ref's own numbers
-(R080)**. **The band chip's ring icon is MEASURED (R081) but NOT built — blocked on ruling H** (decoration vs checkable control) and on
-one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 changed no code ⇒ R080's regression evidence stands.**
+## E01/E02 + N02 status (tester's call, R084)
+Timed chip — **bar PASS (R077), no border PASS (R078), dark same-hue ink PASS (R079)**. Band chip — **ink PASS (R080)**.
+**The band chip's ring icon is MEASURED (R081) but NOT built — blocked on ruling H** and on one decision: ring **16** (vertical ratio)
+vs **22** (horizontal ratio). **R084 changed no chip code ⇒ R080's regression evidence stands.**
+**N02 — line + dot + pill PASS on the light leg (R084)**, structure-for-structure against the ref (faint rule + today's strong rule
++ dot + gutter pill; the three parts share one geometry source). Open residue: (a) the **dark leg was NOT captured** (budget) — the
+line now uses the `todayRed` token in *both* themes, so the dark leg is **extrapolation with no ref anchor**; (b) the **today header
+disc size** (仍差 #8). The spec's "line 1 at proper tick" is satisfied by the *true* time position, which is what the ref does
+(9:41 ⇒ y238.4, not the 220/247 ticks).
 
 ## 仍差 (top 8, visual-impact order)
 1. **The all-day BAND chip's icon — ours has NONE. Fully MEASURED, blocked on ruling H (R081).** Ref: **12x12 ring, stroke 3 / hole 6,
@@ -75,40 +46,63 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
    **Needs ruling D — and a 3-all-day-item day before the band half can be reproduced at all.**
 7. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (near-identical, ~3.7 px at our scale). Rides on
    **ruling G**. Do not chase without a ruling.
-8. **The Thu band-chip order is NON-DETERMINISTIC (R082 — CLOSED as a defect, fix deferred).** Equal-start all-day items tie in
-   `Main.qml:1159-1166`'s comparator and the upstream order is unstable ⇒ light1 ≠ light2 on the same build. **The fix is one
-   deterministic tiebreak in that sort (UID, then title) — no ruling needed**; the regression is the same 3-leg experiment. **Only
-   affects fixture-shaped ties (identical DTSTART); no ref anchor exists for a tiebreak order, so pick any stable key.**
+8. **The today day-header disc is 20px; the ref's is 22 ref px ⇒ 29 at our scale** (R084: ref x536..557 × y100..122 = 22×23, a
+   filled `todayRed` disc with a white number, inline after the weekday name — `CalendarScheduleView.qml`'s header cell). N02's own
+   clause ("today marker visible") PASSES; this is the *size* only, so it is cosmetic-adjacent but ref-anchored.
+   - *Demoted from #8 (R084):* the band-chip fill alpha — ref **0.16** vs ours **0.17** (R080), a 1-level difference on the 0.17
+     leg. Still not worth a round unless something else takes us into `allDayChip`'s fill.
 - *Cosmetic / settled, no ID:* the band's empty third slot is visibly ruled (R074's separators cross it). `secondary` hover = neutral
   grey 79 no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. D02 radius **16** vs spec 24/32 — **keep 16**. Topmost
   visible gutter label is **half-clipped** when a scroll offset lands an hour line exactly on the viewport top (R066; scroll artifact).
-  **Ref band-chip fill alpha ≈0.16, ours 0.17** — a ~1-level difference, not worth a round.
+- **CLOSED in R083: 仍差 #8, the nondeterministic Thu band-chip order.** R082's 3-leg experiment showed light1 == dark1 ≠ light2 on the
+  same build; the comparator's `itemDateTime` tie was resolved upstream by an unstable emitter order. The tiebreak now decides it.
 
 ## 最近已改 (most recent 8)
-1. R082 — **verdict only, NO code changed**: the Thu band-chip order swap is **run-to-run**, not theme-dependent; R080's theme rule
+1. R084 — **`CalendarScheduleView.qml` N02**: `nowRow`/`nowInHour`/`nowLineY`/`nowLabel`/`todayColumn`/`nowLabelClearance`;
+   `nowPill` (42×20 `todayRed` capsule, white time, rightMargin 6); the gutter Label hides when the pill would collide; the old
+   1px per-cell line → `nowLine` (2px, strong on today's column / 0.10 elsewhere) + `nowDot` (9px on today's left rule); colour
+   `AppTheme.destructive` → `root.todayRed`. Nothing else touched.
+2. R083 — **`Main.qml`**: new `itemStableId(item)` + the sort comparator's tie fallback (UID, then title) ⇒ the all-day tie order is
+   a total order. Everything else untouched.
+3. R082 — **verdict only, NO code changed**: the Thu band-chip order swap is **run-to-run**, not theme-dependent; R080's theme rule
    withdrawn; the mechanism named (equal `DTSTART` ties in the model's sort). Figure in `docs/ui-calendar/`.
-2. R081 — **measurement only, NO code changed**: the band chip's ring icon → 12x12 / stroke 3 / hole 6 / inset 3 / item-colour ink; the
+4. R081 — **measurement only, NO code changed**: the band chip's ring icon → 12x12 / stroke 3 / hole 6 / inset 3 / item-colour ink; the
    thin-stroke second family found; the anisotropic-scale question raised. Detail now lives in `LEDGER.md` R081.
-3. R080 — **the band chip's ink**: `allDayChip` gained a derived `inkColor` (same expression as `timedChip`), Label `color:` →
+5. R080 — **the band chip's ink**: `allDayChip` gained a derived `inkColor` (same expression as `timedChip`), Label `color:` →
    `allDayChip.inkColor`. Ref-anchored 1:2 on two ref colours.
-4. R079 — **E01/E02 step 3**: `timedChip` Label `color:` `AppTheme.text` → derived `inkColor` = the colour halfway to its pole.
-5. R078 — **E01/E02 step 2**: `timedChip`'s `border.width: 1` + `border.color` **deleted**.
-6. R077 — **E01/E02 step 1**: `timedChip` gained a saturated same-hue left bar — derived `stripeWidth`/`stripeInset` (= 4, from
+6. R079 — **E01/E02 step 3**: `timedChip` Label `color:` `AppTheme.text` → derived `inkColor` = the colour halfway to its pole.
+7. R078 — **E01/E02 step 2**: `timedChip`'s `border.width: 1` + `border.color` **deleted**.
+8. R077 — **E01/E02 step 1**: `timedChip` gained a saturated same-hue left bar — derived `stripeWidth`/`stripeInset` (= 4, from
    `chipHeight/4`), capsule radius, vertical margin 2, `color: itemColor(modelData)`; Label `leftMargin` 5 → derived.
-7. R076 — **A03**: `allDayChip`'s `radius` → four corner radii, square where `allDayContinues(item, columnDate, ±1)`; new injected
-   `itemRecord` + `isoDay`/`isoDayPattern`/`lastCoveredDay`/`allDayContinues`.
-8. R075 — **A01 step 5**: `allDayChip` `radius: 5` → `Math.round(root.allDayRowHeight / 3)` = **8**.
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
-- **CROSS-LAUNCH CONTENT ORDER IS NOT STABLE, AND THE THEME IS NOT THE VARIABLE (R082).** Three legs of one build, same fixture and
-  date: light1 == dark1 ≠ light2 on the Thu band-chip order. ⇒ **any "X differs between light and dark" claim needs two legs of the
-  same theme**, and any ordering difference needs a tie analysis before it needs a theme analysis.
-- **AN EQUAL-START TIE IS DECIDED UPSTREAM, NOT BY OUR SORT (R082).** `Main.qml:1159-1166` sorts all-day-first then by
-  `itemDateTime` lexicographic, and `CalendarScheduleView.qml:136-145` `allDayItems()` filters order-preserving ⇒ two items with
-  identical `DTSTART` **compare 0** and `Array.sort`'s stability just preserves whatever arrived. The fixture's Thu pair
-  (`Design sync` UID `…r072-allday-a` / `Release notes` UID `…-b`, both `DTSTART;VALUE=DATE:20260402`) renders **b,a** in two legs and
-  **a,b** in the third ⇒ the upstream order is neither the ICS order nor its reverse. **Any future "items are in the wrong order" bug:
-  check for an equal key first.**
+- **THE CURRENT-TIME OBJECT IS FOUR PARTS WITH ONE GEOMETRY SOURCE (R084).** `nowRow` / `nowInHour` / `nowLineY` / `nowLabel` /
+  `todayColumn` / `nowLabelClearance` at `CalendarScheduleView.qml`'s root; the pillow/pill/line/dot and the suppressed label all
+  read them. **Do not re-derive a y per part** — that is how the four drift apart.
+- **OUR NOW-LINE, MEASURED (R084, light 1100x692, `contentY 0`, clock 01:43):** pill **42×20 at x4..45** (`rightMargin 6`), centred
+  on the true now y; **line 2px at y303-304**; strong segment = today's column **802..951** `(229,72,77)`; faint `(252,236,237)`
+  (= 0.10 alpha) across **52..1101**; **dot 9px centred x=802**; the `01:00` label ink **y270-278** survives and the next label is
+  gone. **Column boundaries are 52/202/352/502/652/802/952/1102** — `dayColumnWidth = (1102−52)/7 = 150`; the older "pitch 149"
+  phrasing is the *delegate count* dressed up as a width. Sat 17 ⇒ 802..951.
+- **THE REF'S NOW-LINE IS CONTINUOUS ACROSS THE WHOLE WEEK, WEEKEND INCLUDED (R084).** A first read said it stopped at x=732; the
+  truth is a **green chip sat under it** (green (226,243,229) + 10% red = (227,226,213) — the "weekend tint" I misread at x753/783).
+  ⇒ **a faint overlay over a coloured chip is indistinguishable from a tint by eye: always sample a known-empty column too.**
+- **THE REF'S PILL DROPS THE HOUR LABEL IT COLLIDES WITH (R084).** Pill y231..245; **9AM ink y216-224 survives, 10AM is gone**.
+  ⇒ ours hides a label when `|label tick − nowLineY| ≤ 14` (pill 20 tall + label ink 9 ⇒ half-sum 14.5), and only when today is in
+  the shown week (`todayColumn >= 0`) — otherwise a week without today would lose a label for nothing.
+- **A CURRENT-TIME CAPTURE NEEDS `position contentY` (R084).** The launcher opens at hour 7 (`usefulStartHour()`), so with a local
+  time outside 6..21 the line is off-screen. Drive `{"action":"position","contentY":0}` (`harness/Main.qml:263`) before the capture.
+  The harness logs the **pre-command** `contentY`, so the log line still reads 280 even when the command set 0 — trust the pixels.
+- **AN EQUAL-START TIE IS NOW DECIDED BY US, AND THE KEY IS THE UID (R083).** `Main.qml`'s sort falls back to `itemStableId` (record
+  `seriesId` = the VEVENT UID, then `id`) and then `itemTitle`. Because UIDs are unique this is a **total order**, so the result no longer
+  depends on the engine's sort stability. **Any future "same-time items are in the wrong order" report: this is the line to read.** The
+  rendered winner for the fixture's Thu pair is `Design sync` (UID `…allday-a`); no ref anchor exists for it — it is a *stability*
+  choice, not a match.
+- **TWO SAME-THEME LAUNCHES CAN BE PIXEL-IDENTICAL INSIDE A REGION AND STILL HAVE DIFFERENT md5s (R083).** light1 vs light2: identical
+  fill, count, top-5% ink mean and extreme pixel in the band, three distinct file hashes — the **now-line moves with wall-clock** between
+  launches. ⇒ **never treat a differing md5 as evidence of a content difference; diff the region.** (Pairs with R069/R071/R079/R082:
+  a differing md5 also does NOT prove two captures are different, since the point is the reverse direction — size equality is not
+  staleness either. Diff the pixels, in both directions.)
 - **THE BAND CHIP'S ICON IS A 12x12 RING, INSET 3 FROM THE CHIP'S FILL (R081).** Outer **12**, **stroke 3**, **hole 6**, vertically
   centred (fill 18 ⇒ 3 top / 3 bottom), outer left edge **3 px right of the fill's left edge**, **colour = `itemColor`, full saturation,
   no alpha**. Text ink starts **17-19 ref px** right of the ring's outer-left edge ⇒ **ours @x1.33: 16 / stroke 4 / inset 4 / text at
@@ -119,7 +113,7 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
 - **OUR SCALE IS ANISOTROPIC: x1.33 VERTICAL, x1.83 HORIZONTAL (R081).** Ref chip fill 18 tall x 81 wide vs ours 24 x 148. Any circular
   or square icon must pick one axis — **use the vertical ratio for anything that must fit the 24-px row**; the horizontal one only for
   things that must span the column (e.g. R077's stripe width).
-- **THE REF'S INK RULE IS ONE PARAMETER: HALFWAY TO THE POLE (R079 + R080).** Now measured on **five** ref colours — three *timed* bars
+- **THE REF'S INK RULE IS ONE PARAMETER: HALFWAY TO THE POLE (R079 + R080).** Measured on **five** ref colours — three *timed* bars
   (red, blue, olive) and two *band* ring colours (purple (187,62,217), blue-grey (133,148,173)) — all **1:2 on every channel**, plus nine
   of our chips in both legs by the coverage test. ⇒ **any future "same-hue text/tint" on a chip is `c + (pole − c) * 0.5`, never a typed
   hex and never an alpha.** Corollary: the *dark* leg is the ref's rule mirrored, not a ref measurement — the ref image has no dark mode,
@@ -131,21 +125,22 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
   (±0.05); but when the fill is only lightly saturated the *hue* direction and the *grey* direction can sit <10° apart (ours: 9.6° on the
   blue) and the pixel count separates weakly. **The exact discriminator is a channel gap the fill cannot reach: here `B − R` is 26 in the
   fill yet 50 in the ink's pixels at t≈0.48 — no neutral endpoint can do that.** Use the gap, not the count.
-- **THE HULL FAILS AS AN INK INSTRUMENT (R079, re-confirmed R080).** Our light band chip's *darkest* pixel is (60,71,121) — off the
+- **THE HULL FAILS AS AN INK INSTRUMENT (R079, re-confirmed R080/R083).** Our light band chip's *darkest* pixel is (60,71,121) — off the
   fill→ink segment (G too dark) — while dozens of mid-coverage pixels fit the assumed ink to ±0.005. **Never read an ink off the extreme
-  pixel in either theme.**
+  pixel in either theme. R083's instrument is the top-5%-coverage MEAN, which reproduced to the last digit across two launches.**
 - **THE REF'S ALL-DAY BAND HAS TWO CHIP FAMILIES, AND ONE IS UNEXPLAINED (R080).** (a) *Coloured*: same-hue wash + same-hue ink at 1:2 +
   same-hue ring (purple, blue-grey). (b) *Neutral*: fill **248**, ink **(38,38,38)** — a neutral pair that **cannot** be `itemColor` and
   `itemColor/2` of the same source — while the **ring** is strongly coloured. **Do not cite the neutral chips for any ink or fill rule;
   they are not explained by our model.**
-- **A CROSS-ROUND PNG IS NOT POSITION-ALIGNED (R079, strengthened R082).** Same session, view and date, two rounds: different chip sets
-  at the same y, and in the dark pair a *green* chip in one round where the next has *blue*. **R082: this is true of two launches of the
-  same build** — the *layout* map (columns, y-bands) has held for 8 rounds; **content maps never have**. ⇒ **never A/B two captures
-  pixel-for-pixel for content; re-derive the content map on every capture, and treat layout maps as stable.**
+- **A CROSS-ROUND PNG IS NOT POSITION-ALIGNED (R079, strengthened R082/R083).** Same session, view and date, two rounds: different chip
+  sets at the same y, and in the dark pair a *green* chip in one round where the next has *blue*. **R082: true of two launches of the
+  same build.** **R083's refinement: the *layout* map (columns, y-bands) and, for a same-theme pair, even the *content* can be
+  pixel-stable — but that must be MEASURED per region, never assumed; the file hash is not the instrument.** ⇒ **re-derive the content
+  map on every capture; keep treating layout maps as stable.**
 - **THE LAUNCHER REFUSES WHEN A LIVED INSTANCE IS ALIVE (R079), AND `>/dev/null` HIDES IT.** `start-review-vm.sh` exits **1** with
   `Owned review instance still running: <pid>` if `live-app.pid` points at a running `kos-calendar`. ⇒ **`kill "$(cat live-app.pid)"`
-  first, keep the launcher's stderr, and check `live-app.pid` changed** (R082: 141747 → 143818 → 144014 → 144185). **R082: 3 launches
-  in one round is comfortable; the `leg.sh` helper (kill → nohup launch → sleep 30 → one flat drive list → md5) is the shape to reuse.**
+  first, keep the launcher's stderr, and check `live-app.pid` changed** (R083: 144185 → 145311 → 145475 → 145631). **`leg.sh <theme>
+  <name>` does the whole leg (kill, launch, sleep 30, one flat drive list, md5) in one call; three legs fit one round comfortably.**
 - **A CHIP EDGE CAN ONLY PROVE "NO BORDER" IF IT DOES NOT ABUT A RULE (R078).** Read a **top or bottom** edge as a RAW profile and check
   monotonicity — a real border is a row darker *and* more saturated than the fill; a corner/AA row is *lighter*.
 - **THE REF BAR IS AN ABSOLUTE STROKE, NOT A FRACTION OF THE CHIP (R077).** 2.4 ref px on an 11 px 30-min chip *and* on a 22 px 60-min
@@ -156,9 +151,9 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
   `(48,140,198)` light and dark. **Our chip calendar colours are NOT the ref's**: ours blue **(48,140,198)** / green **(57,196,135)** /
   gold **(215,166,44)** (read off the bars, which are `itemColor` with no alpha) — so our ink is the same *rule* on a different source.
 - **OUR `allDayChip` AFTER R080:** fill `withAlpha(itemColor, dark ? 0.32 : 0.17)` — light blue reads **(220,236,246)**, dark **(35,65,83)**
-  (R082 re-read, exact); ink `itemColor` halfway to the pole — light **(24,70,99)**, dark **(152,198,227)** for that blue. Row 0 = y
+  (R082/R083 re-read, exact); ink `itemColor` halfway to the pole — light **(24,70,99)**, dark **(152,198,227)** for that blue. Row 0 = y
   **157-180**, gap **181**, row 1 = **182-205**, third slot **206-231**; band chip inset 1 ⇒ fills 53..200 / 203..350 / 353..500 /
-  503..650…; Label `leftMargin: 5`.
+  503..650…; Label `leftMargin: 5`. **R083: the Thu band region is byte-reproducible across two same-theme launches.**
 - **THE REFERENCE WEEK CONTAINS NO MULTI-DAY ALL-DAY EVENT (R076).** Measured: all 21 band rows carry the column rule unbroken and every
   chip's fill is inset 1–2 px inside **one** column ⇒ **A03's clause has no ref anchor; say "spec-only".**
 - **ALL-DAY RANGE ARITHMETIC SUBTRACTS EXACTLY ONE DAY — NEVER TWO (R076).** The ICS carries `DTEND;VALUE=DATE:20260403` for `Multi-day
@@ -170,17 +165,19 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
 - **`itemRecord` IS AN INJECTED PROPERTY ON `CalendarScheduleView` (R076)**, bound in `Main.qml`'s two schedule views. A view that omits
   it gets `({})` ⇒ `continuesLeft/Right` false ⇒ every chip fully rounded (falls back to the R075 shape, no crash). Any *new*
   schedule-view instance must bind it or silently lose A03.
-- **MEASURING A CORNER, A JOINT, A STRIPE, A BORDER OR AN INK (R075–R082).** Corner: per-row **fill-start inset**. Joint: per-row
+- **MEASURING A CORNER, A JOINT, A STRIPE, A BORDER OR AN INK (R075–R083).** Corner: per-row **fill-start inset**. Joint: per-row
   **`!= white` envelope**. Stripe: a saturated run whose **width is constant over the chip's full height**. Border: **monotonicity of a
-  raw profile across an edge that abuts no rule**. Ink: **the per-channel coverage agreement test PLUS the channel-gap argument**.
-  **Ordering/content: a per-column deviation-from-fill profile rendered as an ASCII ramp string — equal strings are equal content
-  (R082).** **Caveat: read the *fill* channel, not luminance** — antialiased text and ring icons poison a luminance scan.
+  raw profile across an edge that abuts no rule**. Ink: **the per-channel coverage agreement test PLUS the channel-gap argument**, and for
+  a cross-capture comparison the **top-5%-coverage mean** (R083). **Ordering/content: a per-column deviation-from-fill profile rendered as
+  an ASCII ramp string — equal strings are equal content (R082).** **Caveat: read the *fill* channel, not luminance** — antialiased text
+  and ring icons poison a luminance scan. **R083: a word-space GAP in that ramp string gives the word-length signature of a title without
+  reading a font (r0 28+19 px = 6+4 chars).**
 - **`captureClient` RETURNS `false` ON A NESTED RELATIVE PATH AND THE PNG IS SILENTLY NOT WRITTEN (R075).** Pass a **FLAT filename**; it
   lands in the app's CWD (= the directory `start-review-vm.sh` was launched from). **Always read the success flag in
   `live-runtime-vm.log`** (`… capture <name> true`) and then `ls` the actual CWD.
 - **THE BAND RULES ITS COLUMNS WITH THE GRID'S TOKEN (R074).** `allDayColumn`: left-edge 1px `gridLine` per column + right rim on
   `index === root.dayCount - 1`; measured y=215 (band) and y=250 (grid) give the SAME run list (52/202/352/502/652/802, all 237).
-- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED R074–R082 (dark too, R082).** `sectionRule` **y=155**
+- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED R074–R083 (dark too, R082).** `sectionRule` **y=155**
   (242 light / 39 dark, 1px); band interior **156..231 = 76**; `allDaySeparator` **232-233** (217, 2px); first hour line **234** (237).
   Chips **157-180**, gap **181**, **182-205**, third slot 206-231. **The band is net +28 vs R070 — the grid has permanently lost ~28px
   of viewport.**
@@ -219,7 +216,7 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
 - **`hourHeight` is THE pitch constant (R064).** `CalendarScheduleView.qml:49`. Chip height =
   `Math.round(root.hourHeight * 21 / 54)` = **16**. Half-hour line = `Math.round(parent.height / 2)` = **20**. **R072 added the four
   `allDay*` tokens; R077 the chip's `stripeWidth`/`stripeInset`; R079 `timedChip.inkColor`; R080 `allDayChip.inkColor` — the same
-  expression twice. If a third consumer appears, hoist it, do not copy it a third time.**
+  expression twice. R083 added `Main.qml:itemStableId`. If a third consumer of the ink expression appears, hoist it, do not copy it.**
 - **REF FACT SHEET (R063, compacted).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026) + 243px sidebar + mini
   calendar. Day headers (text y108-116) → **all-day band (y 124–184)** → hour grid 8 AM–8 PM. Gutter labels 193/220/247/274/301/328 =
   **pitch 27**; the red `9:41` pill **replaces** the 10 AM label. Now-line y=238. **7 equal day columns, 1px separators at
@@ -227,7 +224,7 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
   contract says 40; 40 was chosen). Hour lines and vertical separators are both **1px (237,237,237)**. Gutter label (ref x 215..238):
   digit **(89,89,89)**, `AM`/`PM` suffix **(176..193)**, right ink edge 238 vs grid line 243 ⇒ 5 ref-px. **Columns: Sun 29 · Mon 30 · Tue
   31 · Wed 1 · Thu 2 · Fri 3 · Sat 4.**
-- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R082).** `harness/Main.qml` matches `command.action` only
+- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R083).** `harness/Main.qml` matches `command.action` only
   (`captureClient{path}`, `escape`, `resize{width,height}`, `sidebar{expanded}`, `view{view}`, `date{date}`,
   `openItem{kind,titleContains}`); a command with no `action` **silently hits the fallback**. `review-command.py` takes **ONE argv that is
   a JSON list**, bumps `sequence` itself, writes **in place** (never `os.replace`). The whole drive list in ONE invocation works fine.
@@ -236,18 +233,18 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
   check that `live-app.pid` changed.** A rebuilt binary needs a **kill+relaunch**; kill the pid **read from `live-app.pid`**, never
   `pkill`. ~24 s to the new pid (30 s is a safe sleep). Include `resize 1100x692`; it starts in `--view week --date 2026-10-15`, so every
   drive list must re-send `view week` + the date. **The theme is fixed at launch — a dark leg costs a full kill+relaunch.** **App stderr
-  goes to `live-runtime-vm.log`** — read the capture success flags there before believing any capture. **R082: `leg.sh <theme> <name>`
-  does the whole leg (kill, launch, sleep 30, drive, md5) in one call; three legs fit one round comfortably.**
+  goes to `live-runtime-vm.log`** — read the capture success flags there before believing any capture. **`leg.sh <theme> <name>` does the
+  whole leg in one call (R082); three legs fit one round comfortably (R083).**
 - **Fixtures on 2026-04-02** (live = `profile/pim/calendar.ics`; the repo-root `calendar-fixture.ics` is **stale, no VTODOs**): VEVENTs
   Morning planning 08:00 / Short appointment 10:15 / **Long review with a deliberately lengthy title** 11:00 / **Design review** 14:30 /
   Evening session 18:00; plus a **`Multi-day review`** all-day strip with **`DTSTART;VALUE=DATE:20260330` + `DTEND;VALUE=DATE:20260403`**
   (line 574) ⇒ covers Mon 30 · Tue 31 · Wed 1 only and **does not appear on Thursday**. `Design sync` (**ICS 832-834, UID
   `…r072-allday-a`**) + `Release notes` (**ICS 842-844, UID `…-b`**) are two separate **single-day** all-day VEVENTs on **2026-04-02**,
-  **byte-identical in DTSTART/DTEND** ⇒ **Apr 2 carries exactly 2 all-day items, and they are an order TIE (R082)**. VTODOs (kind
-  `"todo"`): `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00, `A deliberately long task title to inspect
-  elision` 11:00, **`[R019 LONG TASK] 任务长标题与编辑表单检查`**. **The rendered week also shows `[R019 LONG EVENT]`, `Prepare notes`,
-  `Review checklist` — re-read the ICS before predicting a cell's contents.**
-- **Row-band measurement idiom (R046/R062–R082):** scan the target column (or row) for pixels that are **not** the background, threshold,
+  **byte-identical in DTSTART/DTEND** ⇒ **Apr 2 carries exactly 2 all-day items**; since R083 their order is the UID order
+  (`Design sync` first). VTODOs (kind `"todo"`): `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00,
+  `A deliberately long task title to inspect elision` 11:00, **`[R019 LONG TASK] 任务长标题与编辑表单检查`**. **The rendered week also
+  shows `[R019 LONG EVENT]`, `Prepare notes`, `Review checklist` — re-read the ICS before predicting a cell's contents.**
+- **Row-band measurement idiom (R046/R062–R083):** scan the target column (or row) for pixels that are **not** the background, threshold,
   group into bands, read the band **centre** (text) or **start** (cap-tops). A **row/column mean over a wide span** is the cheapest way to
   find horizontal lines. **Caveats:** keep the window strictly inside the region; the separator and the first hour line can be **adjacent
   rows**; the x=0 rim merges every band, start at x ≥ 3; for **full-width** rules a row-mean over x 0..1099 is exact — **but a row-mean
@@ -259,37 +256,38 @@ one decision: ring **16** (vertical ratio) vs **22** (horizontal ratio). **R082 
   **R078: for a BORDER, a raw RGB profile across an edge that abuts no rule.** **R079: for an INK, the coverage test — dark leg scans for
   the BRIGHTEST text pixels, the mirror of the light leg's darkest. R080: add the channel-gap check and use `Counter` modes for the fill.
   R082: for CONTENT IDENTITY across captures, a max-deviation-from-fill profile per column as an ASCII ramp string — string equality is
-  the test, and it needs no threshold tuning.**
+  the test, and it needs no threshold tuning. R083: the same ramp exposes word boundaries ⇒ title signatures without OCR; and the
+  top-5%-coverage mean is the reproducible ink scalar.**
 - **Pillow crops need ABSOLUTE paths**; a glob and a literal path in the same `for` list crashes the crop script — assert `im.size`
   first. **A composite (1:1 strip above a 2–4× zoom) answers "overall form + local detail" in ONE image read.** **R076: label the rows in
   the composite (`ImageDraw.text`).** **R077: `LANCZOS` for a ×1.8 upscale of a ref crop; `NEAREST` when the point is pixel structure.**
   **R078: a ×6 `NEAREST` edge crop is right for "is there a 1px ring" — back it with raw numbers.** **R080: a `Counter` mode over a cell
-  gives the fill in one call.** **R082: a ×3 `LANCZOS` stacked composite with a black label bar per leg is the whole verdict in ONE image
-  read — do this instead of reading three crops.**
+  gives the fill in one call.** **R082/R083: a ×3 `LANCZOS` stacked composite with a black label bar per leg is the whole verdict in ONE
+  image read. R083 caveat: a ×3 LANCZOS upscale can make two IDENTICAL inks *look* different across stacked panels — when the composite
+  suggests a difference inside a replicated region, confirm it with the numbers before reporting it (it was a misread here).**
 - **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in (name them
   **`r0NN-<slug>.png`**) and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first) — **prepend with
   `Path.write_text(entry + old)`; an `Edit` whose only `old_string` is the previous round's heading deletes that heading.**
   `state.md`/`rounds.md` can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
-  **R069/R071/R079/R082: two different PNGs can be byte-identical in SIZE — `md5sum` before concluding a capture is stale.**
+  **R069/R071/R079/R082/R083: two different PNGs can be byte-identical in SIZE — `md5sum` before concluding a capture is stale; and per
+  R083 a differing md5 does not imply differing content — diff the region.**
 
 ## Next round (pick ONLY #1)
-**#1 — make the Thu band-chip order deterministic (仍差 #8), the smallest fix the R082 verdict unlocks.** Add a **stable tiebreak** to
-the existing sort at **`apps/calendar/qml/Main.qml:1159-1166`**: when `itemDateTime(left).localeCompare(itemDateTime(right)) === 0`,
-fall back to `String(value(left,"seriesId", value(left,"id",""))).localeCompare(String(value(right,"seriesId", value(right,"id",""))))`
-— i.e. the all-day items' **UID**, which the fixture carries (`…r072-allday-a` / `…-b`) and which is unique by construction; if that is
-still 0, compare `itemTitle`. **Do not reorder anything else, do not touch the all-day-first rule, and do NOT touch the icon, fills,
-inks, corners, separators or the timed chip.** Regress with **exactly R082's 3-leg experiment**: `leg.sh light light1`, `leg.sh dark
-dark1`, `leg.sh light light2`, then the ASCII profile strings — **pass condition: all three legs' r0/r1 strings identical, and the same
-title in r0 in all three.** Note the expected winner: `Design sync` (UID `…-a`) sorts before `Release notes` (`…-b`), so r0 becomes
-`Design sync` — that is fine, it is a *stability* fix, not a ref match (no ref anchor exists for the tie).
+**#1 — N02's dark leg: capture `r084-leg.sh dark r084-dark 2026-10-17 0` and read the same numbers as the light leg.** R084 moved
+the line's colour to `root.todayRed` (`#E5484D`) in **both** themes and the dark leg was never captured, so this is the one place a
+dark-leg surprise can hide (the 0.10 faint rule over a (30,30,30) field is the specific worry — `(50,34,35)` is only ~3% away from
+the field). Compare pill bbox / line rows / strong-vs-faint colours / dot centre against the light numbers above; **the ref has no
+dark mode, so the dark leg is a *visibility and consistency* check, not a match** — only fix it if something is actually broken.
+**Do not touch the chips, the band, or the light-leg geometry.**
 
-**Then (unlocked, ref-anchored, one per round):** **N02** (now-line + red badge — needs a capture of the **current** week); **A02** —
-blocked until a fixture with 1 and 4 all-day rows exists; V01–V05 (month — **no ref anchor**, use `spec.md` + HIG only).
+**Then (unlocked, ref-anchored, one per round):** **仍差 #8** — the today header disc 20px → 29 (ref 22 × 1.33), a one-line change in
+the header cell. Then **A02** — blocked until a fixture with 1 and 4 all-day rows exists; V01–V05 (month — **no ref anchor**, use
+`spec.md` + HIG only).
 
 **Blocked on rulings A–H:** the **band icon (H, R081 — measured, needs only the ruling and one decision: 16 vs 22)**, dim snap (A),
 shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses 1+2 PASS R048), `slice(0,2)` / month 1-chip cap (D — also
 needs a 3-all-day-item day), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs the ref's
-measured 1**. **The `code-writer` subagent is NOT registered in this session** — R072–R082's edits were made directly; do not retry
+measured 1**. **The `code-writer` subagent is NOT registered in this session** — R072–R083's edits were made directly; do not retry
 `code-writer` each round. **Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03
-PASS**; **E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); everything else PENDING or ruling-blocked. **R082 changed no code
-⇒ R080's regression evidence still stands.**)
+PASS**; **E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); **N02 now the top open ref-anchored item**; everything else PENDING
+or ruling-blocked. **R083 touched only `Main.qml`'s sort ⇒ R080's chip regression evidence still stands.**)

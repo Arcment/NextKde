@@ -1,3 +1,10 @@
+## R122 — C01 / C02 / C03 / C04 / C06 re-verified on the frozen R118 build (light week, 1100x692): **all five PASS**. Verification only — 0 source files, 0 builds.
+
+"Settings" is settled as the settings app: our dot block `apps/calendar/qml/Main.qml:1637-1661` is character-identical to `apps/settings/main.qml:911-928`.
+**C01** diameter **14** (red box x1072..1084 / y11..23; edges 1071.5/1085.5 and 10.5/24.5). **C02** edge gap **14** (centres 1022.5/1050.5/1078.5, pitch 28). **C03** last dot right **14.5** (red right edge 1085.5 = 1100 - 14.5) and top **10.5**; the toolbar chrome starts at y36, so 11.5 px clear and the R001 overlap is gone. **C04** order green/yellow/red, `#28c840` / `#febc2e` / `#ff5f57` at `opacity: 0.85`; composited over white = (72,208,93)/(254,198,77)/(255,119,112). **C06** band **30** — y0..35 hold no ink but the rim, the corner arcs and the dots; no strip and no duplicate titlebar; outer corner radius **30**.
+Not a defect, recorded so it is not "re-found": the ref's own dots are macOS-order **red/yellow/green at the top-LEFT** (13 px, gap 8, left inset 17); C01-C04 bind the dots to settings, not to the ref.
+Figure: `docs/ui-calendar/r122-window-dots.png` (top band 1:1, ours x6, ref x6, TL corner x8).
+
 ## R121 — S02 / S03 / S05 re-verified on the R118 build (light, expanded sidebar): all three PASS
 
 Re-verification round on the frozen R118 binary (light leg, 1100x692, sidebar expanded). Two fresh client captures: `r121-sidebar-light.png` (fixture lists) and `r121-s05-elide.png` (private Inbox renamed in the ISOLATED profile only, restored after — the R007 method). Figure `docs/ui-calendar/r121-sidebar-groups.png`.

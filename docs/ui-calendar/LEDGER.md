@@ -1,3 +1,18 @@
+# R087 — **A02 phase 1 (FIXTURE + MEASUREMENT ONLY). The prediction is FALSIFIED: nothing clips and nothing overflows — the band is a 3-slot box whose 3rd slot is unreachable. And the REF BAND DOES NOT EXPAND EITHER.**
+
+Fixture: three all-day VEVENTs appended to `profile/pim/calendar.ics` (UIDs `…r087-allday-c` / `-d` on 2026-04-02, `-e` on 2026-04-03) => **Thu Apr 2 carries 4 all-day items (was 2), Fri Apr 3 carries exactly 1** (Mon/Tue/Wed stay at 1 each via `Multi-day review`). **No code changed this round.**
+
+Measurement — light 1100x692, `view week`, `date 2026-04-02`, capture md5 `24160c7fb7998cc21f7ed146bc046d54`:
+- `sectionRule` **y=155 (242, 1px)**, band interior **156..231 = 76**, `allDaySeparator` **y232-233 (217, 2px)**, first hour line **y234 (237)** — **all four unchanged**; the grid lost nothing.
+- **Thu with 4 items renders exactly 2 chips**: y157-180 (`Design sync`) and y182-205 (`Release notes`). **Slot 3 (y206-231) is empty; `R087 card C/D` are not rendered at all, and nothing appears below y231.** Fri with 1 item: one chip y157-180. Mon/Tue/Wed: one chip each.
+- => the band **never clips and never grows**. It is a **fixed 3-row box whose 3rd row is unreachable**.
+
+Cause, one line: `apps/calendar/qml/CalendarScheduleView.qml:454` `model: allDayColumn.columnItems.slice(0, 2)` against `:64 allDayBandRows: 3` feeding `:69 allDayBandHeight` = `1*2 + 3*24 + 2*1` = **76**. The **height** is already the ref's 3-row strip at our scale (ref `1*2 + 3*18 + 2*1` = 58 content; 76/58 = 1.31, our vertical ratio 1.33), but the **model** is capped at 2. **A02's height clause is already correct; the live defect is A04's "all-day overflow count explicit, no half-clipped rows".**
+
+REF re-measured (814x522) — the decisive part: the band is **one uniform 3-row strip shared by all 7 columns**, and those columns carry **0, 1, 2 and 3** chips (Sat 29: 3 — incl. the selected `Palm Sun…`; Sun 30: 2; Mon 31: 0; Tue 1: 3; Wed 2: 1; Thu 3: 3). Bottom separator **y183-184 (217, 2px)**, row-mean over x250..810 constant **217.0 in both rows** => **shared bottom edge with no per-column variation**; the row-2 chips are fully drawn, none half-clipped. **=> the ref band does NOT grow with the row count.** "The ref grows it with the number of all-day rows" was a *spec* reading, not a measurement; **A02's "expands uniformly" has no ref anchor, and our fixed 76 already matches the ref's structure.** Figure `docs/ui-calendar/r087-allday-band-cap.png` (ref strip above ours, each 1:1 x2, labelled).
+
+Next: 仍差 #2/A02 is closed as *ref-satisfied for height*; the top open ref-anchored item is now **A04** — `slice(0, 2)` -> `slice(0, allDayBandRows)` on the band first, then an overflow affordance for the 4th+ item. (2026-10-17)
+
 # R086 — **仍差 #8 CLOSED. The today day-header disc is 22 px — the ref's OWN diameter; "22 × 1.33 = 29" is WITHDRAWN as a mis-derivation.**
 CODE CHANGE, one geometry line: `CalendarScheduleView.qml`'s header date mark `20x20 / radius 10` → **`22x22 / radius 11`** + its comment.
 The 29 came from applying the window-height ratio to a *type* element; our type is **not** at 1.33×. One instrument on both images:

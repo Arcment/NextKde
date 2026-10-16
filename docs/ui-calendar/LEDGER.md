@@ -1,3 +1,49 @@
+# R068 — **Measurement only: the reference's separator *above* the all-day band is 1px (242,242,242) — NOT 2px.**
+No code change (the R067 brief: if the ref says 1px, change nothing). But the same crop shows an **inversion**:
+the ref's top boundary is the *lightest* rule in the view (242, lighter than its own hour lines at 237), while
+ours (223,225,228) is the *heaviest* — darker than our `gridLine` (237). (2026-10-17)
+
+## 本轮 (R068)
+Atomic step: the standing Next-round #1 — "close the separator story: is the ref's separator *above* the all-day
+band also 2px?" **Measurement only**, zero source files touched, 0 builds, 0 launches (nothing to relaunch).
+~16 Bash calls, ≈6 min. Evidence: `r068-ref-allday-band-5x.png` (ref crop x243..420, y118..190, ×5).
+
+**Answer: 1px.** `.loop/refs/macos-calendar.png` row **y=124 = (242,242,242)**, uniform, `min 229 / max 242 /
+mean 242.0` over x 244..812 (the 229s are the 6 column separators bleeding in). Row **y=123 = (254,254,254)**
+and **y=125 = (244/249)** ⇒ **one** pixel row, no AA partner. Contrast the *bottom* separator measured in R067:
+**y=182 = (233,233,233)–(236,236,236)** (a real partial AA edge) then **y=183 AND y=184 = (217,217,217)** = 2px.
+One row with no neighbour vs two rows with a half-tone neighbour is the discriminator.
+
+**It spans the gutter too**, same as the bottom one: y=124 samples x=194/198/202…246 are all **242** (x=186/190
+are 236 = the sidebar edge) ⇒ the run starts at the gutter's left edge x≈192 and ends at the right rim 812.
+Our `CalendarScheduleView.qml:240-243` is already `Layout.fillWidth: true` ⇒ **the span is already correct.**
+
+**The inversion (the real finding — new standing 仍差 #1 / next round's #1).** Ref hierarchy, lightest → heaviest:
+top boundary **242** (1px) < hour lines **237** (1px, re-confirmed this round at y=220/221, x=260) < bottom
+separator **217** (2px). Ours: top boundary **223,225,228** (1px) **>** hour lines **237** (1px) > … ⇒ our
+top boundary is our *heaviest* rule while the ref's is its *lightest*. The width matches (1px); the weight is
+inverted. Fix is one Rectangle + possibly one token — deliberately **not** done this round (one atomic step).
+
+**Ref all-day band as a form (A01 data — recorded, no code change).** The band is a **distinct tinted section**,
+not white field: **weekday ≈(249,249,249), weekend columns ≈(244,244,244)**; the hour grid below is **white 255**
+on weekdays and **249 on Sun/Sat** (measured y=210/216). Rows in col 1 (Sun, bg 244): chip fill spans
+**126..142, 144..161, 163..180** ⇒ **chip h ≈17 ref-px, pitch ≈18.5, inter-row gap ≈1**, first row starts **2px**
+below the y=124 separator, last row ends **1px** above the y=183 one. Horizontal: chip covers **x 244..323**
+inside a column bounded by 243 and 324 ⇒ **inset ≈1 ref-px each side**, pill **radius ≈6** (visibly rounded ends).
+Scaled to our 1100x692 (**×1.33 h / ×1.35 w**): h **≈22.6**, pitch **≈24.6**, gap **≈1.3**, inset **≈1.35**,
+radius **≈8**, band content **≈77px** — vs ours **min 28 / row 18 / gap 2 / inset 2–3**, i.e. our rows are ~20%
+short and our inset ~2× too big.
+
+**New ref fact:** the ref's grid field is **not uniformly 249** — **weekday columns are white 255**, only the
+**weekend columns (Sun, Sat) are 249**, in the hour grid; and the all-day band adds its own 249 tint on top
+(244 on weekends). Our locale week runs Mon–Sun, so our shaded columns would be Sat/Sun. **No spec ID.**
+
+## Scope guards
+Zero source edits. `CalendarScheduleView.qml` (both separators, `gridLine`/`gridLineMinor`/`allDaySeparator`,
+the band, the gutter), `AppTheme.qml`, the chips — all untouched.
+
+---
+
 # R067 — **The all-day band's bottom separator is now 2px (217,217,217), exactly the reference's value; the hour line below it stays 1px.**
 Pre-round it was 1px `AppTheme.border` (223,225,228) — the same weight as every other rule, so the grid had no
 strength hierarchy. (2026-10-17)

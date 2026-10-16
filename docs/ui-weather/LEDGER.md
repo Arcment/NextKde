@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **AQ 白点刻度 /300→/500（本轮，前端，零 Go/C++ 改动，巡检轮）**：复核外推项"AQ 标记点位置线性外推"——Pillow 高精度实测 ref-main（AQI 40）：渐变条 x283-493（宽 211px）、白点中心 x300.5 → 条上 **8.33%**；`/300` 线性预测 13.3%（偏差 10.5px，旧实现的依据）、`/500`（EPA AQI 满量程 0-500，条右端终止色即 EPA 301-500 maroon 段）预测 **8.0%**（Δ0.7px）——刻度是 0-500 线性满量程，Apple 并非"非线性分段中点"（旧外推猜测被参考实测推翻）。`apps/weather/qml/Main.qml:1528`（现 1529）usAqi 除数 `300→500` + 注释标明实测依据；全仓库唯一消费点（shell/src grep 无 `/300` AQ 用法），渐变 stops/点尺寸/clamp 未动。
+  **实测**（本轮二进制截图 tmp/shots/1792184107.png 过体检闸 1180x727）：条 x270-1141、白点中心 x470.5 → **23.02%** vs 快照 usAqi 114/500=22.8%（Δ1.9px）；目视 /tmp/aq-dot-new.png：白点落黄区（114∈101-150 Unhealthy，EPA 黄段），自洽。
+  **回归**（vs 改动前 1792183918，2px 步进 diff>24）：变化仅 AQ 条带 y308-324（白点 598-606→467-474 位移本体，40 采样点）+ y698-706 逐小时卡顶缘已知入场交错时序带（381+134 采样点）——其余全窗零变化。qmllint 0 error（code-writer 自证）。测试 6/6 绿、go test ok。
 - **分段控件降水段水滴 glyph 垂直居中修复（本轮，前端，零 Go/C++ 改动，巡检轮勘误）**：巡检新截图（1792183567 过体检闸）放大分段控件发现中段水滴**偏上 9.5px**——实测胶囊 y646-681（中心 663.5）、水滴 bbox y649-659（中心 654），而 ☁/≋ 均居中；ref-main 实测胶囊 y213-237（高 25，中心 225）、水滴 y221-230（中心 225.5）**精确居中**——上轮"居中于段 1、视觉平衡"的记载是误判，本轮推翻。根因：Canvas 直接作为 AbstractButton contentItem 时 QQuickControl 每次布局覆写其 x/y，写 在 Canvas 自身的 `anchors.centerIn: parent` 失效、Canvas 落在按钮 (0,0) 顶部对齐。`apps/weather/qml/Main.qml:2100-2101` contentItem 改为包一层 `Item { anchors.fill: parent }`、Canvas `anchors.centerIn: parent` 改居中于包裹 Item（onPaint 路径/fillStyle/Connections/Accessible 一行未改；注释标明 ref 实测依据）。segment 0/2 未动。
   **实测**（本轮二进制截图 tmp/shots/1792183837.png 过体检闸 1180x727）：水滴 bbox y659-669 中心 **664.0** vs 胶囊中心 **663.5**，偏差 **+0.5px**（修复前 −9.5px；参考同为 +0.5px）；目视 /tmp/my-seg-fixed.png 5x：水滴与 ☁/≋ 同一水平线、居中于段 1。**回归**（vs 改动前 1792183567，2px 步进采样 diff>8）：chpx 248 全窗稀疏散布 = 星空闪烁已知时变噪声（Math.random() 相位每次启动不同），水滴本体 y649-659→659-669 精确下移 10px，无布局位移。qmllint 0 error（158 warning 与基线一致）。测试 6/6 绿、go test ok。
   **注**：水滴尺寸维持上轮裁定（glyph ~8×11px vs ref 7×10×1.44≈10×14 折算目标，上轮已记邻域接受），本轮只修垂直居中一个原子项。
@@ -202,7 +205,7 @@
 - **Variable color 与 Bounce/入场叠加**：delegate 创建瞬间同一图标依次经历入场浮入→Bounce 弹跳→光线点亮（onCompleted 同帧 restart），三重叠加是否过闹待人工复核；reduce-motion 下三者全部停用（入场置终态、Bounce 归零、playRayLightup return）。
 - **图标 Pulse 参数无参考**：参考图全静态；脉冲深度（opacity 1→0.45）、节奏（550+550ms InOutSine，整周期 1100ms）、触发门控（`backend.loading`，同时作用于逐小时卡与 10 天行全部图标）系按 SF Symbols "Pulse" 词汇与 HIG"正在更新"≤1.2s/周期外推（TASK 阶段三 D 允许）。真实 `backend.loading` 窗口太短、无法与 spectacle 连拍对时（刷新钮旋转轮同先例），TEMP 强制 `pulse: true` 与真实绑定走同一属性链，QML 标准原语风险低；真实刷新时全部图标同时呼吸的观感（会不会太闹）待人工复核。
 - **Pulse 取证需 TEMP 隐藏 AQ 卡**：AQ 卡加入后逐小时条带被推到 813px 屏幕可视区外（终态截图窗口高 727 的截图模式不受影响），取证时 TEMP `visible:false`；若后续要在真机观察 loading 脉冲，需窗口够高或滚动主区。
-- **AQ 标记点位置线性外推**：参考图 AQI 40 时白点在条 ~8% 处，按 usAqi/300 线性应为 13%——Apple 用的是非线性分段刻度（EPA 分段中点），本轮用线性 /300 近似（usAqi 111 → 37%），无 Apple 原始刻度可对照；若拿到原生参考需改分段定位。
+- ~~**AQ 标记点位置线性外推**~~（**已裁定并执行**，见已改"AQ 白点刻度 /300→/500"——ref 高精度实测 AQI 40 白点在条 8.33%，0-500 EPA 满量程线性预测 8.0% 吻合；旧"非线性分段中点"猜测被推翻。残差：条起点/终点 padding 折算 ±0.3%，单数据点定标）
 - **AQ 说明文案是参考模板照抄**："which is similar to yesterday at about this time" —— 快照里**没有**昨日 AQ 对照数据，这句是静态照抄参考图文案，并非真实对比结论；有误导风险，待用户裁定（改成只报数值/类别，或后端补昨日读数）。
 - **AQ 卡为全宽**：参考图里 AQ 卡是半宽卡（与 Conditions 并排两列）；本项目主区是单列布局，Conditions/10 天卡已是全宽，AQ 卡沿用全宽保持一致性。若以后改双列网格需一并重排。
 - **空气质量字段形态无参考数值约束**：Category（Good/Moderate/...）是本地按 US EPA 分段从 us_aqi 派生的，Open-Meteo 只给 us_aqi；参考图卡上 "40 Good" 与 EPA 分段一致（40∈0-50→Good），形态吻合但分段文案无 Apple 原文对照。AQ 本次未取到时保留上一次读数（不随主预报一起失效），`time` 字段供消费方判新鲜度——是否要在 stale 判定里单独处理 AQ 待定。消费方接线（Qt WeatherClient 暴露给 QML、shell WeatherService.qml、前端空气质量卡）下一轮做。

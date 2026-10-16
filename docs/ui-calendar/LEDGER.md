@@ -1,3 +1,18 @@
+## R084 — N02: the current-time line becomes the ref's four-part object (light leg, 2026-10-17)
+`apps/calendar/qml/CalendarScheduleView.qml`. Before: a **1px `AppTheme.destructive` rule drawn per hour-cell, today's column only,
+no dot, no time badge**. After: **`nowLine`** (2px — full strength across today's column, `Qt.rgba(todayRed, 0.10)` across the rest
+of the grid), **`nowDot`** (9px, centred on today's left column rule), **`nowPill`** (42×20 `todayRed` capsule in the gutter, white
+time text, `rightMargin 6`), plus a gutter Label that hides when the pill would collide with it. Geometry comes from six new root
+properties (`nowRow`, `nowInHour`, `nowLineY`, `nowLabel`, `todayColumn`, `nowLabelClearance`).
+Ref measurements (`.loop/refs/macos-calendar.png`, 1:1, now = 9:41): line **2 ref px** at **y238-239**; **strong x487..569** (Wed 1's
+column, `(235,76,70)`); **faint ~10% x243..813** (`(253,237,236)`); **dot d≈6.5 centred x488.5 vs the column rule at 487**; pill
+**31×15, x209..239** — right edge on the hour labels' ink edge (238), centre y238 = the **true** now y (9:41 ⇒ 238.4, **not** the
+220/247 ticks); **the pill's row drops the label it collides with** (9AM ink y216-224 survives, 10AM is gone).
+Ours after (light 1100x692, `contentY 0`, clock 01:43): pill **42×20 x4..45**, line **y303-304**, strong **802..951 `(229,72,77)`**,
+faint **`(252,236,237)`**, dot **9px centred x=802**, `01:00` ink **y270-278** survives / the next label suppressed. Colour moved
+`AppTheme.destructive` (216,59,59) → `root.todayRed` `#E5484D` (229,72,77) — **6/255** off the ref's (235,76,70), where the old token
+was **19** off. Dark leg not captured this round. Figure: `docs/ui-calendar/r084-nowline-compare.png`.
+
 # R083 — **the Thu band-chip order is DETERMINISTIC: the equal-start tiebreak is in, and `Design sync` is r0 in all three legs.**
 One code change, the smallest the R082 verdict unlocked, in the sort at **`apps/calendar/qml/Main.qml:1159-1166`**: when
 `itemDateTime().localeCompare()` returns 0 the comparator now falls back to a new **`itemStableId(item)`** (= the record's `seriesId`,

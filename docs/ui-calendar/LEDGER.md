@@ -1,147 +1,46 @@
 # R052 — **仍差 #3 RETIRED: the editor dialogs do NOT compress — the "39px notes viewport" is a CLIP line** (2026-10-16)
 
+## 本轮 (R052)
 Atomic step: R051's Next round #1 = fix 仍差 #3 ("the editor dialogs compress instead of scrolling at 760x540").
-The premise was false. One candidate fix for the real defect it hid was implemented, measured, found to regress
-the wide window, and reverted — this round ships **no net code change** (`git diff` empty).
+**The premise was false.** The dialogs never compress; "96 → 39px" is the *visible* fraction of a 96px notes box
+that the scroll viewport clips at y=360/361. One candidate fix for the real defect it hid was implemented,
+measured, found to regress the **wide** window, and **reverted** ⇒ **no net code change this round**
+(`git diff` empty for `CalendarTaskEditorDialog.qml`).
 
-**A. Static proof nothing is compressed.** In `r041-narrow-0021.png` (760x540 dark, pre-existing) at x=350 the
-notes box fill `(34,39,47)` runs **y 326→360 with no bottom border** and stops dead at the card fill; the wide
-frame ends the same box with *rounded* corners (fill-run 335→321px over y 444→452, border 453–455). A 38px box
-would show that rounded bottom. The fill stays the **full 335px** (x 220–554, exactly the wide frame's x 390–724)
+**A. Static proof (pre-existing frames, no app needed).** `r041-narrow-0021.png` (760x540 dark) at x=350: the notes
+box fill `(34,39,47)` runs **y 326→360 with NO bottom border** and stops dead at card fill; the *wide* frame ends
+the same box with **rounded** corners (fill-run 335→321px over y 444→452, border 453–455). A 38px box would show
+that rounded bottom. The fill stays the **full 335px wide** (x 220–554 = exactly the wide frame's x 390–724) down
 to its last drawn row ⇒ **clipped, not resized**. The field bands above are h **31/31/31** at both sizes.
 
-**B. Live proof the form scrolls (dark pid 101088, `date 2026-04-02` → `view day` → `openItem` → `detailsEdit` →
-`resize 760x540` → 2× `windowWheel angleY:-600`):**
+**B. Live proof the form scrolls** (dark, pid 101088; `date 2026-04-02` → `view day` → `openItem todo
+"Green planning"` → `pointerObject detailsEdit` move/press/release → `resize 760x540` → `nativeRecord r052-rev` →
+2× `windowWheel x350 y300 angleY:-600` → `nativeRecord r052-revscroll`):
 
-| x=350 band | narrow, unscrolled | after 2× wheel-down | wide |
+| x=350 band | narrow unscrolled | after 2× wheel-down | wide |
 |---|---|---|---|
-| fields | 151..181, 191..221, 232..262 | **132..162, 173..203** | 187..217, 227..257, 271..294 |
+| fields | 151..181, 191..221, 232..262 | **132..162, 173..203** (title row gone above) | 187..217, 227..257, 271..294 |
 | hint text | 276..284 | 217..225 | 311..320 |
 | **notes box** | **323..360 (clipped)** | **264..360 = h97** | 359..455 = h97 |
-| 保存/取消/删除任务 | 396/433/470 | **unmoved** | 516/553/590 |
+| 保存/取消/删除任务 | 396/433/470..501 | **unmoved** | 516/553/590 |
 
-The translation is **rigid at −59px with field heights unchanged and the footer fixed**; the notes box is **96px
-(97 with borders) in both window sizes**. **The 59px scroll range equals the 59px that was hidden** (undrawn box
-bottom would be 419, clip at 360) — two independent derivations, one number. So `CalendarTaskEditorDialog.qml:32-33`
-is **true of the layout**; R040's "73px" and R041's "39px" were readings of the clip line, never of the box.
+**Rigid translation, exactly −59px, field heights unchanged (31/31), footer immobile.** The notes box is **96px
+(97 with borders) in the narrow *and* wide windows**. And the **59px scroll range equals the 59px that was hidden**
+(an undrawn box bottom would be 419; clip at 360) — one number from two independent derivations.
+⇒ **`CalendarTaskEditorDialog.qml:32-33` is TRUE of the layout.** R040's "73px" and R041's "39px" were both
+readings of the *clip line*, never of the box. 仍差 #3 is retired as a phantom.
 
 **C. The real defect, measured → fixed → reverted.** `CalendarTaskEditorDialog.qml:182-184` claims "the attached
-scrollbar"; only the **event** editor has one (`EventEditorDialog.qml:268-281` P03, `AsNeeded`, 6px, no track,
-`blackSeed`@0.40/0.30 — its comment names the symptom "a clipped form reads as scrollable instead of as a rendering
-fault"). Ported verbatim: **narrow works** (thumb `(23,23,23)` at x 553–555 travelling y 126..311 → 173..358;
-renders **3px wide, not the declared 6**), but **wide regresses** — `r052-wide-0006.png` shows a **permanent dark
-line at x 723–725** y 162..477, while the pre-change cross-section at y=300, x 718–736 of
-`r041-taskdialog-dark.png` is **constant (38,38,38)**. `AsNeeded` cannot hide it: the wide form is scrollable by a
-few px, so `size` < 1 and a near-full-length thumb is painted on a **D11-PASS** surface. Reverted via
-`git checkout --`; re-shot: x 548..562 @y300 uniform again, unscrolled profile reproduces R041 exactly.
-
-**Verdict: 仍差 #3 RETIRED (a phantom, not a fix).** The dialogs' 760x540 behaviour matches their comment and their
-layout. Replaced in the top-8 by the genuine sibling divergence (new #3: the missing affordance + the too-tall wide
-form), which needs a ruling because the event editor shares the latent mark.
-
-**Evidence:** `round-052-dialog-scroll.png` (2× side-by-side: clipped vs scrolled-whole). Frames `r052-rev-0007`,
-`r052-revscroll-0006`, `r052-narrow-0013`/`r052-scroll-0007` (with-bar build), `r052-wide-0006` (with-bar build),
-`r041-narrow-0021`/`r041-taskdialog-dark` (pre-change).
-
----
-
-# R051 — **P01 dark narrow leg PASS ⇒ P01 CLOSED (2 themes × 2 window sizes)** (2026-10-16)
-
-## 本轮 (R051)
-Atomic step: R050's Next round #1 = **P01's narrow-window (760x540) popover, dark**. Measurement + judgment
-only — **no product code touched, no build**.
-
-The live instance was **light** (`/proc/95488/environ` → `KOS_APPEARANCE=light`), so it was killed and
-`./start-review-vm.sh dark` cold-started (pid 98047, dark confirmed from `/proc`). Method copied from R050
-exactly: `date 2026-04-02` → `view week` → `resize 760x540` → `openItem titleContains "Long review"` →
-`nativeRecord r051-narrow-dark` (15 frames); then `escape` → `resize 1100x692` → `openItem` the **same
-fixture** → `nativeRecord r051-wide-dark` (14 frames). Same-fixture A/B ⇒ content cannot confound it.
-
-**Steadiness:** every follow-up frame is **byte-identical** to frame 0000 in both series
-(`ImageChops.difference` bbox `None`, 14/14 and 13/13) ⇒ the popover is fully static over 1.5 s — no reflow, no
-shake, no animation.
-
-**Card fill bbox** (flood-fill over the dark (38,38,38) fill):
-
-| window | fill bbox | w | h |
-|---|---|---|---|
-| 760x540 | x 210–549, y 226–413 | **340** | **188** |
-| 1100x692 | x 380–719, y 252–438 | **340** | **187** |
-
-(The 1px height delta is a flood-fill edge artifact, not content.) Horizontally the card is **exactly centred**
-in both windows (gaps 210/210 and 380/380).
-
-**Content bands, card-relative** — identical offsets *and* identical ink lengths in both legs:
-
-| band | rel x | rel y | ink run narrow | ink run wide |
-|---|---|---|---|---|
-| title, 2 lines h38 | 14 | 19 | 14–318 (305) | 14–318 (305) |
-| date · 11:00 – 13:00 | 14 | 70 | 14–214 (201) | 14–214 (201) |
-| location | 15 | 96 | 15–121 (107) | 15–121 (107) |
-| notes | 15 | 122 | 15–288 (274) | 15–288 (274) |
-| 编辑 label | 278 | 148 | 278–325 (48) | 278–325 (48) |
-
-Top-edge material **byte-identical** in both: y0−1 border (43,43,43), y0−2/−3 shadow ramp (16,16,16)/(17,17,17),
-y0 fill (38,38,38). Dark baseline re-confirmed against R047: fill (38,38,38) ✓, border 43≈42 ✓, title ink
-(242,242,242) ✓, secondary ink (164,164,164) ✓.
-
-**The one apparent narrow/wide difference was an artifact.** The wide frame's extra band at rel y 179–185 exists
-at **only rel x 1,2,5,6 and 333–338** — the card's own rounded corners + border over a blue-tinted backdrop
-(that row is pure fill at card centre-x in *both* frames). Backdrop, not material.
-
-**Status dot:** 10×10 at card-relative **x 14–23, y 31–40**, peak **(48,140,198)** accent blue, identical in
-narrow dark, wide dark and narrow light. **R047's recorded "(57,196,135) green dot" does NOT reproduce** — 0
-pixels within ±30 of it anywhere in either dark frame.
-
-⇒ **P01 dark narrow leg = PASS**, and with it **P01 is CLOSED**: PASS at 1100x692 light (R046), 1100x692 dark
-(R047), 760x540 light (R050), 760x540 dark (R051). The popover does not compress in either theme at either size;
-it is the standing **counter-example to 仍差 #3**, which stays a *dialog-only* finding.
-
-Evidence: `round-51-popover-dark-narrow-vs-wide.png` (2x side-by-side, aligned on the fill bbox),
-`round-51-popover-dark-760x540.png`, `round-51-popover-dark-1100x692.png`.
-
-**Next round #1:** fix **仍差 #3** — the editor dialogs compress instead of scrolling at 760x540
-(`CalendarTaskEditorDialog.qml:32-33` plus the event-editor sibling); the top-ranked 仍差 item that needs no
-ruling.
-
-# R050 — **P01 narrow leg PASS: the popover does not compress; card is size-invariant** (2026-10-16)
-
-## 本轮 (R050)
-Atomic step: R049's Next round #1 = **P01's narrow-window (760x540) popover**. Measurement + judgment only,
-**no product code touched, no build**.
-
-Route, light, one instance (reused the live R049 pid — it was still up): `date 2026-04-02` → `view week` →
-`resize 760x540` → `openItem titleContains "Long review"` → `nativeRecord r050-narrow` (16 frames, **all
-760x540** ⇒ the resize did land). Then `escape` → `resize 1100x692` → `openItem` the **same fixture** →
-`nativeRecord r050-wide` (13 frames). **Same-fixture A/B**, so content cannot confound the comparison.
-
-**Card fill bbox** (flood-fill over the neutral (245,245,245) fill; card = fill ±1px border):
-
-| window | fill bbox | w | h |
-|---|---|---|---|
-| 760x540 | x 211–548, y 227–412 | **338** | **186** |
-| 1100x692 | x 381–718, y 253–438 | **338** | **186** |
-
-**Content bands in card-relative coords** (rel x = ink left − fill left, rel y = ink top − fill top):
-
-| band | rel x | rel y | ink run narrow | ink run wide |
-|---|---|---|---|---|
-| title, 2 lines h38 | 13 | 18 | 224–528 | 394–698 |
-| date · 11:00 – 13:00 | 13 | 69 | 224–424 (200) | 394–594 (200) |
-| location | 14 | 95 | 225–331 (106) | 395–501 (106) |
-| notes | 14 | 121 | 225–497 (272) | 395–667 (272) |
-| 编辑 label | 277 | 151 | 488–511 (23) | 658–681 (23) |
-
-**Identical offsets, identical ink-run lengths** ⇒ no reflow, no shrink, no clip. Card fully inside 760x540
-(210px backdrop each side, 128px below). Top-edge **material is byte-identical** in both captures:
-−4/−3/−2/−1 = **(236,236,236) (210,210,210) (204,204,204) (175,175,175)** then fill (245,245,245).
-
-⇒ **P01 narrow leg = PASS.** The popover is the **counter-example to 仍差 #3**: `EventDetailsPopover.qml:57`
-`width: 340 + 2*shadowInset` (window-size-independent) + content-driven height + notes
-`Layout.maximumHeight: 120` ScrollView (`:171-174`). #3 stays open for the **dialogs only**; do not
-generalise it to overlays.
-
-**Not verified this round (do not assume):** the **dark** 760x540 leg. P01's dark leg is PASS at 1100x692 (R047).
+scrollbar"; only the **event** editor has one (`EventEditorDialog.qml:268-281`, P03: `AsNeeded`, 6px, no track,
+`blackSeed`@0.40/0.30 — its own comment names the symptom "a clipped form reads as scrollable instead of as a
+rendering fault"). Ported verbatim (clean build, block at :189-203): **narrow works** — thumb `(23,23,23)` at
+x 553–555 travelling y 126..311 (`contentY=0`) → 173..358 (max); **renders 3px wide, not the declared 6** — but
+**wide REGRESSES**: `r052-wide-0006.png` carries a **permanent dark line at x 723–725, y 162..477**, while the
+pre-change cross-section of `r041-taskdialog-dark.png` at y=300, x 718–736 is **constant (38,38,38)**. `AsNeeded`
+cannot hide it: the **wide form is scrollable by a few px**, so `size` < 1 and a near-full-length thumb is painted
+on a **D11-PASS** surface. Reverted (`git checkout --`, `git diff` empty, rebuilt); re-shot the reverted build and
+the x 548..562 @y300 cross-section is uniform again, the unscrolled profile reproduces R041's numbers exactly
+(151/191/232/276/323..360/396/433/470) and B still holds.
 
 ## 仍差 (top 8, visual-impact order)
 1. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
@@ -150,74 +49,95 @@ generalise it to overlays.
    fix = bind the `Overlay.modal` rectangle's opacity to `revealProgress`. Do not "fix" silently.
 2. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
    `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. Needs a ruling.
-3. **Form compresses instead of scrolling at 760x540** — *dialogs only* (R050 shows the popover is immune):
-   notes viewport **96 → 39px**, card 555 → 471. `CalendarTaskEditorDialog.qml:32-33` claims "only the form above
-   it scrolls". Sibling: the event editor. Same class as #1 (comment says one thing, layout another).
-4. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (month 18px,
-   week/day 21px, all fixed, no duration→height code path), while the ref's week view *does* show proportional
-   top-aligned blocks ⇒ decide reword-the-clause vs build-proportional-blocks. Clauses 1+2 PASS (R048).
+3. **NEW (was #3's real defect, R052): the task editor's form has no scroll affordance at 760x540, and the wide
+   form is a few px too tall.** At 760x540 the form scrolls 59px but **wheel-only** — the user sees the notes box
+   amputated mid-box with no hint (the event editor's P03 bar exists precisely for this, its comment says so).
+   Porting P03 fixes the narrow case but paints a permanent 3px line at x 723–725 at 1100x692, because the wide
+   form *is* scrollable: `AsNeeded` never hides a bar whose `size` < 1. Root order matters — **first make the wide
+   form fit (contentHeight ≤ height at 1100x692), then port P03**. Acceptance numbers are already measured
+   (see Next round #1). The **event editor carries the same latent mark** ⇒ decide whether to fix both.
+4. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (month 18px, week/day
+   21px, all fixed, no duration→height code path), while the ref's week view *does* show proportional top-aligned
+   blocks ⇒ decide reword-the-clause vs build-proportional-blocks. Clauses 1+2 PASS (R048).
 5. `KosButton.qml:67-68` — secondary regains a 1px `AppTheme.border` rim on **hover or activeFocus**; never
-   checked vs ref. `buttonNeutralHover`/`Pressed` never captured; no button has ever been hovered. Also open from
-   R045: the disabled footer button's accent→disabled blend animates (~0.69 → 0.63 over 52ms).
+   checked vs ref. `buttonNeutralHover`/`Pressed` never captured; **no button has ever been hovered**. Also open
+   from R045: the disabled footer button's accent→disabled blend animates (~0.69 → 0.63 over 52ms).
 6. **Line pitch 22px at font 15 = 1.47** (R046/R047, both themes) — CJK font-stack leading; same root cause as the
    recorded `controlHeight` 31-vs-34. App-wide. Cosmetic, no ID covers it.
 7. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3 fixtures; the
    `calendar.ics:91` VTODO (due 11:00) is dropped silently. Needs a ruling.
-8. **Month day cell holds 1 chip + `+N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1
-   (`+8/+8/+11/+9/+7` measured). Same family as #7. Needs a ruling.
-- *Cosmetic, no ID, folded out of the top-8 (in rounds.md):* card centre sits **+7px right** of window centre at
-  both window sizes, both themes (R041); D02's radius is **16** vs the spec's named `largeRadius` 24 /
-  `windowCornerRadius` 32 — recommendation stands: **keep 16**.
+8. **Month day cell holds 1 chip + `N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1 (`+8/+8/+11/+9/+7`
+   measured). Same family as #7. Needs a ruling.
+- *Cosmetic, no ID, folded out of the top-8 (in rounds.md):* D02's radius is **16** vs the spec's named
+  `largeRadius` 24 / `windowCornerRadius` 32 — recommendation stands: **keep 16**.
 
 ## 最近已改 (most recent 8)
-1. R050 — measurement + judgment only, **no code change**; **P01 narrow leg PASS** — same-fixture A/B at
-   760x540 vs 1100x692: card fill bbox 338×186 **both**, all five content bands at identical card-relative
-   offsets with identical ink-run lengths, top-edge material byte-identical ⇒ no compression. Popover is the
-   counter-example to 仍差 #3 (dialogs only). Dark narrow leg left un-shot.
-2. R049 — measurement + judgment only, no code change; E03 clause 3 **BLOCKED on a ruling** (no tall block
-   exists in any view); new 仍差 #8 (month cell cap 1 vs ref 3); negative finding: per-day multi-day chips are
-   *correct* (ref does the same).
-3. R048 — measurement + judgment only, no code change; **E03 clauses 1+2 PASS** (elide literal `…` at pitch 3px).
-4. R047 — measurement + judgment only, no code change; **P01 long-text dark leg PASS** ⇒ P01 CLOSED both themes.
-5. R046 — measurement only; **P01 long-text light PASS**; ref confirmed to contain **no popover**.
-6. R045 — measurement only; exit re-measured ⇒ **≈125ms = declared `motionFast` 120**; D10 full pass.
-7. R044 — measurement only; enter = **220ms at both interval 60 and 12** (declared `motionNormal`).
-8. R043 — measurement only; dim snap structurally confirmed; `args`→flat command schema trap documented.
+1. R052 — **attempted** port of the event editor's P03 overlay scrollbar into `CalendarTaskEditorDialog.qml`,
+   measured (works narrow, **regresses wide**), **REVERTED**; ships no net code change. Retires 仍差 #3 as a
+   phantom with static + live proof, and files its real defect as new #3.
+2. R051 — measurement + judgment only, no code change; P01 dark narrow leg PASS ⇒ P01 CLOSED (4 legs).
+   Corrected R047's dot colour (accent blue, not green).
+3. R050 — measurement only; P01 narrow leg PASS (light); the popover is immune to the dialog finding.
+4. R049 — measurement only; E03 clause 3 **BLOCKED on a ruling**; new 仍差 #8.
+5. R048 — measurement only; **E03 clauses 1+2 PASS**.
+6. R047 — measurement only; **P01 long-text dark leg PASS**.
+7. R046 — measurement only; **P01 long-text light PASS**; ref confirmed to contain **no popover**.
+8. R045 — measurement only; exit re-measured ⇒ **≈125ms = declared `motionFast` 120**; D10 full pass.
 
 ## 外推待确认 (do NOT assume)
-- **The popover's card geometry is window-size-invariant and content-driven** (R050). At 760x540 and 1100x692 the
-  fill bbox is 338×186 for the *same* fixture, and every content band keeps its card-relative offset. Consequence:
-  **never explain a popover geometry change by window size** — it is set by `EventDetailsPopover.qml:57`
-  (`340 + 2*shadowInset`) and by content. A *different* card height means a *different fixture*: the event
-  "Long review…" (date+location+notes) is **h186**, the task "A deliberately long task title…" (time only) is
-  **h134** (`p01-long-popover.png`) — a 52px difference that is content, not compression.
-- **The popover is the counter-example to 仍差 #3.** #3 is a *dialog* finding; do not carry it to overlays.
-- **Harness `openItem(NULL)` vertical centring does not reproduce at 760x540** (card top 227 with a 186-tall card
-  ⇒ 320 centre vs the 270 window centre), while at 1100x692 it lands centred (253 + 93 = 346 = 692/2). Recorded,
-  **not a defect** — R046 already ruled harness-driven popover *position* unjudgeable; judge material/content only.
-- **`resize` does land** — all 16 narrow frames are genuinely 760x540. But `captureClient` still returns the stale
-  pre-resize buffer, so **after any `resize`, capture with `nativeRecord`, not `captureClient`**.
-- **A live instance is reusable across rounds.** `start-review-vm.sh` prints "Owned review instance still
-  running: <pid>" and returns without launching; the pid in `live-app.pid` answers harness commands fine. Kill it
-  by the pid **read from `live-app.pid`** — never `pkill -f 'kos-calendar'` (that pattern matches the driving
-  shell and kills the tool call, exit 144).
-- **`nativeRecord` frames land in the app's CWD = repo root**, not in `tmp/ui-acceptance/calendar/`. Move them in.
-- **Month-view geometry (R049, 1100x692 light).** Row pitch **60.7px**; day-number ink tops **y 165 / 226 / 287 /
-  348 / 408**; chip fill band **y 183 → 200 (h 18)**; chip x-runs **(6,148) (164,305) (321,463) (636,778)
-  (794,935)** ⇒ pitch **157.5**, chip w **143**, gap **16**. Selected-day rect **x 473 → 626** (w 154 = chip ±5).
-- **Month chip fill is per-list tinted, NOT the week chip's uniform (216,234,245)**: measured **(241,247,251)**
-  and **(222,236,246)**. Locate a month chip by *shape/position*, not fill. The month grid draws **no cell
-  borders at all** — infer geometry from day-number ink and chip runs, never from rules.
-- **`CalendarScheduleView.qml` line numbers drift** (~+6 since R048). Timed chip now **`:394`/`:395`**, all-day
-  chip `:277`, hour row `:353`. **Re-anchor by content, never by an earlier round's line number.**
+- **A clipped box is NOT a resized box.** In a dialog the form's viewport floor at 760x540 is **y=360/361**; a form
+  element that reaches it is clipped there. **A rounded-corner bottom + a lower fill-run width = a real box end; a
+  full-width fill that stops dead = the clip line.** Never read a clipped box's visible height as its height.
+- **The dialog form scrolls RIGIDLY.** One wheel-down translates *every* form element by the same Δ (−59px at
+  760x540 after max scroll) and never moves the footer. **If two form elements move by different Δ, that IS
+  compression** — that test, not a single box's height, is the compression detector.
+- **The notes viewport is 96px (97 with borders) at 760x540, 1100x692, light and dark.** A different notes height
+  means a different field, not a smaller window.
+- **The task dialog's form right edge at 1100x692: x 723–725 at y=300 is `(38,38,38)` with no bar.** A dark
+  `(23,23,23)` column there = the P03 overlay bar (a regression), **not** a border — field borders read *lighter*
+  than the card (`(65,66,67)`), never darker. Same cross-section at 760x540: the bar sits at x 553–555.
+- **The P03 overlay bar renders 3px wide, not the declared 6**, and its thumb ≈185px of a 237px track ⇒ `size`
+  ≈0.78 at 760x540.
+- **`ScrollBar.AsNeeded` does NOT hide a bar whose `size` < 1.** A few px of content overshoot = a permanently
+  visible near-full-length bar. **Measure `contentHeight ≤ height` before attaching any bar.**
+- **Scroll range is self-checking:** at 760x540 it is **59px** and the undrawn notes-box bottom would be at 419 vs
+  the clip at 360 — the same 59. If those two disagree, one of the two probes is wrong.
+- **The task dialog's 4 form rows are NOT compressible in practice** — h 31/31/31 at both window sizes; the card
+  clamp is `min(380, w−48)` × `min(560, h−64)` (`:21-22`) and is the only thing that shrinks with the window.
+- **Harness `windowWheel` = `{action:"windowWheel", x, y, angleY}`**; `resize` = `{width,height}`; `openItem` =
+  `{kind, titleContains}`; `view` = `{view:"month"|"week"|"day"}`; `date` = `{date:"YYYY-MM-DD"}`. Fields are FLAT.
+- **`review-command.py` is not executable in this environment — invoke it as `python3 review-command.py '<json>'`.**
+- **The popover's card geometry is window-size-invariant and content-driven** (P01, 4 legs): fill **340×188** for
+  the "Long review…" fixture at 760x540 and 1100x692, light and dark. A *different* card height means a *different
+  fixture* — the event (date+location+notes) is h≈186, the task "A deliberately long task title…" is h134.
+  **Never explain a popover geometry change by window size.**
+- **The status dot is 10×10 at card-relative (14,31), peak (48,140,198) accent blue, in BOTH themes** (R051).
+  R047's "(57,196,135) green dot" does NOT reproduce — no green pixel exists in either dark frame.
+- **Harness `openItem(NULL)` vertical centring does not reproduce at 760x540** (card top 226 + h188 ⇒ centre 320
+  vs window centre 270); at 1100x692 it is exact in both themes. Harness-driven popover *position* is unjudgeable.
+- **R041's "card centre sits +7px right of window centre" does NOT reproduce on the popover** (R050/R051: exact
+  centring, gaps 210/210 and 380/380). Do not apply it to overlays.
+- **`resize` does land, but `captureClient` returns the stale pre-resize buffer** ⇒ after any `resize`, capture
+  with `nativeRecord`, not `captureClient`.
+- **A live instance is reusable, but check its theme first.** `/proc/<pid>/environ` `KOS_APPEARANCE` is ground
+  truth; `start-review-vm.sh` only *prints* "Owned review instance still running" and `exit 1`s, silently leaving a
+  light instance in place for a dark round. Kill by the pid **read from `live-app.pid`** — never
+  `pkill -f 'kos-calendar'` (matches the driving shell; exit 144). A reverted rebuild requires a **kill+relaunch**:
+  the running process keeps the old binary.
+- **`nativeRecord` frames land in the app's CWD**, which is *wherever `start-review-vm.sh` was invoked from* —
+  the repo root if launched from there, `tmp/ui-acceptance/calendar/` if launched from there. Check both.
+- **Month-view geometry (R049, 1100x692 light).** Row pitch **60.7px**; day-number ink tops
+  **y 165/226/287/348/408**; chip fill band **y 183 → 200 (h 18)**; chip x-runs **(6,148) (164,305) (321,463)
+  (636,778) (794,935)** ⇒ pitch **157.5**, chip w **143**, gap **16**. Selected-day rect **x 473 → 626** (w 154).
+- **Month chip fill is per-list tinted, NOT the week chip's uniform (216,234,245)**: measured **(241,247,251)** and
+  **(222,236,246)**. Locate a month chip by *shape/position*, not fill. The month grid draws **no cell borders**.
+- **`CalendarScheduleView.qml` line numbers drift** (~+6 since R048). Timed chip now **`:394`/`:395`**, all-day chip
+  `:277`, hour row `:353`. **Re-anchor by content, never by an earlier round's line number.**
 - **There is no third "agenda" view.** Week and day are the *same* `CalendarScheduleView` with `dayCount` 7 vs 1
   (`Main.qml:2502` / `:2532`).
 - **The ref is the Week view** (`Day|Week|Month|Year`, Week active): all-day row stacks up to **3** chips per day
   column; timed blocks are **duration-proportional and top-aligned**; red `9:41` now-line.
 - **Per-day segmentation of a multi-day event is correct, not a defect** (ref does the same; no spanning bar).
-- **`tmp/` is gitignored.** The committable artifact is a mirror under **`docs/ui-calendar/`**: copy the
-  screenshot in and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md` /
-  `rounds.md` can never be committed — expected, not a failure.
 - **The week view has NO duration-proportional blocks.** Every timed chip is `Layout.preferredHeight: 21`.
 - **Week-grid geometry: vertical rules at x = 52, 201.5, 351.5, 501.5, 651.5, 801.5, 951.5** (pitch 149.5) at
   1100x692. Chips inset 3px ⇒ 144 wide. Chip fill light **(216,234,245)**. Hour-row pitch ≈ 54px.
@@ -229,25 +149,25 @@ generalise it to overlays.
   `EventDetailsPopover.qml:258-277` null branch. **Never judge popover position from a harness-driven open.**
 - **P01/E03 are judged against HIG convention, not the ref** where the ref has no such surface. The ref has **no
   popover**; it *does* show row elision with a trailing `…`.
-- **The popover header is dot → title → `closeButton` (22×22, `objectName:"detailsClose"`), `:96-125`.** The ✕ sits
-  20px inside the card's right edge (measured at both window sizes in R050).
+- **The popover header is dot → title → `closeButton` (22×22, `objectName:"detailsClose"`), `:96-125`.** The ✕
+  sits 20px inside the card's right edge at both window sizes and both themes.
+- **`EventDetailsPopover.qml:57` is `width: 340 + 2*shadowInset`**, height content-driven, notes in a
+  `Layout.maximumHeight: 120` ScrollView (`:171-174`) — this is *why* P01 passes.
 - **The `EventDetailsPopover` qsTr source is English (`"Edit"`, `:224`) but the VM renders `编辑`.** Not a bug.
 - **The secondary line left-aligns to the status dot (x = fill+14), not to the title (fill+32).** Expected.
-  R050 measured date/location/notes all at fill+13/+14 and the title's *dot* at fill+13.
 - **`openItem` alone raises the *popover*, not the Dialog** — no dim, page stays 255. The Dialog requires
   `pointerObject detailsEdit` **move, press, release** (three commands).
 - **A fresh enter needs an app restart** after `escape` (the day-view selection is not restored).
-- **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it.** Wrapping it in `timeout 180` kills the app.
-- **`captureClient` key is `path`**, not `file`; `view` is `{"action":"view","view":"month"}`; `date` is
-  `{"action":"date","date":"2026-04-02"}`.
+- **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it** (`nohup … & disown`). Wrapping it in
+  `timeout 180` kills the app.
+- **`captureClient` key is `path`**, not `file`; **`capture` is NOT a harness action.**
 - **The α probe is the instrument of record.** Backdrop per point from the last *undimmed* frame, ×0.8;
   α = (m − backdrop)/(247 − backdrop). Pill left edge is only a ±0.14 cross-check.
 - **Frame pacing degrades under capture load, reported timing does not.** Use the *discrete* dim step
   (204↔255 at (1040,400) light) as the t0 anchor.
-- **Harness command fields are FLAT** (`Main.qml:217/221/225`). **`args` nesting is a silent no-op.**
-- **In-place write only** to `command.json` (atomic replace trips the QML dir watcher). Poll is `interval:100`.
+- **In-place write only** to `command.json` (atomic replace trips the QML dir watcher). `review-command.py '<json>'`
+  does it, and auto-increments `sequence`. Poll is `interval:100`.
 - **`nativeRecord` is the burst mechanism**: `{action,prefix,duration,interval}` → `<prefix>-NNNN.png`.
-- **`capture` is NOT a harness action.**
 - **The dim is `KosWorkspaceDialog`'s `Overlay.modal`, 0.20 light / 0.42 dark.**
 - **In light, the notes field is indistinguishable from the card fill** (#F7F7F7 vs (248,248,249)) — locate a light
   field box by its **border** (222,224,226) only.
@@ -264,14 +184,26 @@ generalise it to overlays.
 - Fixtures live on **2026-03-29..04-04** in `profile/pim/calendar.ics`; always send `date` first, in its own batch.
   `long-label.py` is the *sidebar list* fixture (S05), currently "Inbox".
 - Save is deliberately NOT exercised (isolated-profile discipline).
+- **`tmp/` is gitignored.** The committable artifact is a mirror under **`docs/ui-calendar/`**: copy the
+  screenshot in and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md` /
+  `rounds.md` can never be committed — expected, not a failure.
 
 ## Next round (pick ONLY #1)
-**#1 — P01 dark narrow leg** (760x540, dark): the one corner R050 deliberately left un-shot. Reuse the R050
-method exactly — `nativeRecord` for both legs, same fixture, compare *card-relative* band offsets. Re-establish
-the dark baseline numbers first (R047, 1100x692 dark): fill (38,38,38), border (42,42,42), title (242,242,242)
-2 lines, secondary (164,164,164), dot 10×10 (57,196,135).
+**#1 — make the wide task-dialog form fit, then port the P03 bar (this is new 仍差 #3).** Two steps in one
+atomic change, in `apps/calendar/qml/CalendarTaskEditorDialog.qml` only:
+(a) **Measure first, do not guess:** at 1100x692 the form's `contentHeight` exceeds the Flickable's `height` by a
+few px (proved indirectly — the ported `AsNeeded` bar stayed visible with a near-full-length thumb). Determine the
+overshoot and remove it (the form's bottom inset/margin) so `contentHeight ≤ height` at 1100x692.
+(b) Then port the event editor's P03 block (`EventEditorDialog.qml:268-281`) verbatim into `editorScroll`.
+**Acceptance, already-measured numbers:** at **1100x692** the cross-section at y=300, x 723–725 must stay
+**`(38,38,38)`** (pre-change value; a `(23,23,23)` column = the bar is still showing ⇒ FAIL); at **760x540** a
+`(23,23,23)` thumb must appear at **x 553–555** and travel the track between `contentY=0` and max scroll
+(measured extremes: y 126..311 → 173..358). The reverted-state baselines to not regress are the R041 values:
+field bands 151/191/232, hint 276..284, notes box 323..360, footer 396/433/470. **Do not touch the popover**
+(P01 CLOSED) and do not change the notes-area `ScrollBar.vertical` at `:373`.
 
-**#2 — 仍差 #7 / #8 (silent per-cell caps)** need a ruling before anyone "fixes" them: schedule view `slice(0,2)`,
-month view 1-chip cap vs the ref's 3.
+**#2 — 仍差 #5: capture `KosButton` hover / pressed / focus in both themes** (no ruling needed; the ref's
+`buttonNeutralHover`/`Pressed` have never been shot and no button has ever been hovered). Continuous frames
+required for the hover/disabled transitions.
 
-**#3 (deferred) — E03 clause 3 ruling**: reword the clause, or build duration-proportional top-aligned blocks.
+**#3+ — everything else in 仍差 needs a ruling** (#1 dim snap, #2 shadow, #4 E03 clause 3, #7/#8 per-cell caps).

@@ -1,3 +1,16 @@
+## R077 — the same-hue left stripe, on the chip that actually has one
+**Corrects R073.** The "3px solid same-hue LEFT STRIPE at x=491-493" is not in the all-day band — a classified 2D dump shows
+that region is the band chip's **ring icon** (hollow centre x495-496). A saturation scan finds **no bar at any band chip's
+left edge**; the band carries four 12x12 icons ~4px inside their column rules. The stripe is a **timed grid chip** property:
+blue x409-411 = (59,134,247), red x328-330 = (235,76,70) ⇒ **~2.4 ref px of ink, ~2 ref px inside the chip's fill, round
+caps, absolute (not proportional to chip height)**; ref text ink starts 7 ref px in.
+**Edit** (`CalendarScheduleView.qml:timedChip`): derived `stripeWidth = Math.round(chipHeight/4)` = 4, `stripeInset =
+stripeWidth`, capsule `radius: width/2`, vertical margin 2, `color: itemColor(modelData)`, Label `leftMargin` 5 → 13.
+All-day chip / band geometry / fill translation / border untouched.
+**Evidence:** `r077-timed-stripe-light.png` (light, stripe at x59-62 in a chip starting at 55), `r077-timed-stripe-compare.png`
+(ref ×1.8 vs ours 1:1 at matched feature scale), `r077-timed-stripe-dark.png` (dark, stripe x509-512 = (48,140,198)).
+**Next:** the timed chip's 1px border (the ref has no ring: rule 236 → fill 222,237,254), then dark same-hue chip text.
+
 # R076 — **A03 done: the multi-day all-day strip is ONE bar; only the run's outer ends round.**
 The ref was walked 1:1 first for a chip crossing a column rule — **there is none in this reference week.** Every band row
 carries its rule unbroken (x=324/406/487/569/650/732 read **236/242/229 on all 21 band rows**, chip fills on both sides

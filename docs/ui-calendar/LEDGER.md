@@ -1,3 +1,53 @@
+# R057 — **dark footer re-measured: 548..577 / 585..614 / 622..651, identical to R056 light (≤1px) ⇒ #B is NOT a theme offset; R055's dark table is exactly 13px high and its "resize lag" retirement of R054 is retracted. #A is dead AND is a MATCH: no ring at open in dark either, and the macOS ref alert has no ring at rest** (2026-10-16)
+
+## 本轮 (R057)
+Atomic step: R056's Next #1 = "re-measure the dark footer with R056's method". Done. No code change, **0 build→screenshot loops**.
+Drive (dark 1100x692, pid 107851 → **109482**): kill light pid → `start-review-vm.sh dark` → ONE 9-item list
+(`runtimeInfo`, `nativeRecord r057-dark2 11000/250`, `escape`, `date 2026-04-02`, `view day`,
+`openItem "Design review"`, `pointerObject detailsEdit` ×3) → a second 5-item list (`pointer 557,599`
+move+press, `pointer 557,500` move+release, `pointer 557,562` move) → **44 frames**.
+`runtimeInfo` = `{"width":1100,"height":692,"dpr":1,"appearance":"dark","dark":true}`.
+
+1px column scan at x=450 (dark, card **(38,38,38)**):
+| button | y span | normal | hover | pressed |
+|---|---|---|---|---|
+| 保存 (primary) | 548..577 | **(48,140,198)** | **(69,152,204)** | — |
+| 取消 (secondary) | 585..614 | **(69,69,69)** | **(79,79,79)** | **(89,89,89)** |
+| 删除日程 (destructive 2nd) | 622..651 | (69,69,69) + red label | — | — |
+Pitch 37, gap 6. R056 light was **547..578 / 584..615 / 621..650** ⇒ **≤1px apart: the two themes are identical.**
+
+1. **#B RESOLVED — there is no theme offset.** R055's dark table (535..565 / 572..602 / 609..639) sits exactly **13px higher**.
+   Re-scanning **R055's own 28 frames** this round gives 535..565 in all 28 — stable, no drift — so R055 read its frames
+   faithfully. But R055's Flickable geometry (sceneY 131.4, h 380, contentHeight 418) equals R057's, and R057's
+   `contentY` is **0** (range 0..38) ⇒ leading explanation: **R055's live Flickable was at `contentY ≈ 13`**.
+   Not light-vs-dark, **not** resize lag. R054's "Save 546..577" was right all along; **R055's retirement of it as
+   post-`resize` lag is retracted.**
+2. **#A RESOLVED — and it is a MATCH, not a defect.** At the clean open (frame 4501 ms = the first settled frame;
+   0016@4262 is mid-fade; 0017–0029 = 4.5–7.5 s are byte-identical) **保存 = flat (48,140,198) over 548..577 and
+   取消 = flat (69,69,69) over 585..614 — no ring on either.** The reference macOS alert at rest shows **no ring on
+   Primary or Secondary** ⇒ no-ring-at-open is the correct macOS behaviour. **R055's "the ring sat on 取消 at open"
+   does not reproduce and is retracted.**
+3. **Ring geometry, dark, pressed 取消:** **(45,115,159)** on rows **585** and **613**, AA at 586 (52,111,147) /
+   614 (44,108,147) ⇒ 2px, inset at the box edges, box 585..614 = `focusRing` dark = `accent`@0.76 over the card.
+   Still there at frames 0040/0043 **while 保存 is hovered** ⇒ **the ring follows the press and persists** — same as light.
+4. **Hover 取消 = flat (79,79,79) across the whole 585..614** (585=(80,80,80), 614=(80,80,80)) ⇒ the ring is gone while
+   hovered, but there is **no distinct 1px `borderHover` edge** — R055's "1px gray (81,81,81) borderHover" is a 1-unit AA
+   read. The substance holds; the mechanism is *the fill covers the ring*, not *a border replaces it*.
+5. **D08 verdict: the event-editor footer PASSES its 三态 + `focusRing` clauses in both themes** — fills
+   48,140,198 / 69,152,204 / 85,161,208 and 69/79/89 exact, ring 2px in the right colour in both
+   ((120,179,216) light = accent@0.64, (45,115,159) dark = accent@0.76). What remains under D08 is **coverage**
+   (task-editor footer, a toolbar `KosButton`) and the **unverified `Esc 可关闭` clause**.
+
+**Discipline: ~30 Bash calls (budget 25 — OVER).** Waste: (a) a crop script fed a `glob` list to `Image.open` and died
+with `IndexError: image index out of range`, and two column scans then disagreed 13px until one pass over all 28 R055
+frames settled it; (b) five calls just to read/edit `LEDGER.md` and `rounds.md`; (c) two probes of harness internals that
+the 外推 notes already answered. The 13px itself was worth chasing — it retracted a wrong ledger table.
+
+Evidence: `_r057-dark-footer-open2x.png`, `_r057-dark-cancel-press2x.png`,
+`_r057-dark-cancel-ring-persist-save-hover2x.png` (2x crops of x 384..736 × y 528..662).
+
+---
+
 # R056 — **D08 light leg captured: three distinct fills PASS and the light `focusRing` (accent@0.64 = (120,179,216)) renders 2px on the box edges — but light shows NO ring at a clean open, and the light footer is 12px lower than R055's dark footer although the dialog geometry is identical** (2026-10-16)
 
 ## 本轮 (R056)

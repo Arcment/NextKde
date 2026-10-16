@@ -1,3 +1,28 @@
+## R091 — the "initial-scroll race" is the 450 ms `autoScrollTimer` WINDOW, not PIM arrival. Fixed.
+
+**Reproduced on the unmodified build.** Two fresh light legs (`leg.sh light r091a` / `r091b`): the whole-page diff is
+**154,551 px — R090's own number** — and one chip's left bar sits 40 px lower in one leg (Mon x60 `280..290` vs `320..330`).
+**But both legs' trailing `{"action":"stop"}` probe reads `contentY 240`** (`harness/Main.qml:263` logs the pre-command
+value) — the scroll is NOT the variable.
+
+**What actually differs is *when* the capture landed.** Grid lines and gutter-label ink bands are at identical y in both;
+the *text* of the labels is one hour apart (topmost `07:00` vs `06:00`) and the chips follow the labels, i.e. the capture
+shows the PREVIOUS week's offset (`280` = hour 7, the empty-week fallback — the launch week 2026-10-12..18 carries no
+fixture items) while the probe 0.6 s later shows the settled `240`. Figure `r091-pre-fix-one-hour-offset.png`.
+
+**Mechanism:** `positionTimeline()` was reachable only through `autoScrollTimer` (`interval 450`); the drive list's
+`captureClient` lands ~0.6 s after `date`, so it can fall *inside* that window. **R090's "PIM arrival race" is a
+misdiagnosis of this window** — no model-empty run is needed to explain the pair, and the timer never races PIM here.
+
+**Fix (`CalendarScheduleView.qml:276`):** `repositionTimeline()` = `positionTimeline()` immediately **+** the timer as a
+settle-net, wired to `onFirstDateChanged` / `onDayCountChanged` / `onVisibleChanged`. No chip, band, grid or token changed.
+
+**After:** `leg.sh light r091c` / `r091d` → chip bars identical in both legs (**Mon x60 `320..330`**, Sat x660 `320..330`)
+and a **whole-page diff of 0 px**. (The two PNGs still have different md5s — 0 differing pixels prove PNG bytes are not
+the instrument, R083 re-confirmed.) A04 / E01 / E02 / N02 untouched.
+
+*2026-10-17*
+
 # R090 — **regression leg came back DIRTY: the two legs are one `hourHeight` (40 px) apart in initial scroll. Not a content regression — a startup RACE. No code changed.**
 
 **The finding (new, live): the initial scroll is a race with PIM arrival.** `capture-r089.png` md5 `2029858ad5e3afb429d3cfd0bf8aa6f8`

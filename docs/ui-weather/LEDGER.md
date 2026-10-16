@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.4：卡片 hover 玻璃高光 + 轻微抬升（本轮，前端）**：`apps/weather/qml/Main.qml:1184-1192`（Conditions 卡）与 `:1389-1397`（10 天卡）各加 `HoverHandler` + `cardHot` + `hoverFill`/`hoverStroke`（hover 时 fill 白 0.16→0.21、stroke 白 0.22→0.32）+ `transform: Translate`（hover 抬升 y −3px）；三处均 `Behavior` + `NumberAnimation` `duration: AppTheme.motionNormal`（220ms，reduceMotion 时为 0 自动退化瞬时）+ `Easing.OutCubic`，落在 HIG 120–300ms 内；抬升 y 显式判 `AppTheme.reduceMotion`（reduce-motion 零位移、高光瞬时）。逐小时小卡（hourlyCard）不动。
+  **帧差证据**（活实例 + spectacle 连拍 6 帧间隔 ~400ms；TEMP 脚手架 700ms Timer 翻转 `testHover` 驱动同一 `cardHot` 属性链，取证后已删并重编译；TEMP 强制下 fill 振荡由 Timer 保证，真实 HoverHandler 的 `hovered` 绑定路径与 TEMP 完全同一条）：Conditions 卡区 (260,370)-(1210,560) 相邻帧 MAE **0.833/5.230/1.111/3.742/5.251**（max 至 171，含 3px 抬升的内容边缘位移）；对照 10 天卡区 (260,700)-(1210,790) 与侧栏 (20,200)-(210,400) 五对相邻帧 **全部精确 MAE=0.0000 / maxdiff=0**。填充实测：hot `(71,90,119)` ↔ unhot `(59,80,111)`，Δ+12 ≈ 设计的 0.05 alpha 步进（0.16→0.21）；f3 `(68,88,117)` 为 220ms Behavior 中间帧（证明动画而非瞬切）。目视（/tmp/hover-crop.png，f2 hot 态）：指标卡填充变亮、描边变亮、整卡上移。
+  **终态二进制**（TEMP 已删，截图 1792165935 过体检闸）：静止态卡面回到 0.16 无高光残留、无抬升偏移，星空/侧栏/逐小时卡无回归。测试 6/6 绿、go test ok。
 - **阶段三动效 B.1（第 6 条）：雷电闪白（本轮，前端）**：`apps/weather/qml/Main.qml:71` 新增 `thunderSky`（code ≥95，与 rainySky 的雷暴分支同码表）；:633-665 主布局 RowLayout 之前新增 `flashLayer`（全窗 Rectangle、白、opacity 0 常态、位于卡片内容之下只漫亮天空区）= Timer（interval 4200ms 初始，onTriggered 随机化 3500-8500ms，落在 HIG 环境循环 2-12s 内）+ `SequentialAnimation` 双闪：0→0.32(70ms)→0(90ms)→停 110ms→0.20(60ms)→0(140ms)，全程 ~470ms，`running: thunderSky && !AppTheme.reduceMotion`（reduce-motion 停、非雷暴码零渲染、Timer 不走）。
   **帧差证据**（TEMP 强制 `currentWeatherCode=95`/`currentIsDay=true` + interval 1400 取证，取证后已删并重编译；单实例 spectacle 密集连拍 12 帧间隔 ~200ms）：闪白峰值对 f2→f3 **MAE 28.80** / f3→f4 **MAE 28.79**（maxdiff 92），闪歇对 f7→f8 / f9→f10 噪声底 MAE 0.07-0.09（信号 ≈ 噪声底 300+ 倍）；峰值瞬间天空均值 `[51.4,65.9,96.6]→[83.3,95.6,121.4]`，三通道反解白洗系数**同为 w=0.157**（纯白漫射、非偏色）；跨闪白对 f2→f4 MAE 0.107（闪完归零无残留）、控制区 f2→f4 **精确 0.0000**。峰值裁片目视：整片天空白洗提亮、雨丝仍在（/tmp/flash-peak.png）。
   **终态二进制**（TEMP 已删，截图 1792165469 过体检闸）：真实数据夜晴 code 0 → 无闪白残留（门控生效）、星空/卡片/侧栏无回归。测试 6/6 绿、go test ok。
@@ -47,7 +50,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白"（均见已改，含帧差证据）。剩余：图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升"（均见已改，含帧差证据）。剩余：图标 Bounce/Pulse/Replace、hero 温度视差、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. Conditions 卡无温度走势曲线。
 4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
@@ -55,6 +58,7 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **卡片 hover 参数无参考**：参考图全静态，hover 高光量（fill 0.16→0.21、stroke 0.22→0.32）、抬升量（−3px）、时长（220ms OutCubic）系按 HIG 120–300ms 与既有玻璃词汇（选中盘白@0.27）外推（TASK 阶段三 D 允许）；真实鼠标悬停（HoverHandler 实际触发）未在真机验证——帧差取证用 TEMP Timer 驱动同一 `cardHot` 属性链，QML HoverHandler 为标准原语、风险低，但触感（高光量/抬升幅度是否过强）待人工复核。press 态未做（卡片当前无点击行为，无 press 概念）。
 - **雷电闪白外观无参考**：参考图无雷暴画面；双闪形态（0.32/0.20 两峰、470ms 全程、闪歇随机 3.5-8.5s）、峰值白洗不透明度系程序化近似（TASK 阶段三 D 允许）。帧差抓到的峰值瞬间 w=0.157 是动画坡上一点，设计峰值 0.32/0.20 未被直接实拍（峰值窗口仅 ~70-90ms，spectacle 截屏延迟撞不撞峰值靠运气——首轮 7 帧连拍只抓到低不透明度沿 MAE 2.73，密集 12 帧才抓到峰值）。真机雷暴天观感（闪白强度是否过弱/过强）待复核。闪白层在主布局之下、位于卡片内容后面，但首轮取证侧栏区也有 Δ~1.3 亮度位移——`AppTheme.sidebarSurface` 可能带微量 alpha，闪白透亮侧栏是否合意待定。
 - **云层漂移外观无参考**：参考图为白天部分多云的静止照片，云的动态参数全系程序化近似（TASK 阶段三 D 允许）——7 朵全窗、宽 160-340px、白绒球（Canvas 径向渐变，非模糊位图）、透明度 0.10-0.24、单朵横穿 8-12s、夜间同色（白@低透明度当"月光云"用）未按昼夜分色；多云（code 2）白天 vs 阴天（code 3）vs 雾（45/48）共用同一套云未做密度/高度区分，观感待真机多云/雾天复核。Canvas 绒球在小画布（窄窗）时半径下限 8px 与 clamp 交互未在窄窗验证。
 - **云层帧差信号强但形态证据依赖活实例卫生**：本轮两次取证踩坑——a) 窗口映射晚于首拍（前 4 帧全 0）；b) pkill 模式撞到 Claude CLI 进程被拒，旧实例叠影出"硬边矩形"假象，险些把旧版本当新版本判负。教训：动效取证前必须 `pkill -x kos-weather`（精确进程名）+ 确认单实例 + 首帧后目视确认窗口已映射再连拍。

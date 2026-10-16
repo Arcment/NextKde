@@ -1,3 +1,15 @@
+### R126 — dark leg of S02/S03/S05 + C01-C04/C06 — ALL PASS (read-only, free capture) — figure `r126-dark-chrome-sidebar.png`
+
+No source, no build: the R125 dark instance (204727) was still alive, so the capture cost one `review-command.py` call. The batch had to re-set `view week` (R125 had left the app on month) alongside `resize 1100x692` / `sidebar expanded` / `date 2026-04-02`.
+
+- **C04 proved by the BLEND, three times.** The dots are hardcoded literals at `opacity 0.85`, so on dark the prediction is 0.85·token + 0.15·**(30,30,30)**: measured cores green **(38,174,59)** / yellow **(220,164,44)** / red **(221,85,78)** against (38.5,174.5,58.9) / (220.4,164.3,43.6) / (221.25,85.25,78.45) — **every channel within 0.5/255**.
+- **C01/C02/C03 — all within 0.03 px of the light numbers.** Disc **13.98** wide (AA at x1015 t=0.48/0.47/0.48 and x1029 t=0.49) and **14.02** tall (10.49..24.51 at x1078); gaps **13.99/14.01**; centres **1022.50/1050.50/1078.49**; red right edge **1085.49 = 1100 − 14.51**, red top **10.49**.
+- **C06 — the band reads (40,40,40) left of the rim and (30,30,30) right of it, the dark mirror of 228/255**, and radius 30 is now *proved* rather than restated: the arc's centre (1070,30) puts y17's edge at **x1097.04** and the capture goes black at **1097** (y5 predicts 1086.58, x1090 already black). First toolbar ink at y37.
+- **S03** — box centres **173.5/203.5/233.5** and **301.5/331.5/361.5/391.5** (pitch **30**, exactly R121's light values), box **x12..23 × 12 h**, radius **3** (top-row missing area **1.61 px²** ⇒ r≈3.2; the distance-field ramp is not the integral), label ink left **32** ⇒ gap **8**, label 13 (ink 12 Latin / 13 CJK).
+- **S02** — heading ink left **12**, 11 pt (ink 9 tall), group gap **16**, heading→first row **6**; the block model's predicted ink bands (140.5..150.5 / 267.5..277.5) land as 140..149 / 268..277.
+- **S05** — every label in one ink band; **y400..518 in the sidebar is empty plane**, so no status card and no redundant switches. The **elide half is not exercisable** (`UI Review Gold` stops at x122 vs the 208 tail) and stays carried from R121.
+- 外推: **a literal's leg-invariance is proved against that leg's own plane**; **a radius token is proved by predicting the arc's edge pixel**; **a rounded corner renders as a distance field, so fit the missing area, not the ramp**; **a live instance keeps the view you last set it to**.
+
 ### R125 — dark leg of E01/E02 (4/4 + gap 2) and the L01/L02/L04/L06/L07 re-read — figure `r125-dark-e01-toolbar.png`
 
 # R124 — **E01's LAST open light-leg clause closed: `timedChip` radius 5 → 3 (`CalendarScheduleView.qml:838`). E01 is now 4/4 PASS on light; E02's column-gap clause promoted from declared-only to PASS.** One source file, one build, one relaunch, one capture. Bonus finding: **the standing fixture DOES contain a 2-item hour** (Thu 11:00: a VEVENT *and* the `[R019 LONGTASK]` WTODO) — state.md's "every event in a distinct hour" was a VEVENT-only claim. Figure `docs/ui-calendar/r124-e01-radius.png`.

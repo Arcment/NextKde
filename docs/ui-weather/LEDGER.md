@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.1（第 5 条）：多云/雾天云层漂移（本轮，前端）**：`apps/weather/qml/Main.qml:67-70` 新增 `cloudySky`（code 2/3/45/48，昼夜通用）；:156-182 `cloudField`（mulberry32(20261019) 种子 PRNG，7 朵云：cloudWidth 160-340px、yRatio≤0.55 偏上半天空、opacity 0.10-0.24、driftMs 8000-12000ms 全屏横穿（落在 HIG 环境循环 2-12s 内）、phaseMs 0-driftMs 随机相位，每朵 4 个绒球 cxRatio 0.15-0.85 / cyRatio 0.35-0.7 / rRatio 0.28-0.5 / alphaMul 0.6-1.0）；:569-629 `cloudFieldLayer`（snowFieldLayer 之后、主 RowLayout 之前，visible 跟随 cloudySky，clip），delegate Item + `Canvas`（径向渐变绒球，软边无硬边——**首版 `r = rRatio*width` 最大 0.5×宽远超画布高 0.38×宽，渐变圆被 Canvas 边界硬裁成矩形**，改为 `r = min(rRatio*height*1.2, cy, height-cy, cx, width-cx)` 让 alpha 在触边前衰减到 0，:602-606）；`SequentialAnimation on x`（:616-624）从 -cloudW-20 线性漂到 layer.width+20，Infinite，`running: cloudySky && !AppTheme.reduceMotion`（reduce-motion 停、非多云码零渲染）。
+  **帧差证据**（TEMP 强制 `currentWeatherCode=3`/`currentIsDay=true` 取证后已删并重编译；**单实例**活窗 spectacle 连拍 5 帧间隔 ~400ms——首轮取证曾因 pkill 模式撞到 CLI 进程被拒、旧实例（修复前块状云版本）叠在新窗上，肉眼看到的"硬边矩形"是旧窗残影，`pkill -x kos-weather` 清干净后重拍）：动效天空区 (860,50)-(1160,320) 相邻帧 MAE **3.02 / 1.11 / 2.25 / 4.22**、变化像素(>8) 10635/3842/7857/14635、maxdiff 31-33；对照侧栏静止区 (60,540)-(240,690) 四对相邻帧 **全部 MAE=0.0000、maxdiff=0**。目视：hero 周围软绒球逐帧位移清晰（/tmp/cloud-hero.png）。
+  **终态二进制**（TEMP 已删，截图 1792165030 过体检闸）：真实数据夜晴 code 0 → 星空正常、天空无云朵残留（门控生效）、卡片/侧栏无回归。测试 6/6 绿、go test ok。
 - **阶段三动效 B.1（第 4 条）：雪天雪花飘移（本轮，前端）**：`apps/weather/qml/Main.qml:63-66` 新增 `snowySky`（code 71-77 / 85 / 86，与 `skyStopsFor` 雪天分支同一码表）；:128-147 `snowField`（mulberry32(20261018) 种子 PRNG，56 片雪花：xRatio 均匀、直径 2-5px、色 `#ffffff`、透明度 0.35-0.80、fallMs 6000-11000（单片全程落屏 6-11s，落在 HIG 环境循环 2-12s 内）、swayAmp 8-22px、swayMs 2000-4000ms、phaseMs 0-11000 / swayPhaseMs 0-4000 随机相位）；:470-524 `snowFieldLayer`（rainFieldLayer 之下、主布局之上，visible 跟随 snowySky，clip），每片双 `SequentialAnimation`：y 从 -(d+10) 线性落到 layer.height+10（Linear，Infinite，前 置 PauseAnimation 随机相位错峰），x 在 xBase±swayAmp 之间 InOutSine 往返摆动；`running: snowySky && !AppTheme.reduceMotion`（reduce-motion 停、非雪码零渲染）。
   **帧差证据**（TEMP 强制 `currentWeatherCode=73`/`currentIsDay=true` 取证后已删并重编译；活实例 spectacle 连拍 5 帧间隔 ~400ms）：雪区 (860,70)-(1190,380) 相邻帧 MAE **0.0423 / 0.0507 / 0.0484 / 0.0587**、变化像素(>8) 118/124/102/113、maxdiff 117-130；对照侧栏静止区 (140,600)-(320,700) 四对相邻帧 **全部 MAE=0.0000、maxdiff=0**（本轮对照区完全干净，优于前几轮的合成器噪声底）。天空白点逐帧位移目视可见（/tmp/snow-small.png 裁片）。**终态二进制**（TEMP 已删，截图 1792164288 过体检闸）：真实数据夜晴 code 0 → 天空 `#0d1d38/#102343`（夜晴色板），无文本天空区 (880,20)-(1160,140)/(350,20)-(560,140) 白点数 **0**，雪层门控生效、无残留。测试 6/6 绿、go test ok。
 - **阶段三动效 B.1（第 2 条）：雨天雨丝下落（本轮，前端）**：`apps/weather/qml/Main.qml:20-21` 新增集中属性 `currentWeatherCode`/`currentIsDay`（把 :22-24 skyStops 与 :56-58 nightClearSky 的取值收拢到这两处，行为等价重构）；:59-62 `rainySky`（code 51-67 / 80-82 / ≥95）；:107-123 `rainField`（mulberry32(20261017) 种子 PRNG，64 条雨丝：xRatio 均匀、长 10-20px、宽 1.4px、色 `#dbe9ff`、透明度 0.20-0.48、fallMs 1500-2300、phaseMs 0-2300 随机相位）；:407-441 `rainFieldLayer`（sky 渐变之上、主布局之下，visible 跟随 rainySky，clip），每条雨丝 `SequentialAnimation on y`：随机相位 Pause（起点 y=-length-10 在屏外，故暂停期不可见）→ `NumberAnimation` y 从 -(length+10) 线性落到 layer.height+10，Infinite，`running: rainySky && !AppTheme.reduceMotion`（reduce-motion 停、非雨码零渲染）。
@@ -41,7 +44,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移"（均见已改，含帧差证据）。剩余：云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移"（均见已改，含帧差证据）。剩余：雷电闪白（按天气码 ≥95）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. Conditions 卡无温度走势曲线。
 4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
@@ -49,6 +52,8 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **云层漂移外观无参考**：参考图为白天部分多云的静止照片，云的动态参数全系程序化近似（TASK 阶段三 D 允许）——7 朵全窗、宽 160-340px、白绒球（Canvas 径向渐变，非模糊位图）、透明度 0.10-0.24、单朵横穿 8-12s、夜间同色（白@低透明度当"月光云"用）未按昼夜分色；多云（code 2）白天 vs 阴天（code 3）vs 雾（45/48）共用同一套云未做密度/高度区分，观感待真机多云/雾天复核。Canvas 绒球在小画布（窄窗）时半径下限 8px 与 clamp 交互未在窄窗验证。
+- **云层帧差信号强但形态证据依赖活实例卫生**：本轮两次取证踩坑——a) 窗口映射晚于首拍（前 4 帧全 0）；b) pkill 模式撞到 Claude CLI 进程被拒，旧实例叠影出"硬边矩形"假象，险些把旧版本当新版本判负。教训：动效取证前必须 `pkill -x kos-weather`（精确进程名）+ 确认单实例 + 首帧后目视确认窗口已映射再连拍。
 - **雪花外观无参考**：参考图只有晴天；雪密度（56 片全窗）、直径（2-5px）、颜色（纯白）、透明度（0.35-0.80）、摆幅（8-22px）、摆动周期（2-4s）、下落时长（6-11s/片）系程序化近似（TASK 阶段三 D 允许）；无倾斜角度、无大小远近分层（近大远小），雪量观感（小雪还是大雪）待真机雪天复核。另一帧差局限：取证帧间隔 400ms 内雪花位移较小，信号靠"变化像素 102-124 / maxdiff 117-130 + 对照区全 0"支撑，不如"位移逐帧可见"直观。
 - **雨丝外观无参考**：参考图只有晴天；雨丝密度（64 条全窗）、长度（10-20px）、颜色（`#dbe9ff`）、透明度（0.20-0.48）、slant（本轮垂直无倾斜）、下落时长（单丝全程 1.5-2.3s，**短于 HIG 环境循环 2-12s**——按"每颗粒子"而非"整场循环"理解外推，若要求整场周期落在 2-12s 需重算）均系程序化近似（TASK 阶段三 D 允许），雨量观感（是毛毛雨还是大雨）待真机雨天复核。
 - **雨丝帧差信号比星空轮弱**：纯天空区 MAE ~0.06 / maxdiff ~75 对噪声底 MAE ~0.03 / maxdiff ~42，倍率约 2x（星空轮为计数 2 倍/峰值 2.5 倍）；1.4px 宽雨丝信号天然弱，靠"帧差图中雨丝逐帧位移"目视证据补强。若后续要求更强数值证据需加粗/提亮雨丝重拍（会改外观）。

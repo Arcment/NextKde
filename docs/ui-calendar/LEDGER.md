@@ -1,77 +1,46 @@
-# R090 — regression leg FAILED TO BE CLEAN: the two legs differ by exactly one `hourHeight` (40 px) of initial scroll. No code changed.
+# R090 — **regression leg came back DIRTY: the two legs are one `hourHeight` (40 px) apart in initial scroll. Not a content regression — a startup RACE. No code changed.**
 
-**Verdict: NOT a content regression — a startup race.** `capture-r089.png` (md5 `2029858ad5e3afb429d3cfd0bf8aa6f8`) vs `capture-r090.png`
-(md5 `e947d8a55aba4450e5cc231b9305d860`), both light 1100x692 `view week` `date 2026-04-02`. Whole-page `ImageChops.difference` (>6 RGB-sum)
-returned **154,551 differing px in 15 runs spanning the whole grid** — not the expected now-line band. The cause: the gutter labels and every
-hour line sit at the SAME absolute y in both (full-width row means 237.0/244.0 identical at y234/254/274/294 — the pitch is exactly
-`hourHeight` 40, so a 40 px scroll maps the line set and the label set onto themselves), while **every timed chip bar moved by exactly −40 px**
-(Mon column x60: `319..330` → `279..290`). One hour.
+**The finding (new, live): the initial scroll is a race with PIM arrival.** `capture-r089.png` md5 `2029858ad5e3afb429d3cfd0bf8aa6f8`
+vs `capture-r090.png` md5 `e947d8a55aba4450e5cc231b9305d860` — whole-page diff **154,551 px in 15 runs over the whole grid**, not the expected
+now-line band. Gutter labels and hour lines sit at the **same absolute y** in both (row means 237.0/244.0 identical at y234/254/274/294 —
+`hourHeight` 40 ⇒ a 40 px scroll maps both sets onto themselves) while **every timed chip bar moved exactly −40 px** (Mon x60
+`319..330` → `279..290`). Root cause in source: `CalendarScheduleView.qml:244 usefulStartHour()` returned **6** in r089 (earliest timed item
+08:00 ⇒ 8−2, `contentY 240`) and **7** in r090 = its **hard-coded fallback**, i.e. it ran against an empty model (`contentY 280`). Caller
+`positionTimeline()` (`:270`) is fired by `autoScrollTimer` (`:283-289`, `interval 450`) which re-arms on firstDate/dayCount/visible but
+**never on model population** ⇒ win the race → 06:00, lose it → 07:00, one hour of empty grid above the first chip. **This is why every
+regression leg from here on is nondeterministic until it is fixed** — and it is the next round's single subject.
 
-**Root cause, in the source — `CalendarScheduleView.qml:244` `usefulStartHour()`.** For the Apr 2 week the earliest timed item is 08:00, so
-`8 − 2 = 6` ⇒ `contentY = 6 × 40 = 240` (r089). r090 landed on **7**, which is the function's *hard-coded fallback* (`earliest` still 24,
-i.e. the function ran against an empty model) ⇒ `contentY = 280`. The caller is `positionTimeline()` (`:270`) fired by `autoScrollTimer`
-(`:283-289`, `interval: 450`, re-armed on `firstDate`/`dayCount`/`visible` change **but never on model population**). So the "scroll to the
-first event" affordance is a **race against PIM data arrival**: win it and you land on 06:00, lose it and you land on the default 07:00 —
-one hour of empty grid above the first chip, decided by timing. Two same-theme launches inside the same leg family disagree.
+**The regression answer, recovered (viewport-clamped realignment).** r089 screen `274..691` ↔ r090 screen `234..651` (= same content) ⇒
+**450 px, ONE run at r089 y664..691 (bottom 28 rows, maxrow 55)** = a realignment boundary artifact. Non-scrolling zone y0..233 = header +
+all-day band ⇒ **163 px, confined to y38..60 x35..75 = the sidebar-toggle glyph's AA**. ⇒ **The band's 3 chips + `+2`, all four band rules,
+every hour/half-hour line, every gutter label and every timed chip are byte-identical. R088+R089 stay independently regression-verified;
+A04 remains PASS.** Figure `docs/ui-calendar/r090-scroll-race.png`. (2026-10-17)
 
-**The regression answer, recovered.** Realigning viewport-clamped (r089 screen `274..691` ↔ r090 screen `234..651`, i.e. content-equal) collapses
-the diff to **450 px in ONE run at r089 y664..691 (28 bottom rows, x0..1099, maxrow 55)** — a viewport-boundary artifact of the realignment.
-The non-scrolling zone (y0..233 = header + all-day band) differs by **163 px confined to y38..60, x35..75** = the sidebar-toggle glyph's
-antialiasing. ⇒ **The all-day band's 3 chips + `+2`, all four band rules, every hour/half-hour line, every gutter label and every timed chip
-are byte-identical. R088+R089 are independently regression-verified.** Figures `docs/ui-calendar/r090-scroll-race.png`.
-
-# R089 — A04 step 2 PASS: the all-day band's overflow is explicit. Thu Apr 2 (4 items, 3 slots) now renders `Design sync` / `Release notes` / **`+2`** — nothing is dropped silently.
-
-**Spec-only, NOT ref-anchored:** `refs/macos-calendar.png`'s 7 columns carry at most 3 chips, so it cannot anchor an overflow form. The form
-(three-slot band ⇒ `rows−1` chips + a `+N` remainder row) is the macOS week-view convention read off the HIG, not off this reference.
-
-**Measured (light 1100x692, `view week`, `date 2026-04-02`).** Thu (x502..651): slot 1 `Design sync` (y157-180), slot 2 `Release notes`
-(y182-205), slot 3 **`+2`** (y207-230) — the band's ink colour, no fill, so a count of hidden items does not read as an event chip. Fri
-(x652..801) keeps its single `R087 sole` chip and gets **no** `+N` (1 item ≤ 3 slots). Dark leg: the same `+2` in the dark chip ink.
-**Regression proof: whole-page `ImageChops.difference` vs `capture-r088.png`, per-pixel threshold >6 (RGB sum) ⇒ exactly ONE contiguous
-y-group, y207..230, x503..650 (Thu's third slot alone), max 148 px/row; every other pixel of the 1100x692 page is byte-identical.** The run's
-x-range is column-bounded, not full-width, so it is the content change and not a now-line artifact.
-
-**Code:** `apps/calendar/qml/CalendarScheduleView.qml` — the band's `ColumnLayout` gained `id: allDayStack` with `allDayOverflow =
-max(0, columnItems.length − allDayBandRows + 1)` and `allDayVisible = allDayBandRows − (overflow > 0 ? 1 : 0)`; the `Repeater`'s model is now
-`slice(0, allDayStack.allDayVisible)`; a trailing `Label` renders `"+" + allDayOverflow` in a chip-height slot. The chip-ink expression reached
-its **third** consumer, so R079/R080's duplicated `inkColor` body was hoisted to a root `chipInk(item)` function — both chip delegates are
-**binding-equivalent**, which the byte-identical whole-page diff confirms. `allDayBandRows`, `allDayBandHeight`, the grid-cell slice and the
-month cell are untouched.
-
-Figures: `docs/ui-calendar/r089-band-overflow-light3x.png`, `r089-band-overflow-dark3x.png`. (2026-10-17)
-
-# R088 — **A04 step 1 PASS: the band's 2-item cap is gone. ONE line (`:454 slice(0, 2)` → `slice(0, root.allDayBandRows)`), and Thu Apr 2 renders 3 chips; the whole page outside Thu's 3rd slot is byte-identical.**
-
-Measured (light 1100x692, `view week`, `date 2026-04-02`, md5 `4c59ed839306aa0d8fc7621e17db70b4`), on R087's fixture (still in the live
-profile): **Thu (x502..651) now shows THREE chips — y157-180 `Design sync` (214.7), y182-205 `Release notes` (208.7), y207-230 `R087 card C`
-(216.5).** The **4th (`R087 card D`) is still dropped and there is still NO `+N`** — read off the crop. **Fri = 1 chip**; **Mon/Tue/Wed = 1
-chip each, row mean 203.576 identical across all three** (`Multi-day review`). **The four band rules are unmoved**: `sectionRule` **y155
-(242)**; interior **156..231 = 76**; `allDaySeparator` **y232-233 (217, 2px)**; first hour line **y234**.
-**Regression proof (the instrument of the round):** whole-page `ImageChops.difference` R087→R088 with a per-row count of pixels differing by
-**>6 (RGB sum)** has **exactly one contiguous y-group — y207..230, max 148 px/row** — and its x-range is **503..650 = Thu's column alone**.
-**Everything else on the entire 1100x692 page is byte-identical.** Slot geometry corrected: ours is inset1 + 24 + gap1 + 24 + gap1 + 24 +
-inset1 = **76**, so slot content = **157-180 / 182-205 / 207-230** (the older "third slot 206-231" included the gap and inset).
-Figure `docs/ui-calendar/r088-allday-band-3chips.png`. (2026-10-17)
-
-## ## 本轮 (R088)
-Atomic step: **raise the band's model cap from 2 to the slot count — ONE line** + a 2-line comment. Nothing else: not `allDayBandRows`, not
-`allDayBandHeight`, not `:689`'s grid-cell slice, not the month cell. ~8 Bash (1 grep, 1 edit, 1 build, 1 leg, 3 scans/reads, 1 ledger write).
+## ## 本轮 (R090)
+Atomic step: **the regression leg the plan called for.** ONE capture (`leg.sh light r090`), then the whole-page diff. It came back dirty, so
+the round's deliverable became the **diagnosis** (measured −40 px, then grep → `usefulStartHour` → the 450 ms timer never re-arming on the
+model) plus the **recovered containment proof** by realigning within the viewport. **No code was touched** — the fix is a second thing and
+belongs to R091. ~21 Bash (2 legs-worth of driving but only 1 launch, 4 measurement scripts, 1 fixture/log grep, 1 source grep+sed, 2 doc writes).
 **`code-writer` is still NOT registered** (agent list: claude / Explore / general-purpose / Plan / statusline-setup); implementer/test role was
-me, R072–R088 precedent — **do not retry it each round.** The R087 fixture (4 all-day items on Thu, 1 on Fri) is **still in the gitignored
-`profile/pim/calendar.ics`**, so the next round can measure on it as-is.
+me, R072–R090 precedent — **do not retry it each round.** The R087 fixture (4 all-day items on Thu, 1 on Fri) is **still live**.
 
-## E01/E02 + N02 status (unchanged R077–R088)
+## The chip-ink hoist (R089, structural — read this before touching a chip)
+**`inkColor` reached its THIRD consumer** (timedChip R079, allDayChip R080, the band's `+N` row R089), so the rule now lives **once** at
+`CalendarScheduleView.qml`'s root as **`chipInk(item)`**; both chip delegates are `readonly property color inkColor: root.chipInk(modelData)`.
+**If a fourth consumer appears, call `root.chipInk(item)`; do not inline the expression again.**
+
+## E01/E02 + N02 status (unchanged R077–R089)
 Timed chip — **bar PASS (R077), no border PASS (R078), dark same-hue ink PASS (R079)**. Band chip — **ink PASS (R080)**.
-**The band chip's ring icon is MEASURED (R081) but NOT built — blocked on ruling H** (ring 16 vertical-ratio vs 22 horizontal). **R084/R087/R088
-changed no chip code ⇒ R080's regression evidence stands.** **N02 — line + dot + pill PASS on the light leg (R084) AND the dark leg (R085).**
-Open residue: the **dark faint rule's ΔL is half the light leg's** (7.4 vs 15.5) — a theme fact, **not a defect**. **N02's today header disc
-CLOSED R086** (22 px, the ref's own diameter).
+**The band chip's ring icon is MEASURED (R081) but NOT built — blocked on ruling H** (ring 16 vertical-ratio vs 22 horizontal). **R089's hoist
+is binding-equivalent (whole-page diff) ⇒ R080's regression evidence stands.** **N02 — line + dot + pill PASS on the light leg (R084) AND the
+dark leg (R085).** Open residue: the **dark faint rule's ΔL is half the light leg's** (7.4 vs 15.5) — a theme fact, **not a defect**.
+**N02's today header disc CLOSED R086** (22 px, the ref's own diameter).
 
 ## 仍差 (top 7, visual-impact order)
-1. **A04 step 2 — a band column with MORE items than slots drops them silently: no `+N`.** Step 1 (R088) made the band render its 3 slots;
-   the 4th item on Thu Apr 2 is still invisible with no count. **Unblocked, but NO ref anchor** (the ref never exceeds 3 chips) ⇒ it is a
-   **HIG/spec-only design call**, not a measurement. Target form: `allDayBandRows − 1` chips + a final `+N` row (macOS week-view convention).
+1. **THE INITIAL SCROLL IS A RACE (NEW, R090) — the only *defect* in this list that is neither cosmetic nor ruling-blocked.** Losing the race
+   to PIM arrival drops the view on the hard-coded hour 7 instead of the first event's hour − 2. Fix = make `positionTimeline()` re-run when
+   the model populates (or bind it), so `usefulStartHour()` is always evaluated against data. **Blocks every future regression leg until fixed.**
+   Source: `CalendarScheduleView.qml:244` / `:270` / `:283-289`.
 2. **The all-day BAND chip's icon — ours has NONE. Fully MEASURED, blocked on ruling H (R081).** Ref: **12x12 ring, stroke 3 / hole 6,
    inset 3 from the chip's fill on left/top/bottom, colour = `itemColor` at full saturation (no alpha)**, text ink 17-19 ref px right of
    the ring's outer-left edge. @x1.33 ⇒ **16 / stroke 4 / inset 4 / text at fill_left + 28**. **Also unanswered: the thin-stroke family**
@@ -82,31 +51,44 @@ CLOSED R086** (22 px, the ref's own diameter).
    **Needs ruling A.**
 5. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. App-wide. **Needs ruling B.**
 6. **Month day cell `slice(0, 2)` — 1 chip + `N` where the ref stacks 3.** **Needs ruling D — and a 3-all-day-item *month* day before it
-   can be reproduced at all** (the R087 fixture is a week-view fixture). **Now the *only* remaining `slice(0, 2)` with a content cap**
-   (`:689` is the grid hour cell — check it separately, but it has no ref counter-example either).
+   can be reproduced at all** (the live fixture is a week-view fixture). **The only remaining `slice(0, 2)` with a content cap** (`:689` is
+   the grid hour cell — no ref counter-example either). **Note the band's own cap is now gone (R089); this is the last one.**
 7. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (near-identical, ~3.7 px at our scale). Rides on
    **ruling G**. Do not chase without a ruling.
-- **CLOSED in R088: 仍差 #1 (old) / A04 step 1 — the band's 2-item cap.** Ref-anchored (R087's uniform 3-row ref strip carries 3-chip
-  columns) and byte-contained; promoted the remaining half (`+N`) to 仍差 #1.
-- **CLOSED in R087: 仍差 #2 (old) / A02 — "the all-day band expands uniformly".** A **ref-satisfied-for-height** clause, not a defect.
+- **CLOSED in R089: 仍差 #1 (old) / A04 step 2 — the band's silent overflow.** Spec-only (no ref anchor); the `+2` row is a HIG-convention
+  design call, proved contained by the whole-page diff. **A04 is now fully PASS.**
+- **CLOSED in R088: A04 step 1 — the band's 2-item cap.** Ref-anchored and byte-contained.
+- **CLOSED in R087: A02 — "the all-day band expands uniformly".** A **ref-satisfied-for-height** clause, not a defect.
 - **CLOSED in R086: the today header disc's size.** 20 → **22 px** (`radius 11`); "×1.33 ⇒ 29" withdrawn.
 - *Cosmetic / settled, no ID:* `secondary` hover = neutral grey 79 no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. D02 radius
   **16** vs spec 24/32 — **keep 16**. Topmost visible gutter label is **half-clipped** when a scroll offset lands an hour line exactly on the
   viewport top (R066; scroll artifact). Band-chip fill alpha ref **0.16** vs ours **0.17** (R080) — not worth a round.
 
 ## ## 最近已改 (most recent 8)
-1. R088 — **A04 step 1**: `CalendarScheduleView.qml:454` `model: allDayColumn.columnItems.slice(0, 2)` → **`slice(0, root.allDayBandRows)`**
-   + a 2-line comment. Thu Apr 2 renders 3 chips; 4th still dropped, no `+N`; whole-page diff confined to y207..230 × x503..650.
-2. R087 — **verdict + fixture, NO code changed**: 3 all-day VEVENTs added to `profile/pim/calendar.ics` ⇒ **Thu = 4 all-day items**; ref band
-   re-measured ⇒ uniform 3-row strip carrying 0/1/2/3 chips ⇒ **A02 closes, A04 opens**.
-3. R086 — **the header date mark**: `width/height/radius` `20/20/10` → **`22/22/11`** on the one Rectangle the today and selected discs share.
-4. R085 — **verdict only, NO code changed**: N02's dark leg captured; pill 42×20 at x4..45, fill `(229,72,77)` in both themes.
-5. R083 — **`Main.qml`**: new `itemStableId(item)` + the sort comparator's tie fallback (UID, then title) ⇒ the all-day tie order is total.
-6. R082 — **verdict only**: the Thu band-chip order swap is **run-to-run**, not theme-dependent; mechanism = equal `DTSTART` ties.
-7. R081 — **measurement only**: the band chip's ring icon → 12x12 / stroke 3 / hole 6 / inset 3 / item-colour ink; thin-stroke family found.
-8. R080 — **the band chip's ink**: `allDayChip` gained a derived `inkColor` (same expression as `timedChip`).
+1. R090 — **verdict + diagnosis, NO code changed**: the regression leg is one `hourHeight` off; root cause = the initial-scroll race in
+   `usefulStartHour()`/`autoScrollTimer`; containment recovered by viewport-clamped realignment (see 外推).
+2. R089 — **A04 step 2**: band `ColumnLayout` → `id: allDayStack` + `allDayOverflow`/`allDayVisible`; Repeater model
+   `slice(0, allDayStack.allDayVisible)`; trailing `+N` `Label`; chip ink hoisted to root **`chipInk(item)`** (3rd consumer).
+2. R088 — **A04 step 1**: `:454 slice(0, 2)` → `slice(0, root.allDayBandRows)` + a 2-line comment.
+3. R087 — **verdict + fixture, NO code changed**: 3 all-day VEVENTs added ⇒ **Thu = 4 all-day items**; ref band re-measured ⇒ A02 closes, A04 opens.
+4. R086 — **the header date mark**: `width/height/radius` `20/20/10` → **`22/22/11`** on the shared today/selected disc.
+5. R085 — **verdict only, NO code changed**: N02's dark leg captured; pill 42×20 at x4..45, fill `(229,72,77)` both themes.
+6. R083 — **`Main.qml`**: `itemStableId(item)` + the sort comparator's tie fallback (UID, then title) ⇒ the all-day tie order is total.
+7. R082 — **verdict only**: the Thu band-chip order swap is **run-to-run**, not theme-dependent; mechanism = equal `DTSTART` ties.
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
+- **A CROSS-LEG WHOLE-PAGE DIFF MUST FIRST MEASURE THE SCROLL OFFSET, OR IT REPORTS A ONE-HOUR SHIFT AS A 154k-PIXEL REGRESSION (R090).**
+  The launcher's `contentY` is `usefulStartHour() * hourHeight` and **`hourHeight` equals the hour-line pitch (40)** ⇒ a 40 px scroll offset
+  **leaves every hour line, half-hour line and gutter label at the same absolute y** while moving every chip. So the tell is not the lines —
+  it is **one chip's bar y** (scan a chip's saturated left bar in a fixed column; `319..330` vs `279..290` = exactly −40). **Recipe:**
+  (1) read one chip bar in each leg; (2) if they differ by k·40, realign **viewport-clamped** — r089 screen `(274..691)` ↔ r090 screen
+  `(234..651)`, i.e. floor to the viewport top on BOTH sides, **never by pasting whole images** (that drags the *fixed* all-day band into the
+  scrolled comparison and invents a 57k-px run at y155..245); (3) the residual is the answer.
+- **THE INITIAL SCROLL IS A RACE WITH PIM ARRIVAL (R090).** `usefulStartHour()` (`CalendarScheduleView.qml:244`) returns `earliest − 2`, and
+  `7` when the model is still empty; it is called by `positionTimeline()` (`:270`) from `autoScrollTimer` (`:283-289`, `interval 450`) which
+  re-arms on `firstDate`/`dayCount`/`visible` **but not on model population**. ⇒ **two same-theme legs can legitimately land on different
+  hours, and a "the view starts at 07:00" report is this, not a layout bug.** Also: the *fallback* is what the user sees whenever the model is
+  slow, so "the view opens one hour above the first chip" is a real defect, not just a test artifact.
 - **A WHOLE-PAGE `ImageChops.difference` WITH A PER-ROW DIFF COUNT IS THE CHEAPEST REGRESSION PROOF (R088).** Threshold per pixel at
   **>6 RGB-sum** (kills AA), then group the differing rows into contiguous y-runs and read each run's x-range. It returned
   **"exactly one run, y207..230, x503..650"** for a one-line change — a *containment* proof that "the four rules didn't move" cannot give.
@@ -176,8 +158,14 @@ CLOSED R086** (22 px, the ref's own diameter).
 - **OUR `allDayChip` AFTER R080 (re-confirmed R088):** fill `withAlpha(itemColor, dark ? 0.32 : 0.17)` — light blue **(220,236,246)**, dark
   **(35,65,83)**; ink halfway to the pole — light **(24,70,99)**, dark **(152,198,227)**. **Band rows 157-180 / 182-205 / 207-230** (gap 1,
   inset 1, height 24, per R088's corrected geometry); band chip inset 1 ⇒ fills 53..200 / 203..350 / 353..500 / 503..650…; Label
-  `leftMargin: 5`. **R083: the Thu band region is byte-reproducible across two same-theme launches.** **R088: all 3 slots render; the cap
-  is now `:454 slice(0, root.allDayBandRows)` — and there is still NO overflow affordance past slot 3.**
+  `leftMargin: 5`. **R083: the Thu band region is byte-reproducible across two same-theme launches.** **R089: the model is
+  `slice(0, allDayStack.allDayVisible)` — 3 chips when a column holds ≤3 items, else 2 chips + a `+N` row; there is no cap left to hit.**
+- **THE BAND'S OVERFLOW ROW IS A SPEC-ONLY FORM, AND ITS GEOMETRY IS THE CHIP SLOT'S (R089).** When a column exceeds `allDayBandRows`,
+  `allDayStack.allDayVisible = allDayBandRows − 1` and the last slot renders `"+" + allDayOverflow` — **plain `root.chipInk(hidden item)`
+  ink on the band's own background, NO fill, `leftPadding: 5`, `font.pixelSize: 9`, height bound to `allDayRowHeight`** so the slot's
+  rectangle is a chip's rectangle. Measured: Thu slot 3 = y207..230, x503..650 (the whole-page diff's single run). **The ref's 7 columns
+  carry ≤3 chips ⇒ NO ref anchor exists for `+N`'s form, its ink, or whether it should be `+N` at all — label every future change here
+  spec-only.** The `+N`'s ink is taken from the **first hidden** item; no rule in the ref or the HIG fixes that choice.
 - **THE REFERENCE WEEK CONTAINS NO MULTI-DAY ALL-DAY EVENT (R076)** ⇒ **A03's clause has no ref anchor; say "spec-only".**
 - **ALL-DAY RANGE ARITHMETIC SUBTRACTS EXACTLY ONE DAY — NEVER TWO (R076).** The record's end is the **inclusive last day**.
 - **A SQUARE JOINT ONLY READS AS "ONE BAR" BECAUSE THE COLUMN RULE IS DRAWN THROUGH THE BAND (R074 + R076).** ⇒ if the R074 separators are
@@ -295,28 +283,26 @@ CLOSED R086** (22 px, the ref's own diameter).
   `state.md`/`rounds.md` can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## ## Next round (pick ONLY #1)
-**#1 — A04 step 2: make the band's overflow explicit — ONE atomic change.** On the R087 fixture (still live) **Thu Apr 2 holds 4 items in a
-3-slot band**, and today **3 render + the 4th vanishes with no count**. Target: when a band column's item count exceeds
-`root.allDayBandRows`, render **`allDayBandRows − 1` chips + one final `+N` row** (N = the hidden count), so Thu shows
-**`Design sync` / `Release notes` / `+2`** and nothing is dropped silently. **This is a DESIGN CALL, not a measurement: the ref never exceeds
-3 chips ⇒ no ref anchor. Label it spec-only in the ledger.** Implement in `apps/calendar/qml/CalendarScheduleView.qml` at the band delegate
-(`:451`-`:465` region, the `Repeater` whose model R088 changed) — a small `readonly property int allDayVisible` on the band `Column` plus a
-trailing chip when `columnItems.length > allDayBandRows`, `Label` styled like the chip's ink. **Do NOT touch `allDayBandRows`,
-`allDayBandHeight`, `:689`'s grid-cell slice, or the month cell.**
-**Regression guard, exact:** the four band rules must not move (`sectionRule` y155 = 242; interior 156..231 = 76; `allDaySeparator`
-y232-233 = 217 at 2px; first hour line y234); **Mon/Tue/Wed must keep their single chip with row mean 203.576; Fri must keep `R087 sole` at
-y157-180 with one chip only** (Fri has 1 item ⇒ no `+N`); and the whole-page diff vs `capture-r088.png` must be confined to **x503..650,
-y157..230** — anything outside Thu's band is a regression. **A `+2` in Thu's third slot proves A04 step 2.**
-**Then (unlocked, ref-anchored, one per round):** nothing ref-anchored and unblocked remains in the all-day/grid track — 仍差 #2 needs ruling
-H, #3 needs ruling F, #4 ruling A, #5 ruling B, #6 ruling D + a month fixture, #7 ruling G. **The next best unblocked step after A04 step 2 is
-to build the band-chip RING ICON if ruling H has been answered** (fully measured in R081), **or to run the final end-to-end regression over
-T01/T02/T03/A01/A03/E01/E02/N02** if the ask is to close out.
+**#1 — fix the initial-scroll race (R090's finding). ONE atomic change in `CalendarScheduleView.qml`.** Today the only thing that calls
+`positionTimeline()` is `autoScrollTimer`, armed 450 ms after `firstDate`/`dayCount`/`visible` change and **never re-armed when the model
+populates** (`:283-289`). Target behaviour: `usefulStartHour()` is evaluated **after** the day's items exist, so a launched Apr-2 week always
+lands on `contentY = 6 * 40 = 240` (first chip `Morning planning` 08:00 ⇒ 8−2), never on the `7` fallback. Smallest candidates, in order:
+(a) also re-arm `autoScrollTimer` on the model's count/rows changes; (b) have `positionTimeline()` mark itself "positioned" and re-run once
+when the model first becomes non-empty; (c) drop the `7` fallback so an empty model cannot masquerade as "hour 7 is the answer". **Do not
+change `hourHeight`, the band, or any chip** — this is one binding/timer change. **Acceptance, and it must be measured, not eyeballed:**
+two consecutive fresh light legs (`leg.sh light r091a` / `r091b`) must produce the **same chip-bar y** (the R090 tell: scan a chip's
+saturated left bar in the Mon column, x≈60) and a whole-page diff ≈0 outside the header-icon AA (163 px, y38..60 x35..75) — **no 40 px
+offset, no 154k px**. If two legs still disagree, that is the finding, and the residual re-frames the round.
+**Then (unlocked, ref-anchored, one per round):** nothing ref-anchored and unblocked remains in the all-day/grid track — the band icon needs
+ruling H, 仍差 #3 ruling F, #4 ruling A, #5 ruling B, #6 ruling D + a month fixture, #7 ruling G. The next best unblocked step after the race is
+to build the band-chip RING ICON if ruling H has been answered (fully measured in R081).
 
 **Blocked on rulings A–H:** the **band icon (H, R081 — measured, needs only the ruling and one decision: 16 vs 22)**, dim snap (A),
 shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses 1+2 PASS R048), month `slice(0,2)` / 1-chip cap (D — also needs
 a 3-all-day-item *month* day), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs the ref's measured
-1**. **The `code-writer` subagent is NOT registered in this session** — R072–R088's edits were made directly; do not retry `code-writer`
-each round. **Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04 step 1**
-PASS R088, step 2 open; **E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**;
-everything else PENDING or ruling-blocked. **R088 changed one line in `CalendarScheduleView.qml` only ⇒ R080's chip regression evidence
-still stands.**)
+1**. **The `code-writer` subagent is NOT registered in this session** — R072–R089's edits were made directly; do not retry `code-writer`
+each round. **Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04 fully
+PASS — step 1 R088 ref-anchored, step 2 R089 spec-only + byte-contained, and R090's realigned leg re-confirmed the band (3 chips +
+`+2`), all four band rules, the hour lines, the gutter labels and every timed chip as byte-identical**; **E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080);
+**N02 closed on both legs (R085)**; **A02 closed R087**; everything else PENDING or ruling-blocked. **R089's only chip-code change was the
+binding-equivalent ink hoist ⇒ R080's chip regression evidence still stands, and the whole-page diff says so in pixels.**)

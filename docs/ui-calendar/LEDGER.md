@@ -1,3 +1,60 @@
+# R056 — **D08 light leg: three distinct fills PASS, the light ring is `focusRing`@0.64 rendered exactly — but light shows NO ring at a clean dialog open, and the light footer sits 12px lower than R055's dark footer** (2026-10-16)
+
+## 本轮 (R056)
+Atomic step: R055's Next round #1 = "D08 light leg: repeat R055's capture with `KOS_APPEARANCE=light`".
+Done: the light leg. No code change, **0 build→screenshot loops**.
+
+Drive (light, 1100x692, pids 103791→**107851**): kill the dark pid read from `live-app.pid`, `start-review-vm.sh light`,
+then `escape` → `date 2026-04-02` → `view day` → `openItem {kind:"event",titleContains:"Design review"}` (popover) →
+`pointerObject detailsEdit` ×3 (dialog) → one command list of 9: `nativeRecord r056-lit 9000ms/250`, then
+`pointer {x:557,y:587}` move→press→drag-out(500,400)→release, then `pointer {x:557,y:550}` move→press→drag-out→release.
+**36 frames.** Per-frame `elapsedMs` was read back out of the log's `native recording` line to map state→frame.
+
+Measured by a 1px column scan at x=450 (light, card fill **(247,247,247)**), y from 530:
+| button | y span | normal | hover | pressed |
+|---|---|---|---|---|
+| 保存 (primary, `accent*`) | 547..578 | **(48,140,198)** | **(69,152,204)** | **(85,161,208)** |
+| 取消 (secondary, `buttonNeutral*`) | 584..615 | **(227,229,230)** | **(215,216,217)** | **(204,205,206)** |
+| 删除日程 (destructive 2nd) | 621..650 | (227,229,230) + red label | — | — |
+Pitch 37, gap 6, x 384..730 — **the same pitch/gap as dark**.
+
+- **Three distinct fills on both kinds ⇒ hover ≠ pressed ≠ normal. PASS** (light leg).
+- **Every light token lands on its formula exactly:** `accentHover` (69,152,204) and `accentPressed` (85,161,208)
+  match dark digit-for-digit; `buttonNeutralHover`/`Pressed` are `buttonNeutral` mixed 0.055/0.105 toward **black**
+  over the measured base (215,216,217)/(204,205,206) — both exact. **The focus ring renders #78b3d8 = (120,179,216)
+  = `accent`@0.64**, the light `focusRing` (`AppTheme.qml:141`), 2px, on the box's top rows (585,586) **and** bottom
+  rows (613,614) — the same 2px geometry dark showed ⇒ **D08's `focusRing` clause PASSES in light too.**
+- **`buttonNeutral`'s base is NOT the rendered dialog fill.** Prediction `mix(card, black, 0.095)` with card
+  (247,247,247) gives (224,224,224); measured **+3/+5/+6 bluer** at (227,229,230) ⇒ the light button base is
+  ≈**(251,252,254)**, i.e. a lighter/tinted token than the dialog's own fill. Same story for the hover edge:
+  measured 1px hairline **(209,211,215)** vs `borderHover` (`AppTheme.qml:135-137`) over (247,247,247) = (198,202,207).
+- **While hovered the ring is replaced by that 1px gray hairline and returns on leave** (frames 739/988 ms = 取消
+  hover, no ring; 1988 ms onward = 取消 back to (227,229,230) **with** the ring). The ring follows the press:
+  取消 holds it from 1988 ms until 保存 takes it at 3736 ms. `KosSurface.qml:61-64` again ⇒ **a 1px gray edge on a
+  hovered button proves `focused == false` while hovered** — the same HoverHandler-drops-activeFocus behaviour as
+  dark. Observation, not filed.
+- **New, reproducible, and NOT explained: in light no `KosButton` shows a ring at a clean dialog open.** Frames
+  251/501 ms of the main record and a separate clean re-open (`escape`→`date`→`view day`→`openItem`→`detailsEdit`×3
+  → `nativeRecord r056-open 3000/250`, 11 frames) both show 取消 flat (227,229,230) across **all** rows 584..615 —
+  no ring, no matter which button. R055 measured the ring **on 取消 at open** in dark.
+- **New, reproducible, and NOT explained: the light footer sits 12px lower than R055's dark footer** (保存 547..578
+  here vs 535..565 in R055). **Dialog geometry is identical**, so this is not a taller card: the visible event-editor
+  Flickable reads `sceneX 387.6, sceneY 131.4, w 340, h 380, contentHeight 418` in light — **the same numbers R055
+  recorded for dark.** R054's "13px-lower" reading (Save 546..577) that R055 retired as a *post-`resize` layout lag*
+  is within 1px of this round's light numbers, so **that retirement is probably wrong — the offset looks like light
+  vs dark, not lag.**
+- Both anomalies are handed to Next #1 (one dark re-measure with *this* round's method decides both).
+
+Evidence (mirrored to `docs/ui-calendar/`, 2x crops of x 384..736 × y 528..662):
+`r056-lit-footer-normal.png`, `r056-lit-cancel-{hover,press,focusring}.png`,
+`r056-lit-save-{hover,press,focusring}.png`. `rounds.md` carries the frame→elapsedMs map.
+
+**Round-level discipline note:** **28 Bash calls (budget 25 — over)**. Two self-inflicted detours: (a) a
+`nativeRecord 500ms/250→500` with `interval == duration` produced **0 frames** — the stop timer wins the race;
+(b) I spent calls re-deriving "is the dialog open?" from logs when one frame answers it. Both are now in 外推.
+
+---
+
 # R055 — **D08 dark leg: hover/pressed/focus captured — the focus ring is REAL (2px `focusRing`), and all three fills are distinct** (2026-10-16)
 
 ## 本轮 (R055)

@@ -1,3 +1,15 @@
+## R121 — S02 / S03 / S05 re-verified on the R118 build (light, expanded sidebar): all three PASS
+
+Re-verification round on the frozen R118 binary (light leg, 1100x692, sidebar expanded). Two fresh client captures: `r121-sidebar-light.png` (fixture lists) and `r121-s05-elide.png` (private Inbox renamed in the ISOLATED profile only, restored after — the R007 method). Figure `docs/ui-calendar/r121-sidebar-groups.png`.
+
+**S02 — groups.** Heading inset 12 (`Calendars` ink starts x13-15, no left bearing at 11px), heading font 11 (`font.pixelSize: 11`, ink 9 px tall for `Calendars`), heading block 137..153 (topMargin 16 + 16) -> first row top 158.5 = **6 px** gap (spec 6-8). Group gap: last category row bottom 248.5 -> `Task lists` label top 264.5 = **16 px** (spec 16-20). Heading tone `labelSecondary` on the 228 plane.
+
+**S03 — rows.** Row pitch **30.0** measured twice over: box centres 173.5 / 203.5 / 233.5 (Calendars group) and 301.5 / 331.5 / 361.5 / 391.5 (Task lists group). Checkbox **12x12** (x12..23, y168..179), corner inset 1 px on the first/last row => radius 2-3, token `categoryBoxRadius: 3`. Label 13 (`categoryFontSize`), gap **8**: box right edge 24 -> Label left 32, measured ink start x33 (Latin 1 px bearing) / x34 (CJK). Nested row inset 12+24=36 (box x36..47), hollow 1 px border when unchecked.
+
+**S05 — elide + no-redundant-chrome.** Long mixed CJK/Latin list name renders **single line with a trailing ellipsis** (`收件箱与 Personal Inbox 的...`), ink ends **x203**, inside the 12 px right inset (208), no wrap, no collision. No switches anywhere in the sidebar (12 px checkboxes carry the state) and no persistent healthy-status card (the `!pim.connected` banner is absent while connected).
+
+**Verdict: S02 PASS, S03 PASS, S05 PASS (light, final regression leg).** No source file touched; no build. Fixture restored to the 4 canonical task lists (`metadata.json` revision 31) and a clean light instance left alive.
+
 # R120 — **仍差 #7 (the two reds) CLOSED AS A DECISION by R119's own rule, and the rule now covers SATURATED FILLS, not just ink.** The ref's mini-month disc **(207,51,35)** sits on the **VIBRANT** sidebar (plane **237**); the same semantic red on the ref's **FLAT** planes reads **(235,76,70) TWICE, independently** — the `9:41` now-pill on the white gutter (n=230) and the **now-line over the flat grid in today's column** (n=113, `x493..569` = the whole Wed column). `vibrant − flat = (−28,−25,−35)`: **B −50%, G −33%, R −12%** — a saturation boost, the same class of distortion R119 measured for ink (flat `0` → vibrant `97`). **Our disc reads exactly `todayRed` `(229,72,77)` on our flat 228 sidebar; the ref's own flat red is 7/255 (max channel) away — inside the noise of a re-encoded screenshot.** ⇒ **both discs keep `todayRed` / `selectionDisc`; no code change, 0 builds, 0 launches.** Figure `r120-two-reds-flat-vs-vibrant.png`. **CONSEQUENCE: every remaining 仍差 #1–#6 is now RULING-BLOCKED — no plain-judgment visual gap is left.**
 
 ## 本轮 (R120)

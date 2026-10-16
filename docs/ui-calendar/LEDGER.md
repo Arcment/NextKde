@@ -1,3 +1,18 @@
+# R074 — **A01 step 4 done: the all-day band now carries the grid's column separators.**
+Asymmetric read: our band drew **no** column separators while the reference's run **unbroken through it** at its hour-line
+weight. Re-measured the ref at 1:1: separators at **x=324/406/487** read **244/236/242** — one line at three subpixel
+coverages on 81.3px columns (full coverage ≈**236** = the ref's own hour-line token) ⇒ **no new token, reuse `gridLine`**.
+`CalendarScheduleView.qml` `allDayColumn`: two 1px Rectangles added after the weekend tint — a **left edge** per column (the
+hourCell idiom: one edge per boundary, so neighbours can never stack into 2px) with its **left pixel on the delegate's x**, plus
+a **right rim only on `index === dayCount - 1`**. **Measured on our capture (1100x692 light, `view week` + `date 2026-04-02`):**
+a row run-scan at **y=215** (the band's empty third slot, previously uniform 255) now reads 1px **237** at
+**52 / 202 / 352 / 502 / 652 / 802** — **byte-identical to the grid's row y=250**, and the boundary pixels are single-width
+(x=501 is 255, **502 is 237**, x=503 is 255 — no doubles). The R073 y-map is unchanged: **155** sectionRule 242 · **156** white
+(inset 1) · **157-180** chip · **181** gap · **182-205** chip · **232-233** allDaySeparator · **234** first hour line, and the
+x=577 vertical profile reports the same bands. Reused token: `gridLine` (light `#EDEDED` → 237, dark white@0.13). No geometry
+touched: inset 1, row 24, gap 1, band 76, radius 5, the four rule tokens and the weekend tint are all as R073 left them.
+Screenshot: `docs/ui-calendar/r074-band-separators-light.png`. (2026-10-17)
+
 # R073 — **A01 step 3 done: the all-day band's inset now matches the reference — 3 → 1, band 80 → 76.**
 The reference was re-measured at 1:1 **on both legs this round**. Vertical: the band's top rule is **y=124** and the first chip
 starts at **y=126** ⇒ inset **≈1 ref-px**. Horizontal (new): the column separator sits at **x=324** and the near-white chip starts

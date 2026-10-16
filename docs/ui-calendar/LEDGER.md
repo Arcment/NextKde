@@ -1,3 +1,22 @@
+## R109 — A03 clause (b): the all-day run is now continuous. PASS.
+
+**Source.** `apps/calendar/qml/CalendarScheduleView.qml` — three hunks plus one guard:
+a local `scheduleField` token (`#FFFFFF` / `#1E1E1E`) and `allDayBackdrop(column)`, which **composites** the weekend tint into the field before the
+blend (its dark leg is `white@0.03`, translucent — using it raw would drop the alpha); `allDayJointOverlap: 4` beside `allDayBandInset`; and the
+chip itself — `color:` becomes `AppTheme.mix(backdrop, itemColor, dark ? 0.32 : 0.17)` (**alpha 1**) and the chip gains a left `Layout.leftMargin`
+of `-4` when it continues, gated on `allDayColumn.index > 0` so a week-spanning strip cannot paint into the gutter. The chip's Label left margin
+adds the reach back, so the title's x is unchanged. **This is a token change: the chip fill is no longer translucent.**
+
+**Evidence (light, 1100x692, `date 2026-04-02`, sidebar expanded).** The run's fill envelope is **Mon 273 … Wed 626 unbroken**: at both inner
+joints (`388..393`, `507..512`) every pixel of every band row reads the chip fill **`(220,235,245)`** — no `255` field, no `237` rule. R108's
+3 px break is gone. The outer ends still ramp (Mon 281→273→281, Wed 618→625→618) and the single-day neighbours still round on both ends
+(Thu 638→630→638, Fri 757→749→757). `mix(255, itemColor, 0.17)` is **identical** to the old translucent value, so the bar's colour did not move.
+
+Figure: `r109-a03-joint-2panel.png` (1:1 band strip with joint guides above a pair of x6 joint zooms).
+
+**Open.** The **dark leg** (alpha 0.32, and `allDayBackdrop`'s weekend branch) is next round's #1. `:550`'s completed-item `opacity: 0.5`
+re-creates the same defect class and is recorded, not fixed.
+
 # R108 — **A03 measured on the R106 capture. Clause "only outer corners rounded" PASSES and is now WITNESSED on both inner joints. Clause "visually continuous" is OPEN: the run carries a 3px LIGHT break at every day boundary. The obvious fix was built, launched and captured — and it FAILED (two translucent chips overlapping composite to a seam 29/255 DARKER than the fill), so it was reverted. Source fingerprint unchanged from R107.**
 
 **Why this round.** A03 was marked PASS at R087 by the same class of inference A02's was, so it had to be read on a capture first. R106 supplied the fixture (`r106-band-3row.png`: `Multi-day review` 20260330 → spanning Mon/Tue/Wed as a 3-column run) and the expanded-sidebar column map (272/391/510/629/748/867/986, pitch 119).

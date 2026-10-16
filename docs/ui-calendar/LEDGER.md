@@ -1,3 +1,44 @@
+# R104 — the segmented TRACK's radius: `LiquidSegmentedControl.qml:87` `height * 0.38` -> **`height * 0.48`** (10.64 -> 13.44 on the 28-tall track).
+
+**Why this round.** Next #1 from R103: the last unmeasured *shape* constant in the segmented control and the last unblocked item in C05.
+
+**The absolute measurement is DEGENERATE — recorded as a negative result.** A least-squares rounded-rect fit
+`x(y) = x0 + r - sqrt(r^2 - (r - (y - y0))^2)` to the **rim-core trace** (argmin of the luma per row, both edges, mirrored about
+x=502) recovers the **reference** track at **r = 11.25** (SSE 0.28, y0 9.5, y1 37.5, H 28.0) and, on the same rows, at **r = 13.50**
+(SSE 0.15, y0 8.5, y1 38.0, H 29.5) — **r and y0/y1 are not separable when only the arc is visible**, and the two run a tie.
+The instrument validated on our own track (true r = 0.38 x 28 = 10.64) reads **11.00** — a **+0.36 bias**, and the bias *flips sign*
+(-1.14) when the two rows of horizontal top/bottom edge are left in. ⇒ **the reference's track radius is NOT absolutely measurable
+beyond r in [11, 13.5] on H ~ 28-30.**
+
+**The decisive instrument is WITHIN-IMAGE, and it cancels that bias.** Compare the track's corner *inset profile* — per row, the rim
+core's x minus its own nadir column — against **the same control's own lens**, same image, same rows, same method:
+
+| dy from the rim's top row | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **REF track** (col 388, top y9) | 7 | 6 | 5 | 4 | 3 | 2 | 2 | 1 | 1 | 1 | **0** |
+| **REF lens** (col 450, top y12) | 6 | 4 | 3 | 2 | 1 | 1 | **0** | | | | |
+| **ours BEFORE** (col 562, top y36) | 6 | 4 | 3 | 2 | 1 | 1 | 1 | **0** | | | |
+| **ours AFTER** | 8 | 6 | 5 | 4 | 3 | 2 | 2 | 1 | 1 | **0** | |
+
+The reference's **track** corner is uniformly **1-2 px wider (rounder) than its own lens's** at every depth. **Ours before was
+IDENTICAL to our lens's** (both nadir at dy 7-8) — the outer capsule's corner was exactly as tight as the inner one, which is
+geometrically what a concentric pair must not be. ⇒ **the defect was a two-token capsule (0.38 outer / 0.48 inner), not a radius value.**
+
+**The fix is therefore one token, not a new number: `0.48` on both.** `:87` `height * 0.38` -> **`height * 0.48`**: track r
+**10.64 -> 13.44**, lens r unchanged at **11.52** (R101), delta **1.92** against the **2 px** lens inset ⇒ **concentric by construction**
+(the 0.08 px shortfall is sub-pixel). Our AFTER profile then reproduces the reference's to **<= 1 px on every row** (see table), and
+the ref's own numbers agree: its track H measured **30** by rim-core span (ours 28, hard in QML) ⇒ ref r/H **0.46-0.48** = **the same token.**
+
+**Scope, stated.** `:87` is inside the shared control, so this is app-wide by construction — `KosSettingsDialog.qml:174` and `:212` and
+`WallpaperPreviewBar.qml`. It is a fix rather than a regression there because the token is now the one the *lens already used*, so every
+host gains a concentric pair. **`:117/119` (R102) and `:121` (R101) untouched.**
+
+**Figure.** `docs/ui-calendar/r104-track-corner-3panel.png` — **REF / ours-before / ours-after**, the track's left-end corner at **x6 NEAREST**,
+each anchored on its own rim top-left; captions on the final canvas.
+
+**Verdict: C05's track radius CLOSED — the last unblocked *shape* constant in the control. What remains of C05 is the pointer half
+(no harness action drives it) and the label COUNT (ruling-blocked).**
+
 # R103 — the segment's slot **PITCH**: `Main.qml:178` `segmentWidth: 196` is a **spec literal** (L03 width 180–210). **Verdict only — NO code changed.**
 
 **Why this round.** Next #1 from R102: the last unblocked *shape* error in the segmented control — the pitch (ref "56.75" vs our 64).

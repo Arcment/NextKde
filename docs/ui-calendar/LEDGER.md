@@ -1,3 +1,28 @@
+## R102 — C05's segment pill **width**: `LiquidSegmentedControl.qml:117/119` `x: 2 + …` → `4 + …`, `width: root.segmentWidth` → `segmentWidth - 4`
+R101's Next #1 said *"ours is 64 in a 65.33 slot ⇒ 1.2 px per side"*. **That premise was wrong and was corrected before acting**: the slots
+*tile* — `segmentWidth = (width - 4) / labels.length` (`:31`) with `x: 2 + index * segmentWidth` — so an interior pill is **adjacent** to its
+neighbours, gap 0. The 65.33 is `track_width / 3`; it counts the control's own 2 px outer inset as per-slot padding. **The real inset was 0 px
+per side**, so the fix is not a tweak, it is the whole horizontal padding.
+**The reference re-measured with R101's validated fit** (per-row fill-start inset, threshold = the midpoint of *that* image's own two constants,
+interior rows): ref pill **W = 52.4, h 24, r ≈ 11.5**. The fit recovers r = 11.5 on **every** interior row (model 8.15/5.82/4.36/3.25/2.39/1.70/
+1.14/0.72 vs measured 7.7/5.7/4.2/3.2/2.7/1.7/1.2/0.7) ⇒ **the reference's radius token is the same `0.48` as ours; the WIDTH is the
+discriminator.** Ref slot = 227/4 = 56.75 ⇒ **52.4/56.75 = 92.3 % of slot**; ours was 64/64 = **100 %**.
+**Fix: `width: segmentWidth - 4` with the lens re-centred (`x: 4 + …`)** ⇒ 60 px in a 64 px slot = 93.75 %, i.e. a uniform 2 px padding, the mirror
+of the lens's own vertical inset (`y: 2`, `height - 4`). The label delegates are untouched: `4 + i·segW + (segW−4)/2 ≡ 2 + i·segW + segW/2` — the
+same centre by algebra, and the capture confirms no label column moved.
+**Verified on the R098–R101 leg** (light, `contentY 280`, `contentHeight 960`): pill x630..689 = **w 60** (was x628..691 = 64); track x562..757 and
+the pill centre x659.5 unchanged; the radius fit re-run ⇒ **r ≈ 11.5, unchanged** (the corner rows are identical by construction). Residual 2.0 vs
+the ref's 2.18 px/side = **0.2 px**, below the ref W fit's own resolution (52–53). The dark leg is extrapolation — `x`/`width` are
+theme-independent constants.
+**Also measured, and unmeasurable — recorded:** the ref *track*'s vertical extent. Its fill waves 248↔255 on a 255 plane (a 250 band at y7-8
+confined to x403..601, 255 at y9-10, 249 at y15-19, 253 at y30-32, 255 at y36-37, 248-252 at y39-43) ⇒ the pill's *vertical* inset in the
+reference cannot be established at any threshold trusted here. Ours stays at 2.
+Figure `r102-seg-width-3panel.png` (REF / before / after, ×5 `NEAREST`, black-barred and labelled, red lines = slot boundaries). **仍差 #3's
+inset half is CLOSED.**
+**Next: the segment's slot PITCH — the ref is 56.75/slot in a 227 track, ours 64/slot in `Main.qml:178`'s hard-coded `segmentWidth: 196`. A
+like-for-like 3-label control at the ref's pitch would be ≈174 wide ⇒ a pill of ≈52.4, not 60. Decide whether 196 is a spec literal before
+touching it.**
+
 ## R101 — C05's segment pill **radius**, measured: `LiquidSegmentedControl.qml:121` `height * 0.42` → `height * 0.48`
 The R100 Next #1 asked for the pill's radius as a per-row fill-start inset fit. Two of its premises were wrong and were
 corrected first: the **reference's pill is h = 24, not ~17** (ours is also 24 ⇒ the comparison is 1:1, not a ratio transfer),

@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.2：图标 Bounce（切换城市/刷新时逐小时卡天气图标弹跳，本轮，前端）**：`apps/weather/qml/Main.qml:1366` 逐小时卡 WeatherIcon 加 `transform: Translate { id: iconBounceShift }`；:1335-1340 新增 `iconBounceAnim` SequentialAnimation = Pause 300+40×index（等入场动画结束、按卡序交错）→ y 0→−6（110ms OutCubic）→ y −6→0（160ms OutBack 过冲落回），实际动画 270ms 落在 HIG 120–300ms 内；:1319-1324 `Component.onCompleted`：reduceMotion 时 `iconBounceShift.y=0` 显式归零不启动动画，否则在 entranceAnim 后 restart iconBounceAnim——delegate 重建（切城市/每小时刷新）时播放一次，频率符合 HIG"避免高频交互动效"。
+  **帧差证据**（TEMP-BOUNCE-PROBE Timer 1600ms 循环 restart 取证，取证后已删并重编译；活实例 spectacle 连拍两组：6 帧 ×400ms + 10 帧 ×150ms）：第一卡图标区 (326,630)-(366,676) 弹跳中帧对相邻帧 MAE **3.86/3.86（maxdiff 170）** 与 **3.80/3.80（maxdiff 170）**（两组各捕捉到一次弹跳，放大序列 /tmp/bounce-seq.png 目视：f1 月牙上移出框顶、f0/f2 基线）；同卡温度文字区 (320,682)-(372,700) 与侧栏 (30,300)-(200,420) 对照 **全部精确 MAE=0.0000 / maxdiff=0**；f0-f4 / f2-f4 图标区 MAE=0.0000（回落干净、无残留位移）。
+  **终态二进制**（TEMP 已删，截图 1792166644 过体检闸）：图标静止于基线、无弹跳残留，星空/侧栏/hero/指标卡无回归（06:00 卡半透明为既有入场动画被抓中段，非本轮回归）。测试 6/6 绿、go test ok。
 - **阶段三动效 B.6：刷新按钮旋转（loading 指示，本轮，前端）**：`apps/weather/qml/Main.qml:991` 刷新钮 contentItem Label 加 `id: refreshGlyph`；:998-1005 该 Label 内 `RotationAnimation on rotation`（`running: backend.loading && !AppTheme.reduceMotion`、Infinite、duration 1000ms/圈、from 0 to 360、`onRunningChanged` 归零）——loading 时 ↻ 字形绕中心持续旋转（HIG"正在更新"类 ≤1.2s/周期），reduce-motion 完全停转，loading 结束字形归 0°（不留斜角残态）。按钮其余属性、其他文件零改动；既有 BusyIndicator（:1011）保留不动。
   **帧差证据**（TEMP 强制 `running: true` 取证，取证后已删并重编译；活实例 spectacle 连拍 5 帧间隔 ~400ms）：旋转字形区 (115,655)-(133,669) 相邻帧 MAE **14.80 / 17.36 / 16.63 / 16.71**（maxdiff 116-124）；对照侧栏城市卡区 (20,200)-(200,400) 与逐小时卡区 (400,520)-(1100,660) 四对相邻帧**全部精确 MAE=0.0000 / maxdiff=0**，纯天空对照区 MAE 0.0004-0.0088（已知星空闪烁噪声底）——信号 ≈ 干净对照区不可测 / ≈ 天空噪声底 1800 倍。目视（/tmp/spin-seq.png，5 帧 6x 放大序列）：↻ 箭头逐帧处于不同角度，旋转清晰。
   **终态二进制**（TEMP 已删，截图 1792166245 过体检闸）：静止态 ↻ 字形归 0° 直立（/tmp/rest-btn.png 目视）、玻璃盘/⚙/°C/°F/状态行无回归。测试 6/6 绿、go test ok。
@@ -53,7 +56,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升""刷新按钮旋转"（均见已改，含帧差证据）。剩余：图标 Bounce/Pulse/Replace、hero 温度视差、温度曲线 draw-on。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升""刷新按钮旋转""图标 Bounce（切换城市/刷新，见已改）"（均见已改，含帧差证据）。剩余：图标 Pulse（正在更新）/Variable color/Replace、hero 温度视差、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. Conditions 卡无温度走势曲线。
 4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
@@ -61,6 +64,8 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **图标 Bounce 参数无参考**：参考图全静态；弹跳幅度（−6px）、节奏（110ms OutCubic 上 + 160ms OutBack 落，共 270ms）、触发时机（delegate 重建即入场动画后 300+40×index ms）系按 SF Symbols "Bounce" 词汇与 HIG 120–300ms 外推（TASK 阶段三 D 允许）；与入场交错叠加后的整体观感（图标先随卡浮入再弹跳）是否过于频繁/花哨待人工复核。另：弹跳只做了逐小时卡图标，10 天行图标（:1463 附近 WeatherIcon）未加（避免一帧内 7 个图标同时弹太闹），是否需要补待定。
+- **Bounce 与每小时刷新重放**：逐小时数据每小时刷新会重建 delegate → 图标每小时弹跳一次（与入场交错重放同批，见下条既有记录），频率是否符合预期待复核。
 - **刷新钮旋转的真实 loading 触发未实拍**：帧差取证用 TEMP `running: true` 强制（真实 `backend.loading` 窗口太短、无法与 spectacle 连拍对时），`backend.loading` 门控路径与 TEMP 同一属性，QML RotationAnimation 标准原语风险低；真实网络刷新（loading 持续几百 ms~几 s）时旋转观感——尤其很短的 loading 是否只闪转半圈就归零——待真机复核。loading 期间按钮 disabled、字形变白 0.38 且旋转，是否够醒目待定。
 - **卡片 hover 参数无参考**：参考图全静态，hover 高光量（fill 0.16→0.21、stroke 0.22→0.32）、抬升量（−3px）、时长（220ms OutCubic）系按 HIG 120–300ms 与既有玻璃词汇（选中盘白@0.27）外推（TASK 阶段三 D 允许）；真实鼠标悬停（HoverHandler 实际触发）未在真机验证——帧差取证用 TEMP Timer 驱动同一 `cardHot` 属性链，QML HoverHandler 为标准原语、风险低，但触感（高光量/抬升幅度是否过强）待人工复核。press 态未做（卡片当前无点击行为，无 press 概念）。
 - **雷电闪白外观无参考**：参考图无雷暴画面；双闪形态（0.32/0.20 两峰、470ms 全程、闪歇随机 3.5-8.5s）、峰值白洗不透明度系程序化近似（TASK 阶段三 D 允许）。帧差抓到的峰值瞬间 w=0.157 是动画坡上一点，设计峰值 0.32/0.20 未被直接实拍（峰值窗口仅 ~70-90ms，spectacle 截屏延迟撞不撞峰值靠运气——首轮 7 帧连拍只抓到低不透明度沿 MAE 2.73，密集 12 帧才抓到峰值）。真机雷暴天观感（闪白强度是否过弱/过强）待复核。闪白层在主布局之下、位于卡片内容后面，但首轮取证侧栏区也有 Δ~1.3 亮度位移——`AppTheme.sidebarSurface` 可能带微量 alpha，闪白透亮侧栏是否合意待定。

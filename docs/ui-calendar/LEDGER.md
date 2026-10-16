@@ -1,3 +1,26 @@
+# R064 — **T01 修复：小时高度 54 → 40（PASS）**。`CalendarScheduleView.qml` 新增唯一常量 `hourHeight: 40`，
+滚偏移 / 小时格高度 / 事件条高度全部由它派生；实测 gutter 标签中心 **连续 10 段差值恰为 40.0**，
+harness 自身日志 `contentHeight 960`(=24×40) 与 `contentY 280`(=7×40) 独立佐证。参考图 27 ref-px ≈ 我们窗口 36，
+合同写 ≈40，**取 40**。附带发现 **harness 命令格式缺陷**（`review-command.py` 写的是嵌套形式，harness 只认
+扁平 `command.action` ⇒ 截图静默失效），本轮已绕过并记录。代码改动（1 文件 4 处）。 (2026-10-17)
+
+## 本轮 (R064)
+Atomic step = `T01`（"Hour pitch about 40 with half-hour at 20"），**代码改动**。
+`apps/calendar/qml/CalendarScheduleView.qml`：新增 `:49 readonly property int hourHeight: 40`；
+`:124` 滚动偏移 `usefulStartHour() * 54` → `* root.hourHeight`；`:357` 小时格 `Layout.preferredHeight: 54` →
+`root.hourHeight`；`:402` 事件条高度 `21` → `Math.round(root.hourHeight * 21 / 54)` = **16**
+（格子内高 40−3×2 = 34，两条 16 + `spacing: 2` 恰好 34；仍是 21 会被 ColumnLayout **静默压缩**）。
+未动：gutter 标签样式、`slice(0, 2)`、事件条 `radius: 5` 与内缩 3/5/4、当前时刻线（本就按比例）。
+
+**判定 PASS。** 行带扫描（x 2..50，阈值 ≥3 非背景像素）得标签中心
+244.5/284.5/324.5/364.5/404.5/444.5/484.5/524.5/564.5/604.5/644.5 ⇒ **连续 10 段 40.0**。
+视觉复核 `_r064-grid2x.png`（06:00→12:00，2 倍下标签间距 80px）、`_r064-thu11-3x.png`：单行、无压缩、无重叠、内缩不变。
+
+**工具缺陷（本轮发现，未修）：** `review-command.py` 原样写入命令字典，`{"captureClient":{...}}` 到达 harness 时
+**没有 `action` 键**，只会落到 `Main.qml:249` 的 `[UIReview] manual undefined …` 分支 —— **截图静默无效**（无文件、
+无日志、退出码 0）。绕过方式：原地写扁平形式 `{"action": k, **v, "sequence": prev+1}`。
+**仍未 `DONE`。** 详见 `tmp/ui-acceptance/calendar/rounds.md` R064 与 `state.md`。
+
 # R063 — **state.md 的"堵死"前提被推翻**：参考图 `.loop/refs/macos-calendar.png` 是**周视图**（不是月视图），
 A/T/E/N/V 全族 ~30 条 spec ID 从未审过；**T01 判定 FAIL —— 小时高度硬编码 54，合同写 ≈40，参考图实测 27**
 （814x522、1:1，换算到 1100x692 约 36）。纠正两处 state.md 事实错误，把循环重新开在有参考锚点的 T/A/E/N 族上。

@@ -1,3 +1,24 @@
+# R094 — the mini month's today disc: 20 → 15 px, the ref's own diameter
+
+R093 closed M04's **colour** clause and left the **size**: the mini month drew today as a **20x20** disc; the ref's mini disc is
+**15x15 at x91..105/y395..409**. The spec literal "18–20" contradicts the ref, but **R086's precedent** (the ref's own diameter beat
+the derived literal for the week header disc) applies — the ref wins.
+
+**Fix.** `apps/calendar/qml/Main.qml:2199-2200`: `width/height: 20` → **`15`** (the M03 comment updated to match). `radius: width / 2`
+follows, so the disc is a 15 px circle. The same `Rectangle` is also the **selected-day** marker, so its 1 px accent ring shrinks with
+it — one marker, one size (the ref has no separate anchor: its selected day *is* its today). **No other line touched**; the numeral
+stays `font.pixelSize: 11`.
+
+**Evidence** (light 1100x692, `view week` + `date 2026-10-15` + `sidebar expanded`) — `r094-mini-today-15.png` (ours vs the ref at x8,
+`NEAREST`), `r094-light-leg.png`:
+- mini today disc (Oct 17, Sat) = **15x15, rows 599..613, max row width 15**, measured with the **same red-dominance envelope
+  predicate** applied to the ref: ref = **15x15, rows 395..409, max row width 15**. **1:1 by the same instrument.**
+- selected day (Oct 15) accent ring = **15x15 at x102..116 / y599..613** — same marker, same size.
+- **Non-regression control: the week header's today disc is still 22x22, rows 126..147** (R086's value, untouched).
+- numeral: **no white ink outside the disc footprint (x158..172)** ⇒ the two-digit `17` fits inside 15 px; R093's 1:1 ink-height
+  result (**9 = 9**) cannot have moved, the font is unchanged.
+- build clean: `ninja -C .build/calendar-review kos-calendar kos-pim-service` → 7/7, relink OK.
+
 # R093 — M04 colour: the mini month's today disc, blue → `AppTheme.todayRed`
 
 The mini month drew today in `root.tahoe.accent` (`#0088FF` = (0,136,255)) — the **one** place in the app where "today" was

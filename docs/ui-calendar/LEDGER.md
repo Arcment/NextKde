@@ -1,76 +1,24 @@
-# R106 — **A01's clause table, and the ONE clause that was neither closed nor G-blocked — (a) "band min about 28" — was MEASURED-OPEN and is now CLOSED.** The all-day band was a hard 3-row box: 76 px in a week with four all-day items and 76 px in a week with none.
+# R106 — **A01's clause table built; the ONE clause that was neither closed nor G-blocked — (a) "band min about 28" — was MEASURED-OPEN and is now CLOSED.** The band was a hard 3-row box: 76 px whether the week carried four all-day items or none.
 
-**Why this round.** Next #1 from R105. A01 (`spec.md:34`, *"All-day band min about 28, row 18, vertical gap 2, column inset 2-3"*) carries the tree's oldest open ruling — **G**, its own spec literals against the reference's measured 1 — and since R075 a verdict claiming *all four clauses match the ref*, which was an inference from a single 3-row week. Classifying the four clauses honestly leaves exactly one that is neither already-closed nor G-blocked: **clause (a), the band's minimum height** — never observed, because `allDayBandRows: 3` was a hard constant. **A box that cannot shrink has no minimum to measure.**
+**Why this round.** Next #1 from R105. A01 has carried the tree's **oldest open ruling (G: spec "gap 2 / inset 2-3" vs the ref's measured 1)** and, since R075, a verdict claiming *all four clauses match the ref* — an **inference from a single 3-row week**. Classifying the four clauses honestly leaves exactly one that is **neither already-closed nor G-blocked**: **clause (a), the band's MINIMUM height**, never observed, because `allDayBandRows: 3` was a hard constant — a box that cannot shrink has no minimum to measure.
 
 | A01 clause | spec | ref (measured) | ours before | ours now | verdict |
 |---|---|---|---|---|---|
-| **(a) band min ~28** | 28 | **20** = 1+18+1 — the rows HUG: top rule y124, first chip y126, last row ends 181 against the separator 183-184 | **76, hard-coded** | **26** = 1+24+1 | **PASS** — 26 vs 20 × our 1.33 vertical factor = **26.6**, and −7 % of the spec's 28 |
-| (b) row 18 | 18 | 18 (pitch 19) | 24 = 18 × 1.33 (R072) | 24 | closed (ref-anchored) |
-| (c) vertical gap 2 | 2 | **1** | 1 | 1 | G-blocked — spec erratum |
-| (d) column inset 2-3 | 2-3 | **1**, both axes (R073) | 1 | 1 | G-blocked — spec erratum |
+| **(a) band min ~28** | 28 | **20** = 1+18+1 — the rows HUG: rule y124, first chip y126, last row ends 181 against the separator 183-184 | **76, hard-coded** | **26** = 1+24+1 | **PASS** — 26 vs 20 x our 1.33 vertical factor = **26.6**, and -7 % of the spec's 28 |
+| (b) row 18 | 18 | 18 (pitch 19) | 24 = 18 x 1.33 (R072) | 24 | closed (ref-anchored) |
+| (c) vertical gap 2 | 2 | **1** | 1 | 1 | G-blocked — **spec erratum** |
+| (d) column inset 2-3 | 2-3 | **1**, both axes (R073) | 1 | 1 | G-blocked — **spec erratum** |
 
-**One atomic change, in `CalendarScheduleView.qml` — the band's row count becomes content-derived.** `:64` `allDayBandRows: 3` → **`allDayMaxRows: 3`** (A04's cap, renamed to what it is) + a new **`allDayContentRows`** (the max `allDayItems().length` over the 7 columns) + **`allDayBandRows: Math.max(1, Math.min(allDayMaxRows, allDayContentRows))`**; `:483` R089's `allDayOverflow` re-pointed from `allDayBandRows` to **`allDayMaxRows`** (without that, a 1-item column in a 1-row band renders `+1` instead of its chip — the floor and the cap must not share a variable); `:411` the band's gutter label `Layout.preferredHeight: 48` (stale since R073) → **`root.allDayBandHeight`**.
+**One atomic change — the band's row count becomes content-derived** (`CalendarScheduleView.qml`): `:64` `allDayBandRows: 3` -> **`allDayMaxRows: 3`** (A04's cap, renamed to what it is) plus a new content-derived **`allDayContentRows`** (max `allDayItems().length` over the 7 columns) and **`allDayBandRows: Math.max(1, Math.min(allDayMaxRows, allDayContentRows))`**; `:483` R089's overflow formula re-pointed from `allDayBandRows` to **`allDayMaxRows`** (without that, a 1-item column in a 1-row band renders `+1` instead of its chip — the floor and the cap must not share a variable); `:411` the band's gutter label `Layout.preferredHeight: 48` (stale since R073) -> **`root.allDayBandHeight`** (a 48-tall label in a 26-tall row would have pinned the row back to 48).
 
-**Evidence, light, 1100x692, sidebar expanded, one launch, three captures.** `r106-band-min.png` (week of Apr 6, **0 all-day items**): `sectionRule` 155 → **band interior 156..181 = 26** → `allDaySeparator` 182-183 → first hour line 184. `r106-band-3row.png` (week of Apr 2, four all-day items on Thursday): **band 76 UNCHANGED** — chips 157-180 / 182-205, **A04's `+2` row still in slot 3 (207-230)**, separator 232-233, hour line 234 = the R073-R104 map **byte for byte**. The gutter `all-day` label's ink sits at rows **167-174 on both legs** — the label-height edit moved nothing. Figure **`docs/ui-calendar/r106-a01-band-min-3panel.png`**: reference 1:1 / ours 3-row / ours 0-item, with the section rule in red and the band's bottom separator in blue on every panel.
+**Evidence — light, 1100x692, sidebar expanded, one launch, three captures.** `r106-band-min.png` (week of Apr 6, **0 all-day items**): `sectionRule` 155 -> **band interior 156..181 = 26** -> `allDaySeparator` 182-183 -> first hour line 184. `r106-band-3row.png` (week of Apr 2, Thu 4 all-day items): **band 76 UNCHANGED** — chips 157-180 / 182-205, **A04's `+2` row still in slot 3 (207-230)**, separator 232-233, hour line 234 = the R073-R104 map **byte for byte**. The gutter `all-day` label's ink sits at rows **167-174 on both legs** — the label-height edit moved nothing. Figure **`docs/ui-calendar/r106-a01-band-min-3panel.png`**: ref 1:1 / ours 3-row / ours 0-item, with the section rule in red and the band's bottom separator in blue on each panel.
 
-**Two new load-bearing measurements, from the same capture pair.** (1) **Our weeks start Monday, and an expanded sidebar shifts the day columns to pitch 119** (separators 272/391/510/629/748/867/986) — so `x=577`, the column every band measurement since R073 profiled as "Thursday", is the **3rd** day column; Thursday is **629..747** (x≈690). The y-map is x-independent, so every vertical number in this ledger stands; only *horizontal* reads need the leg's sidebar state stated. (2) An **all-day-empty week keeps a 26 px band** — the spec's "min" read as a floor rather than a hide; the reference has no all-day-empty week, so hide-vs-26 is an extrapolation, not a finding.
+**A01 is PASS-pending-ruling-G with clause (a) now MEASURED rather than inferred.**
 
-**Verdict: A01 clause (a) PASS ⇒ A01 is PASS-pending-ruling-G with the clause now measured rather than inferred.** Next: **A02**, re-verified on these captures — R106 changed the very thing A02 describes (*"the band expands uniformly"*), which until now it could not do.
-
-# R105 — **L03 PASS, all five clauses**, on the frozen R104 capture. Clause (c) — the one clause never directly measured — is verified, and the reference agrees with it to the same 0.5 px.
-
-**Why this round.** Next #1 from R104: L03 (`spec.md:17`, *"Day/week month segment centered within main region; height 28 and width 180-210"*) is the ID whose control was edited in five of the last eight rounds (R097-R104) and is now frozen. Everything left in 仍差 is ruling-blocked and no rulings channel exists, so the highest-value unblocked step is **verification, not new work**. **No build, no leg, no code change** — the R104 capture was re-measured.
-
-**Clause (c) needed a definition of "main region", and the definition is what the round produced.** Our sidebar's plane ends at **x=220** (px[220,300]=224, px[221,300]=255) ⇒ our main region is **221..1099, centre 660.0**. Our track's rim spans **562..757, centre 659.5** ⇒ **offset −0.5 px = −0.057 % of the region width.** The reference was then measured the same way, and it settles a figure this ledger has carried since R063:
-
-| | sidebar plane ends | main region | region centre | track rim span | rim centre | offset |
-|---|---|---|---|---|---|---|
-| **REF** `macos-calendar.png` | **x = 191** | 192..813 (W 622) | **502.5** | 388..616 (W 229) | **502.0** | **−0.5 px** (−0.080 %) |
-| **OURS** `r104-seg-light.png` | x = 220 | 221..1099 (W 878) | 660.0 | 562..757 (W 196) | 659.5 | **−0.5 px** (−0.057 %) |
-
-**The ref's "243 px sidebar" was a conflation of the sidebar WITH the hour gutter, and it made the ref look mis-centred.** The plane boundary is at **191**; the 237-plane is the sidebar alone, and **192..243 is the white hour gutter** (right-aligned labels ending at x≈242). 243 is where the first *day column* starts — the grid, not the region. Measured against the real region, **the reference's segment is centred to 0.5 px, exactly like ours.** ⇒ a *centred-in-region* comparison is legitimate and (c) is a PASS, not a promotion to 仍差.
-
-**The other four clauses, re-measured on the same capture (not re-litigated — one line each).**
-**(a)** the QML constant is `196` (L03 180-210) and the render agrees: the rim's widest row (y=50) reads **562..757 = W 196 exactly**. **(b)** height **28** — columns x570/x660 both read y36..63. **(d)** the three labels sit at the centres of slots `(562+4)+i·64`: ink at **595.6** (slot 0) and **723.5** (slot 2), with the pill occupying slot 1 → order **Day · Week · Month** per R100. **(e)** the pill (fill 232, span 630..689) is on **Week**, and the leg ran `--view week` ⇒ the pill is on the active view.
-
-**One observation, not a finding.** With this locale the three labels render as the CJK single characters 日/周/月 — `R100`'s order ruling is on the model list and localization renders it; every previous round measured these as ~10-11 px ink runs, which is a single CJK glyph's width, not `Week`'s. **L03 names the segment semantically, so the locale is not one of its clauses** — recorded here only so the next round does not re-derive it as a 4th-word problem.
-
-**Figure.** `docs/ui-calendar/r105-l03-centre-2panel.png` — REF above, OURS below, **each panel rescaled so its own main region is 700 px wide**; blue = the track's rim span, grey = the rim centre, green = the region centre. Both green lines fall within 1 px of x=350.
-
-**Verdict: L03 PASS (5/5). The first ID of the final regression chain is closed.** Next: A01 (ruling-G-blocked on the spec literals vs the measured 1), then T01/T02/T03.
-# R104 — the segment's TRACK radius: `LiquidSegmentedControl.qml:87` `height * 0.38` → **`height * 0.48`** (10.64 → 13.44 on the 28-tall track). **C05's last unblocked *shape* constant — CLOSED.**
-
-**Why this round.** Next #1 from R103: `:87` `0.38` on a 28 track, against the lens's `0.48` on a 24 lens (R101) and against the reference.
-
-**The absolute measurement is DEGENERATE — the negative result R103 predicted.** A least-squares rounded-rect fit
-(`x(y) = x0 + r − √(r² − (r − (y − y0))²)`) to the **rim-core trace** (per-row argmin of luma, both edges, mirrored about x=502) returns the ref
-track at **r = 11.25** (SSE 0.28, y0 9.5, y1 37.5, H 28.0) **and**, on the same rows, at **r = 13.50** (SSE 0.15, y0 8.5, y1 38.0, H 29.5) — a tie.
-**r and y0/y1 are not separable from an arc-only trace.** Validated on our own track (truth 0.38·28 = **10.64**) the same fit reads **11.00**
-(**+0.36 bias**) — and the bias **flips to −1.14** if the two rows of horizontal top/bottom edge stay in. ⇒ **the ref's track radius is only bounded:
-r ∈ [11, 13.5] on H ≈ 28–30.**
-
-**The decisive instrument is within-image and cancels that bias.** Per-row corner *inset profile* (rim-core x minus its own nadir column), the
-**track** against **the same control's own lens** — same image, same rows, same method:
-
-| dy from the rim's top row | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **REF track** (col 388, top y9) | 7 | 6 | 5 | 4 | 3 | 2 | 2 | 1 | 1 | 1 | **0** |
-| **REF lens**  (col 450, top y12) | 6 | 4 | 3 | 2 | 1 | 1 | **0** | | | | |
-| **ours BEFORE** (col 562, top y36) | 6 | 4 | 3 | 2 | 1 | 1 | 1 | **0** | | | |
-| **ours AFTER** | 8 | 6 | 5 | 4 | 3 | 2 | 2 | 1 | 1 | **0** | |
-
-The ref's **track** corner is uniformly **1–2 px rounder than its own lens's**; **ours before was IDENTICAL to our lens's** (both nadir dy 7–8) —
-the outer capsule was exactly as tight as the inner one, which is what a concentric pair must not be. ⇒ **the defect was a two-token capsule
-(0.38 outer / 0.48 inner), not a bad radius value, and the fix is ONE token on both, not a new number.** Track r **10.64 → 13.44**, lens r
-unchanged **11.52**, Δ **1.92** against the **2 px** inset ⇒ **concentric by construction** (0.08 px short). Our AFTER profile then matches the ref to
-**≤ 1 px on every row**, and the ref agrees: its track H measures **30** by rim-core span (ours 28, hard in QML) ⇒ ref r/H **0.46–0.48 = the same token.**
-
-## ## 本轮 (R104)
-Atomic step: **one number at `:87`** (`0.38` → `0.48`), then one build → one light leg → one ×6 3-panel compare. **`:117/119` (R102) and `:121`
-(R101) untouched.** 17 Bash calls, 3 image reads. Files: `shared/qml/controls/LiquidSegmentedControl.qml:87`, `docs/ui-calendar/LEDGER.md`,
-`docs/ui-calendar/r104-track-corner-3panel.png`, + this file and `rounds.md` (uncommittable). **Scope: `:87` is in the SHARED control ⇒ app-wide
-by construction (`KosSettingsDialog.qml:174`/`:212`, `WallpaperPreviewBar.qml`) — a fix there, not a regression, because the token is now the one the
-lens already used. Not separately captured this round.**
+## ## 本轮 (R106)
+Atomic step: **the band's minimum height** — 1 source file, 3 edits, **1 build, 1 launch, 3 captures** (19 Bash calls, ~20 min). Files: `apps/calendar/qml/CalendarScheduleView.qml`, `docs/ui-calendar/r106-a01-band-min-3panel.png` + `r106-band-3row.png` + `r106-band-min.png`, + this file and `rounds.md`.
+## ## Archive — R105 (完整细节见 rounds.md 尾部)
+Atomic step: **measure, then record L03 PASS** — 10 Bash calls, 2 image reads, **no build, no leg, no source file touched**. Files: `docs/ui-calendar/LEDGER.md`, `spec.md:17` (verdict; both `spec.md` and this file are uncommittable), `docs/ui-calendar/r105-l03-centre-2panel.png` (new figure), + this file and `rounds.md`.
 
 ## 仍差 (top 7, visual-impact order) — **every remaining item is ruling-blocked**
 1. **The ref's segment carries a 4th word — `Year` — and we have three with no year view.** L03 specifies exactly three, so **three is
@@ -88,6 +36,8 @@ lens already used. Not separately captured this round.**
 6. **Month day cell `slice(0, 2)` — 1 chip + `N` where the ref stacks 3.** **Needs ruling D — and a 3-all-day-item *month* day** before it can be
    reproduced at all. **The only remaining `slice(0, 2)` with a content cap** (`:689` is the grid hour cell).
 7. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (near-identical, ~3.7 px at our scale). Rides on **ruling G**.
+- **CLOSED in R106: A01 clause (a) — the band's MINIMUM height.** The band was a hard 3-row constant, so the one A01 clause that is neither ref-closed nor G-blocked had no observable value; it is now content-derived with a one-row floor. **1 row = 26 px** (ref 20 x 1.33 = 26.6, spec 28). A01 = PASS-pending-ruling-G.
+- **CLOSED in R105: L03 — ALL FIVE CLAUSES PASS.** (a) W **196** ∈ [180, 210] (render rim 562..757 = 196); (b) h **28** (y36..63); (c) **centred in the main region, −0.5 px**, matching the ref's own −0.5 px; (d) order **Day · Week · Month** (R100); (e) the pill is on **Week**, the active view. **The first ID of the final regression chain is closed.**
 - **CLOSED in R104: C05's TRACK RADIUS** — `:87` `0.38` → `0.48`; the capsule pair is concentric (Δ1.92 vs a 2 px inset) and our corner profile
   matches the reference's to ≤1 px. ⇒ **C05 is now spec-complete but for the label COUNT (ruling-blocked) and the pointer half (undrivable).**
 - **CLOSED in R103: 仍差 #3 in full — the slot PITCH is spec-mandated** (L03 width 180–210: the ref's pitch needs 172, and the floor forces
@@ -98,19 +48,33 @@ lens already used. Not separately captured this round.**
 - *(archived to rounds.md tail: R096 S04 verdict, R095 weekday-header tick, R094 size, R093 colour, R092 dark-leg verdict, R091 timeline trigger.)*
 
 ## ## 最近已改 (most recent 8)
-0. R104 — **C05's segment TRACK RADIUS**: `LiquidSegmentedControl.qml:87` `height * 0.38` → **`height * 0.48`** (10.64 → 13.44 on the 28 track;
-   lens 11.52 unchanged ⇒ Δ1.92 against a 2 px inset = **concentric**). One token on both elements. Figure
-   `r104-track-corner-3panel.png` (REF / before / after, ×6, anchored on each rim's top-left).
-1. R103 — **verdict only, NO code changed**: the slot PITCH is a **spec literal** (L03 180–210; the ref's 56.0 needs 172 for 3 labels).
-   Figure `r103-seg-pitch-2panel.png`.
-2. R102 — **C05's pill WIDTH**: `:117` `2 +` → **`4 +`**, `:119` → **`segmentWidth - 4`**. Pill 64 → 60.
-3. R101 — **C05's pill radius**: `:121` `height * 0.42` → **`height * 0.48`**. Ref pill h=24, r fit 11.4–11.7.
-4. R100 — **C05/L03's label ORDER**: `Main.qml:1713-1728` → `[Day, Week, Month]` + `2 - index` mirroring (`viewIndex` consumers untouched).
-5. R099 — **C05's inactive label**: `Main.qml:1717-1722` `mutedTextColor: labelSecondary` → **`labelPrimary`** (1 token).
-6. R098 — **verdict only**: C05's dark leg (`r098-seg-dark.png`): plane 30 / track **43** / pill fill **60**.
-7. R097 — **C05 clause 1's chrome**: `Main.qml:94-103` `segmentTrack` + `segmentPill`; `:1715-1716` repointed.
+0. R106 — **A01's clause (a)**: the band's row count is now content-derived (one-row floor, A04's 3-row cap). `allDayBandRows: 3` -> `allDayMaxRows` + `allDayContentRows`
+   + a clamped `allDayBandRows`; R089's overflow re-pointed to the cap; the band's gutter label de-hard-coded. Band 76 -> **26** on an all-day-empty week; **76 byte-identical**
+   on the 3-row week. A01 clause (a) **PASS**.
+1. R105 — **L03 PASS 5/5** (verification only, **no code changed**): clause (c) our rim centre 659.5 vs region centre 660.0 (-0.5 px); ref rim centre 502.0 vs **its**
+   region centre 502.5 (-0.5 px) once the sidebar is read as **192**, not 243. Figure `r105-l03-centre-2panel.png`.
+2. R104 — **C05's segment TRACK RADIUS**: `LiquidSegmentedControl.qml:87` `height * 0.38` -> **`height * 0.48`** (10.64 -> 13.44; lens 11.52 unchanged => concentric).
+3. R103 — **verdict only, NO code changed**: the slot PITCH is a **spec literal** (L03 180-210). Figure `r103-seg-pitch-2panel.png`.
+4. R102 — **C05's pill WIDTH**: `:117` `2 +` -> **`4 +`**, `:119` -> `segmentWidth - 4`. Pill 64 -> 60.
+5. R101 — **C05's pill radius**: `:121` `height * 0.42` -> **`height * 0.48`**.
+6. R100 — **C05/L03's label ORDER**: `Main.qml:1713-1728` -> `[Day, Week, Month]` + `2 - index` mirroring.
+7. R099 — **C05's inactive label**: `Main.qml:1717-1722` `mutedTextColor: labelSecondary` -> **`labelPrimary`**.
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
+- **THE ALL-DAY BAND IS CONTENT-SIZED WITH A ONE-ROW FLOOR (R106, load-bearing).** The reference band HUGS its rows (rule y124, first chip y126, last row ends 181, separator 183-184) => a 1-row reference band is **20**, not 60. Ours is now `allDayBandRows = clamp(maxItemsAcrossThe7Columns, 1, 3)`: **26 px** on an all-day-empty week, **76** on the 3-row week. **`allDayMaxRows` (the cap, 3) and `allDayBandRows` (the drawn rows) must stay separate variables** — R089's `+N` overflow is keyed to the CAP. The middle of the range (a week carrying 1 or 2 all-day rows) is **not in the fixture**, so content-following is witnessed only at 0 and 3.
+- **OUR WEEKS START MONDAY, AND AN EXPANDED SIDEBAR SHIFTS THE DAY COLUMNS (R106, load-bearing).** With the sidebar expanded (which every leg since R093 drives) the gutter runs **221..272** and the separators sit at **272/391/510/629/748/867/986** — **pitch 119**, not 150. So **`x=577`, the column every band measurement since R073 profiled as "Thursday", is the 3rd day column; Thursday is 629..747 (x~690)**, and **Friday 748..866** (its headers read 周四 2 / 周五 3 in the R106 crop). The y-map is x-independent, so every *vertical* number in this ledger stands; only *horizontal* reads need the leg's sidebar state stated.
+- **AN ALL-DAY-EMPTY WEEK STILL SHOWS A 26 px BAND (R106, extrapolation).** The spec says "min about 28", so the band has a floor rather than a hide; the ref has no all-day-empty week to anchor hide-vs-26. Our choice keeps the band and its gutter `all-day` label coherent — recorded as an extrapolation, not a finding.
+- **THE REF'S SIDEBAR IS 192 px WIDE — "243px sidebar" WAS A CONFLATION (R105, load-bearing).** The 237-plane ends at **x=191**; the white
+  **hour gutter** runs **192..243** (labels right-aligned, ink ending ≈242) and the first *day column* starts at **243**. ⇒ the reference's
+  **main region is 192..813, centre 502.5** — and its segment's rim centre is **502.0**. **Measured against the grid (243..812, centre 527.5)
+  the ref looks 25 px mis-centred; against the REGION it is centred to 0.5 px, exactly like ours.** R063–R104 carried the wrong denominator ⇒
+  **any ref-centredness number derived from "grid 243..812" must be recomputed.**
+- **A CENTRED-IN-REGION SEGMENT IS −0.5 px ON BOTH SIDES, AND THAT IS THE CONVENTION (R105, load-bearing).** ref −0.5 of a 622-wide region
+  (−0.080 %), ours −0.5 of an 878-wide one (−0.057 %). **The residual is the same absolute sub-pixel and scales with nothing** ⇒ the reference
+  centres on **sidebar edge .. window right**, not on the grid and not on the window itself. **L03's clause (c) PASSES.**
+- **A LOCALIZED LABEL IS NOT A 4th WORD (R105).** The segment renders 日/周/月 under this locale — single CJK glyphs, ~10–11 px ink runs, which
+  is what R099/R100/R102 actually measured. **L03 names the segment semantically, so the locale is not one of its clauses; do not re-open
+  仍差 #1 as a label defect on this evidence.**
 - **A CAPSULE'S OUTER RADIUS IS MEASURED AGAINST ITS OWN INNER ELEMENT, NEVER IN ABSOLUTE PX (R104, load-bearing).** An outer/inner pair that
   shares an inset **must differ in radius by exactly that inset**; our track was **10.64 against a lens of 11.52 in a 2 px inset** — the outer corner
   tighter than the inner, which is unbuildable as a concentric pair. **Two tokens (0.38/0.48) were the bug; one token on both is the fix** —
@@ -183,7 +147,7 @@ lens already used. Not separately captured this round.**
   `Owned review instance still running: <pid>`. **The R097–R104 working leg (ONE Bash call): kill `live-app.pid` → `nohup ./start-review-vm.sh
   light|dark &` → `sleep 36` → `review-command.py` with `resize`/`sidebar`/`view`/`date`/`position`/`captureClient`/`stop` → grep
   `capture <name>.png true` + the `manual stop contentY` probe.** `leg.sh` has NO `sidebar` action.
-- **OUR COLUMN MAP AT 1100x692 (R071–R104):** x=0 rim; gutter x 1..51; separators at **x=52/202/352/502/652/802 in BOTH the band and the grid**,
+- **OUR COLUMN MAP AT 1100x692 (R071-R105) — THIS IS THE SIDEBAR-COLLAPSED MAP (R106 amendment, load-bearing):** x=0 rim; gutter x 1..51; separators at **x=52/202/352/502/652/802 in BOTH the band and the grid**, **With the sidebar EXPANDED the map is different: gutter 221..272, separators 272/391/510/629/748/867/986 (pitch 119), Thu = 629..747.**
   **pitch 150**, 7×150px delegates starting at 52. Weekend = the last two. **Sidebar x0..219; the toolbar's segment track spans x562..757 (w 196)
   centred on the main region, now `radius: 13.44` (R104); the lens x630..689 (w 60) on segment 2 = Week, `radius: 11.52` (R101); our segment label
   centres are x595.5 / 659.5 / 723.0 (pitch 64.0) — `(W−4)/3 = 64`, so the labels tile like the lens does; the capsule is y36..63 (28 tall, 1px
@@ -211,15 +175,15 @@ lens already used. Not separately captured this round.**
   R094 the mini disc's `15`; R097 `tahoe.segmentTrack`/`segmentPill` + the segment's repoint at `Main.qml:1715-1716`; R099 the segment's
   `mutedTextColor` at `Main.qml:1718`; R101 `LiquidSegmentedControl.qml:121` `height * 0.48`; R102 `:117` `x: 4 + …` and `:119`
   `width: root.segmentWidth - 4`; **R104 `:87` `height * 0.48` — the track now shares the lens's token.**
-- **REF FACT SHEET (R063, compacted; R103/R104 revise the segment).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026,
-  **today = Wed Apr 1**) + 243px sidebar + mini calendar. Day headers (text y108-116) → **all-day band (y 124–184)** → hour grid 8 AM–8 PM. Gutter
+- **REF FACT SHEET (R063, compacted; R103/R104/R105 revise the segment and the sidebar).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026,
+  **today = Wed Apr 1**) + **a 192px sidebar** (plane 237, ends **x=191** — NOT 243, R105) holding the mini calendar + a **52px white hour gutter (192..243)**. Day headers (text y108-116) → **all-day band (y 124–184)** → hour grid 8 AM–8 PM. Gutter
   labels 193/220/247/274/301/328 = **pitch 27**; the red `9:41` pill **replaces** the 10 AM label. Now-line y=238, pill/line red **(235,76,70)**.
   **7 equal day columns, 1px separators at x=324/406/487/569/650/732, grid x=243..812 ⇒ 81.3px/column.** **Scale to our 1100x692: w 1.35,
   h 1.33** ⇒ ref pitch 27 ≈ **36** (the contract says 40). **Columns: Sun 29 · Mon 30 · Tue 31 · Wed 1 · Thu 2 · Fri 3 · Sat 4.**
-  **R097/R098/R101/R102/R103/R104 give the toolbar row: y4..36 in the ref, holding (left→right) the traffic dots, a 2-icon capsule at x≈122..190,
-  a round `+` at x≈205..230, the Day/Week/Month/Year capsule at x389..616 (W 228–229, slot 56.0, selected pill x449..499 + fit ⇒ W 51–52.4, h 24
-  y12..35, r 11.5, word centres 418/474/530/586, **track rim core x388..616 / y9..38 ⇒ H ≈ 30, r fit 11.25–13.5 with r/H 0.46–0.48 = the lens's own
-  0.48 token, R104**), and two round glass buttons (radar, search) at x≈735..810.** *The ref track has no measurable fill edge (R103), so all its
+  **R097/R098/R101/R102/R103/R104/R105 give the toolbar row: y4..36 in the ref, holding (left→right) the traffic dots, a 2-icon capsule at x≈122..190,
+  a round `+` at x≈205..230, the Day/Week/Month/Year capsule at x388..616 (W 229, slot 56.0, selected pill x449..499 + fit ⇒ W 51–52.4, h 24
+  y12..35, r 11.5, word centres 418/474/530/586, track rim core x388..616 / y8..38 ⇒ H ≈ 31, r fit 11.25–13.5 with r/H 0.46–0.48 = the lens's own
+  0.48 token, R104; **rim centre 502.0 = the main region's centre 502.5 to 0.5 px, R105**), and two round glass buttons (radar, search) at x≈735..810.** *The ref track has no measurable fill edge (R103), so all its
   edge-derived numbers carry ±1.*
 - **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R104).** `harness/Main.qml` matches `command.action` only; a command with no `action`
   **silently hits the fallback**. `review-command.py` takes **ONE argv that is a JSON list**, bumps `sequence` itself, writes **in place** (never
@@ -249,28 +213,22 @@ lens already used. Not separately captured this round.**
   panel width or the panels' captions overlap.** **No `numpy` here.**
 
 ## ## Next round (pick ONLY #1)
-**#1 — start the FINAL REGRESSION with L03, the ID whose control has been edited in five of the last eight rounds.** Everything left in 仍差 is
-ruling-blocked (**and no rulings channel exists anywhere in the tree**), so the highest-value unblocked step is verification, not new work. L03
-(`spec.md:17`: *"Day/week/month segment centered within main region; **height 28 and width 180–210**"*) is now **frozen** — C05's shape, order, token and
-radius all closed (R097–R104) and `Main.qml:178` `196` ruled a spec literal (R103). Check its five clauses **on the R104 capture** (`r104-seg-light.png`,
-already on disk — no new leg needed): **(a)** width **196 ∈ [180, 210]** ✓ by the QML constant, and re-measure the track's x-span to confirm the render
-agrees; **(b)** height **28** = `y36..63`; **(c)** the capsule is **centred in the main region** (main region x220..1100 ⇒ centre 660; track x562..757 ⇒
-centre **659.5** — 1.5 px off, i.e. it is centred on the **region**, not on the main region **minus the sidebar**, and the ref does the same: its track
-centre **502 = the grid's own centre** (243..812 ⇒ 527.5)? **check this — it is the one L03 clause never directly verified.**); **(d)** the three labels
-are `Day · Week · Month` in the spec's order (R100) with **one** ink (R099); **(e)** the pill is on the active view (Week = index 1). ⇒ **expect: L03
-PASS recorded, or one clause promoted to 仍差.** Do not re-run a build or a leg unless (c) fails.
+**#1 — A02, re-verified on the R106 captures, because R106 changed the thing A02 describes.** A02 = *"All-day band expands uniformly; shared bottom edge and subtle stronger
+separator"*, marked PASS at R087 — but until R106 the band **could not expand at all** (a hard 3-row box), so "expands uniformly" was as inferential as A01's clause (a) was. The two
+captures already on disk are the two legs the claim needs: **`r106-band-min.png`** (0 rows) and **`r106-band-3row.png`** (3 rows). Build A02's clause-by-clause table from `spec.md:35`
+and classify each clause closed / ruling-blocked / still open; act only on a clause that is neither. The measurement to make: the `sectionRule` is pinned at **155 on both legs** and
+the `allDaySeparator` **moves with the band (182-183 vs 232-233)** — i.e. the shared bottom edge, and the separator's 2px 217 is stronger than the 1px 242 rule. **No build, no leg
+expected.** If A02 collapses to the same G/ref-blocked set, record it and move to A03.
 
-**Then:** the regression chain in spec order — **A01** (ruling-G-blocked on the spec literals vs the measured 1), then T01/T02/T03, M01–M03, S02/S03/S05,
-C01–C04/C06, E01/E02 (clauses 1+2+3 already PASS), L01–L07 — then the ruling-blocked list in 仍差 order.
+**Then:** the chain in spec order — **T01/T02/T03**, M01-M03, S02/S03/S05, C01-C04/C06, E01/E02 (clauses 1+2+3 PASS), **L01-L07**. **L03 done (R105); A01 done but for G (R106).**
 
-**Blocked / open on rulings A–H:** the **band icon (H, R081)**, dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses
-1+2 PASS R048), month `slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs the ref's measured 1**,
-**and a 4th `Year` segment**. **No rulings channel exists anywhere in the tree.**
-**`code-writer` is STILL not registered in this session (do not retry it each round) — R097 used `general-purpose` as the stand-in implementer;
-R098–R104 were done inline.**
-**Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04** fully PASS; **E01/E02** clauses
-1+2+3 PASS and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**; **M04 closed R093 + R094**;
-**M03/M02/M01/S02/S03/S05/L01–L07/C01–C04/C06 PASS-pending-final-regression**; **S01 + S04 MEASURED R096**; **C05: clause 1's structural half CLOSED
-R097, dark leg CLOSED R098, label-token residue CLOSED R099, label ORDER CLOSED R100, pill radius CLOSED R101, pill horizontal padding CLOSED R102, slot
-PITCH CLOSED R103 as spec-mandated, TRACK RADIUS CLOSED R104 — what remains of C05 is the pointer half (no harness action drives it) and the label COUNT
-(ruling-blocked)**; **L03: clauses a/b/d/e verified across R100–R104 piecemeal, clause (c) never directly measured — Next #1**.)
+**Blocked / open on rulings A-H:** the **band icon (H, R081)**, dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses 1+2 PASS R048), month
+`slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2-3) vs the ref's measured 1**, **and a 4th `Year` segment**. **No rulings channel
+exists anywhere in the tree.**
+**`code-writer` is STILL not registered in this session (do not retry it each round).** R097 used `general-purpose` as the stand-in implementer; **R098-R106 were done inline**
+(R106 = 3 edits in one file, fully specified before the edit; delegating it would have cost more than it saved). **R106 DID build and launch — the binary is now 1 round newer than
+the R104-era capture set, so re-run a leg before comparing against any pre-R106 screenshot.**
+**Not `DONE` — all spec IDs do not pass.** (**L03 PASS R105, 5/5 — closed.** T01/T02/T03 and **A01** PASS-pending-final-regression **with clause (a) now measured (R106)**; **A03** PASS;
+**A04** fully PASS (its `+2` row re-verified mid-band at R106); **E01/E02** clauses 1+2+3 PASS and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**
+— *re-verification now due, see Next #1*; **A02/A03/A04 M04 closed R093 + R094**; **M03/M02/M01/S02/S03/S05/L01-L07/C01-C04/C06 PASS-pending-final-regression**; **S01 + S04 MEASURED R096**;
+**C05 — what remains is the pointer half (no harness action drives it) and the label COUNT (ruling-blocked)**.)

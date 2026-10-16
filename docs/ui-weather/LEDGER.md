@@ -4,6 +4,8 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **侧栏顶天立地**（本轮，前端，TASK.md 用户裁定）：`shared/qml/foundation/KosSidebar.qml:12` 新增 `property bool floating: true`，:27 `radius: root.floating ? AppTheme.largeRadius : 0`；`apps/weather/qml/Main.qml:286` RowLayout `anchors.margins: 12→0`（主列 :592 自己有 `Layout.margins: 20` 不变），:294 传 `floating: false` 并删除半透明 `surfaceColor` 覆盖（改用默认实色 `AppTheme.sidebarSurface` 一族，用户裁定不用半透明玻璃）。todo 不传 floating、默认 true，观感不变。截图核实：侧栏与窗口左/上/下齐平、四角直角、无边距。
+- **侧栏头部改胶囊搜索框**（本轮，前端）：删 "KOS Weather" 大标题（原 Main.qml:302-308）与 "● Locations" 小标题（原 :370-386，参考图两者皆无）；locationField 加 `Layout.preferredHeight: 30` + `cornerRadius: 15`（全圆角胶囊，参考实测高 57px/2≈28-30）+ `glassColor: 白0.22`/`outlineColor: 白0.30`/`textColor: #ffffff`/`mutedTextColor: 白0.66` + 占位 `Search`。实测截图胶囊填充 `#818998` = 白0.22 叠侧栏面（Pillow 期望 130,140,157，吻合；参考胶囊同为白~0.22 半透明叠深蓝）。
 - **彩色天气图标落地**（本轮，前端）：新建 `apps/weather/qml/WeatherIcon.qml`（24×24 逻辑坐标 Canvas：黄日 `#ffd257` 带 8 根光线、奶油月 `#f7f3dc` 月牙、白云、蓝雨线 `#6cb8ff`、雪点、闪电，按 weatherCode 分派）；`apps/weather/CMakeLists.txt:18` 加入 QML_FILES；`Main.qml` 逐小时卡图标 Label（font 25px 字符）→ 26×26 WeatherIcon，10 天行图标 Label（22px 字符）→ 24×24 WeatherIcon（isDay:true）；无引用的 `conditionSymbol()` 已删。实测：夜晴渲染奶油月牙、雷暴/雨渲染云+闪电/蓝雨滴，截图确认。
 - **hero 温度占屏比**（本轮，前端）：`Main.qml:676` `font.pixelSize` 92→160。实测截图温度字高 114px / 窗高 727 = **15.7%**（Pillow 量参考图 80px/498 = **16.1%**），对齐。
 - **阶段二后端：每城市 summary**（本轮，全链路）：`services/data-service/weather.go` —— `WeatherLocation.Summary *WeatherLocationSummary`（time/temperature/weatherCode/isDay/tempHigh/tempLow，:46-58）；`OpenMeteoProvider.Summaries`（:403-472，一次批量多坐标请求 current+daily[0]，数组/单对象双解析、按请求序匹配±0.1°校验、≤20 城）；`Summaries` 进 `WeatherProvider` 接口（:110，fixture 可替换）；`fetchWeather` 成功后才拉 summary，失败保留旧值，选中城市的 summary 直接取自 forecast（:676-700）。schema `weather-v1.schema.json` location 加 optional `summary`（未升版本）。Go 测试 ×3（批量解析/单对象/持久化往返）。
@@ -17,14 +19,17 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. 侧栏卡细节：参考卡里城市名字重更粗、卡间距/圆角接近但卡内字号可再压一档；"● 地点"小标题与搜索框形态和参考不符（参考是圆角胶囊搜索框、无小标题）。
+1. 侧栏城市卡：参考卡高实测 ~78px（tile 156px/2），当前 96px 偏高；城市名字重/字号可再压一档贴近参考。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
-3. 顶部工具栏（更新时间/设置/刷新位置形态）与参考右上搜索框布局不符。
+3. 顶部工具栏（更新时间/设置/刷新位置形态）与参考布局不符（参考主区顶部无工具栏）。
 4. Conditions 卡无温度走势曲线。
 5. WeatherIcon code 1/2 夜间也画太阳+云（drawSun 不分昼夜），夜间应画月+云。
 6. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
+7. 侧栏底部 °C/°F 切换与 "Open-Meteo" 状态文字互相重叠（截图 1792152642 可见），需加间隔或移位。
 
 ## 外推待确认
+- `kos-language-test` 对环境敏感：需 `EXPECTED_LANGUAGE=zh`（本机 LANG=zh_CN.UTF-8）才绿，缺省跑会 1 failed——环境问题，非代码回归（本轮已核实，`EXPECTED_LANGUAGE=zh` 下 5/5 过）。
+- 侧栏从半透明玻璃改为实色 `AppTheme.sidebarSurface`（用户裁定），透出天空的质感随之消失；参考图侧栏是透天空的，若后续要兼顾需另想实色偏移方案。
 - summary 字段形态（tempHigh/tempLow 命名、无 summary 时卡的 `—` 回退）为本轮外推，无参考约束；如要改字段名需同步 Go/schema/QML 三处。
 - 卡高 96px 系按 4 行文字内容反推（参考 210px 侧栏里约 67px 高、四行同样结构），比例略偏高但文字不重叠。
 - ~~8px/20px 组合~~ **已由用户裁定**：窗口圆角本身 = 8px（`KosApplicationWindow.qml:20` 32→8，本轮已改），内容区留 20px 作为未来 KWin 裁剪的保险。
@@ -34,7 +39,5 @@
 - 夜间玻璃卡 fill 0.16 是否太透（实测 21:00 夜空下卡片略发灰蓝）。
 - hover / 选中 / 按下的具体取值（参考图都是静态态）。
 
-## 遗留物（可直接利用，非垃圾）
-- `apps/weather/qml/WeatherIcon.qml`（162 行，`Canvas` 手绘的 Apple 风格天气图标，
-  24×24 逻辑坐标空间、按控件尺寸缩放）：由上一轮在被中断前创建，**目前还没被任何地方引用**。
-  它正对应"仍差"第 1 项（图标仍是文本字符），本轮可直接接入 `Main.qml` 的图标位或按需重写。
+## 遗留物
+（无——WeatherIcon.qml 已接入并记录于"已改"。）

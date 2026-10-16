@@ -1,3 +1,33 @@
+# R081 — **the ref's all-day band chip icon is a 12x12 RING: outer 12, stroke 3, hole 6, inset 3 from the chip's fill on left/top/bottom.**
+Measured on the ref only — **no code changed, no build, nothing was built.** The band chip's ring icon was 仍差 #1 and had never been
+measured, so this round measured it: a x6 `NEAREST` crop of six ref rings plus raw row/column profiles. The ring is **12x12 ref px**
+(Wed1 r0 x491-502, y129-140) inside a chip fill spanning y126-143 ⇒ **vertically centred, 3 px top and bottom**; its **outer left edge
+sits 3 px right of the chip's fill left edge** on **all four** chips checked (Wed1 fill 488/ring 491, Fri3 651/654, Sun29 r2 244/247,
+Mon30 326/329) — and the fill is **rule + 1**. **Two stroke weights exist**: stroke **3 / hole 6** in purple (187,62,216) and blue-grey
+(133,148,172), stroke **~1.5 / hole ~9** in blue (76,121,232) and salmon (235,186,179); both are 12 outer, and the correlation is
+**thick ⇔ tinted-wash fill, thin ⇔ neutral-248 fill** (R080's *unexplained* family). The *reason* is not measurable off a PNG ⇒ **ruling
+H**. Text ink starts **17-19 ref px** right of the ring's outer-left edge. **Nothing is built until H is answered** (decoration vs
+checkable control). Figure: `r081-bandicon-ref-geometry.png`. (2026-10-17)
+
+**Ring, exact.** Wed1 r0 centre row: x491(188,66,218) 492(187,62,216) 493(193,78,220) | wash x494-499 | x500(201,103,225)
+501(187,62,217) 502(189,68,218) ⇒ stroke 3 / hole 6 / outer 12. Centre column: ring y129-131, hole y132-136, ring y137-140 (the 4th row
+of that run is AA). Sun29 r0 blue-grey is pixel-identical in form (x247-249 / hole / x256-258). **Thin family:** Mon30 r0 =
+x329(76,121,232) 330(164,186,241) | hole x331-338 | x339(102,141,235) 340(138,167,238) ⇒ outer 12, stroke ~1.5, hole ~9; Fri3 r2
+salmon (235,186,179) is 1 px with heavy AA. **Ring colour = the item colour at full saturation, no alpha** (re-confirms R080) — and it is a
+**ring, not a stripe** (R077's x491-493 read was this ring's left arc).
+**Chip geometry re-confirmed on ring-bearing chips.** Fill left = **rule + 1** (Wed1 488/rule 487, Fri3 651/650, Sun29r2 244/243, Mon30
+~326/324); fill spans **y126-143 = 18 rows** ⇒ R072's row 18 / gap 1 / pitch 19 holds; fills (244,226,249) purple, (234,236,240)
+blue-grey, (248,248,248) neutral.
+**THE SCALE IS ANISOTROPIC — the round's one open design number.** Ref chip fill is 18 tall x 81 wide, ours is 24 x 148 ⇒ **x1.33
+vertical, x1.83 horizontal**, and a circle cannot use both. Recommended (vertical ratio, so the icon fits the 24-px row): **ring
+16 = round(row x 2/3), stroke 4 = 16 x 3/12, hole 8, inset 4 = round(24 x 3/18) on left/top/bottom, text ink at fill_left + 28** (ref
+3+12+6 = 21, x1.33). The horizontal ratio would give ring 22 / inset 5.5 — rejected: 22 on a 24-px row leaves 1 px and puts the title at
++38. **No ref anchor exists for the two-weight rule** — record the correlation, do not encode it.
+**Archived out of state.md (superseded by the above):** *the ref's same-hue left stripe is a TIMED-GRID-CHIP property; the band chip has
+an icon instead (R077)* — R073's "x=491-493 = (187,62,216) stripe" is the band ring's left arc (hollow centre x495-496); never cite the
+ref for a stripe in the all-day band.
+**Evidence:** `docs/ui-calendar/r081-bandicon-ref-geometry.png` (6 rings, x6 NEAREST, 1-ref-px grid).
+**Next:** the icon is blocked on **ruling H**; the next unblocked step is the Thu band-chip order swap (仍差 #8).
 # R080 — **the all-day band chip's ink is the calendar colour at HALF VALUE — measured on the REF, not inferred from the timed chip.**
 The band chip's Label was `AppTheme.text` (grey) while the timed chip's was the R079 hue ink, so the two chip families disagreed in one
 screenshot. The ref had **never** been measured for the band-chip ink, so this round measured it first: each coloured ref band chip's **ink

@@ -4,6 +4,7 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段二后端：空气质量字段（本轮，纯后端，零 QML 改动）**：`services/data-service/weather.go:60-66` 新增 `WeatherAirQuality{Time, UsAqi *float64, Category}`；:102/:120 `WeatherState`/`WeatherForecast` 各加 optional `AirQuality *WeatherAirQuality json:"airQuality,omitempty"`；:131-135/:228-234 provider 加 `airQualityURL`（默认 `https://air-quality-api.open-meteo.com/v1/air-quality`）；:489-536 `AirQuality(ctx, location)` 方法复用既有 `getJSON`（20s 超时/2MiB/UA 全继承），query `latitude/longitude/current=us_aqi`，`us_aqi` 缺失返回 `(nil,nil)` 不算错，有读数则本地算 `usAqiCategory`（US EPA 分段 0-50 Good / 51-100 Moderate / 101-150 Unhealthy for Sensitive Groups / 151-200 Unhealthy / 201-300 Very Unhealthy / 301+ Hazardous）；:401-405 `Forecast` 返回前 best-effort 拉 AQ（失败不影响 Forecast）；:792-794 `fetchWeather` 成功分支仅当本次取到才覆盖（保留上一次 AQ，快照 `time` 可判新鲜度）。schema `weather-v1.schema.json` 顶层 properties 加 `airQuality`（$defs.airQuality：required time、usAqi number|null minimum 0），**未升 schemaVersion**。Go 测试 ×3 新增：`TestOpenMeteoForecastFetchesAirQuality`（含 AQ 端点 500 → Forecast 仍成功且 AQ=nil 子场景）、`TestUSAqiCategoryBands`（7 组表驱动）、`TestWeatherAirQualityRoundTripsThroughState`（含 nil 往返）。`go test -count=1` 全绿、Qt 客户端 6/6 绿。**消费方（Qt C++ WeatherClient 与 shell WeatherService.qml）本轮未接线**——后端轮禁止碰 QML/C++，下一轮做前端空气质量卡时一并接。
 - **阶段三动效 B.2：图标 Bounce（切换城市/刷新时逐小时卡天气图标弹跳，本轮，前端）**：`apps/weather/qml/Main.qml:1366` 逐小时卡 WeatherIcon 加 `transform: Translate { id: iconBounceShift }`；:1335-1340 新增 `iconBounceAnim` SequentialAnimation = Pause 300+40×index（等入场动画结束、按卡序交错）→ y 0→−6（110ms OutCubic）→ y −6→0（160ms OutBack 过冲落回），实际动画 270ms 落在 HIG 120–300ms 内；:1319-1324 `Component.onCompleted`：reduceMotion 时 `iconBounceShift.y=0` 显式归零不启动动画，否则在 entranceAnim 后 restart iconBounceAnim——delegate 重建（切城市/每小时刷新）时播放一次，频率符合 HIG"避免高频交互动效"。
   **帧差证据**（TEMP-BOUNCE-PROBE Timer 1600ms 循环 restart 取证，取证后已删并重编译；活实例 spectacle 连拍两组：6 帧 ×400ms + 10 帧 ×150ms）：第一卡图标区 (326,630)-(366,676) 弹跳中帧对相邻帧 MAE **3.86/3.86（maxdiff 170）** 与 **3.80/3.80（maxdiff 170）**（两组各捕捉到一次弹跳，放大序列 /tmp/bounce-seq.png 目视：f1 月牙上移出框顶、f0/f2 基线）；同卡温度文字区 (320,682)-(372,700) 与侧栏 (30,300)-(200,420) 对照 **全部精确 MAE=0.0000 / maxdiff=0**；f0-f4 / f2-f4 图标区 MAE=0.0000（回落干净、无残留位移）。
   **终态二进制**（TEMP 已删，截图 1792166644 过体检闸）：图标静止于基线、无弹跳残留，星空/侧栏/hero/指标卡无回归（06:00 卡半透明为既有入场动画被抓中段，非本轮回归）。测试 6/6 绿、go test ok。
@@ -58,12 +59,14 @@
 ## 仍差（按视觉冲击排序）
 1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升""刷新按钮旋转""图标 Bounce（切换城市/刷新，见已改）"（均见已改，含帧差证据）。剩余：图标 Pulse（正在更新）/Variable color/Replace、hero 温度视差、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
-3. Conditions 卡无温度走势曲线。
-4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
+3. ~~Conditions 卡无温度走势曲线~~ **本轮用 Pillow 放大 ref-main Conditions 卡复核（(515,200)-(760,310) 4x + y280-309 逐行采样）：参考卡里没有走势曲线**——只有 时间行/图标行/温度行 + 右上分段玻璃控件，y298-306 的亮像素全是温度文字字形（逐字列断续分布），无任何连续亮带。TASK 阶段三 B.6 虽列了"温度曲线 draw-on"，但与"参考图唯一判据"冲突，**暂停此条，待用户裁定**（裁定要曲线才恢复）。
+4. 缺卡片：空气质量（**后端字段本轮已就绪**，待前端卡 + Qt/shell 消费方接线）/ 风罗盘 / 月相 / UV —— 月相、UV 等仍受后端字段限制，见"外推待确认"。
 5. 侧栏只有 1 个城市时卡下方大片空白（参考有多城填满）；无数据可解，仅记录。
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **空气质量字段形态无参考数值约束**：Category（Good/Moderate/...）是本地按 US EPA 分段从 us_aqi 派生的，Open-Meteo 只给 us_aqi；参考图卡上 "40 Good" 与 EPA 分段一致（40∈0-50→Good），形态吻合但分段文案无 Apple 原文对照。AQ 本次未取到时保留上一次读数（不随主预报一起失效），`time` 字段供消费方判新鲜度——是否要在 stale 判定里单独处理 AQ 待定。消费方接线（Qt WeatherClient 暴露给 QML、shell WeatherService.qml、前端空气质量卡）下一轮做。
+- **Conditions 温度走势曲线已按参考图证伪**（见仍差 3）：TASK B.6 的"温度曲线 draw-on"若被用户裁定仍要，则属外推发明，需先解除"参考图唯一判据"约束。
 - **图标 Bounce 参数无参考**：参考图全静态；弹跳幅度（−6px）、节奏（110ms OutCubic 上 + 160ms OutBack 落，共 270ms）、触发时机（delegate 重建即入场动画后 300+40×index ms）系按 SF Symbols "Bounce" 词汇与 HIG 120–300ms 外推（TASK 阶段三 D 允许）；与入场交错叠加后的整体观感（图标先随卡浮入再弹跳）是否过于频繁/花哨待人工复核。另：弹跳只做了逐小时卡图标，10 天行图标（:1463 附近 WeatherIcon）未加（避免一帧内 7 个图标同时弹太闹），是否需要补待定。
 - **Bounce 与每小时刷新重放**：逐小时数据每小时刷新会重建 delegate → 图标每小时弹跳一次（与入场交错重放同批，见下条既有记录），频率是否符合预期待复核。
 - **刷新钮旋转的真实 loading 触发未实拍**：帧差取证用 TEMP `running: true` 强制（真实 `backend.loading` 窗口太短、无法与 spectacle 连拍对时），`backend.loading` 门控路径与 TEMP 同一属性，QML RotationAnimation 标准原语风险低；真实网络刷新（loading 持续几百 ms~几 s）时旋转观感——尤其很短的 loading 是否只闪转半圈就归零——待真机复核。loading 期间按钮 disabled、字形变白 0.38 且旋转，是否够醒目待定。

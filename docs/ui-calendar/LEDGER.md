@@ -1,3 +1,16 @@
+# R073 — **A01 step 3 done: the all-day band's inset now matches the reference — 3 → 1, band 80 → 76.**
+The reference was re-measured at 1:1 **on both legs this round**. Vertical: the band's top rule is **y=124** and the first chip
+starts at **y=126** ⇒ inset **≈1 ref-px**. Horizontal (new): the column separator sits at **x=324** and the near-white chip starts
+at **x=326**; separator **x=487** → the pink chip starts at **x=488** ⇒ inset **≈1 ref-px on the horizontal leg too**, so the
+single shared token is the right shape. One number: `CalendarScheduleView.qml` `allDayBandInset` **3 → 1**; the sibling
+`allDayBandHeight` **derives** from it, so the band became 1*2 + 3*24 + 2*1 = **76**. **Measured on our capture (1100x692 light,
+Thursday x=577):** sectionRule **155** (242, unchanged) · inset 156 = white (**1**) · chip1 **157-180** (**24**) · gap **181**
+(**1**) · chip2 **182-205** (**24**) · third slot **206-231** empty · `allDaySeparator` **232-233** (217, 2px) · first hour line
+**234** (237). Every value matched the round's prediction. **The gap did NOT re-inflate:** because the `ColumnLayout` is now
+`height: implicitHeight`, shrinking the band removed surplus instead of re-triggering R072's 7/13/6 spreading. **Bonus evidence
+for E01:** the ref's pink chip carries a **solid saturated 3px left stripe** (x=491-493, (187,62,216)) against a light purple
+fill (488-489) — the stripe is real and 3px at 1:1, not a compression artifact. **(2026-10-17)**
+
 # R072 — **A01 step 2 done: the all-day band's row geometry now matches the reference's scaled form — row 24, gap 1, band 80.**
 Reference re-measured **at 1:1 this round**: all-day rows at **y126-143 / y145-162 / y164-181** ⇒ row **18**, gap **1**, pitch **19**,
 inside a band whose top rule is **y=124** and whose 2px bottom separator is **y=183-184** ⇒ **band 60px**. Our vertical factor vs

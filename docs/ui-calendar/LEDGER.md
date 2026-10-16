@@ -1,3 +1,23 @@
+# R080 — **the all-day band chip's ink is the same rule as the timed chip's — and the REF settles it, not our code.**
+The band chip's Label was `AppTheme.text` (grey) while the timed chip's was the hue ink (R079), so the two chip families disagreed in one
+screenshot. The ref had **never been measured** for the band-chip ink, so the round measured it first, on the ref's band rows at 1:1:
+the ink core of each coloured chip against **its own ring-icon colour**, which is the item colour. **Purple ring (187,62,217) → ink core
+(93,30,108); blue-grey ring (133,148,173) → (67,74,86).** Both are **1:2 on every channel** (the .5 rounds down on the odd ones:
+187/2=93.5→93, 173/2=86.5→86) — hue and saturation untouched, exactly R079's `ink = c + (pole − c) * 0.5`, now anchored in the *band* by
+the ref itself and not by analogy. Edit: `CalendarScheduleView.qml` `allDayChip` gains the same derived `inkColor`; its Label `color:` →
+`allDayChip.inkColor`. Nothing else in the band was touched.
+**Ours, measured after the edit (coverage test, `t = (fill − pixel)/(fill − ink)` must agree per channel).** Light, blue calendar
+(48,140,198), fill (220,236,246): pixel (125,155,175) ⇒ **0.48/0.49/0.48**; (50,90,118) ⇒ 0.87/0.88/0.87; (101,133,154) ⇒
+0.61/0.62/0.63 — spread ≤0.019, with **25 pixels under 0.05**. Dark, fill (35,65,83), ink (152,198,227): (92,130,153) ⇒
+**0.49/0.49/0.49**, 40 pixels under 0.05. **A grey ink cannot pass this even loosely**, because the decisive channel is the **B−R gap**:
+the fill's B−R is 26 (light) / 48 (dark), so *no* neutral endpoint can produce the observed 50 at t=0.48 (light) or 61 at t=0.49 (dark) —
+only an endpoint of the fill's own hue can. Caveat recorded: on our low-saturation **blue** the hue direction and the grey direction from
+the fill are only **9.6° apart**, so the count of well-fitting pixels separates the candidates by ~2.3× in light (25 vs 11) but the *gap*
+argument is exact; a green or gold band chip would separate them far more sharply. **Regression:** the band fills and the timed chip's
+light fill (216,234,245) read as in R079; the multi-day strip's square joints, corners, radii, separators and `slice(0,2)` untouched.
+**Evidence:** `r080-bandink-light.png`, `r080-bandink-dark.png`, `r080-bandink-compare.png` (ref purple band chip | ours blue at ×4
+NEAREST), `r080-bandink-dark-band-x2.png`.
+
 # R079 — E01/E02 step 3: the timed chip's ink is the calendar colour at HALF VALUE (settled by measurement)
 The standing question was whether the ref's dark same-hue chip text is a *translation* of the calendar colour. Read as **ink cores**
 (the extreme glyph cluster, not the AA edge — R078's (99,131,172) was an AA pixel; the blue core is **(26,67,123)**), the answer is the

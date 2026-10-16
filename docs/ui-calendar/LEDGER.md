@@ -1,3 +1,60 @@
+# R067 — **The all-day band's bottom separator is now 2px (217,217,217), exactly the reference's value; the hour line below it stays 1px.**
+Pre-round it was 1px `AppTheme.border` (223,225,228) — the same weight as every other rule, so the grid had no
+strength hierarchy. (2026-10-17)
+
+## 本轮 (R067)
+Atomic step: the standing 仍差 #1 — "all-day band bottom separator: 1px → 2px (217,217,217)".
+**Code change**, one file, 2 edits (1 local token + 1 Rectangle). 1 build, 2 relaunch+capture circuits
+(light, then dark), ~22 Bash calls ≈ 13 min.
+
+Change — `apps/calendar/qml/CalendarScheduleView.qml`:
+- **New local token** (`:59-64`, after `gridLineMinor`): `allDaySeparator` = light **`#D9D9D9`** (217,217,217) /
+  dark **`Qt.rgba(1,1,1,0.24)`**. Local on purpose: `AppTheme.border` is app-wide and blue-tinted, and `border`
+  is shared with cards/fields/buttons — same reasoning R065 used for `gridLine`/`gridLineMinor`.
+- **The separator Rectangle** (`:323-327`, was 316-320): `Layout.preferredHeight: 1` → **`2`**,
+  `color: AppTheme.border` → **`color: root.allDaySeparator`**.
+- The **other** 1px `AppTheme.border` rectangle in the same `ColumnLayout` — the one *above* the all-day band
+  (`:240-243`) — is **byte-identical**: only the band's bottom boundary was in scope.
+
+**Measured PASS.** Light, field is pure white: **y=204 and y=205 both exactly (217,217,217)** = 2px, spanning
+**x 0..1099** (the whole main region *including* the gutter). The **first hour line** is the *next* row,
+**y=206 (237,237,237), 1px** — R065's adjacent-rows caveat respected, the two did **not** merge. Half-hour line
+y=226 (244,244,244), 1px. Dark, field (30,30,30): y=204/205 **(84,84,84)** 2px, y=206 **(59,59,59)** 1px hour,
+y=226 **(43,43,43)** 1px half. **Geometry is identical in both themes (204/205/206)** ⇒ no layout shift; the
+separator is a `ColumnLayout` sibling of the `ScrollView`, so +1px only shortened the grid viewport by 1px.
+**Pitch intact:** 206 → 226 = 20 = half of `hourHeight` 40 ⇒ T01 unregressed.
+Crops: `r067-alldaysep-light-2x.png`, `r067-alldaysep-dark-2x.png` (copied here).
+
+**Ref re-measured first (the gate for the whole round).** `macos-calendar.png` y=**183 and 184 both (217,217,217)**,
+y=182 (234,234,234) a partial AA edge — so **2px**; the run spans **x 192..812**, i.e. 621 px across the 620px
+main region: **from the gutter's own left edge all the way to the right rim**, crossing *under* the gutter rather
+than stopping at the grid line at x=243. Our `Layout.fillWidth: true` sibling reproduces that exactly (x 0..1099).
+The ref's hour lines are 1px ≈237 (R065) ⇒ 217 is a **deliberate strength step**, not a different rule.
+**Consequence for the y-map** (our 1100x692 light, `view week` + `date 2026-04-02`): title row text 94-105 →
+1px (224,224,224) at **118** → day-header text 133-141 → 1px `AppTheme.border` (223,225,228) at **155** (this is
+the rect *above* the all-day band) → all-day chips 168-188 → **R067's 2px at 204/205** → first hour line 206.
+
+**Dark token derivation (recorded, no dark reference exists).** Light separator `#D9D9D9` = black@0.149 over
+white; light hour line `#EDEDED` = black@0.0706; ratio **2.11×**. R065's dark hour line is white@0.13 ≈ 1.85×
+its light 0.0706 — a standard dark-theme visibility compensation. Applying **0.149 × 1.85 ≈ 0.275**, I took the
+slightly conservative **0.24**. Measured result: separator 84 vs hour 59 ⇒ **Δ25 on the 30..255 field = 11.1% of
+range**, vs light's Δ20 = 7.8% — marginally stronger in dark, same ordering, same direction as the ref's
+hierarchy. **Not a defect**, but it is the one number here with no reference behind it; if a dark ref ever
+appears, re-derive. (Deltas: dark hour→half = 59→43.)
+
+**Cost of one wrong scan window (record me).** My first light scan covered **y 90..200** and therefore only found
+the 1px (223,225,228) at **y=155** — which is the separator *above* the all-day band, **not** the one I changed.
+The band's bottom separator is at **y=204**, outside that window. **Measure the y-map before claiming a target
+row.** Also: launching from the task dir again put the captures in the task dir (R066's rule holds).
+
+**Subagent note:** `code-writer` is **not registered in this session** (available: claude, Explore, general-purpose,
+Plan, statusline-setup). Rather than spend the round on agent plumbing for a two-constant edit, I made the edits
+directly. **The loop's identity split was not exercised this round.**
+
+**Scope guards:** `hourHeight` (40) untouched; `gridLine`/`gridLineMinor` and every grid Rectangle untouched; the
+gutter `Label` untouched; the all-day band's `min 28 / row 18 / gap 2` and `Layout.preferredHeight: 18` (`:289`)
+untouched; the separator above the band untouched; chips untouched; `AppTheme.qml` untouched.
+
 # R066 — **T03 PASS: gutter hour labels are 11px, right-aligned 8px from the grid, centred exactly on their tick.**
 Pre-round they were font **9**, **centred** in the 52px gutter (ink right edge x=36 ⇒ a **16px** gap), and shifted
 by a hardcoded `topMargin: -7` that was only correct at font 9. (2026-10-17)

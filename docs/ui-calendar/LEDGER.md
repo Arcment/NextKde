@@ -1,3 +1,22 @@
+# R083 — **the Thu band-chip order is DETERMINISTIC: the equal-start tiebreak is in, and `Design sync` is r0 in all three legs.**
+One code change, the smallest the R082 verdict unlocked, in the sort at **`apps/calendar/qml/Main.qml:1159-1166`**: when
+`itemDateTime().localeCompare()` returns 0 the comparator now falls back to a new **`itemStableId(item)`** (= the record's `seriesId`,
+i.e. the VEVENT UID, which `PimStore.cpp:376` sets from `event->uid()`), then to `itemTitle`. UIDs are unique by construction ⇒ the
+comparator is a **total order** ⇒ the result is unique whether or not the engine's sort is stable. **Nothing else touched.**
+**Regression = exactly R082's 3-leg experiment** (same build, same fixture, `view week` + `date 2026-04-02`, each cropped to the Thu
+column's band): all three legs read **r0 = `Design sync`, r1 = `Release notes`** — R082's swap is GONE. All three logged `capture …
+true`, all 3050463 bytes, three distinct md5.
+**Two independent instruments agree.** (a) The R082 per-column max-deviation ASCII strings: `light1.r0 == light2.r0` and `light1.r1 ==
+light2.r1` **character for character** (dark1 differs in ramp *value* only — a dark fill has a different dynamic range; the run *shape*
+is the same). (b) **Raw pixels: the two light legs are IDENTICAL in the band** — fill (220,236,246) at n=502 (r0) / 515 (r1), top-5%
+coverage ink mean (78.9,103.2,149.8) / (79.0,102.3,148.5), extreme pixel (50,90,118) / (63,86,123) — all four equal to the last digit.
+⇒ **the band is pixel-reproducible across same-theme launches; the differing md5s come from the now-line moving between launches a
+minute apart.**
+**Title identity proved without reading a font:** the ASCII run splits each row at a word space — r0 = 28 px + 19 px of ink, r1 = 33 px
++ 24 px — i.e. 6+4 chars (`Design sync`) and 7+5 (`Release notes`) at a constant ~4.7-4.8 px/char, in all three legs.
+**The winner is `Design sync`** (UID `…allday-a` < `…allday-b`), as predicted: this is a *stability* fix, not a ref match — no ref
+anchor exists for the order of two equal-start all-day items. Figure: `docs/ui-calendar/r083-thu-band-3legs.png`. (2026-10-17)
+
 # R082 — **the Thu band-chip order swap is RUN-TO-RUN, not theme-dependent. R080's "light vs dark" reading was confounded by the run.**
 Three launches of the **SAME build**, same fixture and view/date (`view week` + `date 2026-04-02`), each cropped to the Thu column's band:
 **light1 = `Release notes` r0 / `Design sync` r1; dark1 = the SAME; light2 = REVERSED.** Two same-theme legs disagreeing is the whole

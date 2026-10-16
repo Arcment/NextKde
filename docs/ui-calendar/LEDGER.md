@@ -1,3 +1,17 @@
+# R085 — **N02 dark leg: no code change. The four-part now-line carries over to dark part-for-part; one extrapolation recorded.**
+VERIFICATION ROUND (N02's dark clause). Capture `r084-leg.sh dark r084-dark 2026-10-17 0` — **no rebuild** (R084's binary is current),
+**no edit**. Clock 01:46 vs the light leg's 01:43 ⇒ every part must move **+2 rows together** (3 min at `hourHeight` 40 = 2.0 px);
+that the *four* parts move as one is itself the test of R084's "one geometry source" claim. Measured, light → dark:
+**pill x4..45 (42×20) y293..312 → y295..314**, fill `(229,72,77)` **both legs** (identical, not a per-theme token); **dot centre y303.5
+→ y305.5** (bbox y299..308 → y301..310, Δ+2); **now-line y303-304 → y305-306**, strong segment over Sat **`(229,72,77)` both legs**;
+**faint `(252,236,237)` → `(50,34,35)`**, continuous over x60..799 by row mean (control rows 255 / 30) — i.e. **the faint rule does not
+drop out in dark**; `y294` half-hour line and `y314` (hour 2, suppressed label row) unchanged: light `(244,244,244)`/`(237,237,237)`,
+dark `(43,43,43)`/`(59,59,59)` = the untouched `gridLineMinor`/`gridLine` tokens. `02:00` suppressed in both (|314−305.5| = 8.5 ≤ 14).
+**One extrapolation, NOT fixed:** the faint rule's luminance contrast is **7.4 in dark vs 15.5 in light** (ΔL: (50,34,35) vs field
+(30,30,30); (252,236,237) vs white), so at 0.10 alpha the dark faint rule reads as a whisper and the line *looks* like it stops at the
+dot — visible in the ×6 crop only. **No ref anchor exists** (the ref image has no dark mode) ⇒ recorded, not changed; alpha is a shared
+token and the ref's structure is matched. Figure `docs/ui-calendar/r085-nowline-dark-cmp.png` (light/dark pill, dot, ×6 faint rule).
+
 # R084 — **N02: the current-time line is now the ref's four-part object (faint rule + today's strong rule + dot + gutter pill).**
 One change, `apps/calendar/qml/CalendarScheduleView.qml`: six root properties (`nowRow`, `nowInHour`, `nowLineY`, `nowLabel`,
 `todayColumn`, `nowLabelClearance`) + the gutter Label's `visible` + a new `nowPill` + the old per-cell 1px line replaced by

@@ -1,103 +1,45 @@
-# R096 — verdict + **first-ever expanded-sidebar capture**: S04's "selected row gray radius 6" governs the compact **category** row,
-not the capsule nav row; ours is already r=6 and the other two clauses hold ⇒ **0 code changes**.
+# R096 — verdict + **first-ever expanded-sidebar capture**: S04's "selected row gray radius 6" governs the **compact category row**, not the capsule nav row; ours is already r=6 and the other two clauses hold ⇒ **0 code changes.**
 
-**Why this round.** R095's Next #1 said the sidebar's own rows (S01/S04) had never been measured and are **not** ruling-blocked. Both
-clauses were read verbatim (`spec.md:22-25`): S04 = "Checked/unchecked checkbox distinct; **selected row gray radius 6**; hover lighter
-than selection"; S01 = "Neutral sidebar surface in settings palette; brighter flat calendar canvas, no blue cast/gradient".
+**The clause (S04, verbatim).** "Checked/unchecked checkbox distinct; **selected row gray radius 6**; hover lighter than selection."
+S01's: "Neutral sidebar surface in settings palette; brighter flat calendar canvas, no blue cast/gradient."
 
-**The ref anchor, read FIRST.** The whole ref sidebar contains exactly **one** rounded selection shape: the calendar row **"Personal"**
+**The ref anchor, read FIRST.** Exactly **one** rounded selection shape exists in the whole ref sidebar: the calendar row **"Personal"**
 (fill **(226,226,226)**, **R == G == B**, rows **y102..129 ⇒ h 28**, x **10..182 ⇒ w 173**). Its per-row fill-start inset over the first
-five rows is **4, 2, 1, 1, 0**; a circle of r=6 predicts 3.6, 2.0, 1.1, 0.55, 0.19 — **fits to ≤0.4 px ⇒ radius 6**. The plane is
+five rows is **4, 2, 1, 1, 0** ⇒ **radius 6** (a circle of r=6 predicts 3.6, 2.0, 1.1, 0.55, 0.19 — fits to ≤0.4 px). Plane
 **(237,237,237)** ⇒ **selection ΔL = −11**. Ref row pitch ≈ **26–27**. The ref's only *unchecked* row (Siri Suggestions) is a hollow
-1 px coloured border at the **same x18** as the checked boxes ⇒ **the ref does not indent an unchecked row**. **No hovered row exists
-in the ref** (no pointer) ⇒ clause 3 has **no ref anchor**, only the ΔL ordering.
+1 px coloured border at the **same x18** as the checked boxes ⇒ **the ref does not indent an unchecked row.** **No hovered row exists in
+the ref** (no pointer) ⇒ clause 3 has **no ref anchor** — only the ΔL ordering does.
 
-**Which delegate S04 governs — `CategoryRow`, not `SidebarRow`.** The ref's highlighted row is a *compact checkbox row*. That is
-`CategoryRow` (`Main.qml:362`): **`radius: 6`** already, `hoverEnabled: true`, 30 tall, 12 px box at inset 12. `SidebarRow`
-(`Main.qml:234`) is **44 tall, inset 20/11, `radius: height / 2` = capsule 22** — a row class **the ref does not contain at all** —
-and `SidebarRow.selected` is **never set true** (`todayNavigation` at `:1960` binds no `selected`), so its capsule is **dead chrome:
-changing its radius would move zero pixels.**
+**Which delegate S04 governs — `CategoryRow`, not `SidebarRow`.** The ref's highlighted row is a *compact checkbox row* (~28 tall,
+r=6, inset 10). `CategoryRow` (`Main.qml:362`, **`radius: 6`**, `hoverEnabled: true`, 30 tall, 12 px box at inset 12) is that class.
+`SidebarRow` (`Main.qml:234`) is **44 tall, inset 20/11, `radius: height / 2` = capsule 22** — a row class **the ref does not contain
+at all** — and `SidebarRow.selected` is **never set true** (`todayNavigation` at `:1960` binds no `selected`), so its capsule is
+**dead chrome: changing its radius would move zero pixels.**
 
-**Ours, measured.** First ever capture with the sidebar expanded (`r096-sidebar-light.png`; light 1100x692, `sidebar{expanded}`,
-`view week`, `date 2026-10-15`, `contentY 280`, capture flag **true**): sidebar **x0..219**, plane **(228,228,228)** neutral R==G==B,
-**uniform within ±3 over y118..683 ⇒ no gradient and no blue cast**; canvas **255** at x221. Boxes **x12..24**, row pitch **30**.
-`selectionFill` = #767680@12 % over 228 ⇒ **(215,215,216)**, ΔL **−13**; `rowHoverFill` = #747480@8 % ⇒ **(219,219,220)**, ΔL **−9**
-⇒ **hover (9) < selection (13) ⇒ clause 3 holds**; our Δ13 vs the ref's Δ11 is 0.8 % of range. **Clause 1 PASS** (filled + white check
-vs hollow 1 px border, both visible in the capture). **Clause 2 already satisfied.** Everything else in the sidebar (inset 12, box 12,
-row 30, heading 11 pt) is S02/S03-locked and PASSing ⇒ **nothing to change, 0 code changes.**
+**Ours, measured (first ever expanded-sidebar capture).** `r096-sidebar.png` (light 1100x692, `sidebar{expanded}`, `view week`,
+`date 2026-10-15`, `contentY 280`): sidebar **x0..219**, plane **(228,228,228)** neutral R==G==B, uniform within ±3 over y118..683
+⇒ **no gradient, no blue cast**; canvas **255** at x221. Boxes **x12..24**, row pitch **30**. `selectionFill` #767680@12% over 228 =
+**(215,215,216)** ⇒ ΔL **−13**; `rowHoverFill` #747480@8% = **(219,219,220)** ⇒ ΔL **−9** ⇒ **hover (9) < selection (13) ⇒ clause 3
+holds**; our Δ13 vs the ref's Δ11 is 0.8 % of range. Clauses: **1 PASS** (filled+white check vs hollow 1 px border, both in the
+capture), **2 = already r=6 on the class the ref anchors**, **3 PASS**. Everything else in the sidebar (inset 12, box 12, row 30,
+heading 11 pt) is **S02/S03-locked and PASSing** ⇒ nothing to change.
 
-**Why 237 vs our 228 is NOT a defect.** The ref sidebar is a **vibrancy material** — R093 already caught the same token reading
-(207,51,35) there vs (235,76,70) in the grid. ⇒ **the ref sidebar's absolute greys do not transfer; only Δ's and orderings do.**
-S01's clause is relational ("neutral plane + brighter flat canvas") and ours holds.
+**Why 237 vs our 228 is NOT a defect — and the instrument that says so.** The ref sidebar is a **vibrancy material**; R093 already
+caught the same token reading (207,51,35) there vs (235,76,70) in the grid. ⇒ **the ref sidebar's absolute greys do not transfer;
+only Δ's and orderings do.** S01's clause is relational ("neutral plane + brighter flat canvas") and ours holds.
 
-**Evidence:** `docs/ui-calendar/r096-sidebar-selection.png` — the ref's row block over ours at ×2, each panel labelled with its numbers;
-raw capture `docs/ui-calendar/r096-sidebar-light.png`.
+## ## 本轮 (R096)
+Atomic step: **Next #1's reading step — read S04/S01 verbatim, crop the ref's sidebar, measure the selected row, rule which delegate
+S04 governs.** **0 code changes** (every sidebar dimension is spec-locked; the one clause that could fail — #2 — is already satisfied
+and its rival delegate is dead chrome). **1 leg** (~4 Bash): kill pid → `start-review-vm.sh light` → `review-command.py`
+`resize/sidebar/view/date/captureClient/stop` → capture flag **true**, `contentY 280`. 1 figure + ~10 measurement reads ≈ **22 Bash**.
+**`code-writer` is still NOT registered — do not retry it each round.** **Ruling H is STILL unanswered** ⇒ the band ring icon **stays
+blocked and unbuilt**. **The app LAUNCHES WITH ITS SIDEBAR COLLAPSED** — `{"action":"sidebar","expanded":true}` must be in the drive
+list. The R087 fixture (4 all-day items on Thu) is **still live**. **NEW INSTRUMENT (R096): the ref sidebar is a vibrancy material —
+never compare an absolute grey across it, compare ΔL against the sidebar's own plane.** **THE HARNESS HAS NO POINTER-MOVE ACTION**
+(`captureClient/escape/resize/sidebar/view/date/position/wheel/flick/stop/openItem`) ⇒ `hovered`/`pressed` chrome **cannot be driven**
+— any clause phrased as "hover …"/"pressed …" is **static-only** unless a new harness action lands.
 
-**Instrument (new, → state.md 外推).** (a) **A vibrancy sidebar's absolute greys never transfer** — measure ΔL against the sidebar's
-own plane. (b) **A radius is the per-row fill-start inset**; r=6 fits the 4,2,1,1,0 signature — never eyeball it off an upscale.
-(c) **The harness has no pointer-move action** ⇒ **`hovered`/`pressed` chrome cannot be driven**; such clauses are static-only (token
-ordering at best) and can never be called PASS. (d) Two verdict rounds in a row is the correct outcome when the spec literals and the
-ref agree: **the remaining unmeasured surface is C05, the toolbar.**
-
-# R095 — verdict, **no code changed**: the mini month's weekday header does **not** tint today's column letter (the "red 六" was a ×2 `LANCZOS` artifact — the ref anchor and ours agree).
-
-**The claim under test (R094's Next #1).** "`Main.qml`'s mini weekday-header row draws the today column's letter (`六`, today = Sat
-Oct 17) in **red** while the other six are grey."
-
-**The anchor, read FIRST (as instructed).** The ref's mini month is **Sunday-first** and its weekday row sits at **y378..385**.
-Per-letter ink (30 % darkest mean) over the seven runs x25-27 / 46-52 / 71-76 / 94-102 / 120-124 / 145-148 / 168-172 =
-**(135,135,135) (124,124,124) (161,161,161) (130,130,130) (143,143,143) (135,135,135) (130,130,130)** — **R == G == B on all
-seven**, including the `W` directly above the today disc (x94-102, the Wed column). ⇒ **the ref tints nothing.**
-
-**Our header, measured the same way.** Row `y541..549`, seven runs x21-30 / 49-58 / 77-86 / 106-113 / 133-142 / **161-170** /
-190-197; the today column's letter **六 is the 6th run (x161-170)** — centred on 165.5, i.e. the same column as the today disc
-(x158..172, R094). Ink 5 %-means: (154,156,162) (132,131,135) (150,149,154) (136,135,141) (157,153,171) (**150,148,153**)
-(151,148,153). For 六, **warm (r−b>6) = 18 vs cool (b−r>6) = 19** — a *balanced* subpixel-AA fringe, not a hue (四 = 22/20,
-日 = 16/17). And the code agrees: `Main.qml:2137-2156`, the weekday `Repeater`'s `Label` carries a single unconditional
-`color: root.tahoe.labelSecondary` — **there is no `today` term to delete.**
-
-**⇒ No defect. Verdict round: 0 code changes.** The ×2 `LANCZOS` crop that R093/R094 used for the mini month makes a 10-px grey
-CJK glyph with RGB-subpixel AA *look* red; `NEAREST` and `LANCZOS` at ×8 over the *same pixels* show `五 六 日` in one grey.
-**R094's Next #1 is refuted, and the last mini-month question closes.**
-
-**Evidence:** `docs/ui-calendar/r095-header-no-tint.png` — the ref strip (x20..186 y374..390, ×5 `NEAREST`) over our strip
-(x14..201 y533..553, ×5 `NEAREST`), each labelled with its per-letter ink RGB. Source pixels: `capture-r094.png` — **the same
-binary, unchanged this round** (no build, no leg: R083's same-theme byte-stability plus an unmodified tree make a fresh launch a
-no-op). **Deliberately no fresh leg** — a verdict round must not spend one.
-
-**Instrument (new, → state.md 外推).** **A 10-px CJK glyph is not an ink instrument under an upscale.** Read its colour as the
-**warm/cool balance** — `count(r−b>6)` vs `count(b−r>6)` over the glyph's bbox: a real red tint makes warm dominate ~10:1,
-while RGB-subpixel AA keeps the two within ±10 %. Corollary: **R093/R094's ×2 `LANCZOS` mini-month crops are colour-unsafe**;
-their *geometric* reads (15 px disc, 22 px header disc) stand because R094 re-verified them with an envelope predicate.
-
-# R094 — M04's **size** clause CLOSED: the mini month's today disc 20 → **15 px**, the ref's own diameter.
-
-**The defect.** R093 closed M04's colour clause (`tahoe.accent` blue → `AppTheme.todayRed`) and left the size: the mini month drew
-today as a **20x20** disc while the ref's mini disc is **15x15 at x91..105 / y395..409**, fill (207,51,35). The spec literal
-"18–20" contradicts the ref, but **R086's precedent** (the ref's own diameter beat the derived literal for the week header disc)
-applies — **the ref wins**.
-
-**The fix.** `Main.qml:2199-2200`: `width/height: 20` → **`15`** (+ the M03 comment, which named 20x20). `radius: width / 2`
-follows, so the disc is a 15 px circle. The **same `Rectangle` is the selected-day marker**, so its 1 px accent ring is 15 too —
-one marker, one size (the ref has no separate anchor: its selected day *is* its today). **No other line touched**; the numeral
-stays `font.pixelSize: 11`.
-
-**Acceptance (light, 1100x692, drive `resize` + `sidebar expanded` + `view week` + `date 2026-10-15`) — figure
-`docs/ui-calendar/r094-mini-today-15.png` (ours vs the ref, ×8 `NEAREST`, labelled) + `r094-light-leg.png`:**
-- mini today disc (Oct 17, Sat) = **15x15, rows 599..613, max row width 15**; the **same red-dominance envelope predicate** on the
-  ref gives **15x15, rows 395..409, max row width 15** ⇒ **1:1 by one instrument.**
-- selected day (Oct 15) accent ring = **15x15 at x102..116 / y599..613** (side effect of the shared Rectangle — consistent).
-- **Non-regression control: the week header's today disc is still 22x22, rows 126..147** (R086's value, untouched).
-- numeral: **no white ink outside the disc footprint x158..172** ⇒ the two-digit `17` fits inside 15 px. The font is unchanged, so
-  R093's 1:1 ink-height result (**9 = 9**) cannot have moved.
-- build clean (`ninja` 7/7 incl. the qmlcache regen + relink). **Leg ran once, capture flag `true`, `contentY 280` at `stop`.**
-
-## ## 本轮 (R094)
-Atomic step: **M04's size clause.** 1 edit (2 values + 1 comment) + 1 light leg + 3 measurement scripts ≈ 13 Bash. **`code-writer`
-is still NOT registered** (agent list: claude / Explore / general-purpose / Plan / statusline-setup) — implemented directly; **do not
-retry it each round.** **Ruling H is STILL unanswered** — no rulings channel exists anywhere in the tree, so the band ring icon
-**stays blocked** and was **not** built. **The app LAUNCHES WITH ITS SIDEBAR COLLAPSED (R093)** — `{"action":"sidebar","expanded":true}`
-must be in the drive list for any mini-month evidence. The R087 fixture (4 all-day items on Thu) is **still live**.
 
 ## The chip-ink hoist (R089, structural — read this before touching a chip)
 **`inkColor` reached its THIRD consumer** (timedChip R079, allDayChip R080, the band's `+N` row R089), so the rule lives **once**
@@ -138,26 +80,49 @@ theme fact, **not a defect**. **N02's today header disc CLOSED R086** (22 px, th
 - *Cosmetic / settled, no ID:* `secondary` hover = neutral grey 79 no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. D02
   radius **16** vs spec 24/32 — **keep 16**. Topmost visible gutter label is **half-clipped** when a scroll offset lands an hour line
   exactly on the viewport top (R066; scroll artifact). Band-chip fill alpha ref **0.16** vs ours **0.17** (R080) — not worth a round.
-  **The mini month's weekday header tints today's own column letter (`六`) red** while every other letter is grey — **ref anchor still
-  unread; this is Next round #1.**
+  **CLOSED in R095: the mini month's weekday header does NOT tint today's column letter** — the ref's seven letters are all
+  R==G==B and ours are all `labelSecondary`; the "red 六" was a ×2 `LANCZOS` upscale artifact. **No mini-month question is open.**
+- **MEASURED in R096: S04 — the sidebar's row chrome.** Clauses 1 (checked vs unchecked) and 3 (hover lighter than selection) **hold**;
+  clause 2's "gray radius 6" is **already satisfied** on `CategoryRow` (`Main.qml:362`, `radius: 6`), which is the class the ref's own
+  selected row anchors, and its only rival (`SidebarRow`'s capsule, `:263`) is **dead chrome — nothing ever sets `selected`**.
+  S01 also holds (plane 228 neutral R==G==B, uniform ±3 ⇒ no gradient/blue cast; canvas 255 flat). **Not a defect; no code change.**
 
 ## ## 最近已改 (most recent 8)
-0. R094 — **M04 size**: `Main.qml:2199-2200` `width/height: 20` → `15` (+ the M03 comment). `radius` follows. Selected-day ring
+0. R096 — **verdict only, NO code changed**: S04's "selected row gray radius 6" governs **`CategoryRow`** (already `radius: 6`); the
+   ref's only selection shape is the compact **"Personal"** row (fill 226 on plane 237 ⇒ ΔL −11, **r=6**, h 28, inset 10). Clause 3
+   (hover lighter than selection) **holds** numerically (ours −9 vs −13). `SidebarRow`'s capsule is **dead chrome** (`selected` never
+   set). First-ever expanded-sidebar capture: `r096-sidebar.png`.
+1. R095 — **verdict only, NO code changed**: the mini month's weekday header **does not tint** the today column's letter. Ref 7/7
+   letters R==G==B; ours 7/7 neutral (六 = x161-170, ink (150,148,153), warm 18 / cool 19); `Main.qml:2137-2156` is one
+   unconditional `labelSecondary`. **R094's Next #1 refuted.**
+2. R094 — **M04 size**: `Main.qml:2199-2200` `width/height: 20` → `15` (+ the M03 comment). `radius` follows. Selected-day ring
    shares the Rectangle ⇒ also 15. Font untouched. Disc re-measured **15x15** vs the ref's **15x15**, header disc control **22x22**.
-1. R093 — **M04 colour**: `AppTheme.qml` gains `readonly property color todayRed: "#E5484D"`; `CalendarScheduleView.qml:111`
+3. R093 — **M04 colour**: `AppTheme.qml` gains `readonly property color todayRed: "#E5484D"`; `CalendarScheduleView.qml:111`
    repointed at it (same value); **`Main.qml:2204` `root.tahoe.accent` → `AppTheme.todayRed`**. 1 literal left in the tree.
-2. R092 — **verdict only, NO code changed**: the dark leg was run as R091's missing acceptance half. `contentY 240` both probes,
+4. R092 — **verdict only, NO code changed**: the dark leg was run as R091's missing acceptance half. `contentY 240` both probes,
    whole-page diff **0 px**, Mon x60 bar runs identical, and the driven week carries no today ⇒ no now-line ⇒ a true structural zero.
-3. R091 — **`CalendarScheduleView.qml:276`**: `repositionTimeline()` (immediate `positionTimeline()` + `autoScrollTimer.restart()`)
+5. R091 — **`CalendarScheduleView.qml:276`**: `repositionTimeline()` (immediate `positionTimeline()` + `autoScrollTimer.restart()`)
    replaces the bare `autoScrollTimer.restart()` on firstDate/dayCount/visible ⇒ the 450 ms window is closed. Two fresh light legs, **0 px**.
-4. R090 — **verdict + diagnosis, NO code changed**: the regression leg was one `hourHeight` off (154,551 px); the accused mechanism
+6. R090 — **verdict + diagnosis, NO code changed**: the regression leg was one `hourHeight` off (154,551 px); the accused mechanism
    (PIM-arrival race) is **corrected in R091** — it is a capture-vs-450 ms-timer window.
-5. R089 — **A04 step 2**: band `ColumnLayout` → `id: allDayStack` + `allDayOverflow`/`allDayVisible`; Repeater model
+7. R089 — **A04 step 2**: band `ColumnLayout` → `id: allDayStack` + `allDayOverflow`/`allDayVisible`; Repeater model
    `slice(0, allDayStack.allDayVisible)`; trailing `+N` `Label`; chip ink hoisted to root **`chipInk(item)`** (3rd consumer).
-6. R088 — **A04 step 1**: `:454 slice(0, 2)` → `slice(0, root.allDayBandRows)` + a 2-line comment.
-7. R087 — **verdict + fixture, NO code changed**: 3 all-day VEVENTs added ⇒ **Thu = 4 all-day items**; ref band re-measured.
+   *(archived to rounds.md tail: R088 — A04 step 1, `:454 slice(0, 2)` → `slice(0, root.allDayBandRows)`; R087 — 3 all-day VEVENTs added.)*
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
+- **THE REF'S SIDEBAR IS A VIBRANCY MATERIAL — ITS ABSOLUTE GREYS DO NOT TRANSFER (R096).** The ref plane reads **237** and its
+  selected row **226** (ΔL **−11**, exactly neutral, **r=6**, **h 28**, fill x10..182); ours is plane **228** with `selectionFill`
+  **215** (ΔL **−13**) over a **flat opaque** plane. The same token reads differently on each layer (R093: `todayRed` = (207,51,35) on
+  the sidebar vs (235,76,70) in the grid) ⇒ **compare only ΔL against the sidebar's own plane and the ordering of Δ's, never the
+  absolute value.** S01's clause is relational, so 237-vs-228 is **not** a defect.
+- **A RADIUS IS MEASURED AS THE PER-ROW FILL-START INSET, AND r=6 FITS 4,2,1,1,0 (R096).** Over the first five rows of a corner a
+  circle of radius r predicts `r − sqrt(r² − (r − (dy+0.5))²)`; read the fill's per-row first/last x with a tight tolerance around the
+  fill's own colour and compare. Do **not** eyeball a radius off an upscaled crop.
+- **THE HARNESS HAS NO POINTER-MOVE ACTION (R096).** The flat action set is
+  `captureClient{path}` / `escape` / `resize{width,height}` / `sidebar{expanded}` / `view{view}` / `date{date}` / `position{contentY}` /
+  `wheel{angleY}` / `flick{velocity,cancelFirst}` / `stop` / `openItem{kind,titleContains}`. ⇒ **`hovered` and `pressed` chrome cannot
+  be driven** — every clause phrased as "hover …"/"pressed …" is **static-only** (its token ordering can still be checked numerically)
+  unless a new harness action lands. **A static screenshot can never settle an animation or a hover clause.**
 - **A DISC'S DIAMETER IS AN ENVELOPE, NOT A TOKEN-PIXEL COUNT (R094).** Read it as `r > 150 and r > 1.6*g and b < 1.2*g`,
   per-row min/max, and take **max row width + the first/last rows**. A **strict token match under-reports**: the white numeral
   carves ~40 % out and R093's strict read gave "74 px" for a disc whose envelope is 15x15 (its "20x20" and this "15x15" are
@@ -166,6 +131,12 @@ theme fact, **not a defect**. **N02's today header disc CLOSED R086** (22 px, th
 - **THE APP LAUNCHES WITH THE SIDEBAR COLLAPSED (R093).** Every R082–R092 leg therefore contains **no sidebar and no mini calendar**;
   `{"action":"sidebar","expanded":true}` must be in the drive list for any sidebar/mini-month evidence. The harness applies it
   *before* the capture command, so the order in the flat list is what matters.
+- **A 10-PX CJK GLYPH IS NOT AN INK INSTRUMENT UNDER AN UPSCALE (R095).** Grey glyphs carry **RGB-subpixel AA**, and an
+  upscale (×2 `LANCZOS` was enough) smears the fringe into apparent colour — the mini month's today-column letter `六` *looked* red
+  in R093/R094's crops while being pure `labelSecondary` grey. **Read the warm/cool balance instead:** `count(r−b>6)` vs
+  `count(b−r>6)` over the glyph's bbox — a real red tint makes warm dominate ~10:1; subpixel AA keeps them within ±10 % (六 18/19,
+  四 22/20, 日 16/17). **Corollary: R093/R094's ×2 `LANCZOS` mini-month crops are colour-unsafe** — their *geometric* reads stand
+  (R094 re-verified the 15 px disc with the envelope predicate, not with an eyeball).
 - **THE REF'S "TODAY" RED IS ONE RED APP-WIDE (R093).** The `9:41` pill and the now-line row both read **(235,76,70)**; the mini
   disc reads **(207,51,35)** — same token, split by the sidebar's translucency. ⇒ **never name a second red token off the mini disc.**
   Our equivalent is `AppTheme.todayRed` = `#E5484D` = **(229,72,77)**, Δ≈(6,4,7) from the ref's pill.
@@ -363,19 +334,19 @@ theme fact, **not a defect**. **N02's today header disc CLOSED R086** (22 px, th
   `state.md`/`rounds.md` can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## ## Next round (pick ONLY #1)
-**#1 — the mini month's weekday header tints today's own column letter red; read the ref anchor before touching it.** `Main.qml`'s mini
-weekday-header row draws `一二三四五六日`; the live capture shows **today's column letter (`六`) in red** while the other six are grey. This
-is the **only remaining mini-month question** and it is one atomic step: **FIRST read the anchor** — the ref's weekday row is above the
-mini month's first date row; crop the ref at **`x82..112, y365..390`** (the ref's today is Wed, so its column letter should sit under the
-Wed column) and print the per-column ink RGB in that row. **If the ref tints nothing (all seven letters one grey), delete the tint; if the
-ref tints the today column, measure its colour and port it via a token — do NOT inline a hex.** Ours: find the header `Repeater` around
-`Main.qml:2120-2160` (`grep -n "miniDay"` / the `一二三` string) and read how the letter's `color` is bound today. **Keep the disc at 15
-(R094) and the numeral at 11.**
+**#1 — C05 clause 1: the TOOLBAR chrome. Not ruling-blocked, never measured.** Literal: "Hover/pressed/inactive chrome matches actual
+settings; **no second capsule or conflicting controls**". **First step is a reading step that needs NO new leg:** crop the toolbar
+(`y0..~70`) out of `r096-sidebar.png`, which is already on disk, and count the capsules/controls; `grep -n "| C05 " spec.md`; then
+`grep -n "toolbar\|ToolBar\|glassPill" apps/calendar/qml/Main.qml` to find the chrome's QML. The ref anchor for "no second capsule": the
+ref toolbar is macOS Calendar's — a **flat** bar with a view segmented control, Today, ‹ › chevrons and a search field — **no glass
+pill anywhere** ⇒ any second rounded container of ours is ref-checkable, and its *absence* similarly. ⚠ **C05's hover/pressed half is
+NOT drivable** (R096: the harness has no pointer-move action) — read the tokens' ordering numerically (`selectionFill` for pressed,
+`rowHoverFill` for hover) and record the pointer half as **needs a harness action**, never as PASS. **Do NOT touch the mini month**
+(closed: M04 colour R093 + size R094 + header R095) **or the sidebar rows** (measured R096 — 0 code changes due).
 
 **Then (all still ruling-blocked, in visual-impact order):** #2 the band ring icon (ruling H — no rulings channel exists anywhere in the
 tree, so it stays unbuilt); #3 12-hour two-tone gutter labels (ruling F); #4 dim snap (`KosWorkspaceDialog.qml:24-27`, ruling A); #5
-shadow magnitude (ruling B); #6 month `slice(0, 2)` (ruling D + a 3-all-day-item *month* day). **Also untouched and NOT ruling-blocked:
-the sidebar rows (S01/S04) and the toolbar chrome (C05).**
+shadow magnitude (ruling B); #6 month `slice(0, 2)` (ruling D + a 3-all-day-item *month* day). **Also untouched and NOT ruling-blocked: the toolbar chrome (C05 — now Next #1). The sidebar rows are MEASURED (R096).**
 
 **Blocked on rulings A–H:** the **band icon (H, R081)**, dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E;
 clauses 1+2 PASS R048), month `slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2–3) vs
@@ -383,5 +354,6 @@ the ref's measured 1**. **The `code-writer` subagent is NOT registered in this s
 **Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 and **A01** PASS-pending-final-regression; **A03** PASS; **A04 fully PASS** —
 step 1 R088, step 2 R089 spec-only + byte-contained, R091's light 0 px pair and R092's dark 0 px pair the byte-level reconfirmations;
 **E01/E02 clauses 1+2+3 PASS** and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02 closed R087**; **M04 closed
-R093 (colour) + R094 (size)**; everything else PENDING or ruling-blocked. **R094 touched two numbers in one Rectangle and re-measured the
-header disc as its control — no chip, band, grid, token or fixture code.**)
+R093 (colour) + R094 (size)**; **S01 + S04 MEASURED R096** (2 clauses hold, clause 2 already satisfied on `CategoryRow`); everything else
+PENDING or ruling-blocked. **R096 changed NOTHING — a verdict round: S04's rival delegate is dead chrome and the ref anchor is already
+r=6; the tree is byte-identical to R095. The sidebar rows, the mini month and the band's ink are all now measured.**)

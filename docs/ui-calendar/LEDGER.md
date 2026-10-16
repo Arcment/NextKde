@@ -1,3 +1,33 @@
+# R128 — **A01 / A02 / A04 DARK LEG PASS — all four band rules and the whole row map byte-equal to light; dark order 39 < 59 < 84 exact.** Read-only round: no source, no build — the R126/R127 dark instance (204727) was still ALIVE (`KOS_APPEARANCE=dark`), so the capture was free. Figure `docs/ui-calendar/r128-band-dark-light-2x.png`.
+
+## 本轮 (R128)
+Atomic step: Next #1 of R127 — the A-series dark leg. A01/A02/A04 had all been measured on the LIGHT leg only (R106/R107), so the band was the last unread dark surface. `kill -0 $(cat live-app.pid)` ALIVE ⇒ one batch (`resize 1100x692` / `view week` / `sidebar expanded` / `date 2026-04-02` / `captureClient r128-dark-band.png`), one capture, no relaunch.
+
+### Orientation — the week starts on MONDAY
+The header reads 周一 30 / 周二 31 / 周三 1 / **周四 2** / 周五 3 / 周六 4 / 周日 5, so the seven columns are Mon..Sun at **272 · 391 · 510 · 629 · 748 · 867 · 986** — **Thu Apr 2 = x629..747**, matching the pinned map. Consequences used below: the `Multi-day review` strip (Mar 30 → Apr 3) runs Mon→Fri, `Design sync` / `Release notes` / `+2` occupy Thu, and **Sun Apr 5 is the empty all-day column** — the column that makes A02 measurable.
+
+### A01 — the four rules, dark (plane 30,30,30); predicted = 30 + a·225
+- `sectionRule` **y155 = (39,39,39)** — white@0.04 ⇒ **39.0** (light mirror 242).
+- `allDaySeparator` **y232-233 = (84,84,84)**, **2 px** — white@0.24 ⇒ **84.0** (light 217).
+- the grid's top rule **y234 = (59,59,59)** — gridLine white@0.13 ⇒ **59.25** (light 237); over the weekend columns it reads **65** (37 + 0.13·218 = 65.3), the same token on the tinted plane.
+- **The spec's demanded dark order 39 < 59 < 84 holds with every rule within 0.5/255.** The light order (242 / 237 / 217) is the same *roles* read in the opposite direction.
+- Rules span **x221..1099** (the sidebar plane is (40,40,40) with its rim at x220 = (61,61,61), the dark blend of the separator).
+
+### A01 — the row map is leg-invariant, byte-for-byte
+3-row leg interior **156..231 = 76** (= 1 + 25·3); chips **157-180 / 182-205 / 207-230** ⇒ **row 24, gap 1, pitch 25**, exactly source `CalendarScheduleView.qml:62-63` (`allDayRowHeight 24` / `allDayRowGap 1`). A mid-height envelope scan at **y178 and y179 returns the identical segment list on both legs** — light `(274,625) (631,744) (750,863)` ≡ dark `(274,625) (631,744) (750,863)` (the merged Mon–Wed bar, Thu's `Design sync`, Fri's `R087 sole`). ⇒ **the band's form did not move between legs; the dark read is the confirmation, not a new measurement** (R127's rule, second application).
+
+### A02 — "expands uniformly": a PER-WEEK max, not a per-column fact
+Sun Apr 5 has **zero** all-day items, yet its interior still runs **156..231 as (37,37,37)** (the weekend tint) and the separator at 232-233 is **continuous across x221..1099**. ⇒ **shared bottom edge = one horizontal edge at y231 for all seven columns, with an unbroken separator beneath it** — and it is only visible *because* one column contributes no rows. "Subtle stronger separator" = **84** against sectionRule's 39 and gridLine's 59: the strongest of the three, exactly as light's 217 is the weakest.
+
+### A04 — the overflow row is explicit and full-height
+Row 3 (**207-230**, a real 24-row slot at the correct pitch) carries **no chip fill** and only the text `+2` — ink cluster at **x635..645** on y218, plane (30,30,30) everywhere else in the row. No half-clipped row anywhere in the leg. The light leg reads the same row as plane 255 throughout at x700.
+
+### Bonus — the band chip's fill is a DECLARED per-leg pre-blend (new token read)
+`CalendarScheduleView.qml:589` `AppTheme.mix(allDayBackdrop(columnDate), itemColor, AppTheme.dark ? 0.32 : 0.17)`. Dark measured **(36,65,84)** = 0.32·(48,140,198) + 0.68·(30,30,30) to **≤0.3/255** on all three channels; light measured **(220,235,245)** = 0.17·(48,140,198) + 0.83·255 to **≤0.4/255**. The fill is uniform across the chip (x740 and x760 at y176 agree), i.e. no gradient — unlike the timed chip. **0.32 ≠ 1 − 0.17**, so R125's rule ("read a dark leg against the token, never by inverting the light alpha") now has a second, independent witness.
+
+### 外推 (R128)
+- **A BAND THAT GROWS BY MAX-ROW-COUNT IS PROVED BY ITS EMPTY COLUMN (load-bearing).** Sun Apr 5 contributes zero all-day items, yet the leg interior still runs 156..231 and the separator beneath is unbroken ⇒ "expands uniformly / shared bottom edge" is a **per-week max** read off the one column that adds no rows. ⇒ **Find the column with the fewest items; it is the only place the band's own edge is visible.**
+- **A DECLARED PER-LEG ALPHA IS THE SECOND WITNESS TO R125 (load-bearing).** `:589`'s 0.32 dark / 0.17 light fits both legs to ≤0.4/255 and 0.32 ≠ 1−0.17 ⇒ **two independent tokens now say: never derive the dark leg from the light alpha.**
 # R127 — **L03's DARK LEG — the segmented Day/Week/Month control: PASS 5/5, and all three light-only colour tokens solved on dark.** Read-only round: no source, no build — the R126 dark instance (204727) was still ALIVE, so the dark capture was free and the light leg came from the R124 PNG. Figure `docs/ui-calendar/r127-seg-dark-light-3x.png`.
 
 ## 本轮 (R127)

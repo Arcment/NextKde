@@ -1,3 +1,24 @@
+## R092 — R091's fix is verified in the DARK leg: two fresh dark legs are **0 px** apart whole-page.
+
+**No code change.** R091 changed one binding path in the timeline's reposition trigger
+(`CalendarScheduleView.qml:276`), and its acceptance pair ran light only — a dark leg has its own launch (the theme is
+fixed at launch), so the fix's dark side was unverified. `leg.sh dark r091e` / `leg.sh dark r091f`:
+
+- **`contentY` reads `240` in BOTH legs' `stop` probe** (`contentHeight 960`, `width 1102`) — the R091 instrument.
+- **Whole-page `ImageChops.difference`, threshold >6 RGB-sum: 0 differing pixels, 0 contiguous y-runs.** The md5s still
+  differ (`45d86358…` vs `4916f52e…`) while the pixels do not — the R083/R091 rule re-confirmed a third time: PNG bytes
+  are not the instrument.
+- **Non-vacuous**: the Mon column (x52..202) does carry 4 timed chips in both legs — reading the saturated bar at x60,
+  the runs are `317..332 / 359..370 / 397..412 / 437..452` **identically in both legs**. (x58/x63 miss the `359..370`
+  run, the short 10:15 chip — the bar is 4 px wide at x59..62, so an x60 read is the right instrument.)
+- **The 0 px is a true structural zero, not a masked one**: the driven week is 2026-03-30..04-06 while "today" is
+  2026-10-17 ⇒ `todayColumn = -1` ⇒ **no now-line is drawn at all**, not even the faint rule (`px(400,63) = (30,30,30)`,
+  the pure field). So no time-dependent ink can hide a difference. R085's dark faint-rule ΔL 7.4 is therefore NOT
+  exercised by this pair — it needs a week containing today; expect a non-zero pair there.
+
+Figure `r092-dark-zero-diff.png` (leg E). **Scope: pixels only. No chip, band, grid, token or fixture was touched, so
+A04 / E01 / E02 / N02 evidence stands unchanged.**
+
 ## R091 — the "initial-scroll race" is the 450 ms `autoScrollTimer` WINDOW, not PIM arrival. Fixed.
 
 **Reproduced on the unmodified build.** Two fresh light legs (`leg.sh light r091a` / `r091b`): the whole-page diff is

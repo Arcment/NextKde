@@ -1,3 +1,44 @@
+# R054 — **仍差 #3 RETIRED as a phantom: the event editor's bar is a REAL scrollbar, range 38px** (2026-10-16)
+
+## 本轮 (R054)
+Atomic step: R053's Next round #1 = "fix the event editor's twin defect: measure, then gate".
+**No code was written — the measurement refuted the premise.**
+
+**A. The instrument that settled it.** `{action:"scrollInfo"}` dumps every Flickable/ScrollView/TextArea with
+`contentHeight/height/contentY/width/clip/visible/interactive` plus `sceneX/sceneY`, and — unlike `objectNamed`,
+`inspectGeometry` and `regionPosition` — it reaches the dialog Flickables, because the *event* editor's Flickable has
+no `objectName` (only the task editor's does). Run it **before** any pixel probe on a dialog. Output =
+one `[UIReview] scrollInfo [...]` line in `live-runtime-vm.log`.
+
+**B. Measurement — dark, pid 103791, `escape` → `date 2026-04-02` → `view day` → `resize 1100x692` (own batch, 3.5s
+settle) → `openItem {kind:"event", titleContains:"Design review"}` (14:30) → `pointerObject detailsEdit`
+move/press/release → `scrollInfo` → `nativeRecord` 800/200.**
+
+| probe | value | reading |
+|---|---|---|
+| event-editor Flickable | `contentHeight 418`, `height 380`, `contentY 0`, `w 340`, `sceneX 387.6`, `sceneY 131.4`, `clip true` | **range 38px — the form does NOT fit** |
+| task-editor Flickable (same dump, closed) | `contentHeight 295`, `height 520`, `objectName "editorScroll"` | R053's gate is correct: `295 ≤ 520` ⇒ no bar |
+| bar column @ y150/200/300/400 | **`(29,20,26)` at x 723–725**, card `(38,38,38)` either side | the inner half of a 6px bar centred on the right edge **727.6** |
+| thumb extent @ x=724 | **y 133..475 = 342px of a 380px track = 0.90** | expected `380/418 = 0.909` ⇒ **a proportional scrollbar** (R053's stray mark read 1.00 on range 0) |
+| notes viewport / footer | `h 96 @ sceneY 453.4` / button ListView `sceneY 531.4 h 40` | unchanged from R041's layout |
+| by eye (`r054-clip-bar2x.png`) | the 备注 box is cut at the clip line (y 511) **with no bottom border** | the form is genuinely clipped — the exact state P03's overlay bar exists to signal |
+
+**C. Why the gate must NOT be ported.** Card height is capped at 620 ⇒ Flickable 380; `contentHeight 418` is
+width-independent (dialog width = `min(380, w-48)`; at 760x540 the card is 508 ⇒ Flickable 268 ⇒ overflow 150). So
+`contentHeight > height` holds at **every** window size, and R053's gated policy would be a **permanent no-op**.
+`EventEditorDialog.qml:271` stays a bare `policy: ScrollBar.AsNeeded`. **0 build→screenshot loops.**
+
+**D. Caveat filed, not fixed.** R053's gate is correct by construction, but its *root-cause story* ("a bare
+`AsNeeded` never hides an attached bar") rests on a pixel sighting on a form that `scrollInfo` now reports as
+`295 ≤ 520` at 1100x692. Re-derive it with `scrollInfo` before quoting that mechanism.
+
+**E. Fixture note.** `[UI] Gold review 2026-04-02` is a **VTODO** (DUE 12:00), not a VEVENT — R053's Next#1 quoted it
+as `kind:"event"`. The 2026-04-02 VEVENTs are Morning planning 08:00 / Short appointment 10:15 / Long review… 11:00 /
+**Design review 14:30** / Evening session 18:00.
+
+Evidence: `r054-event-wide.png` (1100x692 full frame), `r054-clip-bar2x.png` (notes box cut at the clip line),
+`r054-bar3x.png` (the bar column). *Discipline:* 21 Bash calls (budget 25), 0 build loops, measurement-only.
+
 # R053 — **仍差 #3 FIXED: the task editor gets a real overlay scrollbar, and the wide form never shows one** (2026-10-16)
 
 ## 本轮 (R053)

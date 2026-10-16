@@ -1,201 +1,135 @@
 # R066 — **T03 PASS: gutter hour labels are 11px, right-aligned 8px from the grid, centred exactly on their tick.**
-Pre-round they were font **9** and **centred** in the 52px gutter (ink right edge x=36 ⇒ a **16px** gap), shifted by
-a hardcoded `topMargin: -7` that was only correct at font 9. (2026-10-17)
+Pre-round they were font **9**, **centred** in the 52px gutter (ink right edge x=36 ⇒ a **16px** gap), and shifted
+by a hardcoded `topMargin: -7` that was only correct at font 9. (2026-10-17)
 
 ## 本轮 (R066)
 Atomic step: **T03 — "Time labels 10–11, right aligned 6–8 from grid, aligned with their actual hour tick"**.
-**Code change**, one file, 3 edits. 1 build, 2 kill+relaunch (light, then dark), 2 drives, 2 measurements, 3 crops
-read, ~16 Bash calls ≈ 12 min.
+**Code change**, one file, 3 edits + 1 comment. 1 build, 2 relaunch+capture circuits (light, then dark),
+~16 Bash calls ≈ 12 min.
 
-Change — `apps/calendar/qml/CalendarScheduleView.qml`, gutter `Label` now at **lines 367-383** (was 367-377):
-`font.pixelSize: 9 → 11`; `anchors.horizontalCenter: parent.horizontalCenter` →
-**`anchors.right: parent.right` + `anchors.rightMargin: 7`**; `anchors.topMargin: -7` →
-**`-Math.round(implicitHeight / 2)`**.
+Change — `apps/calendar/qml/CalendarScheduleView.qml`, the gutter `Label` now at **lines 367-383** (was 367-377):
+- `font.pixelSize: 9` → **`11`** (top of T03's 10–11 range; chosen over 10 because the ref's digit cap is 9 ref-px
+  and our hour pitch is 40 vs the ref's 27, so we are already *under*-scaled — 11 is the closest the contract allows).
+- `anchors.horizontalCenter: parent.horizontalCenter` → **`anchors.right: parent.right` + `anchors.rightMargin: 7`**.
+  The gutter cell's `parent.right` **IS** the gutter/day boundary, i.e. exactly where the grid's left edge line is
+  drawn — so `rightMargin: 7` puts the text box 7px off the grid line. (The day columns draw their own left edge
+  at that same x, so no separate line has to be added.)
+- `anchors.topMargin: -7` → **`anchors.topMargin: -Math.round(implicitHeight / 2)`**. This font's line box is
+  **~1.47em**, so a hardcoded -7 only centres font 9; deriving it from `implicitHeight` keeps the digit band's
+  centre on the tick at any size and cannot loop with `topMargin` (implicitHeight is text-derived).
+- **Still anchored** (top + right) ⇒ it cannot contribute to the cell's implicit height, so the 40px row pitch
+  is structurally safe. `text:` and `visible: hourCell.columnIndex === 0` are byte-identical.
 
-Why each: the gutter cell's `parent.right` **is** the grid's left edge line (the day columns draw their own left
-edge at that same x), so `rightMargin` reads directly against the grid — the label stops being centred in a 52px
-trough and starts being aligned to the line, which is what the ref does. And this font's line box is **~1.47em**,
-so a constant -7 centres font 9 and nothing else; `implicitHeight` is text-derived, so deriving the offset from it
-keeps the digit band on the tick at any size with no binding loop. The Label **stays anchored** (top + right) so it
-still cannot contribute to the cell's implicit height — the 40px pitch is structurally safe, not accidentally safe.
+**Measured PASS.** Light, grip x 3..49: label ink bands **241..249 / 281..289 / 321..329** (h **9**, was 7) at
+x **18..44**; band **centres 245.0 / 285.0 / 325.0** — *exactly* on the hour lines 245/285/325, pitch **40**
+(T01 unregressed). Ink right edge 44 vs the grid line at x=52 ⇒ **gap 8** (box gap 7) — contract 6–8.
+Dark: gutter (30,30,30), identical geometry (241..249 / 281..289 / 321..329, centres 245/285/325, x 17..44, gap 8)
+⇒ **no dark regression**. Crops `r066-gutter-light-5x.png` / `r066-gutter-dark-5x.png` / `r066-ref-gutter-5x.png`
+(side-by-side `_r066-cmp-5x.png` in tmp).
 
-**Measured PASS.** Light: ink bands **241..249 / 281..289 / 321..329** (cap **9px**, was 7) at x **18..44**;
-centres **245.0 / 285.0 / 325.0** — *exactly* on the hour lines 245/285/325, pitch **40** ⇒ T01 unregressed.
-Right ink edge 44 vs the grid line at x=52 ⇒ **gap 8** (text box gap 7) — contract 6–8. Dark: gutter (30,30,30),
-**identical geometry** ⇒ no dark regression. Crops `r066-gutter-light-5x.png` / `r066-gutter-dark-5x.png` /
-`r066-ref-gutter-5x.png`.
-
-**Ref, measured before touching code:** the ref's label is **12-hour and two-tone** — dark **(89,89,89)** digits in
-a **9 ref-px cap band centred exactly on the hour line**, plus a **(176..193) light-grey `AM`/`PM` suffix flush
-right**; ink right edge 238 vs grid line 243 ⇒ **5 ref-px** gap. Ours is single-size 24-hour `07:00`. **No spec ID
-covers format or the two-tone split** (the T family is only T01 pitch / T02 grid lines / T03 label form), so this is
-**not a T03 failure** — filed as **ruling F**.
-
-**Ref caveat (recorded):** our gap is 8 vs the ref's 5 ref-px (≈6.8 scaled), and our cap 9px matches the ref's 9
-ref-px even though our hour pitch is 40 vs the ref's 27 — i.e. font 11 is the *floor* of a scale-matched ref
-(which would want ~15px and would violate T03's 10–11). The contract wins.
-**Process notes:** the window's x=0 rim column (224,224,224) light / (53,53,53) dark merges every text band into
-one if a gutter scan starts at x<3; and our text uses **subpixel (RGB) antialiasing**, so a single-pixel glyph
-probe comes back colour-fringed — never read a text colour off one pixel.
-**Scope guards:** `hourHeight` (40), the grid-line Rectangles, the half-hour line, the all-day separator and the
-chips are all untouched; `AppTheme.qml` untouched.
-
----
-
-# R065 — **T02 PASS: grid lines are now 1px and neutral, with half-hour lines lighter than hours.**
-The pre-round grid drew a `border.width: 1` box on every 40px cell, so neighbours stacked into **2px** bands.
-(2026-10-17)
-
-## 本轮 (R065)
-Atomic step: **T02 — "Grid lines 1, neutral light gray; half-hour lighter than hours, lines below event emphasis"**.
-**Code change**, one file, 2 edits. 1 build, 2 kill+relaunch (light, then dark), 2 drives, 2 measurements,
-2 crops read, ~16 Bash calls ≈ 14 min.
-
-Why it was a real FAIL, not a re-read: every hour cell was
-`Rectangle { anchors.fill: parent; border.width: 1; border.color: AppTheme.border }`, so a cell's bottom border
-and its neighbour's top border **both** landed on the same boundary ⇒ measured band was **4 rows at 2x =
-2px of (223,225,228)** (blue-tinted, Δ32 from white). Interior day-column separators doubled the same way
-(left+right), while the outer edges stayed 1px — so the grid was internally inconsistent *and* had **no
-half-hour lines at all**.
-
-Change — `apps/calendar/qml/CalendarScheduleView.qml`:
-- **new lines 51-58**: two tokens next to `hourHeight`.
-  `gridLine` = light `#EDEDED` / dark `Qt.rgba(1,1,1,0.13)`; `gridLineMinor` = light `#F4F4F4` / dark
-  `Qt.rgba(1,1,1,0.06)`. **Local to the schedule view on purpose** — `AppTheme.border` is app-wide (cards,
-  fields, buttons) and must not move; leaving the all-day band separator on `AppTheme.border` also preserves
-  the ref's *stronger-than-grid* hierarchy there.
-- **lines 383-415**, hour-cell delegate: the border box is replaced by four bare 1px `Rectangle` siblings —
-  **own top edge only** (hour line), **`y: Math.round(parent.height / 2)`** (half-hour line), **own left edge**,
-  and a right edge only when `columnIndex === root.dayCount` (the outer rim). One line per boundary ⇒ no
-  stacking. `MouseArea` (click = select day, double-click = create) and the chip `ColumnLayout` are unchanged
-  children of the same Rectangle, declared after the lines, so chips still paint **above** the grid.
-
-**Measured PASS, both themes.** Light, `x=1000`, every full-width row: hour lines at y **205 / 245 / 285 / 325**
-= **(237,237,237)**, half-hour lines at y **225 / 265 / 305** = **(244,244,244)** ⇒ alternating pitch 20/20,
-darker/lighter hierarchy exact. Vertical separators at x **52 (gutter/day) / 202 / 352 / 502 / …** = 1px
-(237,237,237). Dark: background (30,30,30); hour (59,59,59) = 30+0.13·225 (the *old* dark border value ⇒
-**zero regression**), half (43,43,43), separators 1px. Chips start at x=55 = 3px inset from the x=52
-separator — no overlap. Crops: `r065-grid-light-2x.png`, `r065-grid-dark-2x.png`.
-
-**Ref anchor.** `.loop/refs/macos-calendar.png` hour lines and day-column separators both measure 1px
-**(237,237,237)** on a (249,249,249) field — we now match the colour exactly. Caveat recorded: our grid field
-is **white 255** where the ref's is 249, so our contrast reads 18/255 = 7.1% vs the ref's 12/249 = 4.8%.
-The ref's half-hour lines are not measurable (≥248 at 13.5px offsets) — our "lighter than hours" is
-**contract-driven (T02), not ref-measured**.
-
-**Not done, and deliberately so (atomic discipline).** The ref's **all-day band bottom separator is 2px
-(217,217,217)** while ours is 1px (223,225,228) = `AppTheme.border`; that is 仍差 #1's second half, not T02.
-T03 (gutter label form: 10–11px, right-aligned 6–8 from the grid, tick-aligned — currently centred in a
-52px gutter at font 9) is **untouched** and is next round's #1.
-
-# R064 — **T01 FIXED: hour pitch 54 → 40.** One source of truth `hourHeight`; measured 10 consecutive 40.0px diffs.
-Plus a **harness tooling defect found**: `review-command.py` writes the *nested* command form, the harness wants
-*flat* `action` ⇒ captures silently no-op. Worked around this round. (2026-10-17)
-
-## 本轮 (R064)
-Atomic step: **T01 — "Hour pitch about 40 with half-hour at 20"**. **Code change**, one file, 4 edits. 1 build,
-1 kill+relaunch (light), 1 drive, 1 app screenshot read, 2 crops read, ~19 Bash calls ≈ 15 min.
-
-Change — `apps/calendar/qml/CalendarScheduleView.qml`:
-- **new line 49**: `readonly property int hourHeight: 40` — the single source of truth.
-- **line 124** `positionTimeline()`: `usefulStartHour() * 54` → `usefulStartHour() * root.hourHeight`.
-- **line 357** hour-cell delegate: `Layout.preferredHeight: 54` → `root.hourHeight`.
-- **line 402** timed-chip delegate: `Layout.preferredHeight: 21` → `Math.round(root.hourHeight * 21 / 54)` (= **16**).
-  Rationale: cell 40 − `anchors.margins: 3`×2 = **34px** inner; two chips + `spacing: 2` must fit. A fixed 21 would
-  have been **silently squeezed** by the ColumnLayout (Rectangle's implicit min-height is 0) — 16×2+2 = 34 exactly.
-- Untouched, as instructed: gutter `Label` (font 9, topMargin −7, `"0"+h+":00"`), `slice(0, 2)`, chip `radius: 5` and
-  insets (3 / 5 / 4), the now-line `y: parent.height * …` (already proportional), the `fillHeight` spacer.
-
-**Measured PASS.** Gutter-label row-band scan (x 2..50, threshold ≥3 non-bg px, bg = white) gives band centres
-244.5 / 284.5 / 324.5 / 364.5 / 404.5 / 444.5 / 484.5 / 524.5 / 564.5 / 604.5 / 644.5 ⇒ **10 consecutive diffs of
-exactly 40.0**. Independently corroborated by the harness's own log line: `contentHeight 960` = 24×40 and
-`contentY 280` = 7×40. Ref measures 27 ref-px ⇒ ≈36 for our window; **the contract says ≈40, so 40 was taken**.
-Visual: `_r064-grid2x.png` (06:00→12:00 at 2x — labels land 80px = 40px apart, chips single-line, no squeeze, no
-overlap, insets unchanged) and `_r064-thu11-3x.png` (one chip in the 11:00 cell, ~15px tall, clean). Both mirrored
-to `docs/ui-calendar/`.
-
-**TOOLING DEFECT (found this round, NOT fixed — see Next round).** `review-command.py` dumps the command dict
-**verbatim**, so `{"captureClient":{"path":"x.png"}}` reaches the harness as a nested object with **no `action` key**;
-`harness/Main.qml` dispatches exclusively on the **flat** `command.action` (`:122 :208 :217 :221 :230`), so every
-nested command fell through to the `[UIReview] manual undefined …` fallback (`:249`) — **the capture silently
-no-opped: no file on disk, no log line, exit 0.** First drive this round produced nothing and cost 4 calls to
-diagnose. **Workaround (used):** write each command flattened, in place —
-`{"action": <k>, **<v>, "sequence": <prev+1>}`. R063's captures landed, so this file's behaviour is not what those
-rounds relied on; treat the flattening as required until the helper is repaired.
-
-**Side observations (recorded, not defects):** the window came up light (`start-review-vm.sh light`) at 1100x692;
-the harness's `contentY` log prints `undefined` for `action` — that is the same defect above, not a view bug.
-The 06:00…12:00 range is what `usefulStartHour()` = 7 shows with the fixture week; unchanged by this round.
+**Ref comparison (side-by-side read, 5x).** Ref right-aligned label, right edge 238, grid line 243 ⇒ **5 ref-px**
+(≈6.8 scaled) — ours 8, inside the contract. Ref digit cap **9 ref-px** = ours **9** at font 11.
+**Two ref features the contract does NOT ask for (recorded, not defects):**
+(a) the ref splits the label into a **large dark hour number + a smaller, lighter, baseline-aligned `AM`/`PM`**
+(ours is single-size); (b) the ref is **12-hour** (`8 AM`, `Noon`, `1 PM`) — **ours stays 24-hour `07:00`**.
+No spec ID covers either → **needs ruling F** if we want them.
 
 ## 仍差 (top 8, visual-impact order)
-1. **T02/T03 — grid-line weight + gutter label form.** Our `Label` prints `06:00…15:00` (24h, zero-padded),
-   the ref prints `8 AM` / `Noon` and its **day-column 1px separators are (237,237,237)** while the **all-day band
-   bottom separator is 2px (217,217,217)** — a deliberate weight hierarchy we may not reproduce. Also the right-edge
-   inset. Ref-anchored, unblocked, **within reach now that the pitch is right (labels must be re-measured at 40)**.
-2. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
-   `Rectangle`. **R058 re-confirmed both directions**. App-wide. **Needs ruling A** (bind opacity to `revealProgress`).
-3. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
+1. **All-day band bottom separator weight.** Ours is 1px (223,225,228) = `AppTheme.border`
+   (`CalendarScheduleView.qml:308-312`); the ref's is **2px (217,217,217)** at y=183-184 — a deliberate
+   strength hierarchy above the grid. Ref-anchored, unblocked, one file. **This is Next round #1.**
+2. **Ref gutter labels are 12-hour and two-tone (hour + lighter `AM`/`PM`)** — see above. **Needs ruling F**
+   (no spec ID). If ruled "match the ref", it is a `text:` rewrite + a second `Label` in the same delegate.
+3. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain
+   un-animated `Rectangle`. **R058 re-confirmed both directions**. App-wide. **Needs ruling A.**
+4. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
    `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs ruling B.**
-4. **`EventDetailsPopover.qml:60` `CloseOnEscape` is dead code** (R059; **NOT a spec failure**, D01 defines 弹框 by a
-   scrim the popover lacks). **Needs ruling C** (fix = window `Shortcut`, `Main.qml:1876-1878`).
-5. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (all heights fixed, no
-   duration→height path), while the ref's week view shows **proportional 30-min vs 60-min chips** ⇒ **ruling E**.
-   Clauses 1+2 PASS (R048). **R063 strengthened E:** the ref *does* show a 30-min chip beside 60-min chips.
-6. **`slice(0, 2)` per cell hides items with no `+N`** (R048, still at `CalendarScheduleView.qml` — **now line ~392**,
-   shifted +3 by this round's edits): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91` VTODO (due 11:00) is dropped
-   silently. **Needs ruling D.**
-7. **Month day cell holds 1 chip + `N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1. Same family as #6
-   ⇒ **ruling D.**
-8. **Two neutral-button idioms diverge, and one has no ref** (R061): `secondary` hover = neutral grey 79, no edge;
-   `flat` hover = accent tint (35,60,81) **with** a 1px edge. Ref has no text button and no hover frame ⇒ **note**.
-- *Cosmetic, no ID, folded out:* light `buttonNeutral` base reads ≈(251,252,254) vs the rendered card (247,247,247)
-  (R056) — **unblocked but unresolved-token**. D02's radius is **16** vs the spec's 24/32 — **keep 16**. Hover is a
-  flat fill, no `borderHover` edge (R057/R060) — a *flat* button does get a `border` edge on hover (R061); no conflict.
+5. **`EventDetailsPopover.qml:60` `CloseOnEscape` is dead code** (R059; **NOT a spec failure**). **Needs ruling C.**
+6. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block, while the ref's
+   week view shows **proportional 30-min vs 60-min chips** ⇒ **ruling E**. Clauses 1+2 PASS (R048).
+7. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the
+   `calendar.ics:91` VTODO (due 11:00) is dropped silently. **Needs ruling D.** Same family: the month day cell
+   holds 1 chip + `N` where the ref stacks 3 (`CalendarMonthView` cap is 1).
+8. **Two neutral-button idioms diverge, and one has no ref** (R061): `secondary` hover = neutral grey 79, no
+   edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. Ref has no text button and no hover frame
+   ⇒ **note**.
+- *Cosmetic, no ID, folded out:* light `buttonNeutral` base reads ≈(251,252,254) vs the rendered card
+  (247,247,247) (R056). D02's radius is **16** vs the spec's 24/32 — **keep 16**. Hover is a flat fill, no
+  `borderHover` edge (R057/R060). The topmost visible gutter label is **half-clipped by the grid viewport**
+  when a scroll offset lands an hour line exactly on the viewport top (R066; pre-existing, a scroll artifact,
+  not a form defect).
 
 ## 最近已改 (most recent 8)
-1. R064 — **T01 FIXED**: `hourHeight: 40` single constant; scroll offset + cell height + chip height all derive from
-   it. Measured 10× 40.0. Code change (4 edits, 1 file). Harness nested-vs-flat command defect documented.
-2. R063 — **measurement only**; state.md's "blocked" premise falsified (D/O-only); ref re-read as a **week** view;
-   **T01 measured FAIL (54 vs ≈40)**.
-3. R062 — popover title leading 22→20px (`lineHeightMode: FixedHeight` + `lineHeight: 20`); 仍差 #6 **CLOSED**.
-4. R061 — measurement only; **D08 toolbar flat `KosButton` PASSES**; R060's `buttonNeutral` expectation retracted.
-5. R060 — measurement only; **D08 task-editor footer dark leg PASSES**; popover 编辑 y for todos = 375.
-6. R059 — analysis only; popover-Esc re-ruled **not a spec failure**; `CloseOnEscape` is dead code ⇒ **ruling C**.
-7. R058 — measurement only; **D08 clause 3 `Esc 可关闭` PASSES** (2 legs).
-8. R057 — measurement only; dark footer re-measured, #A/#B closed; R055's dark table retracted.
+1. R066 — **T03 PASS**: gutter label font 9→**11**, `anchors.right` + `rightMargin: 7` (gap 16 → **8**),
+   `topMargin: -Math.round(implicitHeight/2)`. Centres 245.0/285.0/325.0 exact, pitch 40. Light **and** dark.
+2. R065 — **T02 PASS**: `gridLine`/`gridLineMinor` tokens; per-cell border box → four single-edge 1px
+   Rectangles. Hour 1px (237,237,237), half 1px (244,244,244), separators 1px. Light **and** dark measured.
+3. R064 — **T01 FIXED**: `hourHeight: 40` single constant; scroll offset + cell height + chip height derive
+   from it. Measured 10× 40.0.
+4. R063 — measurement only; ref re-read as a **week** view; T01 measured FAIL (54 vs ≈40).
+5. R062 — popover title leading 22→20px (`FixedHeight` + `lineHeight: 20`); 仍差 (old #6) CLOSED.
+6. R061 — measurement only; **D08 toolbar flat `KosButton` PASSES**.
+7. R060 — measurement only; **D08 task-editor footer dark leg PASSES**; popover 编辑 y for todos = 375.
+8. R059 — analysis only; popover-Esc re-ruled **not a spec failure** ⇒ **ruling C**.
 
 ## 外推待确认 (do NOT assume)
 *(R053's 9 older items are archived to rounds.md — read them there, don't re-derive.)*
+- **THE GUTTER LABEL IS NOW RIGHT-ANCHORED AND SIZE-DERIVED (R066).** `CalendarScheduleView.qml:373-383`.
+  Its vertical centring comes from `-Math.round(implicitHeight/2)`, **not** from a tuned constant — if you
+  change the font size again, do **not** reintroduce a hardcoded `topMargin`. It is anchored on **top + right**;
+  unanchoring it vertically would let it inflate the 40px row height and break the whole pitch.
+  `parent.right` of the gutter cell **is** the grid's left edge line (the day columns draw their own left edge
+  at that same x) ⇒ `rightMargin` is measured against the grid line, not against the gutter's own rim.
+- **THE GRID'S LINE TOKENS ARE LOCAL (R065).** `CalendarScheduleView.qml:51-58` owns `gridLine` /
+  `gridLineMinor`. **`AppTheme.border` is NOT the grid line any more** — anything that reinstates
+  `AppTheme.border` on a grid boundary brings back the blue-tinted (223,225,228) and the wrong weight. The
+  all-day band separator (`:308-312`) deliberately still uses `AppTheme.border` — and 仍差 #1 is exactly that
+  it should become a **local 2px (217,217,217)**.
+- **ONE LINE PER BOUNDARY (R065).** A cell must never draw both a top and a bottom edge, and never both a left
+  and a right edge: adjacent edges land on the same pixel row/column and render as 2px. The right rim is drawn
+  only by `columnIndex === root.dayCount`.
+- **Our schedule grid field is pure WHITE (255,255,255)**, not the app's 247 card fill and not the ref's 249.
+  Every grid-line contrast judgement must use 255 as the base. (R065)
+- **The window's leftmost column x=0 is a 1px rim (224,224,224) light / (53,53,53) dark** — a gutter scan must
+  start at **x ≥ 3** or that column merges every text band into one. (R066, cost me one wasted measurement.)
 - **HARNESS COMMAND FORM IS FLAT (R064, hard-won).** `harness/Main.qml` matches `command.action` only
   (`:122 captureClient{path}`, `:204 escape`, `:208 resize{width,height}`, `:217 sidebar{expanded}`,
-  `:221 view{view}`, `:225 date{date}`, `:230 openItem{kind,titleContains}`); a command with no `action` **silently
-  hits the `:249` fallback** (`[UIReview] manual undefined …`) and does nothing. `review-command.py` does **not**
-  flatten — write `{"action": k, **v, "sequence": prev+1}` in place yourself. `captureClient` writes via
-  `QImageWriter(path)` with a **relative** path ⇒ resolves against the **app's CWD**, which is the task dir (verified
-  via `/proc/<pid>/cwd`).
-- **`hourHeight` is now THE pitch constant (R064).** `CalendarScheduleView.qml:49`; used at `:124` (scroll offset) and
-  `:357` (cell height); chip height `:402` = `Math.round(root.hourHeight * 21 / 54)`. **Anything that hardcodes 40 or
-  16 again will drift**; anything that must track the pitch should read `root.hourHeight`. The now-line is already
-  proportional and needs no constant.
+  `:221 view{view}`, `:225 date{date}`, `:230 openItem{kind,titleContains}`); a command with no `action`
+  **silently hits the `:249` fallback** (`[UIReview] manual undefined …`) and does nothing.
+  `review-command.py` does **not** flatten — write `{"action": k, **v, "sequence": prev+1}` **in place**
+  (truncate+write, never `os.replace`) yourself. `captureClient` writes a **relative** path against the **app's
+  CWD** — read it from `/proc/<pid>/cwd`, it follows *the directory you launched from* (R065: launching from the
+  repo root put `_r065-grid-light.png` in the repo root, not the task dir). Confirmed success line:
+  `qml: [UIReview] native app client capture <name> true`. **R066: launching from the task dir puts the capture
+  in the task dir — do it that way.**
+- **`hourHeight` is THE pitch constant (R064).** `CalendarScheduleView.qml:49`; used for the scroll offset
+  (`:124`) and the cell height (`:365` after R066); chip height = `Math.round(root.hourHeight * 21 / 54)` =
+  **16**. Anything that hardcodes 40 or 16 again will drift. The half-hour line is
+  `Math.round(parent.height / 2)` = 20.
 - **REF FACT SHEET (R063).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026, Sun 29–Sat 4)
   + 243px sidebar + mini calendar. Main region: day headers → **all-day band** (3 rows) → hour grid 8 AM–8 PM.
-  **Gutter hour labels 193/220/247/274/301/… = pitch 27**; the red `9:41` pill **replaces** the 10 AM label.
+  **Gutter hour labels 193/220/247/274/301/328 = pitch 27**; the red `9:41` pill **replaces** the 10 AM label.
   **Now-line y=238** = 9 AM line (220) + 0.683×27 ✓ (proportional, not snapped). **All-day band bottom separator =
   2px (217,217,217) at y=183-184** (stronger than the 1px hour lines, ≈237). **7 equal day columns, 1px separators
   at x=324/406/487/569/650/732, grid x=243..812 ⇒ 81.3px/column.** Traffic-light dots **12px** ⇒ **1:1**.
   **Scale to our 1100x692: w 1.35, h 1.33** ⇒ ref pitch 27 ≈ **36** for us (contract says 40 — 40 was chosen).
+  **R065 addition:** the ref's **hour lines and vertical separators are both 1px (237,237,237)**; its half-hour
+  lines are **not measurable**. **R066 addition (gutter label, ref x 215..238, y 189..197):** the digit is
+  **(89,89,89)** with a **9 ref-px cap band centred exactly on the hour line**; the `AM`/`PM` suffix is
+  **(176..193) light grey, 12 ref-px wide, flush right**, i.e. the label is right-aligned on the **suffix's**
+  right edge; right ink edge 238 vs the grid line 243 ⇒ **5 ref-px** gap. `Noon` has no suffix and is 24 ref-px wide.
 - **REF EVENT CHIPS (R063, this is E01/E02's anchor).** Chip = **light desaturated same-hue fill + dark same-hue text
   + a 2–3px solid same-hue LEFT STRIPE** + small radius (≈3). Confirmed on `Portfolio…`/`Leadersh…`/`Presenta…`
   (red family), `Choir…` (olive/yellow), `Morning…` (blue), `Palm Sun…` (pink/magenta stripe). **This contradicts our
   dark theme's solid-saturated-fill + white-text** ⇒ the E family's first question is whether our dark translation is
-  legitimate. Not yet judged. *(Our timed chip is `radius: 5`, a 1px border, no left stripe — visible in
-  `_r064-grid2x.png`.)*
+  legitimate. Not yet judged. *(Our timed chip is `radius: 5`, a 1px border, no left stripe.)*
 - **THE REF HAS NO POPOVER, NO MENU, NO TOOLTIP, NO HOVER FRAME.** The 弹框/浮层 section (`D`/`O`) is therefore
   HIG+token-anchored only, never pixel-anchored. Unchanged from R061/R062.
 - **`lineHeight`: Qt's `ProportionalHeight` is a multiple of the *font's own* line box, not of `pixelSize` (R062).**
   With the app's CJK-capable stack that box is **1.47em** (22px at 15px), so `lineHeight: 1.2` *loosens*. To hit a
   **pixel** target use `lineHeightMode: Text.FixedHeight` + `lineHeight: <px>`. Measured valid pair:
-  **FixedHeight 20 at font 15** in `EventDetailsPopover.qml:115-118`.
+  **FixedHeight 20 at font 15** in `EventDetailsPopover.qml:115-118`. **R066 corollary:** the same 1.47em box is
+  why a size-tuned `topMargin` is unsafe — use `implicitHeight`.
 - **`pointer{target:"<label>"}` is a free geometry + live-state probe for `KosButton`s (R061)** — matches
   `item.text === label`, so it needs the **rendered/translated** label (`"添加"`; a miss logs `NaN NaN` and the capture
   is a silent no-op). Log carries the resolved centre **and** `hover`/`down`. Needs the item `visible` (drive to
@@ -218,6 +152,7 @@ The 06:00…12:00 range is what `usefulStartHour()` = 7 shows with the fixture w
   **label** peak ≈(239,103,95) on a neutral fill. Hover **never** changes the band height ⇒ no edge token.
   **Dark card fill = (31,36,43)**; **popover** dark = **(38,38,38)**; window = (30,30,30); flat-button hover/press =
   **(35,60,81)/(36,67,92)**; `border` dark rim ≈**(71,78,87)**. `windowRaised` is **not** a neutral grey.
+  **R066: the gutter's own dark field = (30,30,30)** and its leftmost rim = (53,53,53).
 - **Esc semantics (R059): `escape` is a key event addressed to whoever holds `activeFocusItem`.** It closes a
   **focused** popup and does **nothing** to a `modal:false` popup that never takes focus. Ask *who has focus* first.
 - **Spec family split (R059): `D01–D13` = 弹框 (has a scrim), `O01–O09` = 浮层/tooltip/menu.** P01's popover is a
@@ -230,11 +165,14 @@ The 06:00…12:00 range is what `usefulStartHour()` = 7 shows with the fixture w
 - **Diff bounding boxes FIRST, sample pixels second** (R058): `ImageChops.difference(...).getbbox()` separates
   "nothing happened" (`None`) from "a view switch" (≈whole window) at no cost. **R061 caveat:** a *neighbouring*
   widget's hover state can inflate the bbox.
-- **Row-band measurement idiom that has now worked four times (R046/R062/R063/R064):** scan the target column for
-  pixels that are **not** the background, threshold a per-row count (≥3–4), group into bands, read the band **centre**
-  (text rows) or **start** (cap-tops). R064's whole T01 verdict came from this. **Caveat learned in R064:** keep the
-  scan window strictly inside the intended region (x 0..60 spilled into the first day column and produced junk bands);
-  x 2..50 was clean.
+- **Row-band measurement idiom that has now worked six times (R046/R062/R063/R064/R065/R066):** scan the target
+  column (or row) for pixels that are **not** the background, threshold, group into bands, read the band **centre**
+  (text rows) or **start** (cap-tops). R065 used both directions: column x=1000 for the horizontal lines, row y=430
+  for the vertical separators. R066 used column-scan over x 3..49 for the gutter labels. **R065 refinement:** a
+  **row/column mean over a wide span** (x 62..1030) is the cheapest way to find the horizontal lines when chips make
+  single-column probing noisy. **Caveat (R064):** keep the scan window strictly inside the intended region.
+  **Caveat (R065):** the all-day band separator and the first hour line can be **adjacent rows** (204/205) — don't
+  read them as one 2px line. **Caveat (R066):** the window's x=0 rim column will merge every band; start at x ≥ 3.
 - **A glob and a literal path in the same `for` list will crash the crop script** (R057): assert `im.size` first.
 - **The ring is press-driven, in BOTH themes:** nothing has a ring at a clean open; press a button and the ring appears
   1–2px inset and **persists after release-outside**. On hover the ring is **covered by the hover fill**.
@@ -249,19 +187,25 @@ The 06:00…12:00 range is what `usefulStartHour()` = 7 shows with the fixture w
   **`press` → `move` off the button → `release` outside** captures *pressed* without firing the click.
 - **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it** (`nohup … & disown`). A rebuilt binary requires
   a **kill+relaunch**; kill the pid **read from `live-app.pid`**, never `pkill`. ~12–14s before the new pid appears.
-  Include `resize 1100x692` in the drive list. **`Bash` CWD drift is real** — the harness reset CWD to the task dir
-  mid-round this time, and an earlier round saw the reverse; always `cd` explicitly or verify with `pwd`.
+  Include `resize 1100x692` in the drive list. **The app's CWD follows YOUR launch CWD** — launch from the task dir
+  (R065/R066) so the capture lands in the task dir. **R066: it also starts in `--view week --date 2026-10-15`**,
+  so every drive list must re-send `view week` + `date 2026-04-02`.
 - **Fixtures on 2026-04-02** (live file = `profile/pim/calendar.ics`; the repo-root *`calendar-fixture.ics` is a stale
   copy with no VTODOs*): VEVENTs = Morning planning 08:00 / Short appointment 10:15 / **Long review with a
   deliberately lengthy title** 11:00 / **Design review** 14:30 / Evening session 18:00; plus a **`Multi-day review`**
   all-day strip spanning 3 days. VTODOs (kind `"todo"`): `[UI] Green planning` (09:00), `[UI] Gold review` (12:00),
   `[UI] Red review` (16:00), `A deliberately long task title to inspect elision` (11:00), **`[R019 LONG TASK]
   任务长标题与编辑表单检查`** (11:00 — a *repeated* long string; **the record for any wrapping-title test**).
-  The month view's selected-day card is 添加's home. **R064:** in `view week` at `date 2026-04-02` the visible timed
-  cells each held **one** chip (the two-chip cell was not in the visible band).
+  **R065:** the week is **Mon 30 – Sun 5** (locale weeks start Monday, 7 columns, `dayColumnWidth` ≈ 149.7 at
+  1100x692), and `date 2026-04-02` + `view week` puts **07:00 at the top of the viewport** (`contentY` = 280).
+  **R066:** at that offset the very first visible hour line lands **on** the grid viewport's top edge, so its
+  label is half-clipped — read the three *clean* bands (245/285/325) for any pitch claim.
 - **Light theme**: the notes field is indistinguishable from the card fill — locate a light field box by its **border**
   only. Popover fill `#F5F5F5` / `#262626` dark; editor dialogs `#F7F7F7` light / `#262626` dark; event-editor card at
   x=450 renders (247,247,247) light / (38,38,38) dark. `defaultAccentSeed` #3478f6.
+  **R066: our text renders with subpixel (RGB) antialiasing** — single-pixel probes of glyph cores come back
+  colour-fringed (e.g. (133,142,196) light / (141,142,118) dark). **Never read a text colour from one pixel**;
+  use a band's dominant/median over many pixels, or just don't claim a text colour you didn't aggregate.
 - **`motionFast`** = 120, **`motionNormal`** = 220 (`AppTheme.qml:174-175`), both 0 under `reduceMotion`.
   `controlHeight` renders **31px here, not the spec's 34**; the dim is `Overlay.modal`, **0.20 light / 0.42 dark**.
 - **Save is deliberately NOT exercised** (isolated-profile discipline) — *pressed* is captured by
@@ -271,21 +215,27 @@ The 06:00…12:00 range is what `usefulStartHour()` = 7 shows with the fixture w
   committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## Next round (pick ONLY #1)
-**#1 — T02/T03: grid-line weight + gutter label form.** `apps/calendar/qml/CalendarScheduleView.qml` — the gutter
-`Label` (now ~line 356) prints `06:00`-style 24h; the ref prints **`8 AM` / `Noon`**, and the ref's **all-day band
-bottom separator is 2px (217,217,217)** vs its **1px (≈237) day-column separators** — a deliberate weight hierarchy.
-Measure our line colours/widths first, then decide. **Read the ref crop before changing anything** (`.loop/refs/
-macos-calendar.png`, crop x 243..812, y 150..200 and the gutter x 243..290, y 180..500). Do not touch `hourHeight`.
-Re-measure label centres (**expect 40**) to confirm nothing regressed.
+**#1 — all-day band bottom separator: 1px → 2px (217,217,217).** `apps/calendar/qml/CalendarScheduleView.qml:308-312`
+(the `Rectangle` under the all-day band that currently uses `AppTheme.border`). Target: **height 2**, colour a
+**local token** `allDaySeparator` = light **`#D9D9D9` (217,217,217)** / dark — **measure the dark leg first**
+(do NOT reuse `AppTheme.border`, which is app-wide and blue-tinted; R065 set the precedent of a *local* grid
+token precisely because `border` is shared with cards/fields/buttons). Keep the all-day band's own `min 28 /
+row 18 / gap 2` intact. **Read the ref crop first** (`.loop/refs/macos-calendar.png`, x 250..420, y 176..192) to
+confirm the 2px band and that it spans the *whole* main region (my R066 scan found it spanning x 192..251, i.e.
+**including the gutter** — verify whether it should stop at the gutter or run under it).
+Then verify: the separator is **2 rows** of (217,217,217) and the **first hour line below it stays 1px** (R065's
+caveat: they can be adjacent rows — do not read them as one band).
 
 **Then (unlocked, ref-anchored, never reviewed — one per round):** A01 (all-day band: min 28, row 18, gap 2,
-inset 2–3 — ref rows measure ≈15 ref-px ⇒ ≈20 scaled), **E01/E02** (chip language — the biggest unexamined mass; the
-ref's light-fill + dark-same-hue-text + 2–3px left stripe + radius 3 vs our `radius: 5` 1px-border fill is the first
-question), N02 (now-line + red badge — needs a capture of the **current** week), V01–V05 (month — **no ref anchor**,
-use `spec.md` + HIG only).
+inset 2–3 — ref rows ≈15 ref-px ⇒ ≈20 scaled), **E01/E02** (chip language — the biggest unexamined mass; the ref's
+light-fill + dark-same-hue-text + 2–3px left stripe + radius 3 vs our `radius: 5` 1px-border fill),
+N02 (now-line + red badge — needs a capture of the **current** week), V01–V05 (month — **no ref anchor**, use
+`spec.md` + HIG only).
 
 **Optional QoL (only if a round has slack — NOT an atomic step of its own):** make `review-command.py` flatten the
 nested form into `{"action": …}` so every later round stops paying the R064 diagnosis cost.
 
-**Still blocked on rulings A–E** (unchanged, D/O family only): dim snap, shadow magnitude, popover Esc, `slice(0,2)` /
-month 1-chip cap, E03 clause 3. **Not `DONE` — all spec IDs do not pass.**
+**Still blocked on rulings A–F** (unchanged, plus the new F; D/O family + the ref label form): dim snap, shadow
+magnitude, popover Esc, `slice(0,2)` / month 1-chip cap, E03 clause 3, **F = 12-hour two-tone gutter labels**.
+**Not `DONE` — all spec IDs do not pass.** (T01/T02/T03 are PASS-pending-final-regression; everything else is
+PENDING or ruling-blocked.)

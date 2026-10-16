@@ -1,3 +1,44 @@
+# R096 — verdict + **first-ever expanded-sidebar capture**: S04's "selected row gray radius 6" governs the compact **category** row,
+not the capsule nav row; ours is already r=6 and the other two clauses hold ⇒ **0 code changes**.
+
+**Why this round.** R095's Next #1 said the sidebar's own rows (S01/S04) had never been measured and are **not** ruling-blocked. Both
+clauses were read verbatim (`spec.md:22-25`): S04 = "Checked/unchecked checkbox distinct; **selected row gray radius 6**; hover lighter
+than selection"; S01 = "Neutral sidebar surface in settings palette; brighter flat calendar canvas, no blue cast/gradient".
+
+**The ref anchor, read FIRST.** The whole ref sidebar contains exactly **one** rounded selection shape: the calendar row **"Personal"**
+(fill **(226,226,226)**, **R == G == B**, rows **y102..129 ⇒ h 28**, x **10..182 ⇒ w 173**). Its per-row fill-start inset over the first
+five rows is **4, 2, 1, 1, 0**; a circle of r=6 predicts 3.6, 2.0, 1.1, 0.55, 0.19 — **fits to ≤0.4 px ⇒ radius 6**. The plane is
+**(237,237,237)** ⇒ **selection ΔL = −11**. Ref row pitch ≈ **26–27**. The ref's only *unchecked* row (Siri Suggestions) is a hollow
+1 px coloured border at the **same x18** as the checked boxes ⇒ **the ref does not indent an unchecked row**. **No hovered row exists
+in the ref** (no pointer) ⇒ clause 3 has **no ref anchor**, only the ΔL ordering.
+
+**Which delegate S04 governs — `CategoryRow`, not `SidebarRow`.** The ref's highlighted row is a *compact checkbox row*. That is
+`CategoryRow` (`Main.qml:362`): **`radius: 6`** already, `hoverEnabled: true`, 30 tall, 12 px box at inset 12. `SidebarRow`
+(`Main.qml:234`) is **44 tall, inset 20/11, `radius: height / 2` = capsule 22** — a row class **the ref does not contain at all** —
+and `SidebarRow.selected` is **never set true** (`todayNavigation` at `:1960` binds no `selected`), so its capsule is **dead chrome:
+changing its radius would move zero pixels.**
+
+**Ours, measured.** First ever capture with the sidebar expanded (`r096-sidebar-light.png`; light 1100x692, `sidebar{expanded}`,
+`view week`, `date 2026-10-15`, `contentY 280`, capture flag **true**): sidebar **x0..219**, plane **(228,228,228)** neutral R==G==B,
+**uniform within ±3 over y118..683 ⇒ no gradient and no blue cast**; canvas **255** at x221. Boxes **x12..24**, row pitch **30**.
+`selectionFill` = #767680@12 % over 228 ⇒ **(215,215,216)**, ΔL **−13**; `rowHoverFill` = #747480@8 % ⇒ **(219,219,220)**, ΔL **−9**
+⇒ **hover (9) < selection (13) ⇒ clause 3 holds**; our Δ13 vs the ref's Δ11 is 0.8 % of range. **Clause 1 PASS** (filled + white check
+vs hollow 1 px border, both visible in the capture). **Clause 2 already satisfied.** Everything else in the sidebar (inset 12, box 12,
+row 30, heading 11 pt) is S02/S03-locked and PASSing ⇒ **nothing to change, 0 code changes.**
+
+**Why 237 vs our 228 is NOT a defect.** The ref sidebar is a **vibrancy material** — R093 already caught the same token reading
+(207,51,35) there vs (235,76,70) in the grid. ⇒ **the ref sidebar's absolute greys do not transfer; only Δ's and orderings do.**
+S01's clause is relational ("neutral plane + brighter flat canvas") and ours holds.
+
+**Evidence:** `docs/ui-calendar/r096-sidebar-selection.png` — the ref's row block over ours at ×2, each panel labelled with its numbers;
+raw capture `docs/ui-calendar/r096-sidebar-light.png`.
+
+**Instrument (new, → state.md 外推).** (a) **A vibrancy sidebar's absolute greys never transfer** — measure ΔL against the sidebar's
+own plane. (b) **A radius is the per-row fill-start inset**; r=6 fits the 4,2,1,1,0 signature — never eyeball it off an upscale.
+(c) **The harness has no pointer-move action** ⇒ **`hovered`/`pressed` chrome cannot be driven**; such clauses are static-only (token
+ordering at best) and can never be called PASS. (d) Two verdict rounds in a row is the correct outcome when the spec literals and the
+ref agree: **the remaining unmeasured surface is C05, the toolbar.**
+
 # R095 — verdict, **no code changed**: the mini month's weekday header does **not** tint today's column letter (the "red 六" was a ×2 `LANCZOS` artifact — the ref anchor and ours agree).
 
 **The claim under test (R094's Next #1).** "`Main.qml`'s mini weekday-header row draws the today column's letter (`六`, today = Sat

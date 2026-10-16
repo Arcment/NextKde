@@ -1,195 +1,107 @@
-## R062 — P01 popover title leading tightened **22px → 20px** (1.47em → 1.33em at font 15) (2026-10-16)
+# R062 — **P01 popover title leading tightened 22px → 20px** (1.47em → 1.33em at font 15), dark leg. `detailsTitle`
+(`EventDetailsPopover.qml:115-118`) gained `lineHeightMode: Text.FixedHeight` + `lineHeight: 20`. Measured: 3-line title
+cap-tops **307/329/351 → 320/340/360**; card **284h → 280h** = exactly the predicted −4. **仍差 #6 CLOSED — this was the
+last *unblocked* item; the loop is now blocked pending rulings A–E.** (2026-10-16)
 
-**Atom:** 仍差 #6 (line pitch) — the last **unblocked, non-ruling** item. Code change = **2 properties** on
-`detailsTitle` (`EventDetailsPopover.qml:115-118`): `lineHeightMode: Text.FixedHeight` + `lineHeight: 20`.
+## 本轮 (R062)
+Atomic step: R061's Next #1 fallback = "仍差 #6, line pitch — do that instead of a ruling if the loop must keep moving"
+(the unattended loop must keep moving; no ruling channel exists in `.loop/`). **1 code change (2 properties, one Label),
+1 build→screenshot loop, ~3 image reads, 23 Bash calls ≈ 11 min.**
+*(Full write-up archived to `rounds.md` R062 and `docs/ui-calendar/LEDGER.md`.)*
 
-**Before** (dark, 1100x692, R019 todo popover; `_r062-popover-before.png`): the title is a repeated long string, so it
-wraps to the full **3-line cap** and elides at line 3. Card **x381..718 (338w) × y290..573 (284h)**; cap-tops
-**307 / 329 / 351 ⇒ pitch 22**.
+**Before** (dark, 1100x692, R019 todo `[R019 LONG TASK] 任务长标题与编辑表单检查`): the repeated long string wraps to
+the full **3-line cap** and elides at line 3. Card x381..718 (338w) × y290..573 (284h); cap-tops 307/329/351 ⇒ pitch 22.
+**After:** cap-tops 320/340/360 ⇒ **pitch 20**; card 280h; 4–6 clean pixel rows between lines (no ink collision), line-3
+ellipsis intact, dot/`×` centred, time + notes lines untouched.
 
-**After** (`_r062-popover-after.png`, `_r062-popover-title-3x.png`): cap-tops **320 / 340 / 360 ⇒ pitch 20**; card h
-**280**, i.e. exactly the predicted **−4 = 2 gaps × 2px**. 4–6 fully clean pixel rows remain between lines (no CJK ink
-collision), the line-3 ellipsis survives, the colour dot and `×` stay centred, and the time (`2026年4月2日星期四 · 11:00`)
-and notes lines below are untouched. Same 3-line cap, same elide, same `objectName` (harness probe intact).
-
-**Why 20 and not 18.** There is **no ref anchor**: the ref is a month view + sidebar, all text single-line/elided, and it
-contains **no popover at all** — so no ref-derivable pitch exists. The target is therefore the macOS **body ratio 1.33**
-(20px at 15px), not R046's rougher "~1.2" (18px). **`FixedHeight` is deliberate, not laziness:** Qt's
-`ProportionalHeight` is a multiple of the *font's own* line box, which here *is* the 1.47em bug — `lineHeight: 1.33`
-proportionally would give 29px, not 20. (This is also why the in-repo `KosEmptyState.qml:49 lineHeight: 1.22` renders
-*looser* than default, not tighter.) The app-wide form of this bug (`controlHeight` 31-vs-34) is **not** touched: one
-Label, one surface.
-
-**Observation, not a defect.** The harness-opened popover's y sits 11px lower on the new binary (centre 431.5 → 442.5 at
-an unchanged 692 host). Popover *position* is a **documented harness artifact** (`openItem` → `openAt(null)` centres it),
-and the two runs differ in binary, so the shift is not attributable to the change — the target pitch (22→20) and the card's
-**Δheight (−4)** are both exact and independently predicted.
-
-**Loop status: 仍差 #6 CLOSED. This was the last unblocked item.** Every other 仍差 entry (1 dim snap, 2 shadow magnitude,
-3 popover-Esc, 4/E03-proportional-blocks, 7 `slice(0,2)`, 8 month-cell 1-chip cap) changes app-wide or user-visible
-behaviour that **no spec clause decides** ⇒ the loop is **blocked pending rulings A–E**. No `DONE` (not all spec IDs pass).
-# R061 — **D08 third and last surface (toolbar flat `KosButton` "添加", `Main.qml:2379`), dark: PASS.** Tri-state captured
-on the month view's selected-day card. **The fills are `button`/`buttonHover`/`buttonPressed` (accent-tinted blue), NOT the
-`buttonNeutral*` set R060 predicted** — the code is right and the prediction was wrong (`flat:` and `secondary:` are two
-different branches). Focus ring `accent`@0.76 persists after release-outside. No ref counterpart exists. (2026-10-16)
-
-## 本轮 (R061)
-Atomic step: R060's Next #1 = "a toolbar `KosButton` (`Main.qml:2379`), the third and last uncovered D08 surface".
-**No code change. 5 Bash calls for the drive/measure, 0 build→screenshot loops, 3 image reads ≈ 9 min.**
-
-**1 — Instrument (new fact).** `pointer {target: …}` resolves through `controlNamed`, which matches on
-`item.text === label` — i.e. the **rendered, translated** label. `target:"Add"` therefore found nothing and silently
-logged `NaN NaN` (two dead captures), while **`target:"添加"` resolved instantly and logged the centre plus the live
-`hover`/`down` state**: `move 添加 1047 554.5 hover true down false` → `press 添加 1047 554.5 hover true down true`.
-⇒ For **any** `KosButton`, `pointer{target:"<label>"}` is a free geometry+state probe that `scrollInfo` cannot give.
-Also: this app runs Chinese translations under the review locale — **use the on-screen label, not the source string**.
-
-**2 — Geometry (dark, 1100x692, month view, card fill = (31,36,43) = `mix(windowRaised, accent, 0.035)`).**
-Capsule box **x 1008..1086 (79 wide) × y 539..569 (31 tall)** — the 31 is `controlHeight` as rendered (not the spec's 34).
-
-| state | fill @ x=1047 | band y | notes |
-|---|---|---|---|
-| rest | **transparent** | — | column reads pure card fill (31,36,43) y524–561 except glyph pixels |
-| hover | **(35,60,81)** | 539..569 (31) | +1px `border` rim (71,78,87) top / (68,76,83) bottom; + inner highlight |
-| pressed | **(36,67,92)** | 539..569 (31) | same rim reads (37,76,102) — it is being taken over by the ring |
-| after release-outside | transparent again | 539..569 | ring only; interior (29,34,39) = card under the elevation-0.42 shadow |
-
-**3 — The fills are the accent-tinted triple, and that is correct.** `KosButton.qml:53-65`: the `flat` branch returns
-`"transparent"` **only** while `flat && !hovered && !down`; hovered/pressed then fall through to the *default* branch,
-`buttonHover`/`buttonPressed` = `mix(button, accent, 0.13 / 0.21)` (`AppTheme.qml:98-99`). `buttonNeutral*`
-(69/79/89) belongs to the **`secondary:` branch**. ⇒ **R060's "expect buttonNeutral 69/79/89" was a bad prediction;
-code correct, expectation retracted.** The app deliberately keeps two neutral-ish idioms: `secondary` = neutral grey,
-`flat` = accent tint.
-
-**4 — Hover changes the *shape*, not just the fill.** `strokeWidth` (`KosButton.qml:69`) is 0 only while
-`flat && !hovered && !activeFocus`, so a flat button **gains a 1px `border` stroke on hover** — a real difference from
-`secondary`, which never gets an edge (R057). `showInnerHighlight` is `(!flat || hovered)` (line 80) ⇒ hover fill reads
-**(45,69,89) at y540** (inside the top edge) vs **(35,60,81)** at the middle: the hover fill is **graded, not flat**.
-
-**5 — Focus ring: `accent`@0.76 = (43,115,160)**, rows **y539-540 and y568-569**, and it **persists after
-press→drag-out→release-outside** while the fill reverts to transparent — the ring is then the only drawn thing.
-Exactly R060's shape, reproduced on a third surface. ⇒ **D08 三态 + 焦点环 PASSES on the last surface.**
-
-**6 — The scale animation exists but is sub-pixel here.** `hoverScale` 1.012 / `pressScale` 0.968 with `motionFast`
-(`KosButton.qml:27-32`): pressed height would be 31→30.0. So R060's 31→29 is **2 ring rows + ≤1px of scale**, which
-neither contradicts nor is measured apart at this size. Do not read "no animation" into a 31px button.
-
-**7 — No reference counterpart.** `macos-calendar.png`'s toolbar contains only the Week/Month/Year segmented control and
-two **circular icon** buttons (spiral, search) — there is **no text button**, and the ref frame shows **no hover/press
-state of any kind**. This surface is therefore a **token-conformance check, not a visual ref comparison**. Noted in
-passing: the ref's toolbar buttons read **neutral**, while ours is **accent-tinted** — with no ref hover frame and no
-spec clause, that is a note, not a defect (仍差 #5).
-
-**Discipline: 21+ Bash calls (budget 25), 3 image reads, 0 build loops, ~9 min.** Deliverable = **D08 now fully covered
-on all three surfaces** (event-editor footer R055–R057, task-editor footer R060, popover Esc R058/R059, toolbar flat
-button R061). There is **no further unblocked visual work left in D08** — Next round is the rulings.
-
-# R060 — **D08 task-editor footer, dark: PASS.** Tri-state captured for the primary; the footer *shape* matches the
-event editor exactly (height 31 / pitch 37 / gap 6 / x 384..730) and every fill lands on its declared token. Absolute
-y's differ (516 vs 548) only because the task dialog is shorter — which is expected, not a defect. (2026-10-16)
-
-## 本轮 (R060)
-Atomic step: R059's Next #1 = "the task-editor footer D08 leg (`CalendarTaskEditorDialog.qml:81-98`), dark".
-**No code change. 6 Bash calls for the drive/measure, 1 build→screenshot loop (none needed), 3 image reads ≈ 11 min.**
-
-**1 — Open chain had to be corrected (new fact).** `date 2026-04-02` → `view day` → `openItem kind=todo
-titleContains="Green planning"` → popover opens on the todo — but the **raw click at (672,401) from R058 is a no-op
-here**: the todo popover card is *shorter* than the event popover's, so its 编辑 sits at **(673,375)**, not (672,401).
-Clicking (673,375) opened the task editor first try. ⇒ 编辑's y is **record-dependent**; read it off the frame, don't
-reuse the event-editor constant. (Recovered from the `_r060-b-rest-0002.png` frame; cost one extra drive loop.)
-
-**2 — Geometry (dark, 1100x692, `contentY = 0`).** The task editor's `editorScroll` is
-`sceneX 387.6 / sceneY 160.2 / w 340 / h 320 / contentHeight 295` ⇒ **not scrollable**, so unlike the event editor
-there is **no scroll ambiguity** in this round's numbers. Footer:
-
-| button | y (outer) | h | x | fill @ rest |
-|---|---|---|---|---|
-| 保存 (primary) | 516..546 | 31 | 384..731 | accent **(48,140,198)** |
-| 取消 (secondary) | 553..583 | 31 | 384..730 | buttonNeutral **(69,69,69)** |
-| 删除任务 (destructive) | 590..620 | 31 | 384..730 | buttonNeutral **(69,69,69)**, label peak ≈**(239,103,95)** |
-
-**pitch 37, gap 6, equal width.** The canonical event-editor set (保存 548..577 / 取消 585..614 / 删除日程 622..651) is
-the same shape **32px lower** — the *only* difference, and it is explained by the task dialog's shorter body. D08's
-"equal width / same height / pitch 37 / gap 6" **PASSES**.
-
-**3 — Tri-state (primary 保存), all three fills land exactly on their tokens:**
-rest `accent` (48,140,198) → hover `accentHover` (**69,152,204**) → pressed `accentPressed` (**85,161,208**).
-Hover's band is **516..546, the same 31px** as rest ⇒ **hover is a pure flat fill swap, no edge/border token** —
-R057's finding reproduced on a second surface.
-
-**4 — The focus ring, and a trap I nearly fell into.** Pressed measures 517..545 (**29**, not 31) — that is **not** a
-scale/shrink animation. The missing 2 rows are the **focus ring**, drawn 1px inside the button's perimeter: rows
-y517 and y545 read **exactly (45,115,159)**, i.e. `accent`@0.76, the documented dark `focusRing`. It appears on press
-and **persists after press→drag-out→release-outside** while the fill reverts to `accent` (48,140,198). ⇒ D08's
-"焦点环可见" **PASSES**. **Rule for future rounds: a 2px-thinner pressed band is the ring, not a shrink.**
-
-**5 — Secondary/destructive tri-state** (grey test, ring is bluish so it is excluded — hence 24, not 29):
-取消 553..583 → hover **79,79,79** → pressed **89,89,89**; 删除任务 590..620 → hover **79,79,79** → pressed **89,89,89**.
-Both match `buttonNeutral` 69/79/89 verbatim, hover band again unchanged at 31px.
-
-**Discipline: 21 Bash calls (budget 25), 3 image reads, 1 drive-loop for the stale 编辑 y, ~11 min.** Deliverable =
-D08 clause 1+2 now **PASSES for the task-editor footer (dark)**; the only D08 surface left is a toolbar `KosButton`.
+**Why 20 and not R046's "~1.2" (18):** **no ref anchor exists** — the ref is a month view + sidebar, all text
+single-line/elided, and it has **no popover at all**. Target = the macOS body ratio **1.33** (20px at 15px).
+**`FixedHeight` is load-bearing:** Qt's `ProportionalHeight` multiplies the *font's own* line box — here the 1.47em bug
+itself — so `lineHeight: 1.33` proportionally would give 29px. (Corollary: `KosEmptyState.qml:49 lineHeight: 1.22` renders
+*looser* than default.) **Not** app-wide: the `controlHeight` 31-vs-34 family is untouched.
 
 ## 仍差 (top 8, visual-impact order)
 1. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
-   `Rectangle`. **R058 re-confirmed in both directions**: enter = dim full while card α≈0.5; exit = dim full-off while
-   card α≈0.95. App-wide. **Needs a ruling**; fix = bind that rectangle's opacity to `revealProgress`.
+   `Rectangle`. **R058 re-confirmed in both directions** (enter = dim full while card α≈0.5; exit = dim full-off while
+   card α≈0.95). App-wide. **Needs ruling A**; fix = bind that rectangle's opacity to `revealProgress`.
 2. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
-   `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs a ruling.**
-3. **`EventDetailsPopover.qml:60`'s `CloseOnEscape` is dead code** (R059 — re-scoped from R058's "candidate defect";
-   **NOT a spec failure**, the clause is 弹框-scoped and PASSES). A lone popover ignores Esc: 2 tries / 9s / zero pixel
-   change, because `modal:false` + no `focus:` means it never receives the key. **Needs the A/B ruling below** (A =
-   window `Shortcut`, per `Main.qml:1876-1878`).
+   `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs ruling B.**
+3. **`EventDetailsPopover.qml:60`'s `CloseOnEscape` is dead code** (R059; **NOT a spec failure**, the clause is
+   弹框-scoped and PASSES — D01 defines 弹框 by a scrim the popover lacks). A lone popover ignores Esc (2 tries / 9s /
+   zero pixel change) because `modal:false` + no `focus:`. **Needs ruling C** (A = window `Shortcut`, `Main.qml:1876-1878`).
 4. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (month 18px, week/day 21px,
-   all fixed, no duration→height path), while the ref's week view shows proportional blocks ⇒ decide
-   reword-the-clause vs build-proportional-blocks. Clauses 1+2 PASS (R048).
-5. **D08: only a toolbar `KosButton` (`Main.qml:2379`) is still uncovered** — the third and last surface. Task-editor
-   footer **PASSES (R060)**; event-editor footer PASSES (R055/R056/R057); `Esc 可关闭` PASSES (R058). **This is Next #1.**
-6. **Line pitch 22px at font 15 = 1.47** (R046/R047, both themes) — CJK font-stack leading; same root cause as the
-   recorded `controlHeight` 31-vs-34. App-wide. Cosmetic, no ID.
-7. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91`
-   VTODO (due 11:00) is dropped silently. **Needs a ruling.**
+   all fixed, no duration→height path), while the ref's week view shows proportional blocks ⇒ ruling E: reword-the-clause
+   vs build-proportional-blocks. Clauses 1+2 PASS (R048).
+5. **Two neutral-button idioms diverge, and one has no ref** (R061). `secondary` hover = neutral grey 79, no edge;
+   `flat` hover = accent tint (35,60,81) **with** a 1px edge. The ref toolbar's buttons read neutral, but the ref has
+   **no text button and no hover frame** ⇒ **note, not a defect**; only worth a ruling if macOS parity is a goal.
+6. ~~**Line pitch 22px at font 15 = 1.47**~~ — **CLOSED in R062** (popover title now pitch 20; the app-wide
+   `controlHeight` 31-vs-34 half of this family is *not* fixed and would be app-wide).
+7. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91` VTODO
+   (due 11:00) is dropped silently. **Needs ruling D.**
 8. **Month day cell holds 1 chip + `N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1 (`+8/+8/+11/+9/+7`).
-   Same family as #7. **Needs a ruling.**
+   Same family as #7 ⇒ **ruling D.**
 - *Cosmetic, no ID, folded out:* **button fill/edge tokens don't match their own formulas** (R056): light
-  `buttonNeutral` base reads ≈(251,252,254), not the rendered card (247,247,247) — small code fix, unblocked. D02's
-  radius is **16** vs the spec's `largeRadius` 24 / `windowCornerRadius` 32 — recommendation stands: **keep 16**.
-  Hover is a flat fill, **no** `borderHover` edge (R057, **re-confirmed on the primary in R060**).
+  `buttonNeutral` base reads ≈(251,252,254), not the rendered card (247,247,247) — small code fix, **unblocked but
+  unresolved-token** (the "right" value is itself a coin flip). D02's radius is **16** vs the spec's `largeRadius` 24 /
+  `windowCornerRadius` 32 — recommendation stands: **keep 16**. Hover is a flat fill, **no** `borderHover` edge (R057,
+  re-confirmed on the primary in R060) — **but a *flat* button does get a `border` edge on hover (R061); no conflict.**
 
 ## 最近已改 (most recent 8)
-1. R060 — measurement only; **D08 task-editor footer dark leg captured and PASSES** (height 31 / pitch 37 / gap 6 /
-   x 384..730; fills = accent/accentHover/accentPressed and buttonNeutral 69/79/89; ring = accent@0.76, persists).
+1. R062 — **popover title leading 22→20px** via `lineHeightMode: FixedHeight` + `lineHeight: 20` on `detailsTitle`;
+   **仍差 #6 CLOSED**. Code change (2 properties).
+2. R061 — measurement only; **D08 toolbar flat `KosButton` captured and PASSES** (transparent rest → (35,60,81) hover →
+   (36,67,92) press; ring (43,115,160) persists). R060's `buttonNeutral` expectation retracted. No code change.
+3. R060 — measurement only; **D08 task-editor footer dark leg PASSES** (height 31 / pitch 37 / gap 6 / x 384..730).
    Corrected the popover 编辑 y for todos to **375**. No code change.
-2. R059 — analysis only; **popover-Esc re-ruled: not a spec failure** (D08 is 弹框-scoped, `D01` defines 弹框 by a
-   scrim the popover lacks; 浮层 = `O01–O09`, no Esc clause); `CloseOnEscape` at `EventDetailsPopover.qml:60` is dead
-   code with an in-repo fix idiom (`Main.qml:1876-1878`); **needs an A/B ruling**. No code change.
-3. R058 — measurement only; **D08 clause 3 `Esc 可关闭` PASSES (2 legs)**; a **lone popover ignores escape** raised (now
-   re-scoped by R059); `pointerObject detailsEdit` retired in favour of raw coordinates. No code change.
-4. R057 — measurement only; **dark footer re-measured**, #A + #B both closed; R055's dark table retracted. No code change.
-5. R056 — measurement only; **D08 light leg captured**; #A/#B raised (now closed by R057). No code change.
-6. R055 — measurement only; **D08 dark leg captured** (hover/pressed/focus) with a 13px-high footer table (corrected by R057).
-7. R054 — measurement only; event Flickable 418/380 → the old "compressed box" still-difference RETIRED as a phantom;
-   added `scrollInfo` to the toolbox. No code change.
-8. R053 — **ported P03 into the task editor and gated its policy on real scrollability**; narrow + wide PASS.
+4. R059 — analysis only; **popover-Esc re-ruled: not a spec failure** (D08 is 弹框-scoped; 浮层 = `O01–O09`, no Esc
+   clause); `CloseOnEscape` is dead code ⇒ **ruling C**. No code change.
+5. R058 — measurement only; **D08 clause 3 `Esc 可关闭` PASSES (2 legs)**; the lone-popover Esc issue raised. No code change.
+6. R057 — measurement only; **dark footer re-measured**, #A + #B closed; R055's dark table retracted. No code change.
+7. R056 — measurement only; **D08 light leg captured**; #A/#B raised (closed by R057). No code change.
+8. R055 — measurement only; **D08 dark leg captured** (hover/pressed/focus) with a 13px-high footer table (corrected by
+   R057). No code change.
 
 ## 外推待确认 (do NOT assume)
 *(R053's 9 older items are archived to rounds.md — read them there, don't re-derive.)*
+- **`lineHeight`: Qt's `ProportionalHeight` is a multiple of the *font's own* line box, not of `pixelSize` (R062).** With
+  the app's CJK-capable stack that box is **1.47em** (22px at 15px), so `lineHeight: 1.2` *loosens*, and the in-repo
+  `KosEmptyState.qml:49 lineHeight: 1.22` is looser than default. To hit a **pixel** target use
+  `lineHeightMode: Text.FixedHeight` + `lineHeight: <px>`. Measured valid pair: **FixedHeight 20 at font 15** in
+  `EventDetailsPopover.qml:115-118`. `Label` (QtQuick.Controls, Text-derived) supports both properties.
+- **The ref has NO popover and NO wrapped text** (814x522 month view + sidebar, all chips single-line/elided) ⇒ **there is
+  no ref-derivable line pitch, and no ref-derivable popover geometry at all.** P01 is a HIG-convention match. Same for
+  the ref's *hover* states — the ref has no hover frame anywhere (R061) — so any "expected fill" must come from the code's
+  own tokens, never from the ref.
+- **`pointer{target:"<label>"}` is a free geometry + live-state probe for `KosButton`s (R061)** — it goes through
+  `controlNamed`, which matches `item.text === label`, so it needs the **rendered/translated** label (`"添加"`, not
+  `"Add"`; a miss logs `NaN NaN` and the capture is a silent no-op). The log line carries the resolved centre **and**
+  `hover`/`down`: `pointer move 添加 1047 554.5 hover true down false`. `scrollInfo` cannot see buttons; this can.
+  It needs the item `visible`, so drive to the owning view first (the 添加 button lives in **monthPage**).
+- **`flat:` and `secondary:` are different branch groups in `KosButton.qml:53-65`.** `flat` rest = `"transparent"`,
+  then hover/press = `buttonHover`/`buttonPressed` (accent tint). `secondary` = `buttonNeutral*` (neutral grey) and
+  never gets an edge. A flat button **does** gain a 1px `border` rim + inner highlight on hover (`:69`, `:80`; inner
+  highlight = `!flat || hovered`). `AppTheme.qml:97-99` owns all three tokens.
 - **The popover's 编辑 y depends on the RECORD (R060).** Event "Design review" ⇒ (672,401); todo "[UI] Green planning"
   ⇒ **(673,375)**. The popover is centred in the window but its card height is content-driven, so a *reused* y lands
   inside the card below the button and is a **silent no-op**. Read 编辑's centre off a frame before clicking.
+  **R062 caveat:** the R019-todo popover's **y also differs 11px between binaries** (centre 431.5 → 442.5 at an unchanged
+  692 host, h 284→280) ⇒ popover position is only comparable **within one run**; never diff a y against another binary.
 - **Opening the TASK editor (R060, verified):** `date 2026-04-02` → `view day` → `openItem kind=todo
-  titleContains="Green planning"` → raw `pointer` click at **(673,375) @1100x692**. The popover card spans ≈380..722 ×
-  290..410 for this record. `pointerObject` needs THREE commands (`move`,`press`,`release`).
+  titleContains="Green planning"` → raw `pointer` click at **(673,375) @1100x692**. `pointerObject` needs THREE commands.
 - **The task editor's `editorScroll` is `387.6 / 160.2 / 340×320`, `contentHeight 295` ⇒ NOT scrollable**, so its
   footer readings carry **no `contentY` ambiguity** — unlike the event editor, where every footer y MUST be paired with
   `contentY` (R055 vs R057 differed 13px at an identical scrollInfo).
-- **Pressed-button band arithmetic (R060): a 2px-thinner pressed band is the FOCUS RING, not a shrink.** The ring is
-  drawn 1px inside the perimeter and occupies the outer rows of the fill; measured as exact `(45,115,159)` =
-  `accent`@0.76 dark. There is **no scale animation** on press. In the dark footer that turns 31 → 29 (blue test) or
-  31 → 24 (a grey test, which excludes the bluish ring).
+- **Pressed-button band arithmetic (R060): a 2px-thinner pressed band is the FOCUS RING.** The ring is drawn 1px inside
+  the perimeter and occupies the outer rows of the fill; measured as exact `(45,115,159)` = `accent`@0.76 dark (R061
+  re-measured `(43,115,160)` on the flat button — same token, ±2 rounding). `pressScale` 0.968 exists but is ≤1px at
+  height 31, so it cannot be separated from the ring — **never read "no animation" from a 31px band.**
 - **Dark footer token values, measured verbatim (R060):** primary `accent` (48,140,198) / `accentHover` (69,152,204) /
   `accentPressed` (85,161,208); secondary+destructive `buttonNeutral` (69,69,69) / (79,79,79) / (89,89,89);
   destructive **label** peak ≈(239,103,95) on a neutral fill. Hover **never** changes the band height ⇒ no edge token.
+  **Dark card fill = (31,36,43)**; the **popover** card dark = **(38,38,38)** (R062, measured) and the window = (30,30,30);
+  flat-button hover/press = **(35,60,81) / (36,67,92)** (R061); `border` dark rim ≈**(71,78,87)**. `windowRaised` is
+  **not** a neutral grey — do not solve the `mix()` formulas algebraically.
 - **Esc semantics in this app (R059): `escape` is a real key event addressed to whoever holds `activeFocusItem`.** It
   closes a **focused** popup (the modal `KosDialog`/`KosWorkspaceDialog` chain) and does **nothing** to a `modal:false`
   popup that never takes focus. Before reading any Esc result, ask *who has focus*. The app's own working idiom for a
@@ -203,41 +115,57 @@ D08 clause 1+2 now **PASSES for the task-editor footer (dark)**; the only D08 su
   centre x ≈ 557, pitch 37, gap 6. Light is ≤1px the same (547..578 / 584..615 / 621..650). Treat the 548 set as canonical;
   **R055's 535/572/609 set is superseded** — do not cite it. (Re-confirmed in R058 leg 2.) The **task** editor is the same
   shape **32px higher** (516/553/590) for a different record — always say *which* editor a footer number belongs to.
+  **R062 moved the P01 popover y by −11 (284h→280h) — the editor footers above are for the *editor dialogs*, not the
+  popover, and were unaffected.**
 - **`nativeRecord` with `interval == duration` captures ZERO frames** (R056): a 500/500 request produced `frames:[]`.
   Keep `interval ≤ duration/4`. Frames land at **0, interval, 2·interval…** from the command's arrival; the recorder is
   **non-blocking**, so keep `duration` under the 0.6 s command spacing or the next command's state leaks into it.
 - **Diff bounding boxes FIRST, sample pixels second** (R058): three sampled pixels could not distinguish the week view
   from the day view; `ImageChops.difference(...).getbbox()` immediately separates "nothing happened" (bbox `None`)
-  from "a view switch happened" (bbox ≈ the whole window) at no cost.
+  from "a view switch happened" (bbox ≈ the whole window) at no cost. **R061 caveat:** a *neighbouring* widget's hover
+  state can inflate the bbox — always re-scan the target's own column/row before believing a bbox edge is the target's.
+- **Row-band measurement idiom that worked twice (R046/R062):** scan the card's interior column-by-column for pixels
+  that are **not** the card fill, threshold a per-row count (≥4), group into bands ≥6 rows tall, and read **cap-top =
+  band start**. It gave **22** before and **20** after on the same record with no image inspection at all — use it for
+  any wrapped-text or stacked-text pitch question, and confirm once visually at 3x (`Image.NEAREST`).
 - **A glob and a literal path in the same `for` list will crash the crop script** (R057): assert `im.size` first.
-- **The ring is press-driven, in BOTH themes:** nothing has a ring at a clean open (R056 light, R057 dark, R060 dark);
+- **The ring is press-driven, in BOTH themes:** nothing has a ring at a clean open (R056 light, R057 dark, R060/R061 dark);
   press a button and the ring appears 1–2px inset at its top/bottom edges and **persists after release-outside and
-  while another button is hovered**. On hover the ring is **covered by the flat hover fill**.
+  while another button is hovered**. On hover the ring is **covered by the hover fill**.
 - **The reference macOS alert at rest shows NO focus ring** on either Primary or Secondary (`_ref-alert-crop.png`) ⇒
   "no ring at open" is the target behaviour, not a bug. Don't raise it again.
-- **`focusRing`: light = `accent`@0.64 = (120,179,216); dark = `accent`@0.76 = (45,115,159).**
+- **`focusRing`: light = `accent`@0.64 = (120,179,216); dark = `accent`@0.76 = (45,115,159)/(43,115,160).**
   `accent` (48,140,198) / `accentHover` (69,152,204) / `accentPressed` (85,161,208) are **identical in both themes**.
   `buttonNeutral` 69 normal / 79 hover / 89 pressed; light card renders (247,247,247) but the light button base ≈(251,252,254).
 - **`scrollInfo` is THE instrument for dialog geometry** — one `[UIReview] scrollInfo [...]` line per call in
   `live-runtime-vm.log`, reaching dialog Flickables that `objectNamed`/`inspectGeometry`/`regionPosition` cannot. Parse
   the line as JSON and filter on `parent` + `visible:true`. **`live-runtime-vm.log` accumulates across runs** — always
   take the last matching line, and check its `parent` type number matches the current process. It lists **Flickables and
-  ScrollViews only — not `KosButton`s**, so button y's must come from pixels.
+  ScrollViews only — not `KosButton`s**, so button y's must come from pixels *or from `pointer{target:"<label>"}`* (R061).
 - **The 4-step open chain and the 3-step click CAN go in ONE list**, and the recording may be the **first** item (0.6 s
   spacing is enough). **The `press` → `move` off the button → `release` outside** idiom captures *pressed* without
   firing the click and leaves the button with `activeFocus`.
 - **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it** (`nohup … & disown`); `timeout 180` kills the app.
   A rebuilt binary requires a **kill+relaunch**. Kill the pid **read from `live-app.pid`**, never `pkill -f 'kos-calendar'`.
-  It takes **~12 s** before the new pid appears; one `scrollInfo` settles readiness faster than reading logs.
+  It takes **~12 s** before the new pid appears. **A prior round's instance is often still alive and is reusable** —
+  check `ps -o etime -p $(cat live-app.pid)` and `runtimeInfo` before paying for a relaunch. **R062 rebuilt, so it paid
+  the relaunch: kill → `nohup ./start-review-vm.sh dark & disown` → `sleep 15` → the new pid is alive.** Include
+  `resize 1100x692` in the drive list — a fresh instance does not necessarily come up at the review size.
 - **`review-command.py` is not executable here — call it as `python3 review-command.py '<json>'`**; it accepts a LIST of
   commands (0.6 s apart) and prints nothing on success. **In-place write only** to `command.json` (atomic replace trips
-  the QML dir watcher). **`Bash` CWD drifts between calls — always `cd` to the task dir explicitly.**
-- **Fixtures on 2026-04-02:** VEVENTs = Morning planning 08:00 / Short appointment 10:15 / Long review with a
-  deliberately lengthy title 11:00 / **Design review 14:30** / Evening session 18:00. VTODOs (kind `"todo"`) =
-  `[UI] Green planning` (09:00), `[UI] Gold review` (12:00, **not** a VEVENT), `[UI] Red review` (16:00),
-  `A deliberately long task title to inspect elision` (11:00), `[R019 LONG TASK] …` (11:00).
+  the QML dir watcher). **`Bash` CWD drifts between calls — always `cd` to the task dir explicitly.** Actions seen
+  working: `escape`, `date`, `view`, `resize`, `openItem`, `pointer`, `pointerObject`, `nativeRecord`, `windowWheel`,
+  **`captureClient` (`{action,path}`, path relative to the task dir, ~3.05 MB PNG — takes ~2 s to land)**.
+- **Fixtures on 2026-04-02** (live file = `profile/pim/calendar.ics`; the repo-root *`calendar-fixture.ics` is a stale
+  copy with no VTODOs*): VEVENTs = Morning planning 08:00 / Short appointment 10:15 / **Long review with a deliberately
+  lengthy title** 11:00 / **Design review 14:30** / Evening session 18:00. VTODOs (kind `"todo"`) = `[UI] Green planning`
+  (09:00), `[UI] Gold review` (12:00, **not** a VEVENT), `[UI] Red review` (16:00), `A deliberately long task title to
+  inspect elision` (11:00), **`[R019 LONG TASK] 任务长标题与编辑表单检查`** (11:00, `calendar.ics:287` — a *repeated*
+  long string; its popover title fills all **3** lines and elides ⇒ **the record to use for any wrapping-title test**).
+  **The month view's selected-day card is the 添加 button's home** (10 items on 2026-04-02).
 - **Light theme**: the notes field is indistinguishable from the card fill — locate a light field box by its **border**
-  only. Popover fill `#F5F5F5` / `#262626` dark; editor dialogs `#F7F7F7` light / `#262626` dark; event-editor card at
+  only. Popover fill `#F5F5F5` / `#262626` dark (**measured (38,38,38) in R062 for the popover, not `#262626`'s 38 —
+  same value, the dark window is (30,30,30)**); editor dialogs `#F7F7F7` light / `#262626` dark; event-editor card at
   x=450 renders (247,247,247) light / (38,38,38) dark. `defaultAccentSeed` #3478f6.
 - **`motionFast`** = 120, **`motionNormal`** = 220 (`AppTheme.qml:174-175`), both 0 under `reduceMotion`.
   `controlHeight` renders **31px here, not the spec's 34**; the dim is `Overlay.modal`, **0.20 light / 0.42 dark**.
@@ -248,13 +176,19 @@ D08 clause 1+2 now **PASSES for the task-editor footer (dark)**; the only D08 su
   committed — expected, not a failure. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## Next round (pick ONLY #1)
-**#1 — a toolbar `KosButton` (`Main.qml:2379`), the third and last uncovered D08 surface.** Same method as R060:
-drive to the day view, then capture **at rest + hover + press→drag-out→release-outside** for that button, and record
-its own y-band + fill triple. Expect the same tokens as R060 (`buttonNeutral` 69/79/89, ring `accent`@0.76, hover band
-unchanged) — **the point is to confirm, not to re-derive**; a deviation is the finding. There is no `scrollInfo`
-coverage for `KosButton`s, so measure from pixels and crop the button at 2x.
-
-**#2 — STOP and ask for the rulings.** Four items (仍差 #1 dim snap, #2 shadow magnitude, #3 popover-Esc A/B, #4 E03
-clause 3, #7/#8 per-cell caps) each change app-wide or user-visible behaviour that no spec clause decides. After #1
-there is **no further unblocked visual work** in D08/D01–D13 that doesn't depend on one of these.
-**#6 (line pitch)** is cosmetic with no ID.
+**#1 — STOP. There is no unblocked visual work left; do not invent work.** R062 closed the last one (仍差 #6). Every
+remaining 仍差 entry changes app-wide or user-visible behaviour that **no spec clause decides**, so implementing either
+way is a coin flip the reviewer must not make alone. The loop is **blocked pending these rulings**:
+- **A — the modal dim snap** (仍差 #1): bind `Overlay.modal`'s opacity to `revealProgress` (`KosWorkspaceDialog.qml:24-27`)
+  or keep the hard on/off? App-wide, both themes.
+- **B — shadow magnitude** (仍差 #2): touch `KosSurface.effectiveElevation`'s `0.38` factor (app-wide) or accept?
+- **C — popover Esc** (仍差 #3): add the window-level `Shortcut` idiom (`Main.qml:1876-1878`) so a lone popover closes,
+  or leave `CloseOnEscape` as dead code? (Not a spec failure either way.)
+- **D — per-cell caps** (仍差 #7/#8): `slice(0, 2)` in week/day cells and the month cell's 1-chip cap silently drop items
+  — raise the caps, add an always-visible `+N`, or reword?
+- **E — E03 clause 3** (仍差 #4): reword the clause, or build duration→height proportional blocks?
+Two smaller items are technically unblocked but each needs a *value* ruling first, so they are **not** safe coin flips
+either: **(i)** the light `buttonNeutral` base token (reads ≈(251,252,254) vs the rendered card (247,247,247), R056);
+**(ii)** the app-wide half of the line-pitch family (`controlHeight` 31 vs the spec's 34). **Do not start either without a
+ruling** — R062's popover fix was safe precisely because the ref *and* the spec are silent and the change was one Label.
+If a human answers A–E, resume from that ruling; otherwise leave this checkpoint standing.

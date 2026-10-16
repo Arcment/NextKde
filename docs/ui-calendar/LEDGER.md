@@ -1,3 +1,22 @@
+# R098 — C05's **dark leg**, captured: the view segment renders a distinct selection on the dark plane too. **VERDICT: PASS**, no code changed.
+
+**The gap.** R097 fixed the light leg's capsule with an **opaque** pill and left the dark pair (`segmentTrack` white@6%, `segmentPill` `#3C3C3C`) as **extrapolation — no dark reference exists** — while the *old* dark pill was `contentPlane` = `#1E1E1E` = **the dark canvas itself**, i.e. exactly the vanished-selection defect the light leg had. One dark leg, one pass: `kill` → `start-review-vm.sh dark` → `resize 1100x692` → `sidebar{expanded:true}` → `view week` → `date 2026-10-15` → `captureClient r098-seg-dark.png` (flag `true`) → `stop`; probe `contentY 280`.
+
+**Measured — capsule x562..757 (196), lens x629..690 (62): the SAME x in both legs** (the pill is on segment 2 = Week). Fill = the **mode over the body rows y45..61**, never the top row.
+
+| leg | plane | track | pill | pill−track | the two right round buttons (x1023..1048 / x1059..1084) |
+|---|---|---|---|---|---|
+| light, after R097 | 255 | 249 | 232 | **−17** | 248 |
+| dark | 30 | **43** | **60** | **+17** | 96 |
+
+**Both dark tokens land exactly on their arithmetic** — track 43 = `white@6% over 30` = 43.5 ✓; pill 60 = `#3C3C3C` ✓ (**an opaque fill renders its absolute value**, so R097's shadow-reachability trap cannot bite it). **Δ30 above the plane, Δ17 above its own track** ⇒ **the selection does not vanish. C05's dark leg PASSES.** The polarity flip (light −17, dark +17) is the extrapolation — a symmetric mirror of the ref's measured sink — with no dark reference to confirm it against.
+
+**The instrument that had to be built first — A SEGMENT FILL IS THE MODE OVER ITS BODY ROWS, NEVER THE TOP ROW.** `LiquidSegmentedControl.qml:94-99` gives the *track* a specular `Gradient` (white@4% → black@2%) and `:128-136` gives the *lens* a stronger one (white@9% → white@2.5%@0.58 → black@2.5%), while `:124` adds a 1px `border.color: white@16%`. The top row reads **99** where the body is **60** (dark) — a phantom 39-level error that would have been filed as a defect. The identical overlay is measurable on the **light** leg (track 234 → 229 top-to-bottom) and **in both hosts** ⇒ **it is the shared control's own material, never a C05 host divergence.**
+
+**Structure re-confirmed on the dark plane, and our own map corrected.** Non-plane runs in the row: the sidebar (x0..220), the segment capsule (x562..757), exactly **two** round buttons (x1023..1048, x1059..1084) — the **same x as the light leg** (1026..1045 / 1062..1081; the light run reads narrower only because a 248-on-255 glass fill falls inside the `<250` threshold) ⇒ **the dark plane moved no chrome geometry**, and "exactly one capsule" holds on both planes. **Correction: the capsule is y36..63 (28 tall, a 1px `AppTheme.border` hairline top and bottom) and the lens y38..61 (24 = `height − 4`) — in BOTH legs; the earlier "toolbar row y≈22..58" is wrong by 14.** Figure (light-after 1:1 / dark 1:1 / dark ×3 `NEAREST`, one crop): `r098-seg-dark.png`.
+
+**C05 now: clause 1's structural half (R097) + its dark leg (R098) CLOSED.** Remaining: the label-token residue (the segment's `textColor`/`mutedTextColor` are calendar-local — 仍差 #2, now the next round) and the **pointer half**, which no harness action can drive and which is structurally host-invariant (hover/press lives in the shared delegate).
+
 # R097 — C05 clause 1 (the toolbar): the view segment rendered the reference's capsule with its **two fills exchanged** — fixed with 2 tokens + 2 lines.
 
 **The clause (C05, verbatim).** "Hover/pressed/inactive chrome matches actual settings; **no second capsule or conflicting controls**" — the last unmeasured row of `spec.md`.

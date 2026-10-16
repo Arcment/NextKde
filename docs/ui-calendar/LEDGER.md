@@ -1,3 +1,22 @@
+# R093 — M04 colour: the mini month's today disc, blue → `AppTheme.todayRed`
+
+The mini month drew today in `root.tahoe.accent` (`#0088FF` = (0,136,255)) — the **one** place in the app where "today" was
+not red. The ref's today red is one red app-wide (**pill and now-line row (235,76,70)**; mini disc **(207,51,35)**, 15x15 at
+x91..105/y395..409), and our own week header disc / now-line / now-dot / time pill are all `#E5484D` (229,72,77).
+
+**Fix:** hoisted `#E5484D` into `AppTheme.todayRed` (`shared/qml/foundation/AppTheme.qml`), repointed
+`CalendarScheduleView.qml:111` at it (same value), and pointed `Main.qml:2204` at it. Exactly one literal left.
+
+**Evidence** (light 1100x692, `view week` + `date 2026-10-15` + `sidebar expanded`) — `r093-mini-today-red.png`:
+- mini today disc (Oct 17, Sat) **20x20 at x156..175/y597..616, fill (229,72,77)**, white numeral.
+- control: week header today disc still **21x22 at x928..948/y126..147 = (229,72,77)** ⇒ the two markers now agree.
+- build clean: `ninja -C .build/calendar-review kos-calendar kos-pim-service` 15/15.
+
+**Still open (仍差 #7):** disc **20 px vs the ref's 15** (mini row pitch ours ≈25.4 vs ref ≈26.7 ⇒ ~1:1) — next round.
+**Ruling H still unanswered** (no rulings channel exists in the tree) ⇒ the all-day band ring icon was **not** built.
+**Instrument note:** the app launches with the sidebar **collapsed** — R082–R092's legs contained no mini calendar at all;
+any sidebar evidence needs `{"action":"sidebar","expanded":true}`.
+
 # R092 — R091's fix is **verified in the DARK leg**: two fresh dark legs are **0 px** apart whole-page. Verdict only, NO code changed.
 
 **Why it was needed:** R091 changed one binding path (`CalendarScheduleView.qml:276`) but its acceptance pair ran **light only**,

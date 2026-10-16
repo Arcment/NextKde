@@ -4,6 +4,8 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.6：逐小时卡列表入场交错（本轮，前端）**：`apps/weather/qml/Main.qml:1007` delegate 加 `required property int index`；:1011-1012 入场初态 `opacity: 0` + `transform: Translate { id: entranceShift; y: 14 }`；:1013-1021 `Component.onCompleted`（reduceMotion 时直接置终态不动画，否则 `entranceAnim.restart()`）；:1023-1029 `SequentialAnimation`：`PauseAnimation 40ms×index` 交错 + `NumberAnimation` opacity 0→1 / Translate y 14→0，各 260ms OutCubic（单卡落在 HIG 120–300ms 内）。数据异步到达时 Repeater 才建 delegate，故入场恰在数据到达时播一次；每小时刷新重建 delegate 会重放，频率符合 HIG"避免高频交互动效"。
+  **帧差证据**（活实例 + spectacle 连拍；数据即时到达使首轮动画早于 spectacle 首帧，故按 round 15 先例加 TEMP Timer（每卡随机 1800-3400ms 间隔复位初态重触发）取证后已删）：动效区（逐小时条带 y525-665）相邻帧 MAE **14.06 / 7.96 / 1.88 / 14.80**，对照静止区（"7 天"标签带 y688-716）**全部 0.0000**；逐卡分块 MAE（f0→f1）card2=11.6 / card3=28.1 / card5=38.9 / card6=38.9、其余 0——不同卡处于不同相位即交错生效；裁片目视：右端卡半透明+下移中、左端已定。**终态二进制**（TEMP 已删）：4 次重启×5 对相邻帧逐小时区 MAE 全 0.0000（动画收尾干净、无残留运动）；`--screenshot` 650ms 帧恰好抓到动画中段（左卡已定、最右 06:00 卡半透明下移中，截图 1792163552），与 TEMP 证据互证。测试 6/6 绿、go test ok。
 - **阶段三风格 A：侧栏滚动边缘效果（scroll edge effect，本轮，前端）**：`apps/weather/qml/Main.qml:6` 加 `import QtQuick.Effects`；:484-672 `savedLocations` ListView 包进 wrapper `savedLocationsWrapper`（4 个 Layout attached 属性移到 wrapper，ListView `anchors.fill: parent`，其余不动）；:643-671 新增 `scrollEdgeTop` 条带（列表顶 26px、`visible: savedLocations.contentY > 0.5`、clip）= **兄弟节点** MultiEffect（source: savedLocations，`blurEnabled` blurMax 32 / blur 1.0 / saturation 0.2，整列表模糊图与实列表对齐后被 clip 到顶条带）+ 顶部渐隐 Rectangle（`AppTheme.sidebar` α0.9→透明 渐变，即 HIG "降不透明度"）。不滚动时完全不渲染。
   **实测**（截图 1792162746 为 TEMP 脚手架 `visible:true` 强制显示条带时的渲染；截图 1792162785 为最终二进制静止态）：条带区卡片顶部被模糊+渐隐——y96 `#c2c9d3`（顶缘侧栏色）→ y112 `#465775`（过渡）→ y120 以下清晰卡面 `#102547`，过渡平滑无硬边；最终二进制静止态同区域 y96 起即清晰卡面 `#0c1a33`，证明 `contentY` 门控生效、静止时零渲染。测试 6/6 绿、go test ok。
   **验证方式说明**：contentY 无法在截图模式强制（TEMP `Component.onCompleted: contentY=60` 被启动时序重置，卡片仍在列表顶 y=95），故分两步取证——a) TEMP 强制 visible 验证条带渲染本身（模糊+渐隐+位置正确）；b) 移除 TEMP 后静止态验证门控。滚动态实拍未见（见外推待确认）。
@@ -35,7 +37,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：上一轮已完成"夜间晴天星星闪烁"（见已改，含帧差证据）。剩余：雨丝下落/雪花飘移/云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、列表入场交错、温度曲线 draw-on。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：前两轮已完成"夜间晴天星星闪烁"与"逐小时卡列表入场交错"（均见已改，含帧差证据）。剩余：雨丝下落/雪花飘移/云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. Conditions 卡无温度走势曲线。
 4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
@@ -43,6 +45,8 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **入场交错的参数（40ms 交错 / 260ms OutCubic / y 偏移 14px）无参考约束**：参考图为静态，Apple 实际入场节奏不可知；取值按 HIG 120–300ms 与常见交错量级外推。另：真机首启动（数据非即时到达）时的观感未实拍——本轮取证时 service 已有缓存数据、动画早于截图工具首帧，只能靠 TEMP 重触发间接验证；真机冷启动（网络取数后入场）的实际节奏待人工复核。
+- **入口动画与刷新重放**：`upcomingHours` 每次刷新重建 delegate → 逐小时卡每小时重播一次入场（整组同时错开 40ms）；是否符合预期观感待复核（HIG 不禁止低频重放，但观感待定）。
 - **滚动边缘效果滚动态未实拍**：参考静态图无滚动态（卡片未滚到边下），条带参数（26px 高、blurMax 32/blur 1.0、渐隐 α0.9→0）系按 HIG「模糊并降不透明度」+ 静止态/强制显示态两张截图折算；滚动态下条带盖在"被裁切卡片的顶缘"上的实拍未取得（contentY 在截图模式强制失败，被启动时序重置），滚动手感与强度需真机滚动复核。KosKineticScroll 与 TEMP contentY 赋值的相互作用未深查（本轮时间闸）。
 - **⚙/↻ 常亮玻璃盘无直接参考**：参考图只出现"选中段才有玻璃圆盘"的分段形态；动作钮（⚙/↻）采用常亮白@0.14 盘系按已验收的侧栏开关钮同族外推（动作钮无"选中"概念，需常显可点），参考图中 Apple 天气的 ⚙/↻ 在菜单栏内不可见。若后续拿到原生参考需复核。
 - **搜索胶囊 rim 峰值强度**：我的 DPR1 渲染 rim 峰值 Δ+53（197 vs 填充顶 144），参考图因 2x 降采样同一条 1px 亮线被抹平到 Δ+18——绝对值不可直接比，liquidStrength=0.2 是按「填充平、暗边消失、rim 可见」折算的近似；若后续拿到原生分辨率参考需重新校准（可能还需更低）。

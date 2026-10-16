@@ -1,3 +1,29 @@
+# R116 — **M04's "other selection" half is FIXED: gray disc, white number, blue ring gone.** One atomic edit (2 hunks, 1 source file), one build, one light leg. Measured after: a **filled gray disc `(142,142,147)` at x 102..116 / y 599..613 — 15x15, byte-identical geometry to the today disc (x 158..172 / y 599..613)** with a **white digit**, and **0 accent `(0,136,255)`-class pixels in the entire mini month**. M04 goes from *1 of 3 halves PASS* to **2 of 3 PASS**; the remaining gap is the today disc's **15 px vs the clause's 18–20** (next round).
+
+**Why this round.** R115 read M04 for the first time and found the clause's failure the harness could witness most plainly: *"other selection"* was a **hollow blue ring with a dim digit**, where the clause — read through its own today sub-clause, which draws a **filled disc + white number** — calls for that same disc **in gray**. Not ruling-blocked; a plain implementation question in the mini-month delegate.
+
+## 本轮 (R116)
+Source: **`apps/calendar/qml/Main.qml`**, two hunks, nothing else.
+1. **New token** — a sibling of `todayRed` in the calendar's own `tahoe` block (next to `selectionFill`, `:81-84`):
+   `readonly property color selectionDisc: "#8E8E93"` — **Apple systemGray**, leg-independent like `todayRed`, and the reason one literal serves both legs: **142 reads Δ86 below the 228 light plane and Δ102 above the 40 dark one.**
+2. **The mini-month day delegate** (`:2233-2260`): `selectionFill` → `selectionDisc` for the fill; **`border.width` / `border.color: accent` deleted outright** (the ring *was* the defect); the digit's colour became `today || selected ? "#FFFFFF" : labelPrimary` — i.e. the selected digit is now the **same white as today's**, where it used to be `accent`.
+
+**Untouched on purpose:** the today disc (still `AppTheme.todayRed`, still 15 px — that is #2 in `state.md`, not this round), the 15x15 geometry, `categoryInset`, the arrows, `opacity: inMonth ? 1 : 0.42`, and every token name the rest of the app reads.
+
+### The verification, measured off `r116-m04-sel-light.png`
+- **Gray disc: x 102..116 (15 px), y 599..613 (15 rows)**, core **`(142,142,147)`** — the literal, unmodified: 67 px of exactly that tone inside the disc box, i.e. a **fill**, not a stroked outline.
+- **Red today disc: x 158..172 (15 px), y 599..613 (15 rows)**, core **`(229,72,77)`**. **Equal on both axes to the pixel** ⇒ M04's *"the same shape"* is satisfied **by construction, not by eye**.
+- **White digit present**: 19 px with `min channel > 235` inside the disc box (the ×6 zoom shows `15` in white on the gray).
+- **The ring is gone**: **0 px** anywhere in the mini month matching accent `(0,136,255)` ±40. (220 px of *bluish* ink do remain in the block, but all of them are **text sub-pixel fringes** on the weekday-header and out-of-month glyphs — none inside the disc box's `(142,142,147)` fill, and none accent-class.)
+- **Grid regression, re-witnessed:** the date bands scan to tops **541 / 561 / 582 / 599..613 / 624 / 645 / 666 / 689** — the header row, then the **same six 9-row bands at the same tops** as R114/R115, with the disc row still merged into a 15-row band by its **4 above / 2 below** overhang. M01/M02/M03 are untouched and still hold.
+- **M04's third half** ("outside-month muted") is **carried from R115's dark-leg measurement** (114 vs 216); on this light leg the two out-of-month rows read visibly lighter in the 1:1 panel, but **no measurement was taken this round** and none is claimed.
+
+### What this round did *not* settle
+- **The today disc is still 15 px.** M04's literal is 18–20 and the reference scaled into our layout is 17.3; **both discs share one `width: 15`, so #2 is now a one-number edit** — but it is the *next* round's step, and this round moved nothing but the colour and the stroke.
+
+## Verdicts
+**M04 "other selection gray" — PASS (R116, light leg).** The clause's three halves now stand at **2 PASS (other selection, outside-month muted) / 1 PASS-in-form-but-under-size (today, 15 vs 18–20)**. **First source change since R109**, first build since R109 — every figure from R109 to R115 came from the R109 binary, and **`r116-m04-sel-light.png` is the first capture of the current build.** 1 source file touched.
+
 # R115 — **M04 read for the first time.** The clause has three halves and the frame settles all three: **today PASSES in form** (solid red disc, white number, byte-for-byte the reference's construction) **but is 15 px where the clause says 18–20**; **"other selection" FAILS** (ours is a hollow **blue** ring with a dim gray digit, the clause says **gray**); **"outside-month muted" PASSES** (114 vs 216). One capture, one figure, **0 source files touched, no build, no relaunch**.
 
 **Why this round.** M04 was the only spec ID in the whole `spec.md` that had **never been read** — every prior M leg used `date 2026-04-02`, whose week (Apr 2026) contains **no today**. `date 2026-10-15` is the launch week: it contains **today = Sat Oct 17** *and* the **selection = Thu Oct 15** (the launch date). **Both states render in the same frame** — the fixture M04 has been missing since R008.

@@ -1,4 +1,39 @@
-# R068 — **Measurement only: the ref's separator *above* the all-day band is 1px (242,242,242), NOT 2px.**
+# R069 — **Weight inversion FIXED. The rule above the all-day band is now lighter than the hour line: (242,242,242) light / (39,39,39) dark.**
+New local token `sectionRule` (`CalendarScheduleView.qml:66-71`); the last `AppTheme.border` consumer in this view (`:249`) now uses it. Width and span untouched — still 1px, still `Layout.fillWidth: true`. Both themes measured exact and uniform over the full 1100px. (2026-10-17)
+
+## 本轮 (R069)
+Atomic step: the standing Next-round #1 — fix the inverted weight of the separator **above** the all-day band.
+One file, one token, one line changed. Build + light capture + dark capture. ~18 Bash calls ≈ 7 min.
+Evidence → `r069-toprule-light.png`, `r069-toprule-dark.png`, `r069-ref-vs-ours-3x.png`.
+
+**The change.** `apps/calendar/qml/CalendarScheduleView.qml`: added `sectionRule` after `allDaySeparator`
+(`:66-71`) — light `#F2F2F2`, dark `Qt.rgba(1,1,1,0.04)`; and `:249` `color: AppTheme.border` → `color: root.sectionRule`.
+`Layout.preferredHeight: 1` and `Layout.fillWidth: true` deliberately unchanged.
+
+**Light, row-mean over x 0..1099 (exact dump at x=600/700/800/900 identical):**
+
+| row | value | what |
+|---|---|---|
+| 154 / 156 | (255,255,255) | field white either side |
+| **155** | **(242,242,242)** | **the separator — target hit exactly, 1px** |
+| 204 / 205 | (217,217,217) | all-day bottom separator, still 2px, unchanged |
+| 206 | (237,237,237) | first hour line, unchanged |
+| 226 | (244,244,244) | half-hour line, unchanged |
+
+**Dark:** y=155 **(39,39,39)** (=30 + 225×0.04, exactly as derived), neighbours the (30,30,30) field; hour line
+206 ≈**59** (white@0.13, unchanged), half-hour 226 **43** (unchanged), all-day separator 204/205 **84**
+(white@0.24, still 2px, unchanged).
+
+**Weight order now matches the ref in both themes.** Ref: top **242** < hour **237** < bottom **217**.
+Ours light: **242 < 237 < 217**. Ours dark: **39 < 59 < 84**. The inversion is gone; the ref's four-weight
+class system now has its fourth member in our tree.
+
+**Visual check (crop `r069-ref-vs-ours-3x.png`, ref band on top, ours below, 3×):** our band's top rule now reads
+as faint as the ref's and the only heavier rule is at the band's bottom — the earlier "darker line above than
+below" impression is no longer there. The crop also re-exposes, unchanged, the A01/E01 gap: our all-day chips are
+**blue-filled pills**; the ref's are **neutral light-grey with a coloured left stripe**. Next unexamined mass.
+
+## R068 — **Measurement only: the ref's separator *above* the all-day band is 1px (242,242,242), NOT 2px.**
 So no code change (per the R067 brief). But the same crop exposes a **weight inversion**: the ref's top boundary is
 its *lightest* rule (242 < its own hour line 237), while ours (223,225,228) is *darker* than our `gridLine` (237).
 That inversion is now the top 仍差 and next round's #1. (2026-10-17)

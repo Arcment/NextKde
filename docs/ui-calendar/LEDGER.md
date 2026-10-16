@@ -1,3 +1,19 @@
+# R082 — **the Thu band-chip order swap is RUN-TO-RUN, not theme-dependent. R080's "light vs dark" reading was confounded by the run.**
+No code changed, no build — three launches of the **same** build, same fixture, same view/date (week of **Mon 2026-03-30**, i.e.
+`view week` + `date 2026-04-02`), each cropped to the Thu column's band and stacked into one x3 composite
+(`r082-thu-band-3legs.png`, x498..656 y150..214). The two chips are the fixture's **two single-day all-day VEVENTs on 2026-04-02**.
+**Result: light1 = `Release notes` r0 / `Design sync` r1; dark1 = `Release notes` r0 / `Design sync` r1; light2 = `Design sync` r0 /
+`Release notes` r1.** So the two **light** launches disagree with each other ⇒ **the swap reproduces without changing theme: it is an
+unstable order, not a dark-mode branch.** The band y-map held **exactly** on all three captures (row0 y157-180, gap y181, row1 y182-205,
+section rule y155 = 242 light / 39 dark, fill (220,236,246) light / (35,65,83) dark) ⇒ the swap is content, not layout.
+**Confirmed numerically**, not by eye: a per-column max-deviation-from-fill profile over x504..648 is **character-identical between
+legs** — light1.r0's profile string equals light2.r1's, and light1.r1's equals light2.r0's. **Mechanism (read, not guessed):** the model
+*does* sort (`Main.qml:1159-1166`: all-day first, then `itemDateTime(left).localeCompare(...)`), then `CalendarScheduleView.qml:136-145`
+`allDayItems()` filters it order-preserving; the two fixture events have **identical `DTSTART;VALUE=DATE:20260402`/`DTEND:...20260403`**
+(UIDs `…r072-allday-a` `Design sync`, `…-b` `Release notes`) ⇒ **the comparator returns 0 and the tie is decided upstream** — and the
+upstream order is neither the file order nor its reverse (light1/dark1 render b,a; light2 renders a,b) ⇒ **nondeterministic upstream
+ordering for equal-start all-day items.** Fix is one deterministic tiebreak in that sort; not attempted this round.
+
 # R081 — **the ref's all-day band chip icon is a 12x12 RING: outer 12, stroke 3, hole 6, inset 3 from the chip's fill on left/top/bottom.**
 Measured on the ref only — **no code changed, no build, nothing was built.** The band chip's ring icon was 仍差 #1 and had never been
 measured, so this round measured it: a x6 `NEAREST` crop of six ref rings plus raw row/column profiles. The ring is **12x12 ref px**

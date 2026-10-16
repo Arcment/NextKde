@@ -1,3 +1,48 @@
+# R058 — **D08 clause 3 `Esc 可关闭` PASSES on the event editor (2 legs): one `escape` closes it from a clean open (<= 250ms) and one `escape` also clears the editor-over-popover stack (a 2nd escape is a no-op). NEW: a LONE popover ignores `escape` — 2 tries over 9s, zero pixel change, and `EventDetailsPopover.qml:15/59/60` is `Popup` + `modal: false` + `CloseOnEscape` with NO `focus:` anywhere** (2026-10-16)
+
+## 本轮 (R058)
+Atomic step: R057's Next #1 = "verify D08 clause 3 `Esc 可关闭` on the dark event editor". Done. No code change,
+**0 build->screenshot loops**. Dark 1100x692, pid **109482** (still the R057 process, "Design review" open on entry).
+
+**Leg 1 - clean editor, no popover.** List = `nativeRecord r058-esc 6000/250` + `escape` -> **24 frames**.
+Frames 0000-0001 (t 0-0.25s) = editor up (dim (55,55,55), save hovered (69,152,204)); **0002 (t 0.5s) = editor gone**;
+0002-0023 byte-stable for 5.5s = day view, **no dim, no card, no popover**. => **PASS, and it is instant: the whole
+teardown fits inside one 250ms sample (no exit animation is observable).**
+
+**Leg 2 - editor opened ON TOP of the popover.** List = `nativeRecord r058-raw 10000/250` + raw `pointer` (672,401)
+move/press/release + `escape` + `escape` -> **39 frames**. Popover up at 0000-0006 (fill (38,38,38), **no dim**);
+**0007 (t~1.7s) = dialog**: dim (55,55,55) already at full while the card is still fading in ((34,39,47) at 450,300),
+settled 0008; **`escape` at t~2.4s -> 0009** = dim already back to (94,94,94) (full off) while the card is ~95% faded
+((31,32,32)); **0010+ = fully clean day view** (Gold-review chip (96,79,35) at y548), with the **2nd `escape`
+(t~3.0s) changing nothing** (0010->0038 identical). => **One `escape` clears the whole stack; there is no "second
+escape" case.** Caveat: the popover box 378..722 x 262..430 sits **entirely inside** the card
+387.6..727.6 x 131.4..511.4, so pixels cannot say whether the 编辑 click had already dismissed the popover.
+Bonus confirmation of the R057 canonical footer: in leg 2's crop 保存 spans screen y **545..577.5** (canonical 548..577, AA).
+
+**Both legs re-confirm 仍差 #1 from both directions**: on ENTER the dim reaches full while the card is still mid-fade;
+on EXIT the dim reaches full-off while the card is still ~95% opaque. The dim is un-animated, the card is not.
+
+**NEW FINDING (P01 family, not D08) - a lone popover does not close on `escape`.** Leg-1's sibling run: popover up
+with **no dialog**; `escape` at t~4.8s and again at t~5.4s -> **frames 0010->0046 identical for 9s**, the popover
+survived both. Source: `EventDetailsPopover.qml:15 Popup`, `:59 modal: false`,
+`:60 closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape`, and the file contains **no `focus:` / `Keys` /
+`activeFocus` at all**. Non-modal + never takes focus => Escape lands on the day view's focus item, so Qt's
+`CloseOnEscape` cannot fire. That is exactly the pattern observed: the same escape mechanism closed the **focused**
+dialog (legs 1+2) and was inert against the **unfocused** popover. **Candidate defect; see Next #1.**
+
+**HARNESS FINDING - `pointerObject detailsEdit` does NOT open the editor.** Popover up, move/press/release at
+t 3.0/3.6/4.2s => **zero** frame change over the next 8s. A **raw `pointer` click at the same button's centre
+(672,401 @1100x692)** opened the editor first try. R057's "detailsEdit resolves even with no popover open" is now
+explained. `detailsEdit` = `EventDetailsPopover.qml:202`. **Use raw coordinates for popover buttons from now on.**
+
+**Discipline: 11 Bash calls (budget 25), 4 image reads, ~10 min.** Two dead ends, both now in 外推: (a) run 2's
+`pointerObject` click was a silent no-op, which cost that run's two escapes their meaning - a *null* frame diff on a
+click must be treated as a suspect instrument, not as evidence; (b) reading frames at 3 sample pixels could not tell
+week from day - **diff bboxes first, sample pixels second.**
+
+Evidence (mirrored to `docs/ui-calendar/`): `_r058-esc-leg1-2x.png` (editor -> gone),
+`_r058-esc-leg2-2x.png` (editor over popover -> clean day view).
+
 # R057 — **dark footer re-measured: 548..577 / 585..614 / 622..651, identical to R056 light (≤1px) ⇒ #B is NOT a theme offset; R055's dark table is exactly 13px high and its "resize lag" retirement of R054 is retracted. #A is dead AND is a MATCH: no ring at open in dark either, and the macOS ref alert has no ring at rest** (2026-10-16)
 
 ## 本轮 (R057)

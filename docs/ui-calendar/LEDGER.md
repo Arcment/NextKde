@@ -1,3 +1,17 @@
+# R079 — E01/E02 step 3: the timed chip's ink is the calendar colour at HALF VALUE (settled by measurement)
+The standing question was whether the ref's dark same-hue chip text is a *translation* of the calendar colour. Read as **ink cores**
+(the extreme glyph cluster, not the AA edge — R078's (99,131,172) was an AA pixel; the blue core is **(26,67,123)**), the answer is the
+simplest possible one: **the ink is the chip's own colour at 1:2 on every channel** — ref red bar (235,76,70) → ink (117,37,34); blue bar
+(59,134,247) → (26,67,123); olive (254,204,0) → (127,102,0). A uniform RGB scale *is* an HSV value scale (`S = (max−min)/max` is
+invariant), so there is **no separate saturation/value mapping to find and no per-colour fudge**. Rule: `ink = c + (pole − c) * 0.5`,
+`pole = dark ? 1 : 0` — half to black in light, half to white in dark. Edit: `CalendarScheduleView.qml` `timedChip`'s Label `color:` →
+a new derived `inkColor`. **Verified by the coverage test** (`t = (fill − pixel)/(fill − ink)` must agree across a pixel's three
+channels, since a pixelSize-9 glyph never reaches full coverage): nine chips, both legs, ±0.05 — light green/gold/blue 0.91·0.91·0.89 /
+0.84·0.86·0.89 / 0.87·0.88·0.85; dark green/gold/blue 0.87·0.88·0.85 / 0.89·0.91·0.81 / 0.88·0.89·0.85. The **hull fails in both
+themes** (light overshoots darkest, dark overshoots brightest) and **two rounds' PNGs are not position-aligned** — both recorded so they
+are not retried. Bars bit-identical to R078 in both legs; fill alpha, `radius: 5`, R077 bar, R078 border deletion and the all-day band
+untouched. Evidence: `r079-ink-light.png`, `r079-ink-dark.png`, `r079-ink-compare.png` (ref blue chip | ours at ×3 NEAREST).
+
 # R078 — **E01/E02 step 2: the timed chip has no border, and the ref says so on the two edges that can prove it.**
 Deleted `timedChip`'s `border.width: 1` + `border.color: withAlpha(itemColor, 0.34)`. **R077 could only read the chip's left
 edge, which abuts the column rule at x=406 and so cannot tell "no border" from "border hidden by the rule".** This round read

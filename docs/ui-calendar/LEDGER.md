@@ -1,3 +1,22 @@
+## R110 — the dark leg of A03 clause (b): the all-day run is continuous on dark too. PASS.
+
+**Source: none.** Verification only — no file changed, no build. The R109 binary was relaunched under the dark theme; the theme is fixed at
+launch, so the dark leg costs a full kill+relaunch and cannot be reached from the light one.
+
+**Evidence (dark, 1100x692, `date 2026-04-02`, sidebar expanded, contentY 240).** The run's fill envelope is **Mon 273 … Wed 626 unbroken** on the
+dark leg too: at both inner joints (`385..393`, `504..512`) every pixel of every band row 157–180 reads the chip fill **`(36,65,84)`** — no
+`(30,30,30)` field, no `(59,59,59)` separator (the dark rule is `white@0.13` over the 30 field). A contiguous-run test agrees: the ink-free rows
+157–164 and 175–180 are each a single interval `274..625`. The outer ends ramp exactly as on light (281→273→281, 618→625→618).
+
+**Fill identity.** `mix(30, accent, 0.32)` back-solves to accent ≈ `(49,139,199)`; R109's light leg (`mix(255, accent, 0.17)`) back-solved to
+`(49,137,196)`. Agreement inside rounding confirms the dark pre-blend starts from the **weekday** field (30, not the weekend's 37) and uses the
+**0.32** alpha — the two inputs a joint-continuity test cannot see.
+
+**Recorded, not claimed.** The weekend columns read a pure `(37,37,37)`, i.e. `allDayBackdrop`'s weekend composite is right; but the fixture's
+Sat/Sun all-day columns are empty, so no weekend *chip* backdrop has been witnessed.
+
+Figure: `r110-a03b-dark-joint.png` (1:1 dark band strip with joint guides above a pair of x6 joint zooms).
+
 ## R109 — A03 clause (b): the all-day run is now continuous. PASS.
 
 **Source.** `apps/calendar/qml/CalendarScheduleView.qml` — three hunks plus one guard:

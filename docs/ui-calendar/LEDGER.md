@@ -1,3 +1,45 @@
+# R070 — **The "all-day band tint" premise was wrong: the reference tints the WEEKEND COLUMNS, not the band.**
+Re-measured on the ref (vertical profiles of empty columns): weekday columns are **255** in band *and* grid, Sat/Sun are **249** in *both*. Implemented the real thing — a weekend section tint over the whole schedule field (band + hour grid, header row excluded). Light measured exact: **249 on Sat/Sun, 255 on weekdays, in both regions.** (2026-10-17)
+
+## 本轮 (R070)
+Atomic step: the standing Next-round #1 ("give the all-day band its section tint"). **Its premise did not survive measurement**, so
+the round implements the ref-anchored fact it was reaching for. One file, one token, one helper, two 5-line additions.
+Build + light capture ≈ 26 Bash calls ≈ 9 min. Evidence → `r070-weekend-tint-light.png`.
+
+**The falsification.** The reference was re-measured column-by-column instead of sampled at one point. Vertical profile of the two
+*empty* columns — Tue (x=440) and Sat (x=770) — from y=124 to y=185:
+`Tue: 124=242, 125=249, 126..181=255, 182=236, 183/184=217, 185=249` ·
+`Sat: 124=242, 125=244, 126..181=249, 182=236, 183/184=217, 185=249`.
+So the band interior is **255 on a weekday column** — white, exactly like the hour grid, not 249. The `249` is the **weekend
+column's field colour**, and it is identical above (band) and below (grid): `<img> Sat y500 = 249, Sun y500 = 249, Mon/Tue/Wed/Thu/Fri y500 = 255`.
+`y=125` is not a tint row at all — it is the **half-strength row of the 242 top boundary** (242→255 blends to 249 over white,
+242→249 blends to 244 over the weekend tint; both consistent with one semi-transparent rule over the local background).
+The earlier "249 weekday / 244 weekend band tint" note (R068) was this same artefact read as a fill.
+
+**No band-only tint exists in the reference.** The day-header row is *not* tinted either (weekend columns read 254 vs weekday 255 there —
+below the noise floor), so the tint starts at the top rule and runs to the bottom of the hour grid.
+
+**The change.** `apps/calendar/qml/CalendarScheduleView.qml`:
+- new `weekendField` — light `#F9F9F9` (249,249,249), dark `Qt.rgba(1,1,1,0.03)` — plus `isWeekendColumn(column)`, which reads
+  `dateForColumn(column).getDay()` and returns true for 0/6. **Date-driven, not position-driven**: our week is Mon-start, so Sat/Sun
+  are the *last two* columns, whereas the ref's Sun-start week has them first and last.
+- a `Rectangle { anchors.fill: parent }` as the **first** child of the all-day band's `allDayColumn` Item (stacks below the chips
+  and below the column separators), and the same as the **first** child of the `hourCell` delegate.
+- the hour-grid one is guarded `hourCell.columnIndex > 0` — column 0 is the gutter and `dateForColumn(-1)` is the *previous*
+  Sunday, which would otherwise have tinted the whole gutter column.
+
+**Measured (light, our 1100x692 capture):** row 180 (inside the band): weekday x=600/700 = **(255,255,255)**,
+weekend x=880/900/1050 = **(249,249,249)** — exact target. Row 400 (empty hour grid): same 255/249 split.
+Full row 180 histogram over x 0..1099: **298 px at 249**, matching the two weekend columns (2 x 149.7 = 299.4) to the pixel.
+The four structural rules are untouched on the tinted column (x=1050): **155=242, 204/205=217 (2px), 206=237** — the tint rect
+sits behind them, as designed. The day-header row is unchanged.
+
+**Eyes** (`r070-weekend-tint-light.png`): 周六 4 / 周日 5 now read as a distinct section from the top rule down to the window floor,
+and the header row above stays white — the band's left edge no longer looks like a cut-off rectangle.
+
+**Not done this round:** the **dark leg** (relaunch + capture). `weekendField` dark is *derived*, not measured —
+`white@0.03` on the (30,30,30) field ≈ 37. **Next round's first job.**
+
 # R069 — **Weight inversion FIXED. The rule above the all-day band is now lighter than the hour line: (242,242,242) light / (39,39,39) dark.**
 New local token `sectionRule` (`CalendarScheduleView.qml:66-71`); the last `AppTheme.border` consumer in this view (`:249`) now uses it. Width and span untouched — still 1px, still `Layout.fillWidth: true`. Both themes measured exact and uniform over the full 1100px. (2026-10-17)
 

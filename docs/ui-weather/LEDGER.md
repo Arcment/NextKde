@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.1（第 1 条）：夜间晴天星星闪烁（本轮，前端）**：`apps/weather/qml/Main.qml:24-27` 新增 `nightClearSky`（夜间+code 0/1）；:43-67 `mulberry32(20261016)` 种子 PRNG 生成 48 星 `starField`（**坐标确定性**：xRatio 均匀、yRatio=pow(r,1.3)*0.75 偏上部、直径 1.2-2.8px、baseOpacity 0.35-0.95、twinkle 2440-7170ms，落在 HIG 环境循环 2-12s 内）；:310-352 `starFieldLayer`（天空渐变之后、RowLayout 之前，visible 跟随 nightClearSky，clip），delegate 白色圆形 Rectangle + `SequentialAnimation on opacity`：随机相位 PauseAnimation（Math.random()*twinkleMs，**每次启动不同**）→ base→base*0.35→base 两段 NumberAnimation（各 twinkleMs/2，InOutSine，Infinite），`running: nightClearSky && !AppTheme.reduceMotion`（reduce-motion 停）。
+  **帧差证据**（活实例 spectacle 连拍，flatten alpha 后）：400ms 间隔 MAE——星区 starL `0.0114/0.0151/0.0094`、starR `0.0176/0.0164/0.0112`，对照 2s 间隔变化像素：星区 48-54 个（maxdiff 122-128）、静止逐小时卡行 **0**（完全静止）、侧栏噪声底 21-24 个稀疏点（maxdiff ≤49）。星区信号 ≈ 噪声底 2 倍计数 / 2.5 倍峰值，判定动效生效。
+  **已知限制**：`--screenshot` 模式 t=650ms 帧差≈0——数据到达→动画起步晚于抓帧（已知限制，见外推待确认）。
 - **侧栏内容溢出 bug 关闭（本轮实测复核，代码沿用 iter 8/9 的 `Layout.minimumWidth: 0`+`implicitWidth: 0`，本轮零改动）**：新截图 1792160140（本轮二进制）Pillow 实测 —— 侧栏右缘 x≈223（宽 224 顶天立地）、城市卡右缘 x≈205、搜索胶囊右缘 x≈205，均在内容列 18..206（224−2×18）内，**无任何裁切**；卡内"25°/H:28° L:20°"完整。此前 list.w=236 的根因确为 ListView 隐式最小宽，已被 iter 8 的 `implicitWidth: 0` 修复。
 - **开关钮几何复核通过（关闭 LEDGER 条目 2）**：截图 1792160140 实测钮体 x 193–219 / y 9–35 → 直径 ~26、距顶 ~9-10、距侧栏右缘 ~4-5，与已改值 26/10/5 吻合。
 - **WeatherIcon 夜间少云画月+云（本轮，前端）**：`apps/weather/qml/WeatherIcon.qml:33-38` code 1/2 分支按 `isDay` 分派（白日 `drawSun(9,9,4.5)` / 夜间 `drawMoon(ctx, 9, 9, 4.5)`），云仍在前不变；`drawMoon` 加 `cx/cy/r` 参数（默认 12/12/6.5，code 0 夜间行为不变），打孔月牙按 `r/6.5` 比例缩放。截图 1792160140 裁片核实 02:00–05:00（夜间少云）为奶油月牙+白云，不再出现太阳。
@@ -26,13 +29,16 @@
 
 ## 仍差（按视觉冲击排序）
 1. **阶段三风格项：功能层（侧栏/工具栏/控件）未做 Liquid Glass 分层**（风格优先于静态微调）：侧栏现为实色面（用户裁定），搜索胶囊有玻璃但主区卡片是标准材质白玻璃——分层本身已符合 HIG，但缺少 specular 边缘高光与细描边；需按 HIG 逐层核对并落 `文件:行`。
-2. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：目前全部为零——环境动效（雨丝/雪/云漂/星闪）、图标 Bounce/Pulse、卡片 hover 玻璃高光、温度曲线 draw-on 均未做。
+2. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：本轮已完成"夜间晴天星星闪烁"（见已改，含帧差证据）。剩余：雨丝下落/雪花飘移/云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、列表入场交错、温度曲线 draw-on。
 3. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 4. Conditions 卡无温度走势曲线。
 5. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
 6. 侧栏只有 1 个城市时卡下方大片空白（参考有多城填满）；无数据可解，仅记录。
 
 ## 外推待确认
+- **星空外观无参考**：参考图只有白天，星点密度/大小/亮度（48 颗、1.2-2.8px、0.35-0.95 透明度、偏上部 75% 高度）按 HIG"环境动效"与常见夜空观感外推，待夜间视觉复核。
+- **帧差噪声底非零**：侧栏（应全静止） spectacle 连拍有 21-24 个稀疏变化点（maxdiff ≤49），疑似合成器对半透明窗口重合成的伪差；星区信号(48-54/maxdiff 122-128)仍明显高于该底，但证据不如"静止区=0"干净。逐小时卡行区域实测=0，可作对照。
+- **`--screenshot` 模式 t=650ms 抓帧时动画尚未推进**（数据到达→nightClearSky 翻转→动画起步晚于抓帧），该模式下帧差验证无效；动效帧差必须用活实例+外部截屏（spectacle）验证。
 - 开关钮直径 26px/距顶 10px/右边距 5px 系按「本项目侧栏 224 ÷ 参考侧栏 207 ≈ 1.08」从 ref-main 实测（23-24/9/5-6）比例折算；参考原始逻辑像素（retina 倍率）不可直接得知，若有出入以观感复核为准。
 - `AppTheme.qml:159` 启动早期 modernDesign 未生效导致 sidebar 246→224 跳变：溢出裁切已随最小宽修复而消除（见已改），但启动瞬间的宽度跳变本身仍存在（是否影响其他 modernDesign 尺寸值待确认；若多处存在启动跳变，应把 modernDesign 判定提前到 AppTheme 加载前）。
 - `kos-language-test` 对环境敏感：需 `EXPECTED_LANGUAGE=zh`（本机 LANG=zh_CN.UTF-8）才绿，缺省跑会 1 failed——环境问题，非代码回归（本轮已核实，`EXPECTED_LANGUAGE=zh` 下 5/5 过）。

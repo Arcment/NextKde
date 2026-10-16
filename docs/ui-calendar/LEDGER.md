@@ -1,3 +1,17 @@
+# R063 — **state.md 的"堵死"前提被推翻**：参考图 `.loop/refs/macos-calendar.png` 是**周视图**（不是月视图），
+A/T/E/N/V 全族 ~30 条 spec ID 从未审过；**T01 判定 FAIL —— 小时高度硬编码 54，合同写 ≈40，参考图实测 27**
+（814x522、1:1，换算到 1100x692 约 36）。纠正两处 state.md 事实错误，把循环重新开在有参考锚点的 T/A/E/N 族上。
+测量轮，无代码改动。 (2026-10-17)
+
+## 本轮 (R063)
+Atomic step = `T01`（"Hour pitch about 40 with half-hour at 20"）。**无代码改动。** 复核：`rounds.md` 对
+`A01–A04/T01–T03/E01–E06/N01/N02/V01–V05/S01/S04/C05/M04/X01/X02/X04–X06` 的提及数**均为 0**，而 `spec.md`
+里它们全是 PENDING ⇒ R062 的 "no unblocked visual work left" 只对 `D`/`O` 族成立。参考图重读为 **Sun 29–Sat 4
+（2026年4月）周视图 + 全天事件带 + 8 AM–7 PM 小时网格 + 红色 `9:41` 当前时刻线**，文字锐利、红绿灯圆点 12px ⇒ **1:1**。
+**小时间距实测 27px**（时间槽标签 193/220/247/274/301/…；红色 `9:41` 胶囊顶掉了 10 AM 标签），即我们窗口下 ≈36。
+**我们实测 53.5px**，源头 `apps/calendar/qml/CalendarScheduleView.qml:120` 的硬编码 `54` ⇒ **FAIL，超 35%**。
+**仍未 `DONE`。** 详见 `tmp/ui-acceptance/calendar/rounds.md` R063 与 `state.md`。
+
 # R062 — **P01 popover title leading tightened 22px → 20px** (1.47em → 1.33em at font 15), dark leg. `detailsTitle`
 (`EventDetailsPopover.qml:115-118`) gained `lineHeightMode: Text.FixedHeight` + `lineHeight: 20`. Measured: 3-line title
 cap-tops **307/329/351 → 320/340/360**; card **284h → 280h** = exactly the predicted −4. **仍差 #6 CLOSED — this was the

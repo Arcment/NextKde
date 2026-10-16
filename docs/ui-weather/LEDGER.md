@@ -4,6 +4,9 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.2：图标 Variable color（太阳光线逐层点亮，本轮，前端）**：`apps/weather/qml/WeatherIcon.qml:6` 加 `import Kos.Ui`；:27 `property real rayGlow: 1.0`（0..1 点亮进度，默认 1 = 静态全亮与旧渲染逐像素一致）+ `onRayGlowChanged: requestPaint()`（Canvas 重绘原语）；:29-34 `playRayLightup()`（AppTheme.reduceMotion 直接 return；否则 rayGlow=0 + restart）+ :35-38 `SequentialAnimation rayAnim`（NumberAnimation rayGlow 0→1，280ms OutCubic，落在 HIG 120–300ms 内）+ :39 `Component.onCompleted: playRayLightup()`（delegate 随数据到达创建时播一次，与 Bounce/入场同触发时机，符合 HIG"避免高频动效"）；:96-108 drawSun 光线循环每根 alpha = clamp(rayGlow*8 − i, 0, 1)（第 i 根在进度过 i/8 时点亮，8 根绕圆逐层点亮）+ `ctx.globalAlpha` 逐根设置、循环后复位 1。10 天行与 code 1/2（云后小太阳无光线）不涉及。
+  **帧差证据**（TEMP 取证后已删并重编译：首卡 TEMP 强制 `code:0/isDay:true` 白日全太阳 + `rayProbe` 1600ms Timer 循环重放 + AQ 卡 TEMP `visible:false` 把逐小时条带从 813px 屏外拉回可视区——均与 pulse 轮同款脚手架）：活实例 spectacle 连拍 9 帧间隔 ~400ms——首卡图标区 (334,565)-(374,605) f2→f3 与 f3→f4 **MAE 0.304 / maxdiff 179 / 变化像素 18**（280ms 动画窗短于 400ms 采样间隔，仅跨动画的帧对有差，符合预期）；同卡温度文字区 (330,610)-(380,628) 与侧栏 (30,300)-(200,420) 七对相邻帧**全部精确 MAE=0.0000 / maxdiff=0**。目视（/tmp/vc-seq.png，9 帧 4x 放大序列）：f3 帧下/左下光线消失而顶/右上仍在——逐层点亮中间态清晰，首尾帧全亮无残留。
+  **终态二进制**（TEMP 已删，截图 1792169055 过体检闸）：AQ 卡恢复显示、图标静态全亮（rayGlow 默认 1）、星空/侧栏/hero/指标卡无回归。测试 6/6 绿、go test ok。
 - **阶段三动效 B.2：图标 Pulse（正在更新，本轮，前端）**：`apps/weather/qml/WeatherIcon.qml:14-22` 新增 `pulse`/`pulseOpacity` 属性 + `opacity: pulse ? pulseOpacity : 1.0` + `onPulseChanged` 归 1 复位 + `SequentialAnimation on pulseOpacity`（Infinite，550ms InOutSine 降到 0.45 → 550ms 回 1，整周期 1100ms 落在 HIG"正在更新"≤1.2s/周期内，纯 QtQuick 无新 import）；`apps/weather/qml/Main.qml:1471`（逐小时卡实例）与 `:1592`（10 天行实例）加 `pulse: backend.loading && !AppTheme.reduceMotion`（reduce-motion 停、非 loading 零渲染，opacity 复位 1 无残留）。
   **帧差证据**（TEMP 取证后已删并重编译：逐小时首卡 `pulse: true`（:1471）+ AQ 卡 `visible: false`（:1192，AQ 卡遮住逐小时条带使其在屏外，TEMP 隐藏后条带升入可视区））：活实例 spectacle 连拍 5 帧间隔 ~400ms——逐小时条带区 (500,576)-(1240,646) 相邻帧 MAE **0.511 / 0.294 / 0.011 / 0.127**（max 53；f2→f3≈0 系 400ms 采样撞上 1100ms 周期同相位，符合周期性）；对照侧栏 (30,200)-(200,420) 四对相邻帧**全部精确 MAE=0.0000 / maxdiff=0**，指标卡区噪声底 MAE 0.005-0.009（信号 ≈ 噪声底 60-100 倍）。目视（/tmp/pulse-crop.png，f0 低谷 vs f2 峰值 3x 放大）：同一 03:00 夜间少云图标低谷相位明显暗淡、峰值相位全亮，文字不动。
   **终态二进制**（TEMP 已删，截图 1792168609 过体检闸）：AQ 卡恢复显示、图标静止 opacity 1、星空/侧栏/hero/指标卡无回归。测试 6/6 绿、go test ok。
@@ -67,7 +70,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升""刷新按钮旋转""图标 Bounce（切换城市/刷新，见已改）"（均见已改，含帧差证据）。剩余：图标 Variable color/Replace、hero 温度视差、温度曲线 draw-on（图标 Pulse（正在更新）已完成，见已改）。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移""多云/雾天云层漂移""雷电闪白""卡片 hover 玻璃高光+抬升""刷新按钮旋转""图标 Bounce（切换城市/刷新，见已改）""图标 Variable color（太阳光线逐层点亮，见已改）"（均见已改，含帧差证据）。剩余：图标 Replace、hero 温度视差、温度曲线 draw-on（图标 Pulse（正在更新）已完成，见已改）。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. ~~Conditions 卡无温度走势曲线~~ **本轮用 Pillow 放大 ref-main Conditions 卡复核（(515,200)-(760,310) 4x + y280-309 逐行采样）：参考卡里没有走势曲线**——只有 时间行/图标行/温度行 + 右上分段玻璃控件，y298-306 的亮像素全是温度文字字形（逐字列断续分布），无任何连续亮带。TASK 阶段三 B.6 虽列了"温度曲线 draw-on"，但与"参考图唯一判据"冲突，**暂停此条，待用户裁定**（裁定要曲线才恢复）。
 4. 缺卡片：~~空气质量~~（**本轮已做**，见已改）/ 风罗盘 / 月相 / UV —— 月相、UV 等仍受后端字段限制，见"外推待确认"。shell 侧 DockWeatherWidget/WeatherPopup 只接了 service 层 `airQuality` 属性，面板 UI 未展示 AQ 读数。
@@ -75,6 +78,8 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **图标 Variable color 参数无参考**：参考图全静态；点亮节奏（rayGlow 0→1 共 280ms OutCubic，8 根光线按 i/8 阈值逐层点亮）、触发时机（delegate 创建即播一次，与 Bounce/入场交错叠加）系按 SF Symbols "Variable color" 词汇与 HIG 120–300ms 外推（TASK 阶段三 D 允许）。只做了白日 code 0 全太阳的 8 根光线；云后小太阳（code 1/2 无光线）与月亮无 Variable color，SF Symbols 原生是对整个字形分层着色，形态近似待人工复核。另外取证时 TEMP 强制首卡为白日太阳——真实数据里白日 code 0 图标只在白天时刻的逐小时卡出现（且当前窗口高度下逐小时条带在 813px 屏外，真机需滚动/全高窗口才能看到），真机观感待复核。
+- **Variable color 与 Bounce/入场叠加**：delegate 创建瞬间同一图标依次经历入场浮入→Bounce 弹跳→光线点亮（onCompleted 同帧 restart），三重叠加是否过闹待人工复核；reduce-motion 下三者全部停用（入场置终态、Bounce 归零、playRayLightup return）。
 - **图标 Pulse 参数无参考**：参考图全静态；脉冲深度（opacity 1→0.45）、节奏（550+550ms InOutSine，整周期 1100ms）、触发门控（`backend.loading`，同时作用于逐小时卡与 10 天行全部图标）系按 SF Symbols "Pulse" 词汇与 HIG"正在更新"≤1.2s/周期外推（TASK 阶段三 D 允许）。真实 `backend.loading` 窗口太短、无法与 spectacle 连拍对时（刷新钮旋转轮同先例），TEMP 强制 `pulse: true` 与真实绑定走同一属性链，QML 标准原语风险低；真实刷新时全部图标同时呼吸的观感（会不会太闹）待人工复核。
 - **Pulse 取证需 TEMP 隐藏 AQ 卡**：AQ 卡加入后逐小时条带被推到 813px 屏幕可视区外（终态截图窗口高 727 的截图模式不受影响），取证时 TEMP `visible:false`；若后续要在真机观察 loading 脉冲，需窗口够高或滚动主区。
 - **AQ 标记点位置线性外推**：参考图 AQI 40 时白点在条 ~8% 处，按 usAqi/300 线性应为 13%——Apple 用的是非线性分段刻度（EPA 分段中点），本轮用线性 /300 近似（usAqi 111 → 37%），无 Apple 原始刻度可对照；若拿到原生参考需改分段定位。

@@ -1,3 +1,24 @@
+# R105 — **L03 PASS, all five clauses**, on the frozen R104 capture. Clause (c) — the one clause never directly measured — is verified, and the reference agrees with it to the same 0.5 px.
+
+**Why this round.** Next #1 from R104: L03 (`spec.md:17`, *"Day/week month segment centered within main region; height 28 and width 180-210"*) is the ID whose control was edited in five of the last eight rounds (R097-R104) and is now frozen. Everything left in 仍差 is ruling-blocked and no rulings channel exists, so the highest-value unblocked step is **verification, not new work**. **No build, no leg, no code change** — the R104 capture was re-measured.
+
+**Clause (c) needed a definition of "main region", and the definition is what the round produced.** Our sidebar's plane ends at **x=220** (px[220,300]=224, px[221,300]=255) ⇒ our main region is **221..1099, centre 660.0**. Our track's rim spans **562..757, centre 659.5** ⇒ **offset −0.5 px = −0.057 % of the region width.** The reference was then measured the same way, and it settles a figure this ledger has carried since R063:
+
+| | sidebar plane ends | main region | region centre | track rim span | rim centre | offset |
+|---|---|---|---|---|---|---|
+| **REF** `macos-calendar.png` | **x = 191** | 192..813 (W 622) | **502.5** | 388..616 (W 229) | **502.0** | **−0.5 px** (−0.080 %) |
+| **OURS** `r104-seg-light.png` | x = 220 | 221..1099 (W 878) | 660.0 | 562..757 (W 196) | 659.5 | **−0.5 px** (−0.057 %) |
+
+**The ref's "243 px sidebar" was a conflation of the sidebar WITH the hour gutter, and it made the ref look mis-centred.** The plane boundary is at **191**; the 237-plane is the sidebar alone, and **192..243 is the white hour gutter** (right-aligned labels ending at x≈242). 243 is where the first *day column* starts — the grid, not the region. Measured against the real region, **the reference's segment is centred to 0.5 px, exactly like ours.** ⇒ a *centred-in-region* comparison is legitimate and (c) is a PASS, not a promotion to 仍差.
+
+**The other four clauses, re-measured on the same capture (not re-litigated — one line each).**
+**(a)** the QML constant is `196` (L03 180-210) and the render agrees: the rim's widest row (y=50) reads **562..757 = W 196 exactly**. **(b)** height **28** — columns x570/x660 both read y36..63. **(d)** the three labels sit at the centres of slots `(562+4)+i·64`: ink at **595.6** (slot 0) and **723.5** (slot 2), with the pill occupying slot 1 → order **Day · Week · Month** per R100. **(e)** the pill (fill 232, span 630..689) is on **Week**, and the leg ran `--view week` ⇒ the pill is on the active view.
+
+**One observation, not a finding.** With this locale the three labels render as the CJK single characters 日/周/月 — `R100`'s order ruling is on the model list and localization renders it; every previous round measured these as ~10-11 px ink runs, which is a single CJK glyph's width, not `Week`'s. **L03 names the segment semantically, so the locale is not one of its clauses** — recorded here only so the next round does not re-derive it as a 4th-word problem.
+
+**Figure.** `docs/ui-calendar/r105-l03-centre-2panel.png` — REF above, OURS below, **each panel rescaled so its own main region is 700 px wide**; blue = the track's rim span, grey = the rim centre, green = the region centre. Both green lines fall within 1 px of x=350.
+
+**Verdict: L03 PASS (5/5). The first ID of the final regression chain is closed.** Next: A01 (ruling-G-blocked on the spec literals vs the measured 1), then T01/T02/T03.
 # R104 — the segment's TRACK radius: `LiquidSegmentedControl.qml:87` `height * 0.38` → **`height * 0.48`** (10.64 → 13.44 on the 28-tall track). **C05's last unblocked *shape* constant — CLOSED.**
 
 **Why this round.** Next #1 from R103: `:87` `0.38` on a 28 track, against the lens's `0.48` on a 24 lens (R101) and against the reference.

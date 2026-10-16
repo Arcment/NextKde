@@ -1,52 +1,22 @@
-## R112 — M01/M02/M03 PASS (light, expanded sidebar; the first mini-month reading at the shipped geometry)
-**Verification only — 0 source files touched, no build, no new leg** (reuses R111's capture). Figure: `r112-m-mini-month.png` — the ref's mini month above ours, both 1:1, guides labelled.
-- **M01** block edges **x12..x208** of a 220 px sidebar => **12 / 12** = the groups' own inset (their ink starts x12); `cellWidth 196/7 = 28.0`, `cellHeight 21.0`, height pinned min = preferred = max; **no scrollbar anywhere in the sidebar**.
-- **M02** arrows byte-identical and mirrored (x24..28 / x192..196, y523..528), **84.0** each side of the centre 110.0, title centre 109.5; **7 equal columns** (28.0 on 6/6), **6 equal rows** (21.0 on 5/5).
-- **M03** `font.pixelSize: 11`; all six bands **9 rows** at the same +0 offset (one baseline); 1- and 2-digit both centred on the column (centre 26.0); `background: null` and no 200..227 run in any row or column.
-- **Calibration:** a pixel run p..q is **[p, q+1)**, centre **(p+q+1)/2** — the inclusive form had produced an impossible 11.5 / 12.5 margin split; the half-open form reproduces `categoryInset` 12/12.
-- **By-products:** our chevrons are 4x5 px where the ref's are 9 px tall (equal to each other, so not a clause failure — an unfiled ref-fidelity gap); the archived "mini month weekend cells 214" did **not** reproduce (pure 228 across, Sat/Sun included) — 214 is the selection disc's rim.
+# R112 — **M01, M02 and M03 PASS**, re-read on the current build at the EXPANDED sidebar geometry — the first mini-month reading ever taken at the geometry the app ships. The mini month is the sidebar's last child, below the groups and on the *same* `categoryInset` they use (block edges **x12..x208** in a **220** px sidebar => **12 / 12**, and the group rows' ink also starts at **x12**); it cannot be compressed (`cellWidth 196/7 = 28.0` and `cellHeight 21.0`, both exact => pitch **28.0 on 6/6** columns and **21.0 on 5/5** rows; height pinned min = preferred = max; **and the sidebar carries no scrollbar at all**); its two arrows are **byte-identical mirrored ink boxes** (4x5 at **x24..28 y523..528** and **x192..196 y523..528**, **84.0** each side of the sidebar centre **110.0**) with the title between them (ink centre **109.5**); it draws **7 equal columns** (28.0, identical in all six date rows *and* in the weekday header) and **6 equal date rows** (21.0); the dates are `font.pixelSize: 11` on **one baseline** (every band exactly **9 rows** at the same +0 offset: 561..569 / 582..590 / ... / 666..674); 1- and 2-digit numbers are **both centred on the column** (12 px ink box 20..31 vs 6 px 23..28, both centre **26.0**); and there is **no cell border anywhere** (`background: null`; no row *or* column in y505..690 carries a >100 px run of any 200..227 tone — between bands the field is **216/216 px of pure (228,228,228)**).
 
-# R111 — **T01, T02 and T03 PASS on a fresh light leg.** R109's band work did not disturb the grid's three rules. Hour rules `(237,237,237)` and half-hour rules `(244,244,244)` land on *exactly one* row each at pitch **20/20**; the hour pitch is **40.0** across 11 consecutive intervals with `contentHeight 960` = 24x40; the tone ordering **242 < 237 < 217** holds; every tone is neutral `R=G=B`, so `gridLine` has not drifted to the blue-tinted `AppTheme.border`; and every gutter label's 9-row band centres **exactly on its own tick**, right-aligned with a **gap of 8** to the grid line at x272.
+**Why this round.** M01/M02/M03 were "PASS R008 + final regression due", R109 rebuilt the binary, and — the real gap — **the sidebar was never expanded in any mini-calendar reading**, so the mini month had only ever been seen at R008's 760x540 collapsed geometry. This round is the re-read at the shipped geometry: **0 source files touched, no build, and no new leg** — it reuses R111's light capture (same build, no source change since).
 
-**Why this round.** T01/T02/T03 were PASS-pending-final-regression from R064-R066 — and R109 rebuilt the binary, so every figure that witnessed them predates the opaque all-day fill. This round is the re-read on the current build: **0 source files touched, no build**, one kill+relaunch to the light theme, one capture, one read.
-
-**T01 — the pitch.** A gutter ink scan over x222..272 gives label bands at y270-278, 310-318, 350-358, ... 670-678. Their centres are **274.0 / 314.0 / 354.0 / 394.0 / 434.0 / 474.0 / 514.0 / 554.0 / 594.0 / 634.0 / 674.0** — **11/11 diffs of exactly 40.0**. The rule profile at x274 (the first day column's bare left edge) alternates **237 at 234/274/314/354/.../674** and **244 at 254/294/334/.../654** — hour-to-half and half-to-hour both **20.0**. The harness logs `contentHeight 960` = 24x40. The hour rules span **x272..x1099**, from the grid's left edge to the window's *last* pixel: the grid is not clipped short on the right, and the viewport's bottom (y691 = 234+458) is grid content.
-
-**T02 — the rules.** `sectionRule` y155 = `(242,242,242)`; `allDaySeparator` y232-233 = `(217,217,217)`, 2 px; grid top rule y234 = `(237,237,237)`; in-grid hour `(237,237,237)` / half-hour `(244,244,244)`. All four are neutral, so the ordering **242 < 237 < 217** is the ref's and no rule has picked up the blue-tinted `AppTheme.border` (which renders 223/225/228 and would invert it). **Nothing stacks:** the profile y272..278 at x276 is non-white on **y274 alone** — one row per boundary, so R065's 2 px `(223,225,228)` defect has not returned. The day/gutter separators are **1 px 237** at **272/391/510/629/748/867** (pitch 119), and chips still paint above the lines.
-
-**T03 — the labels.** Each label band is **9 rows** (font 11) and its centre sits **exactly on its own tick** — e.g. the 07:00 band is y270..278, centre **274.0**, and the hour rule is at y274. Ink runs **x238..264**, so the right gap to the grid line at x272 is **8** — inside the contract's 6-8, and identical to R066's collapsed-leg reading (ink 44, line 52).
-
-**By-products, and one artifact of the leg.** In a rule row the only non-white pixels left of x272 are the label's own ink: **the rules do not cross the gutter**. And at `contentY 240` the topmost visible label is hour 6, whose 9-row band would be y230..238 — the rows above y234 are outside the scroll viewport, so the capture shows **234..238** and the visible band's centre reads 2 px late. That is clipping, not misalignment: the clipped band's ink x-extent is **identical (238..264)** to its siblings, and the full band's centre (234) is the tick.
-
-**Verdicts.** T01 **PASS**, T02 **PASS**, T03 **PASS**. The T dark leg's tones (`gridLine` 59 / `gridLineMinor` 43) were read R065 and are **not** re-witnessed since R109's rebuild — one dark leg is owed before T is called final-regressed.
-
-**Artifacts.** `docs/ui-calendar/r111-t-rules-3panel.png` — a 1:1 strip (x221..1100, y146..300) with colour-coded guides drawn in the empty gutter, above an x6 contrast-stretched rule stack, an x6 honest junction zoom, and an x6 honest label zoom, over a stacked caption block.
-
-# R110 — **A03 IS PASS ON BOTH LEGS. The dark leg's two inner joints read the chip fill `(36,65,84)` on every pixel of every band row — no field tone `(30,30,30)`, no rule tone `(59,59,59)` — and band rows 157–164 / 175–180 form a SINGLE contiguous fill interval `274 … 625`, so the run is one bar on dark exactly as it is on light. The dark leg's two unknowns are both settled: the weekday backdrop the pre-blend starts from is **30**, not the weekend's 37, and the alpha is **0.32**.**
-
-**Why this round.** R109 closed clause (b) on the light leg but shipped two dark-leg code paths it could not read: `allDayBackdrop`'s weekend branch composites a *translucent* `weekendField` (`white@0.03`), and the chip's alpha is `0.32` on the dark leg against `0.17` on light. If the pre-blend started from the wrong field, or used the wrong alpha, every dark chip would be a wrong absolute colour even though the joint still read continuous. This round is the read.
-
-| A03 clause | dark leg (R110, measured) | verdict |
+| | measured on `r111-t-rules-light.png` (light, 1100x692, expanded sidebar, `date 2026-04-02`, `contentY 240`) | verdict |
 |---|---|---|
-| **(a) only outer corners rounded** | the run's fill envelope ramps **281@157 → 273@165–172 → 281@180** on the left and **618@157 → 625@165–172 → 618@180** on the right — the same corner ramp as R109's light reading (radius 8) | **PASS** |
-| **(b) visually continuous** | at joint 1 (`385..393`) and joint 2 (`504..512`) every pixel of **every** band row 157–180 = **`(36,65,84)`**. **Zero `(30,30,30)` field. Zero `(59,59,59)` rule.** The ink-free rows 157–164 and 175–180 are a single *contiguous* interval `274..625` | **PASS** |
-| **fill identity** | measured `(36,65,84)`; predicted `mix(field 30, accent, 0.32)`. Back-solving gives accent ≈ `(49,139,199)` against the light leg's `(49,137,196)` — two legs, two alphas, two backdrops, agreeing within rounding. **A wrong backdrop (37) would read `(41,70,89)`; the old light alpha (0.17) would read `(33,49,59)`.** Both are excluded | **PASS** |
+| **M01** | the mini block = the sidebar's last child, below Calendars/Task lists (last group ink y397 -> title band y519); block edges **x12..x208** of a 220 px sidebar => **12 / 12**, the same inset the groups use (their ink starts **x12**); `cellWidth = 196/7 = 28.0` and `cellHeight = 21.0` both exact => nothing is squeezed; **no scrollbar in the sidebar at all** (x211..219 pure 228 at y100/300/500/650) => the category list does not overflow onto the block | **PASS** |
+| **M02** | arrows **byte-identical and mirrored**: left ink x24..28 y523..528, right ink x192..196 y523..528 => **84.0** either side of the sidebar centre **110.0**; title ink 78..141 centre **109.5** (0.5 = the conventional rounding); column centres **26.0 + 28.0i** => **28.0 on 6/6**; row band tops **561 + 21.0i** => **21.0 on 5/5** | **PASS** |
+| **M03** | `font.pixelSize: 11` (in 10-11); each of the six bands is **9 rows at the same +0 offset** (561..569 ... 666..674) => one baseline; 2-digit ink **12 px** (20..31) and 1-digit **6 px** (23..28) both give centre **26.0** => the single digit is *centred on the column*, not left-aligned to the 2-digit box; `background: null` and **no >100 px run of any 200..227 tone in any row or column** of y505..690 | **PASS** |
 
-## ## 本轮 (R110)
-Atomic step: **the dark leg of A03 clause (b)** — **0 source files touched, no build**, one kill+relaunch to the dark theme, one capture. Files: `docs/ui-calendar/r110-a03b-dark-joint.png` (new figure), `docs/ui-calendar/LEDGER.md`, + this file and `rounds.md`. **Also read on the same capture: the weekend columns are pure `(37,37,37)` at (1000,300) and (900,600), so `allDayBackdrop`'s weekend composite resolves to the documented ~37 — but no weekend all-day CHIP exists in the fixture, so a weekend chip's fill stays unwitnessed.**
-## ## Archive — R109 (完整细节见 rounds.md 尾部)
-Atomic step: **A03 clause (b), light leg** — the chip's fill became an OPAQUE pre-blend (`AppTheme.mix(backdrop, itemColor, a)`) and the reach became `allDayJointOverlap: 4` on `Layout.leftMargin`, gated on `allDayColumn.index > 0`. Light joints read `(220,235,245)` on every band row; the guard proved invisible (max 1/255).
-Atomic step: **A03 clause (b)** — 3 hunks in `apps/calendar/qml/CalendarScheduleView.qml` (a local `scheduleField` token + `allDayBackdrop()` function, an `allDayJointOverlap: 4` token, the chip delegate's `Layout.leftMargin` + `color`) plus a 4th one-line guard (the reach is gated on `allDayColumn.index > 0`). **2 builds, 2 launches, 2 captures.** Second capture differs from the first by **max 1/255** (AA only) ⇒ the guard is a no-op on this fixture, as predicted — **Mon is column 0 and `continuesLeft` is false there.** Files: `docs/ui-calendar/r109-a03-joint-2panel.png` (new figure), `docs/ui-calendar/LEDGER.md`, + this file and `rounds.md`.
-## ## Archive — R108 (完整细节见 rounds.md 尾部)
-Atomic step: **A03 measured on the R106 capture** — clause (a) PASS witnessed on both inner joints; clause (b) OPEN at a 3 px light break; the negative-margin fix was built, launched, captured, and **reverted on its own evidence** (191 seam vs 220 fill).
-## ## Archive — R107
-Atomic step: **A02 re-verification** — 0 source files touched, no build, no leg. A02 3/3 PASS.
-## ## Archive — R106
-Atomic step: **A01 clause (a), the band's minimum height** — `allDayBandRows` → content-derived `clamp(contentRows,1,3)`. Band 76 → **26** on an all-day-empty week; **76 byte-identical** on the 3-row week.
-## ## Archive — R105
-Atomic step: **measure, then record L03 PASS** — no build, no leg, no source file touched. L03 5/5.
+## 本轮 (R112)
+Atomic step: **re-verify M01/M02/M03 on the current build** — 0 source files touched, **no build**, **no new leg** (R111's light capture is the same binary). Files: `docs/ui-calendar/r112-m-mini-month.png` (new figure: the ref's mini month above ours, both 1:1, guides labelled), `docs/ui-calendar/LEDGER.md`, + this file and `rounds.md`.
+**One calibration was needed to get the margins right, and it is load-bearing.** A run of ink pixels **p..q spans the continuous interval [p, q+1)**, so its centre is **(p+q+1)/2**. The inclusive form `(p+q)/2` gave centres 25.5/.../193.5 and margins **11.5 / 12.5** — an asymmetry that is *impossible*, because both margins are literally the same property (`root.tahoe.categoryInset`, `Main.qml:2122-2123`). With `(p+q+1)/2` the same pixels give centres **26.0 + 28.0i** and margins **12 / 12**, reproducing `categoryInset` exactly. **The source broke the tie: use the half-open interval.**
+**Three by-products read on the same capture (recorded, not claimed as clauses).** (i) **Our month chevrons are much smaller than the ref's** — ours 4x5 px of ink, the ref's 9 px tall on *both* arrows; M02 asks only for *equal* arrows, which holds, so this is an unfiled ref-fidelity gap, not a clause failure (now 仍差 #7). (ii) The selection disc on Apr 2 is a 15x15 `selectionFill` disc with its number in `tahoe.accent` and a 1 px border — the M04 surface, untouched this round (no *today* is on screen: now = 2026-10-17, the strip week is April). (iii) **The archived note "the mini month's weekend cells (214,214,215)" did NOT reproduce**: on this light leg the rows between digit bands are **216/216 px of pure (228,228,228) all the way across, Sat/Sun included**. The (214,214,215) first caught in the disc's box is the **selection disc's own antialiased rim** (4-9 px per row), not a weekend cell fill.
 
-## 仍差 (top 6, visual-impact order) — **all six are ruling-blocked**
+## Archive — R110 .. R102
+R110 dark leg of A03(b) PASS; R109 A03(b) light + opaque pre-blend + `allDayJointOverlap: 4`; R108 A03(a) + a reverted margin fix; R107 A02 3/3; R106 A01(a) band floor 26; R105 L03 5/5; R104 C05 radius 0.48; R103 slot pitch is a spec literal; R102 C05 pill width. **Full text: `rounds.md` tail (append-only).**
+
+## 仍差 (top 7, visual-impact order) — **items 1-6 are ruling-blocked; #7 is not**
 1. **The ref's segment carries a 4th word — `Year` — and we have three with no year view.** L03 specifies exactly three, so **three is
    spec-correct**; adding a view is not an atomic step. Ref word centres **418/474/530/586, pitch 56.0**; ours **595/660/723, pitch 64.0**
    (`(W−4)/n` both; 196 is L03's midpoint). **Blocked on a ruling.**
@@ -61,31 +31,37 @@ Atomic step: **measure, then record L03 PASS** — no build, no leg, no source f
 5. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. App-wide. **Needs ruling B.**
 6. **Month day cell `slice(0, 2)` — 1 chip + `N` where the ref stacks 3.** **Needs ruling D — and a 3-all-day-item *month* day** before it can be
    reproduced at all. **The only remaining `slice(0, 2)` with a content cap** (`:689` is the grid hour cell).
-- **CLOSED in R110: the DARK LEG OF A03(b).** Both dark joints read the chip fill on every band row; the ink-free rows are one interval. **A03 clause (b) is now PASS on both legs.**
-- **CLOSED in R109: A03 clause (b).** Both inner joints read the chip fill across the run; clause (a) re-witnessed on the same capture. **A03 is now PASS on both clauses.**
-- **CLOSED in R107: A02 — all three clauses PASS.** (a) expansion witnessed (**+25/row**); (b) the band's bottom edge *is* the grid's top edge; (c) 217 vs 242/237/244.
-- **CLOSED in R106: A01 clause (a) — the band's MINIMUM height.** 1 row = **26 px**. A01 = PASS-pending-ruling-G.
-- **CLOSED in R105: L03 — ALL FIVE CLAUSES PASS.**
-- **CLOSED in R104: C05's TRACK RADIUS** — `:87` `0.38` → `0.48`. ⇒ C05 spec-complete but for the label COUNT (ruling-blocked) and the pointer half (undrivable).
-- **CLOSED in R103: 仍差's pitch question — the slot PITCH is spec-mandated.** `Main.qml:178` `196` stays.
-- **CLOSED in R102/R101/R100/R099: the pill's padding and radius, L03's label ORDER, C05's label token.** **R098: C05's dark leg, R097: clause 1's chrome.**
+7. **Our month chevrons are 4x5 px of ink where the ref's are 9 px tall** (both arrows, read at 1:1, R112). M02 demands only *equal* arrows — satisfied — so **this is not a clause failure, it is an unfiled ref-fidelity gap**. **Not ruling-blocked:** it is a plain glyph-size question on the two 28x28 `KosToolButton`s in `Main.qml`'s `miniCalendarHeading`.
+- **ALL CLOSED:** T01/T02/T03 (R111) · A03 on **both clauses and both legs** (R109/R110) · A02 3/3 (R107) · A01 but for G (R106) · L03 5/5 (R105) · C05 but for its two blocked halves (R104) · C05's pitch question (R103) · the pill's padding+radius, L03's label order, C05's label token (R102-R099) · C05's dark leg (R098) · clause 1's chrome (R097). **Full text: `rounds.md` tail.**
 - *(archived to rounds.md tail: R096 S04 verdict, R095 weekday-header tick, R094 size, R093 colour, R092 dark-leg verdict, R091 timeline trigger, R108's band measurements.)*
 
-## ## 最近已改 (most recent 8)
-0. R110 — **verification only**: the dark leg of A03(b). 0 source files touched, no build. Figure `r110-a03b-dark-joint.png`.
-1. R109 — **A03(b)**: `CalendarScheduleView.qml` — new `scheduleField` token + `allDayBackdrop()`, new `allDayJointOverlap: 4`, chip `color` →
-   `AppTheme.mix(backdrop, itemColor, a)`, chip `Layout.leftMargin` → `-4` when continuing with a column to its left, Label leftMargin compensated.
-   Figure `r109-a03-joint-2panel.png`.
-2. R108 — **A03 measured; 1 hunk written and REVERTED**: the chip delegate's negative `Layout` margins failed on their own evidence and the tree
-   was rebuilt unchanged. Figures `r108-a03-bandform-2panel.png`, `r108-a03-joint-before-after-x10.png`.
-3. R107 — **verification only**: A02 re-verified 3/3 on the R106 capture pair; figure `r107-a02-shared-edge-3panel.png`.
-4. R106 — **A01's clause (a)**: the band's row count is now content-derived (one-row floor, A04's 3-row cap). **76 byte-identical** on the 3-row week.
-5. R105 — **L03 PASS 5/5** (verification only).
-6. R104 — **C05's segment TRACK RADIUS**: `LiquidSegmentedControl.qml:87` `height * 0.38` → **`height * 0.48`**.
-7. R103 — **verdict only**: the slot PITCH is a **spec literal** (L03 180-210). Figure `r103-seg-pitch-2panel.png`.
-8. R102 — **C05's pill WIDTH**: `:117` `2 +` → **`4 +`**, `:119` → `segmentWidth - 4`. Pill 64 → 60.
+## ## 最近已改 (most recent 8)  [R112 appended; R104 archived to rounds.md]
+0. R112 — **verification only**: M01/M02/M03 re-read on R111's light capture at the **expanded** geometry. 0 source files touched, no build, no leg. Figure `r112-m-mini-month.png` (ref above / ours below, guides labelled).
+1. R111 — **verification only**: T01/T02/T03 on a fresh light leg. Figure `r111-t-rules-3panel.png`.
+2. R110 — **verification only**: the dark leg of A03(b). Figure `r110-a03b-dark-joint.png`.
+3. R109 — **A03(b)**: `CalendarScheduleView.qml` — `scheduleField` token + `allDayBackdrop()`, `allDayJointOverlap: 4`, the chip's opaque `mix(backdrop, itemColor, a)` fill, `Layout.leftMargin: -4` when continuing with a column to its left.
+4. R108 — **A03 measured; 1 hunk written and REVERTED** (the chip delegate's negative `Layout` margins failed on their own evidence).
+5. R107 — **verification only**: A02 re-verified 3/3; figure `r107-a02-shared-edge-3panel.png`.
+6. R106 — **A01's clause (a)**: the band's row count is now content-derived (one-row floor, A04's 3-row cap).
+7. R105 — **L03 PASS 5/5** (verification only).
 
 ## 外推待确认 (live only — older live items are archived to rounds.md tail)
+- **A PIXEL RUN p..q IS THE HALF-OPEN INTERVAL [p, q+1) — ITS CENTRE IS (p+q+1)/2 (R112, load-bearing calibration).** The inclusive form `(p+q)/2` shifts every centre 0.5 px left; on the mini month it produced margins **11.5 / 12.5** where the layout can only have equal ones (`Main.qml:2122-2123` sets the *same* `categoryInset` on both sides). The source broke the tie, and the half-open form then reproduced `categoryInset` = **12 / 12** exactly. **Corollary (the project's own R066/R111 convention): a GAP written as `line - last_ink_pixel` ("ink 44, line 52 => gap 8") is the inclusive form and reads 1 larger than the continuous gap.** Mixing the two forms is a 1 px error — so state which form a gap came from.
+- **A RULE ROW'S GUTTER SEGMENT IS THE LABEL, NEVER A LINE (R111, load-bearing).** The hour/half-hour rules span **x272..x1099** only — the grid's
+  left edge to the window's last pixel. In a rule row the only non-white pixels left of x272 are the gutter label's own ink (`238..264`). => **"does the
+  rule reach across the gutter?" must be scanned right of the label ink, never by a whole-row `!= white` test.**
+- **A CLIPPED LABEL BAND IS STILL AN ALIGNMENT READING IF ITS INK X-EXTENT MATCHES ITS SIBLINGS (R111).** The topmost visible label is clipped by the
+  scroll viewport (visible 234..238 of a 230..238 band), so its visible-band *centre* reads 2 px late. Judge alignment on unclipped bands, or on the
+  clipped band's **identical ink x-extent**.
+- **THE HOUR LABELS SCROLL WITH THE GRID (R111, load-bearing).** At `contentY 240` (= 6x40) the top tick is hour 6 at screen y234 and the label bands sit
+  at 274/314/.../674 — a gutter scan must be indexed by **tick**, not by absolute hour. The y-map **above** the grid (155 / 156..231 / 232-233 / 234) is
+  fixed and does not scroll; only the grid's own rules and labels move.
+- **EXPANDED-SIDEBAR T03 GEOMETRY, MEASURED (R111).** Gutter **221..272**; label ink **x238..264**, right gap **8** to the grid line at 272 — the same 8
+  as the collapsed leg's R066 reading (ink 44, line 52). Separators **1 px 237** at **272/391/510/629/748/867** (**pitch 119**); weekend tint **249**
+  right of the x867 separator. Label band = **9 rows**, font 11.
+- **T01/T02/T03 ARE PASS ON THE CURRENT BUILD, LIGHT LEG (R111).** Pitch 40.0/20.0, `contentHeight 960`, tones 237/244, ordering 242 < 237 < 217, label
+  centres on ticks with gap 8. **The dark leg's 59/43 tones were read R065 and are NOT re-witnessed since R109's rebuild — one dark leg is owed before
+  T can be called final-regressed.**
 - **AN OPAQUE PRE-BLEND MUST RESOLVE THE WEEKEND TINT FIRST (R109, load-bearing).** `weekendField`'s dark leg is `white@0.03` — **translucent** — so
   feeding it to `mix()`/`withAlpha()` drops its alpha and the blend starts from the untinted field. `allDayBackdrop()` composites it explicitly:
   dark ⇒ `mix(field, white, 0.03)` ≈ **37**; light `#F9F9F9` is already opaque so it passes through. **R110 read the weekend FIELD on dark: pure
@@ -139,17 +115,8 @@ Atomic step: **measure, then record L03 PASS** — no build, no leg, no source f
 - **THE REFERENCE'S SEGMENTED CONTROL AND OURS SHARE ONE RADIUS TOKEN (R101–R104).** Ref lens **r ≈ 11.5 on h 24 (0.48)**; ref track **r ≈ 13.4–13.5**; ours **0.48 on both**.
 - **A RADIUS IS MEASURED 1:1 AGAINST A SAME-HEIGHT ELEMENT, AND THE METHOD MUST RECOVER A KNOWN TOKEN FIRST (R101, load-bearing).**
   **threshold = the midpoint of THAT IMAGE's own two constants**; **only when the profile is monotone across the edge. R104: prefer the *within-image* track-vs-lens profile.**
-- **THE REFERENCE'S SEGMENTED CONTROL HAS **ONE** LABEL INK (R099, load-bearing).** **`n<100` discriminates an ink *token* difference from an AA-coverage difference.**
-- **A PUBLISHED INDEX CONTRACT IS MIRRORED IN THE PRESENTATION, NEVER REDEFINED (R100).** `viewIndex` (0=month/1=week/2=day) has five consumers.
-- **A SEGMENT FILL IS THE MODE OVER ITS BODY ROWS, NEVER THE TOP ROW (R098).** **R101: the lens's 1px white@16% border makes the DARK leg measure 2 px wider (62 vs 60) — a capture comparison must state its leg.**
-- **A TRANSLUCENT FILL CANNOT REACH AN ABSOLUTE VALUE WHEN A SHADOW SITS UNDER IT (R097).** Reachable range **[120, 227]** on white.
-- **A SHARED CONTROL'S PALETTE IS THE ONLY THING A HOST CAN DIVERGE ON (R097–R099).**
-- **R096 (compressed): THE REF'S SIDEBAR IS A VIBRANCY MATERIAL — ITS ABSOLUTE GREYS DO NOT TRANSFER** (compare ΔL only), and **A RADIUS IS THE PER-ROW FILL-START INSET**.
-- **THE HARNESS HAS NO POINTER-MOVE ACTION (R096).** `captureClient{path}` / `escape` / `resize{width,height}` / `sidebar{expanded}` / `view{view}` /
   `date{date}` / `position{contentY}` / `wheel{angleY}` / `flick{velocity,cancelFirst}` / `stop` / `openItem{kind,titleContains}`.
   ⇒ **`hovered`/`pressed` chrome cannot be driven**; **a static screenshot can never settle an animation.**
-- **THE APP LAUNCHES WITH THE SIDEBAR COLLAPSED (R093).** `{"action":"sidebar","expanded":true}` must be in the drive list.
-- **A LEG'S `contentY` IS A FIRST-CLASS INSTRUMENT — PUT `{"action":"stop"}` AT THE END OF THE DRIVE LIST (R091).** **R109's leg read `contentY 240 width 885 height 458 contentHeight 960`.**
 - **A WHOLE-PAGE `ImageChops.difference` WITH A PER-ROW DIFF COUNT IS STILL THE CHEAPEST CONTAINMENT PROOF (R088).** Threshold **>6 RGB-sum**.
   **R109 used it to prove the `index > 0` guard is invisible: two captures differ by max 1/255 across the whole page.**
 - **NEVER SCALE A REF *TYPE* ELEMENT BY THE WINDOW RATIO — FIND A SAME-CLASS INK IN BOTH IMAGES FIRST (R086).**
@@ -250,17 +217,17 @@ Atomic step: **measure, then record L03 PASS** — no build, no leg, no source f
 - **A WIDE, SHALLOW CROP CANNOT BE READ AT ×5+ (R107).** **Crop to the feature (≤30 rows) and anchor on the feature.**
 
 ## ## Next round (pick ONLY #1)
-**#1 — T01/T02/T03, the grid's three rules, re-verified on a fresh LIGHT leg against the ref's measured tones.** The chain's next unverified block, and the cheapest: T01/T02/T03 are **PASS-pending-final-regression**, and the binary was rebuilt at R109, so every pre-R109 screenshot predates the opaque band fill. **Procedure: one kill+relaunch with `start-review-vm.sh light`, the same drive list (`resize 1100x692` / `sidebar expanded` / `view week` / `date 2026-04-02` / `position 240` / `captureClient` / `stop`), then read five tones on the SAME capture: `sectionRule` y=155 = **242**; `allDaySeparator` 232-233 = **217**; grid top rule 234 = **237**; `gridLine` **237**; `gridLineMinor` **244**. The requirement is the ORDERING **242 < 237 < 217** light — and `gridLine` must not have drifted to `AppTheme.border` (blue-tinted, renders 223/225/228, which inverts the order).** **Fix nothing this round unless a tone is off — this is a read.**
-**Then:** the chain in spec order — **M01-M03**, S02/S03/S05, C01-C04/C06, E01/E02 (clauses 1+2+3 PASS), **L01-L07** (L03 done R105).
-**A03 done on BOTH clauses and BOTH legs (R108 (a), R109 (b)-light, R110 (b)-dark). A01 done but for G (R106); A02 done (R107).**
-
+**#1 — the T DARK LEG (owed, cheap, the last thing T is missing).** `gridLine` 59 / `gridLineMinor` 43 were measured at **R065**, *before* R109 rebuilt the binary ⇒ **one dark kill+relaunch closes T on both legs.** Re-read exactly R111's T01/T02/T03 rows on the dark capture: pitch 40/20, tones 59/43 one row each, ordering **39 < 59 < 84**, every label band centred on its own tick, gap 8. **Verification only — fix nothing unless a clause is demonstrably off.**
+**#2 — M01-M03's dark leg is NOT read** (this round closed the light leg only). Cheap to fold into #1's dark leg if the mini month is legible there (sidebar plane dark 30, weekend field 37 per R110) — but #1 is the atomic step, so only take it if it costs no extra capture.
+**Then:** the chain in spec order — **S02/S03/S05, C01-C04/C06, E01/E02** (clauses 1+2+3 PASS), **L01-L07** (L03 done R105).
+**T01/T02/T03 done R111 (light). M01/M02/M03 done R112 (light). A03 done BOTH clauses and BOTH legs (R108-R110). A01 done but for G (R106); A02 done (R107).**
 **Blocked / open on rulings A-H:** the **band icon (H, R081)**, dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses 1+2 PASS R048), month
 `slice(0,2)` (D), **F = 12-hour two-tone gutter labels**, **G = A01's spec literals (gap 2, inset 2-3) vs the ref's measured 1**, **and a 4th `Year` segment**. **No rulings channel
 exists anywhere in the tree.**
 **`code-writer` is STILL not registered in this session (do not retry it each round).** R097 used `general-purpose` as the stand-in implementer; **R098-R110 were done inline.**
 **The binary was rebuilt at R109 (the guarded version) and every figure from R109 on comes from THAT build; any pre-R109 screenshot predates the opaque fill, so re-run a leg before comparing.**
 **Not `DONE` — all spec IDs do not pass.** (**L03 PASS R105 5/5; A02 PASS 3/3 R107; A03 PASS both clauses, both legs (R108/R109/R110).
-T01/T02/T03 and **A01** PASS-pending-final-regression **with clause (a) measured R106**; **A04** fully PASS (+2 row re-verified mid-band R106);
+**T01/T02/T03 PASS on a fresh light leg (R111); M01/M02/M03 PASS on the light leg at the expanded geometry (R112)**; **A01** PASS-pending-final-regression with clause (a) measured R106; **A04** fully PASS (+2 row re-verified mid-band R106);
 **E01/E02** clauses 1+2+3 PASS and the band ink PASS (R080); **N02 closed on both legs (R085)**; **A02/A03/A04 M04 closed R093 + R094**;
-**M03/M02/M01/S02/S03/S05/L01-L07/C01-C04/C06 PASS-pending-final-regression**; **S01 + S04 MEASURED R096**;
+**S02/S03/S05/L01-L07/C01-C04/C06 PASS-pending-final-regression**; **S01 + S04 MEASURED R096**;
 **C05 — what remains is the pointer half (no harness action drives it) and the label COUNT (ruling-blocked)**.)

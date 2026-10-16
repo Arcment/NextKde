@@ -37,7 +37,9 @@ as `kind:"event"`. The 2026-04-02 VEVENTs are Morning planning 08:00 / Short app
 **Design review 14:30** / Evening session 18:00.
 
 Evidence: `r054-event-wide.png` (1100x692 full frame), `r054-clip-bar2x.png` (notes box cut at the clip line),
-`r054-bar3x.png` (the bar column). *Discipline:* 21 Bash calls (budget 25), 0 build loops, measurement-only.
+`r054-bar3x.png` (the bar column). *Discipline:* **29 Bash calls (budget 25 — overrun)**, 0 build loops,
+measurement-only. The overrun is the cost of *locating* the subject — 2 calls went on finding the right 2026-04-02
+VEVENT (R053's quoted fixture is a TODO), 6 on probes/comparisons, 5 on mirror+commit bookkeeping.
 
 # R053 — **仍差 #3 FIXED: the task editor gets a real overlay scrollbar, and the wide form never shows one** (2026-10-16)
 

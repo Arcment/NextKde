@@ -1,3 +1,19 @@
+# R086 — **仍差 #8 CLOSED: the today day-header disc is 22 px — the reference's own diameter, not a scaled 29.**
+CODE CHANGE, one geometry line: `apps/calendar/qml/CalendarScheduleView.qml`'s header date mark `20x20 / radius 10` -> **`22x22 / radius 11`**
+(plus the comment above it). Nothing else touched. **The "22 ref px x1.33 => 29" derivation is WITHDRAWN**: 29 applied the window-height
+ratio (522->692 = 1.33) to a *type* element, but our type does **not** render at 1.33x the ref's — measured with one instrument on both
+images, the ref's gutter-label ink is **9 px** and ours is **9 px**, and the ref's day-number ink inside the disc is **9 px** vs ours
+**9 px** (a 12 px font on our side). **The two numbers are already 1:1, so the disc must be too: 22.** After the change: ref disc
+**x536..557 x y101..122 = 22x22, colour (235,75,70)**; ours **x879..900 x y126..147 = 22x22, colour (229,72,77)** (= `todayRed`
+`#E5484D`, a pre-existing token shared with the now-line — **not changed this round**). Vertical: ref disc centre y111.5 vs its
+weekday ink centre 111; ours 136.5 vs 137.5 — **<=1 px, unchanged**. **Isolation proof:** the before/after pixel diff is exactly three
+bands — **y126-147 = the disc** (1170 px), **y297-318 = the now-line, which moves with wall-clock** (captures 2 min apart, 01:50 ->
+01:52), and 6 px at y62-63. **Every row from y148 to y296 — the whole all-day band (156..231) and the grid down to the now-line — is
+byte-identical**, and `sectionRule` y155 still reads 242. The grey non-today *selected* disc shares the same Rectangle, so it becomes 22
+as well (no ref anchor for that state; the geometry stays shared). Figure `docs/ui-calendar/r086-today-disc-cmp.png` — ref "Wed 1"
+above our "Sat 17", **both at the same 1:1 pixel scale**.
+
+---
 # R085 — **N02 dark leg: no code change. The four-part now-line carries over to dark part-for-part; one extrapolation recorded.**
 VERIFICATION ROUND (N02's dark clause). Capture `r084-leg.sh dark r084-dark 2026-10-17 0` — **no rebuild** (R084's binary is current),
 **no edit**. Clock 01:46 vs the light leg's 01:43 ⇒ every part must move **+2 rows together** (3 min at `hourHeight` 40 = 2.0 px);

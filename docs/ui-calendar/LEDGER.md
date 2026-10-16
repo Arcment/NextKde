@@ -1,3 +1,49 @@
+# R060 — **D08 task-editor footer, dark: PASS.** Tri-state captured for the primary; the footer *shape* matches the event editor exactly (height 31 / pitch 37 / gap 6 / x 384..730) and every fill lands on its declared token (`accent`/`accentHover`/`accentPressed`, `buttonNeutral` 69/79/89). Absolute y's differ (516 vs 548) only because the task dialog is shorter — expected, not a defect. The focus ring is `accent`@0.76 = (45,115,159), drawn 1px inside the perimeter, and persists after press→drag-out. (2026-10-16)
+
+## 本轮 (R060)
+Atomic step: R059's Next #1 = "the task-editor footer D08 leg (`CalendarTaskEditorDialog.qml:81-98`), dark".
+**No code change, 3 image reads, ~11 min.**
+
+**1 — Open chain corrected.** `date 2026-04-02` → `view day` → `openItem kind=todo titleContains="Green planning"`
+opened the popover, but R058's raw click at (672,401) was a **silent no-op**: the todo popover card is shorter than
+the event popover's, so 编辑 sits at **(673,375)**. Clicking there opened the task editor first try. ⇒ 编辑's y is
+**record-dependent**; read it off the frame, don't reuse the event-editor constant.
+
+**2 — Geometry (dark, 1100x692, `contentY = 0`).** The task editor's `editorScroll` is `387.6 / 160.2 / 340x320`,
+`contentHeight 295` ⇒ **not scrollable**, so this round's numbers carry **no scroll ambiguity** (unlike the event editor,
+where every footer y must be paired with `contentY`).
+
+| button | y (outer) | h | x | fill @ rest |
+|---|---|---|---|---|
+| 保存 (primary) | 516..546 | 31 | 384..731 | accent **(48,140,198)** |
+| 取消 (secondary) | 553..583 | 31 | 384..730 | buttonNeutral **(69,69,69)** |
+| 删除任务 (destructive) | 590..620 | 31 | 384..730 | buttonNeutral **(69,69,69)**, label peak ≈**(239,103,95)** |
+
+**pitch 37, gap 6, equal width.** The canonical event-editor set (548/585/622) is the same shape **32px lower** — the
+only difference, explained by the task dialog's shorter body. D08's "equal width / same height / pitch 37 / gap 6"
+**PASSES**.
+
+**3 — Tri-state (primary):** rest `accent` (48,140,198) → hover `accentHover` (**69,152,204**) → pressed
+`accentPressed` (**85,161,208**). Hover's band is **516..546, the same 31px** as rest ⇒ **hover is a pure flat fill
+swap, no edge/border token** — R057 reproduced on a second surface.
+
+**4 — The focus ring, and a trap.** Pressed measures 517..545 (**29**, not 31) — that is **not** a shrink animation.
+The missing 2 rows are the **ring**, drawn 1px inside the perimeter: y517 and y545 read **exactly (45,115,159)** =
+`accent`@0.76, the documented dark `focusRing`. It appears on press and **persists after press→drag-out→release-outside**
+while the fill reverts to `accent`. ⇒ D08's "焦点环可见" **PASSES**. **Rule: a 2px-thinner pressed band is the ring, not a shrink.**
+
+**5 — Secondary/destructive tri-state** (a grey test excludes the bluish ring, hence 24 not 29): 取消 553..583 →
+hover **79,79,79** → pressed **89,89,89**; 删除任务 590..620 → hover **79,79,79** → pressed **89,89,89**. Both match
+`buttonNeutral` 69/79/89 verbatim; hover band again unchanged at 31px.
+
+**Discipline: 21 Bash calls (budget 25), 3 image reads, 1 drive-loop lost to the stale 编辑 y, ~11 min.** Deliverable =
+D08 clauses 1+2 now **PASS for the task-editor footer (dark)**; the only D08 surface left is a toolbar `KosButton`
+(`Main.qml:2379`) = Next #1.
+
+Evidence: `_r060-footer-strip-2x.png` (rest | hover | pressed | ring-after-dragout), `_r060-task-editor-dark.png`.
+
+---
+
 # R059 — **popover-Esc RULED: NOT a spec failure.** The harness `escape` **is** a real key event (`ReviewInput.cpp:97-105`: `QKeyEvent(Key_Escape)` → `sendEvent(focusWindow)`, the normal QQuickWindow→`activeFocusItem` route), so R058's null *behaviour* stands — but `spec.md:109` `D08 … Esc 可关闭` belongs to the **弹框** block (D01–D13), `D01` defines 弹框 **by having a scrim** and the popover has none, and the 浮层 family (`O01–O09`, `spec.md:120` O08 names the P01 详情浮层) **never mentions Esc**. ⇒ **D08 Esc stays PASS; no clause fails.** The real defect is internal: `EventDetailsPopover.qml:60` advertises `Popup.CloseOnEscape` that **can never fire**, and the repo already documents this exact failure mode *and* its working fix at `Main.qml:1873-1878`. Needs a 1-line ruling, not a fix. (2026-10-16)
 
 ## 本轮 (R059)

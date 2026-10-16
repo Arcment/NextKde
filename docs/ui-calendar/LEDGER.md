@@ -1,3 +1,24 @@
+# R088 — **A04 step 1: the band's 2-item cap is GONE. One line, and Thu Apr 2 renders 3 chips; the whole page outside Thu's 3rd slot is byte-identical.**
+
+Change, exactly one line: `apps/calendar/qml/CalendarScheduleView.qml:454` `model: allDayColumn.columnItems.slice(0, 2)` -> **`model: allDayColumn.columnItems.slice(0, root.allDayBandRows)`** (= 3), plus a two-line comment. **Nothing else touched** — not `allDayBandRows`, not `allDayBandHeight`, not `:687`'s grid-cell slice, not the month cell.
+
+Measurement — light 1100x692, `view week`, `date 2026-04-02`, capture md5 `4c59ed839306aa0d8fc7621e17db70b4` (R087's fixture, 4 all-day items on Thu, is still in the live profile):
+- **Thu (x502..651) now renders THREE chip bands**: **y157-180** (`Design sync`), **y182-205** (`Release notes`), **y207-230** (`R087 card C`). Row means 214.7 / 208.7 / 216.5. **The 3rd slot is no longer empty.**
+- **The 4th item (`R087 card D`) is still dropped and there is still NO `+N` affordance** — read off the crop, not inferred. That residue is **A04 step 2**.
+- **Fri Apr 3** still exactly one chip y157-180 (`R087 sole`). **Mon/Tue/Wed** one chip each, row mean **203.576 identical to the last digit across all three** (the `Multi-day review` strip).
+- **The four band rules are unmoved**: `sectionRule` **y155 (242, 1px)**; interior **156..231 = 76**; `allDaySeparator` **y232-233 (217, 2px)**; first hour line **y234**. The grid lost nothing.
+
+Regression proof — an `ImageChops.difference` of R087's capture vs this one over the **whole 1100x692 page**, with a per-row count of pixels differing by more than 6 (RGB sum):
+- **exactly one contiguous y-group has any difference at all: `y207..230`, max row count 148.**
+- that x-range is **503..650 = Thu's column (502..651) and only Thu's**; the changed rows are exactly the third chip slot.
+- => every other column, every other row of the page is **byte-identical**. Not "close" — identical. The one-line change is fully contained.
+
+Slot geometry check (ours): inset 1 + 24 + gap 1 + 24 + gap 1 + 24 + inset 1 = **76**. So slot content rows are **157-180 / 182-205 / 207-230**; the older "third slot 206-231" figure in state.md included the surrounding gap and inset. Corrected here.
+
+Verdict: **A04 step 1 PASS.** "A band 3 slots tall renders 3" is now true, ref-anchored (R087: the ref's uniform strip carries 3-chip columns). **A04 step 2 (`+N` for >3) is the remaining half and has NO ref anchor** — the ref never exceeds 3 — so it is a HIG/spec decision, not a measurement.
+
+Figure `docs/ui-calendar/r088-allday-band-3chips.png` (Thu+Fri band, x500..805 y148..240 at x3, labelled). (2026-10-17)
+
 # R087 — **A02 phase 1 (FIXTURE + MEASUREMENT ONLY). The prediction is FALSIFIED: nothing clips and nothing overflows — the band is a 3-slot box whose 3rd slot is unreachable. And the REF BAND DOES NOT EXPAND EITHER.**
 
 Fixture: three all-day VEVENTs appended to `profile/pim/calendar.ics` (UIDs `…r087-allday-c` / `-d` on 2026-04-02, `-e` on 2026-04-03) => **Thu Apr 2 carries 4 all-day items (was 2), Fri Apr 3 carries exactly 1** (Mon/Tue/Wed stay at 1 each via `Multi-day review`). **No code changed this round.**

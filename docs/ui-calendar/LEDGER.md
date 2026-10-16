@@ -1,3 +1,50 @@
+# R050 — **P01 narrow-window leg: the popover does NOT compress; material is size-invariant** (2026-10-16)
+
+Atomic step: R049's Next-round #1 = P01's last un-re-judged corner — the detail popover at the **760x540**
+minimum window (the condition that breaks the *task dialog's* form, 仍差 #3). Measurement + judgment only,
+**no product code touched, no build**.
+
+Route, light, one instance: `date 2026-04-02` → `view week` → `resize 760x540` → `openItem titleContains
+"Long review"` → `nativeRecord r050-narrow` (16 frames, all 760x540). Then `escape` → `resize 1100x692` →
+`openItem` the **same fixture** → `nativeRecord r050-wide` (13 frames). Same-fixture A/B, so the comparison
+is not confounded by content.
+
+### Measured — card fill bbox (flood-fill on the neutral (245,245,245) fill)
+
+| | fill bbox | w | h |
+|---|---|---|---|
+| 760x540 | x 211–548, y 227–412 | **338** | **186** |
+| 1100x692 | x 381–718, y 253–438 | **338** | **186** |
+
+Content bands, in **card-relative** coordinates (rel x = ink left − fill left, rel y = ink top − fill top):
+
+| band | rel x | rel y | ink run (narrow) | ink run (wide) |
+|---|---|---|---|---|
+| title (2 lines, h38) | 13 | 18 | 224–528 | 394–698 |
+| date · time range | 13 | 69 | 224–424 (200) | 394–594 (200) |
+| location | 14 | 95 | 225–331 (106) | 395–501 (106) |
+| notes | 14 | 121 | 225–497 (272) | 395–667 (272) |
+| 编辑 label | 277 | 151 | 488–511 (23) | 658–681 (23) |
+
+**Every band sits at the identical card-relative offset and every ink run has the identical length** ⇒ nothing
+reflows, nothing shrinks, nothing is clipped. The card is fully inside the window at 760x540 (210px of backdrop
+either side, 128px below).
+
+Material at the card's **top edge is byte-identical** in both captures: border/shadow profile at −4/−3/−2/−1
+= **(236,236,236) (210,210,210) (204,204,204) (175,175,175)**, then fill (245,245,245). (The left/right edge
+profiles differ only because the popover sits over a blue grid chip at narrow and over white at wide — backdrop,
+not material.)
+
+### Judgment
+
+**P01 narrow leg = PASS.** The popover is the *counter-example* to 仍差 #3: the task dialog's form collapses at
+760x540 because it is a layout-driven flex region; the popover's card is `width: 340 + 2*shadowInset`
+(`EventDetailsPopover.qml:57`) with content-driven height and a `Layout.maximumHeight: 120` notes ScrollView, so
+the window size never reaches it. 仍差 #3 stays open for the *dialogs* only; it does **not** generalise to overlays.
+
+Recorded as still-unverified: the **dark** narrow leg (P01's dark leg is PASS at 1100x692, R047; the dark
+760x540 case was not re-shot this round).
+
 # R049 — E03 clause 3 ("tall blocks top align"): **BLOCKED on a ruling — no tall block exists in any view** (2026-10-16)
 
 Atomic step: R048's Next-round #1 = judge E03 clause 3 in a view that has tall blocks. Measurement + judgment

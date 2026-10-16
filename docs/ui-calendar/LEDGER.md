@@ -1,3 +1,30 @@
+# R103 — the segment's slot **PITCH**: `Main.qml:178` `segmentWidth: 196` is a **spec literal** (L03 width 180–210). **Verdict only — NO code changed.**
+
+**Why this round.** Next #1 from R102: the last unblocked *shape* error in the segmented control — the pitch (ref "56.75" vs our 64).
+
+**R102's premise for this item was FALSE, and it was the error R102 itself had diagnosed.** *"Ref slot = 227/4 = 56.75"* is `track_width / n` — the
+exact bug R102's own headline names for our side; the true slot is `(W − 4)/n`, the 4 px being the control's own outer inset. Re-derived on the ref:
+**slot = (228 − 4)/4 = 56.0**, and the **direct** measurement agrees — word centres **418 / 474 / 530 / 586** ⇒ pitch **55.5 / 57.0 / 56.0 = 56.0**
+(their centroid 502.0 = the track's own centre, so the four words are symmetrically placed ⇒ the *centres*, not the edges, are the instrument).
+
+**The spec settles it.** `spec.md:17` **L03**: *"Day/week/month segment centered within main region; **height 28 and width 180–210**"*. Ours is
+**196×28** — `Main.qml:171`/`:178` name it as the design constant — and **196 is the band's midpoint (195)**. A 3-label control at the ref's pitch
+= 3×56 + 4 = **172**, **8 px under L03's floor of 180**; conversely the floor already forces slot ≥ (180−4)/3 = **58.67 > 56.0**. ⇒ **the ref's pitch
+is unreachable inside L03, so no number moves.**
+
+**Measured 1:1.** Ref track **x389..616 (W 228–229)**, the pill **centred in its slot** (fitted W 51–52.4, centre **474.0** = slot 2's centre exactly).
+Ours: track **x562..757 (W 196)** unchanged, slot **64.0**, word centres **595 / 660 / 723** ⇒ pitch **64.0**. ⇒ **the discriminator is 4 labels vs 3,
+not a defect.** Side effect: R102's "52.4/56.75 = 92.3 %" re-reads as ref **51/56 = 91.1 %** (direct, sharp-edged) or **52.4/56 = 93.6 %** (fit) against
+ours **93.75 %** ⇒ **our pill's *relative* width is already ≥ the reference's; the residual is absolute, and it is L03's.**
+
+**Negative result.** The ref **track has no measurable fill edge** — its edge pixels read **231–245** between a **250** fill and a **255** plane, *darker
+than both* ⇒ that is a **rim/shadow, not a fill boundary**, and a mid-threshold fit on it is invalid. Any track-edge-derived quantity is ±1 px, so
+**a pitch must be taken from the word centres** (it was).
+
+**Figure.** `docs/ui-calendar/r103-seg-pitch-2panel.png` — REF ×3 and ours ×3, `NEAREST`, **blue = track edge, green = slot boundary, red = word
+centre**, captions drawn on the final canvas at 1×. **Verdict: 仍差 #3 CLOSED in full; `Main.qml:178` `196` stays. Next: the track radius at
+`LiquidSegmentedControl.qml:87` (`height * 0.38`) against the lens's `0.48` (R101).**
+
 # R102 — C05's segment pill **WIDTH**: measured, `LiquidSegmentedControl.qml:117/119` → `segmentWidth - 4` + re-centre. **Fixed (2 numbers, one component).**
 
 **Why this round.** Next #1 from R101: the pill's horizontal slot inset — the last unblocked *shape* error in the control.

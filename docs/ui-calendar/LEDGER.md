@@ -1,3 +1,34 @@
+# R095 — verdict, **no code changed**: the mini month's weekday header does **not** tint today's column letter (the "red 六" was a ×2 `LANCZOS` artifact — the ref anchor and ours agree).
+
+**The claim under test (R094's Next #1).** "`Main.qml`'s mini weekday-header row draws the today column's letter (`六`, today = Sat
+Oct 17) in **red** while the other six are grey."
+
+**The anchor, read FIRST (as instructed).** The ref's mini month is **Sunday-first** and its weekday row sits at **y378..385**.
+Per-letter ink (30 % darkest mean) over the seven runs x25-27 / 46-52 / 71-76 / 94-102 / 120-124 / 145-148 / 168-172 =
+**(135,135,135) (124,124,124) (161,161,161) (130,130,130) (143,143,143) (135,135,135) (130,130,130)** — **R == G == B on all
+seven**, including the `W` directly above the today disc (x94-102, the Wed column). ⇒ **the ref tints nothing.**
+
+**Our header, measured the same way.** Row `y541..549`, seven runs x21-30 / 49-58 / 77-86 / 106-113 / 133-142 / **161-170** /
+190-197; the today column's letter **六 is the 6th run (x161-170)** — centred on 165.5, i.e. the same column as the today disc
+(x158..172, R094). Ink 5 %-means: (154,156,162) (132,131,135) (150,149,154) (136,135,141) (157,153,171) (**150,148,153**)
+(151,148,153). For 六, **warm (r−b>6) = 18 vs cool (b−r>6) = 19** — a *balanced* subpixel-AA fringe, not a hue (四 = 22/20,
+日 = 16/17). And the code agrees: `Main.qml:2137-2156`, the weekday `Repeater`'s `Label` carries a single unconditional
+`color: root.tahoe.labelSecondary` — **there is no `today` term to delete.**
+
+**⇒ No defect. Verdict round: 0 code changes.** The ×2 `LANCZOS` crop that R093/R094 used for the mini month makes a 10-px grey
+CJK glyph with RGB-subpixel AA *look* red; `NEAREST` and `LANCZOS` at ×8 over the *same pixels* show `五 六 日` in one grey.
+**R094's Next #1 is refuted, and the last mini-month question closes.**
+
+**Evidence:** `docs/ui-calendar/r095-header-no-tint.png` — the ref strip (x20..186 y374..390, ×5 `NEAREST`) over our strip
+(x14..201 y533..553, ×5 `NEAREST`), each labelled with its per-letter ink RGB. Source pixels: `capture-r094.png` — **the same
+binary, unchanged this round** (no build, no leg: R083's same-theme byte-stability plus an unmodified tree make a fresh launch a
+no-op). **Deliberately no fresh leg** — a verdict round must not spend one.
+
+**Instrument (new, → state.md 外推).** **A 10-px CJK glyph is not an ink instrument under an upscale.** Read its colour as the
+**warm/cool balance** — `count(r−b>6)` vs `count(b−r>6)` over the glyph's bbox: a real red tint makes warm dominate ~10:1,
+while RGB-subpixel AA keeps the two within ±10 %. Corollary: **R093/R094's ×2 `LANCZOS` mini-month crops are colour-unsafe**;
+their *geometric* reads (15 px disc, 22 px header disc) stand because R094 re-verified them with an envelope predicate.
+
 # R094 — M04's **size** clause CLOSED: the mini month's today disc 20 → **15 px**, the ref's own diameter.
 
 **The defect.** R093 closed M04's colour clause (`tahoe.accent` blue → `AppTheme.todayRed`) and left the size: the mini month drew

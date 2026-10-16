@@ -4,6 +4,8 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三风格 A：侧栏右上开关钮启用 Liquid Glass specular 顶缘+细描边（本轮，前端）**：`apps/weather/qml/Main.qml:1136-1152` KosSidebarToggle 实例的 `background`——fill 保持白 0.14、`border.color` 0.20→0.22（与搜索胶囊描边一族）、内嵌圆形自裁顶部 sheen（`anchors.margins:1`、`radius:width/2`、Gradient 白 0.28@0 → 0@0.22），只改天气这一个实例。**第一版 specular 用全宽 1px 直线在圆外两端溢出**（截图 1792161513 实测 y13 行 x197-214 越出圆弧），改为圆形 sheen 后消除。
+  **实测**（截图 1792161631，本轮二进制）：侧栏面 `#5d687b`(93,104,123) → 填充 `#747c8d`(116,124,141)（Δ≈+23，参考 fill−bg≈+25 吻合）→ 顶缘 `#8c92a0`(140,146,160)（Δ(+24,+22,+19)，参考 rim Δ(+19~23) 同量级）；填充上下平（Δ≈0，参考 Δ≈2 平填充）；目视放大 `/tmp/my-toggle2.png`：玻璃圆钮、亮顶缘、无溢出、无硬边。开关钮部分从"仍差 1"移出。
 - **阶段三风格 A：侧栏搜索胶囊启用 Liquid Glass specular 高光+细描边（本轮，前端）**：`apps/weather/qml/Main.qml:381-383` locationField 实例加 `materialForm: false` + `liquidFinish: true` + `liquidStrength: 0.2`（LiquidTextField `shared/qml/controls/LiquidTextField.qml` 自带 glass 词汇：上缘 specular 细亮线/内部 sheen/四周白描边/下缘暗边，仅在 `liquidFinish && !materialForm` 绘制；只改天气这一个实例，KosTextField 默认值不动，todo/settings 不受影响）。强度经两轮实测校准：0.45 时 rim 峰值 Δ+51、填充上亮下暗 Δ23（参考为平填充 Δ3）过强 → 降到 0.2。**终态实测**（截图 1792161254，DPR1）：侧栏面 `#5d687b` → 填充 `#808a99`(顶)~`#808998`(底，近平) → rim 峰值 y=55 `#c5c9d0`、1px 白 0.19 描边环绕；ref-main 胶囊实测（降采样 2x）：外底 `#2b4469`/填充 `#3e5e8c`(平)/上缘 `#5174a7`/下缘 `#486898`——形态对齐（平填充+亮上缘+细描边）；rim 绝对峰值我的更锐（DPR1 vs 参考降采样抹平），属已记录差异。截图 `/tmp/my-capsule2.png` 目视：玻璃胶囊、亮顶缘、无脏阴影、无硬边。
 - **阶段三动效 B.1（第 1 条）：夜间晴天星星闪烁（本轮，前端）**：`apps/weather/qml/Main.qml:24-27` 新增 `nightClearSky`（夜间+code 0/1）；:43-67 `mulberry32(20261016)` 种子 PRNG 生成 48 星 `starField`（**坐标确定性**：xRatio 均匀、yRatio=pow(r,1.3)*0.75 偏上部、直径 1.2-2.8px、baseOpacity 0.35-0.95、twinkle 2440-7170ms，落在 HIG 环境循环 2-12s 内）；:310-352 `starFieldLayer`（天空渐变之后、RowLayout 之前，visible 跟随 nightClearSky，clip），delegate 白色圆形 Rectangle + `SequentialAnimation on opacity`：随机相位 PauseAnimation（Math.random()*twinkleMs，**每次启动不同**）→ base→base*0.35→base 两段 NumberAnimation（各 twinkleMs/2，InOutSine，Infinite），`running: nightClearSky && !AppTheme.reduceMotion`（reduce-motion 停）。
   **帧差证据**（活实例 spectacle 连拍，flatten alpha 后）：400ms 间隔 MAE——星区 starL `0.0114/0.0151/0.0094`、starR `0.0176/0.0164/0.0112`，对照 2s 间隔变化像素：星区 48-54 个（maxdiff 122-128）、静止逐小时卡行 **0**（完全静止）、侧栏噪声底 21-24 个稀疏点（maxdiff ≤49）。星区信号 ≈ 噪声底 2 倍计数 / 2.5 倍峰值，判定动效生效。
@@ -29,7 +31,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三风格项：功能层其余控件未做 Liquid Glass**（风格优先于静态微调）：搜索胶囊已完成（见已改）；剩余——侧栏右上开关钮（KosSidebarToggle/KosRoundButton 一族）仍是平填充、主区顶栏按钮、侧栏滚动边缘效果（内容滚到侧栏下方模糊降不透明度）均未做 specular/细描边；需按 HIG 逐控件核对并落 `文件:行`。
+1. **阶段三风格项：功能层其余控件未做 Liquid Glass**（风格优先于静态微调）：搜索胶囊（见已改）与侧栏右上开关钮（见已改）已完成；剩余——主区顶栏按钮、侧栏滚动边缘效果（内容滚到侧栏下方模糊降不透明度）均未做 specular/细描边；需按 HIG 逐控件核对并落 `文件:行`。
 2. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：本轮已完成"夜间晴天星星闪烁"（见已改，含帧差证据）。剩余：雨丝下落/雪花飘移/云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、列表入场交错、温度曲线 draw-on。
 3. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 4. Conditions 卡无温度走势曲线。

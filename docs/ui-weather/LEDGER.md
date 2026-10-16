@@ -4,6 +4,7 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **侧栏开关按钮几何贴参考**（本轮，前端）：`apps/weather/qml/Main.qml:1038` Item `height: 44→root.sidebarExpanded ? 46 : 44`、:1043 `rightMargin` 展开态 `4→5`、:1045-1047 去 `verticalCenter` 改 `anchors.top + topMargin: 展开 10 / 收缩 (44-AppTheme.controlHeight)/2`（收缩态数学等价原居中）、展开态直径 `40→26`。依据 Pillow 量 ref-main（814 宽，侧栏 207）：开关圆钮直径 ~23-24px、距顶 ~9px、距侧栏右缘 ~5-6px；按本项目侧栏 224/207≈1.08 折算 → 26/10/5。截图 1792157267（本轮新二进制）核实按钮位于侧栏右上角；但右侧几何被下述侧栏溢出 bug 干扰，**溢出修复后需复核一次**。
 - **侧栏城市卡高度/间距/圆角贴参考**（本轮，前端）：`apps/weather/qml/Main.qml:396` 卡 `implicitHeight: 96→74`（tile-sidebar 实测卡高 ~148-152px/2.1x ≈ 74）、delegate `topPadding/bottomPadding 8→5`、savedLocations `spacing: 8→6`（参考卡间隙 ~12px/2.1x ≈ 6）、卡 `radius: 14→12`（参考角曲线跨度 ~22px/2.1x ≈ 11-12）。卡内挤压故 5 个 Label 加 `lineHeight: 0.85 / ProportionalHeight`、时间行 `topMargin 2→0`、顶部行显式 `height: 30`（截图 1792153411 核实：长沙/26°/7:30PM/晴+H:29° L:20° 四行无重叠，结构与参考一致）。
 - **侧栏底栏清理**（本轮，前端）：删孤立 "°" Label（原 Main.qml:526-532），`Accessible.name: qsTr("Units")` 移到 units RowLayout（:516）；"● Open-Meteo" 状态 Label 加 `Layout.topMargin: 4`。截图 1792153411 核实按钮与状态行间隔 ~20px、无重叠、无杂点。
 - **侧栏顶天立地**（本轮，前端，TASK.md 用户裁定）：`shared/qml/foundation/KosSidebar.qml:12` 新增 `property bool floating: true`，:27 `radius: root.floating ? AppTheme.largeRadius : 0`；`apps/weather/qml/Main.qml:286` RowLayout `anchors.margins: 12→0`（主列 :592 自己有 `Layout.margins: 20` 不变），:294 传 `floating: false` 并删除半透明 `surfaceColor` 覆盖（改用默认实色 `AppTheme.sidebarSurface` 一族，用户裁定不用半透明玻璃）。todo 不传 floating、默认 true，观感不变。截图核实：侧栏与窗口左/上/下齐平、四角直角、无边距。
@@ -21,14 +22,17 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. 顶部工具栏（更新时间/设置/刷新位置形态）与参考布局不符（参考主区顶部无工具栏；Apple 的侧栏开关在侧栏右上角，见 tile-sidebar 顶部）。
-2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
-3. Conditions 卡无温度走势曲线。
-4. WeatherIcon code 1/2 夜间也画太阳+云（drawSun 不分昼夜），夜间应画月+云。
-5. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
-6. 侧栏只有 1 个城市时卡下方大片空白（参考有多城填满）；无数据可解，仅记录。
+1. **侧栏内容整体溢出被裁（本轮新发现的实测 bug，视觉冲击最大）**：截图 1792157267 与 CARDGEO 日志双重证实 —— `delegate.w=236 list.w=236 list.x=0 col.w=188 col.x=18 sidebar.w=246`。事实链：`AppTheme.qml:159` 的 `modernDesign ? 224 : 246` 在启动 100ms 时仍取非 modern 值 246（日志 sidebar.width=246），随后生效侧栏宽变 224 → 内容列只剩 188（224−2×18）；但搜索胶囊（实测右缘 ~222，宽 ≥204）与 savedLocations 列表（236）都超过列宽 188，右半被 `KosSidebar.qml:18` 的 `clip: true` 裁掉 —— 卡的温度/H·L 被切字、胶囊右端缺失。参考图卡两侧各留 ~10px 绝无裁切。修法方向：查 KosTextField/ListView 的 `implicitWidth`→`Layout.minimumWidth` 隐式最小宽链（Qt Layouts 中 fillWidth 子项默认以 implicitWidth 为最小宽，会顶破窄列），让 fillWidth 子项真正贴 188 列宽；参考图侧栏 207/814=25.4% 窗宽，本项目 224/1180=19%，若仍显窄可顺带评估加宽。同轮删除 Main.qml:380-386 的 CARDGEO console.log。
+2. 顶部工具栏：主区顶部已确认无工具栏（本轮截图核实，hero 直接从 20px 边距起）；开关钮几何已贴参考（见已改）→ 本条收窄为「开关钮 26px/10px/5px 几何在溢出修复后复核一次」。
+3. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
+4. Conditions 卡无温度走势曲线。
+5. WeatherIcon code 1/2 夜间也画太阳+云（drawSun 不分昼夜），夜间应画月+云。
+6. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
+7. 侧栏只有 1 个城市时卡下方大片空白（参考有多城填满）；无数据可解，仅记录。
 
 ## 外推待确认
+- 开关钮直径 26px/距顶 10px/右边距 5px 系按「本项目侧栏 224 ÷ 参考侧栏 207 ≈ 1.08」从 ref-main 实测（23-24/9/5-6）比例折算；参考原始逻辑像素（retina 倍率）不可直接得知，若有出入以观感复核为准。
+- `AppTheme.qml:159` 启动早期 modernDesign 未生效导致 sidebar 246→224 跳变，是否同样影响其他依赖 modernDesign 的尺寸值（字体、圆角、间距）待确认；若多处存在启动跳变，应把 modernDesign 的判定提前到 AppTheme 加载前。
 - `kos-language-test` 对环境敏感：需 `EXPECTED_LANGUAGE=zh`（本机 LANG=zh_CN.UTF-8）才绿，缺省跑会 1 failed——环境问题，非代码回归（本轮已核实，`EXPECTED_LANGUAGE=zh` 下 5/5 过）。
 - 侧栏从半透明玻璃改为实色 `AppTheme.sidebarSurface`（用户裁定），透出天空的质感随之消失；参考图侧栏是透天空的，若后续要兼顾需另想实色偏移方案。
 - summary 字段形态（tempHigh/tempLow 命名、无 summary 时卡的 `—` 回退）为本轮外推，无参考约束；如要改字段名需同步 Go/schema/QML 三处。
@@ -42,4 +46,4 @@
 - hover / 选中 / 按下的具体取值（参考图都是静态态）。
 
 ## 遗留物
-（无——WeatherIcon.qml 已接入并记录于"已改"。）
+- `apps/weather/qml/Main.qml:380-386`：CARDGEO console.log 调试定时器（上轮排查遗留；本轮靠它定位到侧栏溢出 bug，下轮修溢出时一并删除）。

@@ -1,3 +1,33 @@
+## R062 — P01 popover title leading tightened **22px → 20px** (1.47em → 1.33em at font 15) (2026-10-16)
+
+**Atom:** 仍差 #6 (line pitch) — the last **unblocked, non-ruling** item. Code change = **2 properties** on
+`detailsTitle` (`EventDetailsPopover.qml:115-118`): `lineHeightMode: Text.FixedHeight` + `lineHeight: 20`.
+
+**Before** (dark, 1100x692, R019 todo popover; `_r062-popover-before.png`): the title is a repeated long string, so it
+wraps to the full **3-line cap** and elides at line 3. Card **x381..718 (338w) × y290..573 (284h)**; cap-tops
+**307 / 329 / 351 ⇒ pitch 22**.
+
+**After** (`_r062-popover-after.png`, `_r062-popover-title-3x.png`): cap-tops **320 / 340 / 360 ⇒ pitch 20**; card h
+**280**, i.e. exactly the predicted **−4 = 2 gaps × 2px**. 4–6 fully clean pixel rows remain between lines (no CJK ink
+collision), the line-3 ellipsis survives, the colour dot and `×` stay centred, and the time (`2026年4月2日星期四 · 11:00`)
+and notes lines below are untouched. Same 3-line cap, same elide, same `objectName` (harness probe intact).
+
+**Why 20 and not 18.** There is **no ref anchor**: the ref is a month view + sidebar, all text single-line/elided, and it
+contains **no popover at all** — so no ref-derivable pitch exists. The target is therefore the macOS **body ratio 1.33**
+(20px at 15px), not R046's rougher "~1.2" (18px). **`FixedHeight` is deliberate, not laziness:** Qt's
+`ProportionalHeight` is a multiple of the *font's own* line box, which here *is* the 1.47em bug — `lineHeight: 1.33`
+proportionally would give 29px, not 20. (This is also why the in-repo `KosEmptyState.qml:49 lineHeight: 1.22` renders
+*looser* than default, not tighter.) The app-wide form of this bug (`controlHeight` 31-vs-34) is **not** touched: one
+Label, one surface.
+
+**Observation, not a defect.** The harness-opened popover's y sits 11px lower on the new binary (centre 431.5 → 442.5 at
+an unchanged 692 host). Popover *position* is a **documented harness artifact** (`openItem` → `openAt(null)` centres it),
+and the two runs differ in binary, so the shift is not attributable to the change — the target pitch (22→20) and the card's
+**Δheight (−4)** are both exact and independently predicted.
+
+**Loop status: 仍差 #6 CLOSED. This was the last unblocked item.** Every other 仍差 entry (1 dim snap, 2 shadow magnitude,
+3 popover-Esc, 4/E03-proportional-blocks, 7 `slice(0,2)`, 8 month-cell 1-chip cap) changes app-wide or user-visible
+behaviour that **no spec clause decides** ⇒ the loop is **blocked pending rulings A–E**. No `DONE` (not all spec IDs pass).
 # R061 — **D08 third and last surface (toolbar flat `KosButton` "添加", `Main.qml:2379`), dark: PASS.** Tri-state captured
 on the month view's selected-day card. **The fills are `button`/`buttonHover`/`buttonPressed` (accent-tinted blue), NOT the
 `buttonNeutral*` set R060 predicted** — the code is right and the prediction was wrong (`flat:` and `secondary:` are two

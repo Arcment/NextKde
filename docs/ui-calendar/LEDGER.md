@@ -1,3 +1,25 @@
+## R100 — C05/L03's segment LABEL ORDER: the reference ascends `Day · Week · Month · Year`; ours was the exact reverse
+**Verdict + fix.** R099 measured the ref's four word centres (418/474/530/587) but left the list alone; this round re-cropped the
+toolbar strip at ×5 and read the words themselves: the reference's segmented control reads **`Day · Week · Month · Year`** —
+granularity **ascending**, left to right, pill on `Week` — and L03 words it "**Day**/week/**month** segment". Ours was
+`labels: [Month, Week, Day]` (`Main.qml:1713`), the **exact reverse** of both.
+
+**Why it is a remap and not a token edit.** `root.viewIndex` publishes `0=month / 1=week / 2=day` and that contract has **five**
+consumers that must not move: `activeView` (`:229`), `Ctrl+1..3` (`:1544-1546`), `--view ` via `requestedViewIndex` (`:1054`),
+the `KosPageCache` page order (`:2372`), and the review harness (`harness/Main.qml:218`,
+`['month','week','day'].indexOf(command.view)`). So the segment **mirrors** the contract instead of redefining it:
+`labels: [Day, Week, Month]`, `currentIndex: 2 - root.viewIndex`, `onSelectionRequested: index => root.viewIndex = 2 - index`
+(`Main.qml:1713-1728`). Week still lands on segment **1**, so the pill's measured geometry (R097/R098) is untouched.
+
+**Acceptance (light, 1100x692, `contentY 280` — the same leg as R098/R099, so the three are comparable).** Three drives over the
+**same live instance**, no rebuild: `view=week` ⇒ pill on the **2nd** segment (`周`); `view=day` ⇒ **1st** (`日`);
+`view=month` ⇒ **3rd** (`月`). The remap is proven **bidirectional**, not merely cosmetic. Figures:
+`docs/ui-calendar/r100-seg-order.png` (ref ×4 over ours ×4, same 1:1 scale) and `r100-seg-remap.png` (the three drives).
+
+**Left alone deliberately.** The ref's **4th** segment (`Year`) has no counterpart view in this app; L03 specifies three
+("Day/week/month"), so three is spec-correct and adding a year view is not an atomic step. Recorded as an open question, not
+chased. Dark leg is extrapolation — the change is a label-order remap with no colour content.
+
 ## R099 — C05's *inactive* label: the reference has NO muted segment label; ours was 130 levels too light
 **Verdict + fix (verdict-driven, not pixel-fishing).** The ref's toolbar capsule (`x385..620 y0..40`) cropped at ×4 and ×8 and
 probed word by word: **all four** reference labels — `Day` (unselected), `Week` (on the pill), `Month`, `Year` — carry the **same

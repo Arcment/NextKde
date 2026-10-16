@@ -1,3 +1,5 @@
+### R125 — dark leg of E01/E02 (4/4 + gap 2) and the L01/L02/L04/L06/L07 re-read — figure `r125-dark-e01-toolbar.png`
+
 # R124 — **E01's LAST open light-leg clause closed: `timedChip` radius 5 → 3 (`CalendarScheduleView.qml:838`). E01 is now 4/4 PASS on light; E02's column-gap clause promoted from declared-only to PASS.** One source file, one build, one relaunch, one capture. Bonus finding: **the standing fixture DOES contain a 2-item hour** (Thu 11:00: a VEVENT *and* the `[R019 LONGTASK]` WTODO) — state.md's "every event in a distinct hour" was a VEVENT-only claim. Figure `docs/ui-calendar/r124-e01-radius.png`.
 
 ## 本轮 (R124)

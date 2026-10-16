@@ -1,4 +1,43 @@
-# R074 — **A01 step 4 done: the all-day band now carries the grid's column separators.**
+# R075 — **A01 step 5 done: the all-day chip's corner, 5 → 8 (derived). The band's last unmatched *form* item closes.**
+Ref re-measured 1:1 before editing: the Thursday all-day chip's fill run per row from its top edge reads
+**4.5 / 3.5 / 2.5 / 1.5 / 1 / 0.5 / 0** ⇒ the arc is fully turned after **6 of the chip's 18 px** ⇒ **r ≈ 6 ref-px = row/3**.
+Edit = one line in `CalendarScheduleView.qml` `allDayChip`: `radius: 5` →
+**`radius: Math.round(root.allDayRowHeight / 3)`** (a literal 8 would drift the moment the row height moves — this file's
+whole token discipline is derived constants). **Our capture reproduced the arc:** inset per row from y=157 reads
+**8 / 5 / 3 / 2 / 2 / 1 / 1 / 1 / 0** — 8 rows on a 24 px row = the ref's 6/18 normalized exactly. Nothing else moved:
+row 24, gap 1, inset 1, band 76, the R074 separators (x=502 reads **237** at every band row, x=503 = **255** in the gap row
+y=156/181), the four rule tokens, the weekend tint, and the timed chip (`:556`, still `radius: 5`) are all untouched.
+(2026-10-17)
+
+## 本轮 (R075)
+Atomic step: the standing Next-round #1 — **A01 step 5: the all-day chip's radius**. Evidence:
+`docs/ui-calendar/r075-chip-radius-light.png` (1100x692 light, `view week` + `date 2026-04-02`) and the
+ref|ours corner composite `docs/ui-calendar/r075-corner-compare.png` (ref crop 8×, ours 6×, so both chips are 144 px tall
+and the arcs are directly comparable).
+
+**Ref measurement (the number the round turned on).** `macos-calendar.png`, Thursday chip (fill `(244,226,249)`), left
+edge x≈488.5, top row y=126. Fill-start inset, in ref px from the chip's left edge, per row from the top:
+**4.5 · 3.5 · 2.5 · 1.5 · 1 · 0.5 · 0** ⇒ the corner is fully turned by row 6 ⇒ **r ≈ 6** on a **row 18** chip ⇒ **r = row/3**.
+This is the number R063 flagged as "~6 ref-px" and the reason the target was 8 for our ×1.33 row.
+
+**Ours, after the edit** (Thursday, chip box x503..650, first row y=157), same metric on the blue channel
+(`246` = full fill, `237` = the R074 gridLine separator at x=502, `255` = white):
+`y157: 8 · y158: 5 · y159: 3 · y160: 2 · y161: 2 · y162: 1 · y163: 1 · y164: 1 · y165: 0` ⇒ **8 rows on 24** = the ref's
+**6 on 18**. Both are antialiased circular arcs — **the ref's is a squircle** so its *approach* is a touch flatter at the
+tangent (4.5 at the first row vs the 6 a true circle would give), but the arc **length/orientation is identical**, which is
+the property a 1:1 read can actually compare. The composite confirms it by eye: both corners turn through the same fraction
+of the chip's height.
+
+**The edit deliberately derives, not hardcodes.** `radius: Math.round(root.allDayRowHeight / 3)` — 24/3 = **8**. A literal
+`8` would survive this round and silently rot on the next row-height change; `allDayRowHeight` is already the band's single
+source of row truth. (Precedent: R072 made band 76 and gap 1 derived for exactly this reason.)
+
+**Regression surface checked in the same capture:** the chip's left edge still lands on **x=503** (inset 1) and the chip's
+vertical extent is still **157..180**, gap **181**, second chip **182..205** ⇒ R073's y-map byte-for-byte intact; the R074
+separator still reads **237** at x=502 on every band row and is still single-width (**503 = 255** in the gap rows).
+**Light only: the change is pure geometry on a fill `AppTheme.withAlpha` already verifies in both legs.**
+
+## 本轮 (R074)
 The band drew **none** (y=215 was uniform 255) while the ref's separators run **unbroken through it**. Ref re-measured 1:1:
 x=324/406/487 read **244/236/242** = one line at three subpixel coverages on 81.3px columns, full coverage ≈**236** = the
 ref's own hour-line token ⇒ reuse `gridLine`, no new token. Added to the band's `allDayColumn` delegate (after the weekend

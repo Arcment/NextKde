@@ -4,6 +4,8 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **阶段三动效 B.1（第 4 条）：雪天雪花飘移（本轮，前端）**：`apps/weather/qml/Main.qml:63-66` 新增 `snowySky`（code 71-77 / 85 / 86，与 `skyStopsFor` 雪天分支同一码表）；:128-147 `snowField`（mulberry32(20261018) 种子 PRNG，56 片雪花：xRatio 均匀、直径 2-5px、色 `#ffffff`、透明度 0.35-0.80、fallMs 6000-11000（单片全程落屏 6-11s，落在 HIG 环境循环 2-12s 内）、swayAmp 8-22px、swayMs 2000-4000ms、phaseMs 0-11000 / swayPhaseMs 0-4000 随机相位）；:470-524 `snowFieldLayer`（rainFieldLayer 之下、主布局之上，visible 跟随 snowySky，clip），每片双 `SequentialAnimation`：y 从 -(d+10) 线性落到 layer.height+10（Linear，Infinite，前 置 PauseAnimation 随机相位错峰），x 在 xBase±swayAmp 之间 InOutSine 往返摆动；`running: snowySky && !AppTheme.reduceMotion`（reduce-motion 停、非雪码零渲染）。
+  **帧差证据**（TEMP 强制 `currentWeatherCode=73`/`currentIsDay=true` 取证后已删并重编译；活实例 spectacle 连拍 5 帧间隔 ~400ms）：雪区 (860,70)-(1190,380) 相邻帧 MAE **0.0423 / 0.0507 / 0.0484 / 0.0587**、变化像素(>8) 118/124/102/113、maxdiff 117-130；对照侧栏静止区 (140,600)-(320,700) 四对相邻帧 **全部 MAE=0.0000、maxdiff=0**（本轮对照区完全干净，优于前几轮的合成器噪声底）。天空白点逐帧位移目视可见（/tmp/snow-small.png 裁片）。**终态二进制**（TEMP 已删，截图 1792164288 过体检闸）：真实数据夜晴 code 0 → 天空 `#0d1d38/#102343`（夜晴色板），无文本天空区 (880,20)-(1160,140)/(350,20)-(560,140) 白点数 **0**，雪层门控生效、无残留。测试 6/6 绿、go test ok。
 - **阶段三动效 B.1（第 2 条）：雨天雨丝下落（本轮，前端）**：`apps/weather/qml/Main.qml:20-21` 新增集中属性 `currentWeatherCode`/`currentIsDay`（把 :22-24 skyStops 与 :56-58 nightClearSky 的取值收拢到这两处，行为等价重构）；:59-62 `rainySky`（code 51-67 / 80-82 / ≥95）；:107-123 `rainField`（mulberry32(20261017) 种子 PRNG，64 条雨丝：xRatio 均匀、长 10-20px、宽 1.4px、色 `#dbe9ff`、透明度 0.20-0.48、fallMs 1500-2300、phaseMs 0-2300 随机相位）；:407-441 `rainFieldLayer`（sky 渐变之上、主布局之下，visible 跟随 rainySky，clip），每条雨丝 `SequentialAnimation on y`：随机相位 Pause（起点 y=-length-10 在屏外，故暂停期不可见）→ `NumberAnimation` y 从 -(length+10) 线性落到 layer.height+10，Infinite，`running: rainySky && !AppTheme.reduceMotion`（reduce-motion 停、非雨码零渲染）。
   **帧差证据**（TEMP 把 `currentWeatherCode` 强制 61 / `currentIsDay` true 取证，取证后已删并重编译；活实例 spectacle 连拍 4 帧间隔 ~400ms）：纯天空区 (950,90)-(1250,420) 相邻帧 MAE **0.0686 / 0.0590 / 0.0692**、变化像素(>8) 124/111/132、maxdiff 74-76；对照侧栏静止区 MAE 0.0231-0.0500 / maxdiff 34-42（已知合成器噪声底）；帧内裁片目视可见 1.4px 淡白雨丝、帧差图（f3→f4 增强后）雨丝逐帧处于**不同高度**（下移位移可见）。**终态二进制**（TEMP 已删，截图 1792163969 过体检闸）：真实数据夜晴 code 0 → 无任何雨丝，雨层门控生效、无残留；星空/卡片/侧栏无回归。测试 6/6 绿、go test ok。
 - **阶段三动效 B.6：逐小时卡列表入场交错（本轮，前端）**：`apps/weather/qml/Main.qml:1007` delegate 加 `required property int index`；:1011-1012 入场初态 `opacity: 0` + `transform: Translate { id: entranceShift; y: 14 }`；:1013-1021 `Component.onCompleted`（reduceMotion 时直接置终态不动画，否则 `entranceAnim.restart()`）；:1023-1029 `SequentialAnimation`：`PauseAnimation 40ms×index` 交错 + `NumberAnimation` opacity 0→1 / Translate y 14→0，各 260ms OutCubic（单卡落在 HIG 120–300ms 内）。数据异步到达时 Repeater 才建 delegate，故入场恰在数据到达时播一次；每小时刷新重建 delegate 会重放，频率符合 HIG"避免高频交互动效"。
@@ -39,7 +41,7 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：前三轮已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落"（均见已改，含帧差证据）。剩余：雪花飘移/云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
+1. **阶段三动效项（≥每 3 轮推进 1 条，必须带帧差 MAE）**：已完成"夜间晴天星星闪烁""逐小时卡列表入场交错""雨天雨丝下落""雪天雪花飘移"（均见已改，含帧差证据）。剩余：云层漂移/雷电闪白（按天气码）、图标 Bounce/Pulse/Replace、hero 温度视差、卡片 hover 玻璃高光+抬升、温度曲线 draw-on。
 2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
 3. Conditions 卡无温度走势曲线。
 4. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
@@ -47,6 +49,7 @@
 6. 滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐（参考图 Mumbai 卡在底缘为硬切，是否需要待定）。
 
 ## 外推待确认
+- **雪花外观无参考**：参考图只有晴天；雪密度（56 片全窗）、直径（2-5px）、颜色（纯白）、透明度（0.35-0.80）、摆幅（8-22px）、摆动周期（2-4s）、下落时长（6-11s/片）系程序化近似（TASK 阶段三 D 允许）；无倾斜角度、无大小远近分层（近大远小），雪量观感（小雪还是大雪）待真机雪天复核。另一帧差局限：取证帧间隔 400ms 内雪花位移较小，信号靠"变化像素 102-124 / maxdiff 117-130 + 对照区全 0"支撑，不如"位移逐帧可见"直观。
 - **雨丝外观无参考**：参考图只有晴天；雨丝密度（64 条全窗）、长度（10-20px）、颜色（`#dbe9ff`）、透明度（0.20-0.48）、slant（本轮垂直无倾斜）、下落时长（单丝全程 1.5-2.3s，**短于 HIG 环境循环 2-12s**——按"每颗粒子"而非"整场循环"理解外推，若要求整场周期落在 2-12s 需重算）均系程序化近似（TASK 阶段三 D 允许），雨量观感（是毛毛雨还是大雨）待真机雨天复核。
 - **雨丝帧差信号比星空轮弱**：纯天空区 MAE ~0.06 / maxdiff ~75 对噪声底 MAE ~0.03 / maxdiff ~42，倍率约 2x（星空轮为计数 2 倍/峰值 2.5 倍）；1.4px 宽雨丝信号天然弱，靠"帧差图中雨丝逐帧位移"目视证据补强。若后续要求更强数值证据需加粗/提亮雨丝重拍（会改外观）。
 - **入场交错的参数（40ms 交错 / 260ms OutCubic / y 偏移 14px）无参考约束**：参考图为静态，Apple 实际入场节奏不可知；取值按 HIG 120–300ms 与常见交错量级外推。另：真机首启动（数据非即时到达）时的观感未实拍——本轮取证时 service 已有缓存数据、动画早于截图工具首帧，只能靠 TEMP 重触发间接验证；真机冷启动（网络取数后入场）的实际节奏待人工复核。

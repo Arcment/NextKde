@@ -1,3 +1,50 @@
+# R052 — **仍差 #3 RETIRED: the editor dialogs do NOT compress — the "39px notes viewport" is a CLIP line** (2026-10-16)
+
+Atomic step: R051's Next round #1 = fix 仍差 #3 ("the editor dialogs compress instead of scrolling at 760x540").
+The premise was false. One candidate fix for the real defect it hid was implemented, measured, found to regress
+the wide window, and reverted — this round ships **no net code change** (`git diff` empty).
+
+**A. Static proof nothing is compressed.** In `r041-narrow-0021.png` (760x540 dark, pre-existing) at x=350 the
+notes box fill `(34,39,47)` runs **y 326→360 with no bottom border** and stops dead at the card fill; the wide
+frame ends the same box with *rounded* corners (fill-run 335→321px over y 444→452, border 453–455). A 38px box
+would show that rounded bottom. The fill stays the **full 335px** (x 220–554, exactly the wide frame's x 390–724)
+to its last drawn row ⇒ **clipped, not resized**. The field bands above are h **31/31/31** at both sizes.
+
+**B. Live proof the form scrolls (dark pid 101088, `date 2026-04-02` → `view day` → `openItem` → `detailsEdit` →
+`resize 760x540` → 2× `windowWheel angleY:-600`):**
+
+| x=350 band | narrow, unscrolled | after 2× wheel-down | wide |
+|---|---|---|---|
+| fields | 151..181, 191..221, 232..262 | **132..162, 173..203** | 187..217, 227..257, 271..294 |
+| hint text | 276..284 | 217..225 | 311..320 |
+| **notes box** | **323..360 (clipped)** | **264..360 = h97** | 359..455 = h97 |
+| 保存/取消/删除任务 | 396/433/470 | **unmoved** | 516/553/590 |
+
+The translation is **rigid at −59px with field heights unchanged and the footer fixed**; the notes box is **96px
+(97 with borders) in both window sizes**. **The 59px scroll range equals the 59px that was hidden** (undrawn box
+bottom would be 419, clip at 360) — two independent derivations, one number. So `CalendarTaskEditorDialog.qml:32-33`
+is **true of the layout**; R040's "73px" and R041's "39px" were readings of the clip line, never of the box.
+
+**C. The real defect, measured → fixed → reverted.** `CalendarTaskEditorDialog.qml:182-184` claims "the attached
+scrollbar"; only the **event** editor has one (`EventEditorDialog.qml:268-281` P03, `AsNeeded`, 6px, no track,
+`blackSeed`@0.40/0.30 — its comment names the symptom "a clipped form reads as scrollable instead of as a rendering
+fault"). Ported verbatim: **narrow works** (thumb `(23,23,23)` at x 553–555 travelling y 126..311 → 173..358;
+renders **3px wide, not the declared 6**), but **wide regresses** — `r052-wide-0006.png` shows a **permanent dark
+line at x 723–725** y 162..477, while the pre-change cross-section at y=300, x 718–736 of
+`r041-taskdialog-dark.png` is **constant (38,38,38)**. `AsNeeded` cannot hide it: the wide form is scrollable by a
+few px, so `size` < 1 and a near-full-length thumb is painted on a **D11-PASS** surface. Reverted via
+`git checkout --`; re-shot: x 548..562 @y300 uniform again, unscrolled profile reproduces R041 exactly.
+
+**Verdict: 仍差 #3 RETIRED (a phantom, not a fix).** The dialogs' 760x540 behaviour matches their comment and their
+layout. Replaced in the top-8 by the genuine sibling divergence (new #3: the missing affordance + the too-tall wide
+form), which needs a ruling because the event editor shares the latent mark.
+
+**Evidence:** `round-052-dialog-scroll.png` (2× side-by-side: clipped vs scrolled-whole). Frames `r052-rev-0007`,
+`r052-revscroll-0006`, `r052-narrow-0013`/`r052-scroll-0007` (with-bar build), `r052-wide-0006` (with-bar build),
+`r041-narrow-0021`/`r041-taskdialog-dark` (pre-change).
+
+---
+
 # R051 — **P01 dark narrow leg PASS ⇒ P01 CLOSED (2 themes × 2 window sizes)** (2026-10-16)
 
 ## 本轮 (R051)

@@ -1,3 +1,22 @@
+## R099 — C05's *inactive* label: the reference has NO muted segment label; ours was 130 levels too light
+**Verdict + fix (verdict-driven, not pixel-fishing).** The ref's toolbar capsule (`x385..620 y0..40`) cropped at ×4 and ×8 and
+probed word by word: **all four** reference labels — `Day` (unselected), `Week` (on the pill), `Month`, `Year` — carry the **same
+pure-black ink** (peak `(0,0,0)`; top-5% mean **23 / 11 / 15 / 20**; `n<100` = 60 / 76 / 85 / 53). The pill alone marks the
+selection — there is no two-tone. Ours read `labelSecondary` = `#3C3C43@60%` ⇒ peak **(147,145,150)**, top-5% **152**,
+**`n<100` = 0**, a **~130-level** gap that is plainly visible at ×4.
+
+**Change — 1 token, nothing else.** `apps/calendar/qml/Main.qml:1717-1722`: `mutedTextColor: root.tahoe.labelSecondary` →
+`root.tahoe.labelPrimary`. After (`r099-seg-light.png`, light, `contentY 280`): unselected `月` peak **25** / top-5% **34** /
+`n<100` **49**; `日` peak **11** / **25** / **38**; selected `周` **unchanged** (`(13,0,22)`, `21,12,28`, `100`) ⇒ no regression
+on the state that already matched. One ×4 stack carries the whole verdict (`docs/ui-calendar/r099-seglabel.png`: ref / before /
+after). Dark leg is extrapolated, not claimed: `labelPrimary` dark = `#F2F2F2`, so the dark muted ink collapses to the same
+single white tone.
+
+**Also recorded — NOT chased (needs a ruling).** The reference's segment set is **`Day · Week · Month · Year`** (4 segments,
+label centres x≈418 / 474 / 530 / 587, pitch ≈56), while ours is **`Month / Week / Day`** (3, centres 594 / 660 / 724, pitch 64)
+— the **reverse** of both the reference's granularity order and L03's own wording, "Day/week/month segment". Reordering the
+label list would remap `viewIndex`, so it is not an atomic token edit.
+
 # R098 — C05's **dark leg**, captured and **PASSED**: the segment's extrapolated dark tokens render at exactly their values. **No code changed.**
 
 **Why this round.** R097 fixed the light leg's capsule with an **opaque** pill; the dark values (`segmentTrack` white@6%, `segmentPill`

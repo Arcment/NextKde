@@ -1,363 +1,150 @@
-# R056 — **D08 light leg: three distinct fills PASS, the light ring is `focusRing`@0.64 rendered exactly — but light shows NO ring at a clean dialog open, and the light footer sits 12px lower than R055's dark footer** (2026-10-16)
+# R056 — **D08 light leg captured: three distinct fills PASS and the light `focusRing` (accent@0.64 = (120,179,216)) renders 2px on the box edges — but light shows NO ring at a clean open, and the light footer is 12px lower than R055's dark footer although the dialog geometry is identical** (2026-10-16)
 
 ## 本轮 (R056)
-Atomic step: R055's Next round #1 = "D08 light leg: repeat R055's capture with `KOS_APPEARANCE=light`".
-Done: the light leg. No code change, **0 build→screenshot loops**.
+Atomic step: R055's Next #1 = "D08 light leg". Done. No code change, **0 build→screenshot loops**.
+Drive (light 1100x692, pid 103791 → **107851**): kill dark pid → `start-review-vm.sh light` → `escape` → `date 2026-04-02` →
+`view day` → `openItem "Design review"` → `pointerObject detailsEdit` ×3 → one 9-command list: `nativeRecord r056-lit
+9000ms/250` + `pointer 557,587` move/press/drag-out/release + `pointer 557,550` move/press/drag-out/release → **36 frames**.
+State→frame map taken from the log's per-frame `elapsedMs`, not from hand arithmetic.
 
-Drive (light, 1100x692, pids 103791→**107851**): kill the dark pid read from `live-app.pid`, `start-review-vm.sh light`,
-then `escape` → `date 2026-04-02` → `view day` → `openItem {kind:"event",titleContains:"Design review"}` (popover) →
-`pointerObject detailsEdit` ×3 (dialog) → one command list of 9: `nativeRecord r056-lit 9000ms/250`, then
-`pointer {x:557,y:587}` move→press→drag-out(500,400)→release, then `pointer {x:557,y:550}` move→press→drag-out→release.
-**36 frames.** Per-frame `elapsedMs` was read back out of the log's `native recording` line to map state→frame.
-
-Measured by a 1px column scan at x=450 (light, card fill **(247,247,247)**), y from 530:
+1px column scan at x=450 (light, card **(247,247,247)**):
 | button | y span | normal | hover | pressed |
 |---|---|---|---|---|
-| 保存 (primary, `accent*`) | 547..578 | **(48,140,198)** | **(69,152,204)** | **(85,161,208)** |
-| 取消 (secondary, `buttonNeutral*`) | 584..615 | **(227,229,230)** | **(215,216,217)** | **(204,205,206)** |
+| 保存 (primary) | 547..578 | **(48,140,198)** | **(69,152,204)** | **(85,161,208)** |
+| 取消 (secondary) | 584..615 | **(227,229,230)** | **(215,216,217)** | **(204,205,206)** |
 | 删除日程 (destructive 2nd) | 621..650 | (227,229,230) + red label | — | — |
-Pitch 37, gap 6, x 384..730 — **the same pitch/gap as dark**.
+Pitch 37, gap 6, x 384..730 — same as dark.
 
-- **Three distinct fills on both kinds ⇒ hover ≠ pressed ≠ normal. PASS** (light leg).
-- **Every light token lands on its formula exactly:** `accentHover` (69,152,204) and `accentPressed` (85,161,208)
-  match dark digit-for-digit; `buttonNeutralHover`/`Pressed` are `buttonNeutral` mixed 0.055/0.105 toward **black**
-  over the measured base (215,216,217)/(204,205,206) — both exact. **The focus ring renders #78b3d8 = (120,179,216)
-  = `accent`@0.64**, the light `focusRing` (`AppTheme.qml:141`), 2px, on the box's top rows (585,586) **and** bottom
-  rows (613,614) — the same 2px geometry dark showed ⇒ **D08's `focusRing` clause PASSES in light too.**
-- **`buttonNeutral`'s base is NOT the rendered dialog fill.** Prediction `mix(card, black, 0.095)` with card
-  (247,247,247) gives (224,224,224); measured **+3/+5/+6 bluer** at (227,229,230) ⇒ the light button base is
-  ≈**(251,252,254)**, i.e. a lighter/tinted token than the dialog's own fill. Same story for the hover edge:
-  measured 1px hairline **(209,211,215)** vs `borderHover` (`AppTheme.qml:135-137`) over (247,247,247) = (198,202,207).
-- **While hovered the ring is replaced by that 1px gray hairline and returns on leave** (frames 739/988 ms = 取消
-  hover, no ring; 1988 ms onward = 取消 back to (227,229,230) **with** the ring). The ring follows the press:
-  取消 holds it from 1988 ms until 保存 takes it at 3736 ms. `KosSurface.qml:61-64` again ⇒ **a 1px gray edge on a
-  hovered button proves `focused == false` while hovered** — the same HoverHandler-drops-activeFocus behaviour as
-  dark. Observation, not filed.
-- **New, reproducible, and NOT explained: in light no `KosButton` shows a ring at a clean dialog open.** Frames
-  251/501 ms of the main record and a separate clean re-open (`escape`→`date`→`view day`→`openItem`→`detailsEdit`×3
-  → `nativeRecord r056-open 3000/250`, 11 frames) both show 取消 flat (227,229,230) across **all** rows 584..615 —
-  no ring, no matter which button. R055 measured the ring **on 取消 at open** in dark.
-- **New, reproducible, and NOT explained: the light footer sits 12px lower than R055's dark footer** (保存 547..578
-  here vs 535..565 in R055). **Dialog geometry is identical**, so this is not a taller card: the visible event-editor
-  Flickable reads `sceneX 387.6, sceneY 131.4, w 340, h 380, contentHeight 418` in light — **the same numbers R055
-  recorded for dark.** R054's "13px-lower" reading (Save 546..577) that R055 retired as a *post-`resize` layout lag*
-  is within 1px of this round's light numbers, so **that retirement is probably wrong — the offset looks like light
-  vs dark, not lag.**
-- Both anomalies are handed to Next #1 (one dark re-measure with *this* round's method decides both).
+- **Three distinct fills on both kinds ⇒ PASS (light leg).** `accentHover`/`accentPressed` match dark digit-for-digit;
+  `buttonNeutralHover/Pressed` = base mixed 0.055/0.105 toward black, both exact.
+- **Ring = #78b3d8 (120,179,216) = `accent`@0.64 = light `focusRing`**, 2px, top rows 585,586 **and** bottom 613,614 —
+  same geometry as dark ⇒ **D08's `focusRing` clause PASSES in light**.
+- **The light button base is ≈(251,252,254), not the dialog fill (247,247,247):** `mix(card,black,0.095)` predicts
+  (224,224,224), measured (227,229,230) (+3/+5/+6 bluer). The hover hairline likewise: measured (209,211,215) vs
+  `borderHover` over the card = (198,202,207).
+- **Hover drops the ring** (1px gray edge) and it returns on leave — the same behaviour R055 saw in dark.
+- **UNEXPLAINED #A — no ring at a clean open in light.** Frames 251/501 ms and a separate clean re-open
+  (`r056-open`, 11 frames) both show 取消 flat across all rows 584..615. R055 measured the ring **on 取消 at open** in dark.
+- **UNEXPLAINED #B — the light footer is 12px lower** (保存 547..578 vs R055 dark 535..565) **while the dialog geometry
+  is identical**: the visible event-editor Flickable reads `sceneX 387.6, sceneY 131.4, w 340, h 380, contentHeight 418`
+  in light = R055's dark numbers. R054's "Save 546..577" that R055 retired as *resize lag* is within 1px of this light
+  reading ⇒ **that retirement looks wrong; the offset is probably light-vs-dark, not lag.**
+- Both handed to Next #1 — one dark re-measure with this round's method decides them.
 
-Evidence (mirrored to `docs/ui-calendar/`, 2x crops of x 384..736 × y 528..662):
-`r056-lit-footer-normal.png`, `r056-lit-cancel-{hover,press,focusring}.png`,
-`r056-lit-save-{hover,press,focusring}.png`. `rounds.md` carries the frame→elapsedMs map.
+Evidence (mirrored to `docs/ui-calendar/`): `r056-lit-footer-normal.png`, `r056-lit-cancel-{hover,press,focusring}.png`,
+`r056-lit-save-{hover,press,focusring}.png` (2x crops of x 384..736 × y 528..662).
 
-**Round-level discipline note:** **28 Bash calls (budget 25 — over)**. Two self-inflicted detours: (a) a
-`nativeRecord 500ms/250→500` with `interval == duration` produced **0 frames** — the stop timer wins the race;
-(b) I spent calls re-deriving "is the dialog open?" from logs when one frame answers it. Both are now in 外推.
+**Discipline: 28 Bash calls (budget 25 — OVER).** Two wasted detours, both now in 外推: (a) `nativeRecord` with
+`interval == duration` yields **0 frames** (stop timer wins the race); (b) I burned calls inferring "is the dialog open?"
+from logs — **one frame answers it**.
 
----
-
-# R055 — **D08 dark leg: hover/pressed/focus captured — the focus ring is REAL (2px `focusRing`), and all three fills are distinct** (2026-10-16)
-
-## 本轮 (R055)
-Atomic step: R054's Next round #1 = "capture `KosButton` hover / pressed / focus in both themes".
-Done: **the dark leg** (light leg carried to Next #1 — one theme = one atomic step).
-First time in 55 rounds that a button has ever been hovered or pressed. No code change.
-
-Drive (dark, 1100x692, the still-running pid 103791): `escape` → `date 2026-04-02` → `view day` →
-`openItem {kind:"event", titleContains:"Design review"}` (popover) → `pointerObject detailsEdit` move/press/release
-(dialog) → `nativeRecord r055-b3 7000ms/250` while `pointer {x:557,y:599}` move → press → drag-out → release,
-then `pointer {x:557,y:562}` move. 28 frames, **0 build→screenshot loops needed** (no source change).
-
-Measured by a 1px column scan at x=450 (exact box edges, dark, card fill (38,38,38)):
-| button | y span | normal | hover | pressed |
-|---|---|---|---|---|
-| 保存 (primary, `flatPrimary`) | 535..565 (h 31) | **(48,140,198)** | **(69,152,204)** | **(85,161,208)** |
-| 取消 (secondary) | 572..602 (h 31) | **(69,69,69)** | **(79,79,79)** | **(89,89,89)** |
-| 删除日程 (destructive 2nd) | 609..639 (h 31) | (69,69,69) + red label | — | — |
-Pitch 37, gap 6, x 384..730 — unchanged, still matches D05.
-
-- **Three distinct fills on both kinds ⇒ hover ≠ pressed ≠ normal. PASS.**
-- **The focus ring is real and measured: 2px, colour (45,115,159)** on the top **and** bottom edge rows
-  (572,573 / 601,602) in the **normal and pressed** frames. (45,115,159) = `AppTheme.focusRing` = `accent@0.76`
-  over the card = (48,140,198)·0.76 + (38,38,38)·0.24 = (46,116,160) ⇒ **D08's `focusRing` clause PASSES**.
-- **At dialog open the ring sits on 取消 (secondary), not 保存** — the primary draws no ring, so *it* is not the
-  focused item. `EventEditorDialog.qml:223-247`.
-- **While hovered the ring is replaced by a 1px gray `borderHover` (81,81,81)** + a 1px (46,46,46) AA row, and it
-  returns on leave. `KosSurface.qml:61-64` is `border.width: focused ? max(2,strokeWidth) : strokeWidth` /
-  `color: focused ? focusRing : (hovered ? borderHover : …)`, so a **1px gray edge on a hovered button proves
-  `focused == false` while hovered** — hovering drops `activeFocus` on this build. Recorded as an
-  observation, **not** filed as a defect (D08 only demands a visible ring; the ref's idle alert shows none).
-
-Evidence (mirrored to `docs/ui-calendar/`): `r055-dark-save-{normal,hover,press}.png`,
-`r055-dark-cancel-{normal,hover,press}.png` (2x crops; the ring rows are visible in the normal/pressed ones),
-`r055-b3-0012.png` (full dialog frame with the ringed 取消), and the 28-frame `r055-b3-*` series.
-
-**Round-level discipline note:** **24 Bash calls (budget 25)**, 0 build→screenshot loops. Two wasted loops inside
-the round: drive1's timing put `press(取消)` at ~6.1s inside a 6.2s recording (**no pressed frame** — the 0.15s
-per-send sleeps + poll latency are not in the sleep arithmetic), and drive2 skipped `openItem` so `detailsEdit`
-was found *outside* the popover and **no dialog opened** (28 frames of nothing). Both are now in 外推.
-
-## 仍差 (top 7, visual-impact order)
+## 仍差 (top 8, visual-impact order)
 1. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
-   `Rectangle`. Enter = page steps 255→204 in one frame with the card still at α=0.00; exit = 204→255 in one frame
-   with the card still at α=1.00. App-wide. **Needs a ruling**; a fix = bind that rectangle's opacity to `revealProgress`.
+   `Rectangle`. Enter = page 255→204 in one frame with the card still α=0.00; exit = 204→255 in one frame with the card
+   still α=1.00. App-wide. **Needs a ruling**; fix = bind that rectangle's opacity to `revealProgress`.
 2. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
    `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs a ruling.**
 3. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (month 18px, week/day 21px,
-   all fixed, no duration→height path), while the ref's week view *does* show proportional top-aligned blocks ⇒ decide
+   all fixed, no duration→height path), while the ref's week view shows proportional blocks ⇒ decide
    reword-the-clause vs build-proportional-blocks. Clauses 1+2 PASS (R048).
-4. **D08 is only *partly* closed (R055):** dark leg captured (three fills + ring, above); still open — the **light
-   leg**, the **task-editor footer** (`CalendarTaskEditorDialog.qml:81-98`) and a **toolbar** `KosButton`
-   (`Main.qml:2379`) for the spec's "每个按钮", and a ruling on the **hover-drops-the-ring** behaviour. **No ruling
-   needed for the capture itself.**
+4. **D08 still partly open:** dark leg (R055) + light leg (R056) captured; **open — the at-open ring discrepancy #A/#B
+   below, the task-editor footer (`CalendarTaskEditorDialog.qml:81-98`), a toolbar `KosButton` (`Main.qml:2379`)** for
+   the spec's "每个按钮", and a ruling on **hover-drops-the-ring**. **No ruling needed for the captures themselves.**
 5. **Line pitch 22px at font 15 = 1.47** (R046/R047, both themes) — CJK font-stack leading; same root cause as the
-   recorded `controlHeight` 31-vs-34. App-wide. Cosmetic, no ID covers it.
+   recorded `controlHeight` 31-vs-34. App-wide. Cosmetic, no ID.
 6. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91`
    VTODO (due 11:00) is dropped silently. **Needs a ruling.**
 7. **Month day cell holds 1 chip + `N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1 (`+8/+8/+11/+9/+7`).
    Same family as #6. **Needs a ruling.**
-- *Cosmetic, no ID, folded out of the top list (in rounds.md):* D02's radius is **16** vs the spec's named
-  `largeRadius` 24 / `windowCornerRadius` 32 — recommendation stands: **keep 16**.
+8. **Button fill/edge tokens don't match their own formulas** (R056): light `buttonNeutral` base reads ≈(251,252,254),
+   not the rendered card (247,247,247). Cosmetic-to-2-Units, but it means the *predicted* light values in 外推 are off.
+- *Cosmetic, no ID, folded out (in rounds.md):* D02's radius is **16** vs the spec's `largeRadius` 24 /
+  `windowCornerRadius` 32 — recommendation stands: **keep 16**.
 
 ## 最近已改 (most recent 8)
-1. R055 — measurement only; **D08 dark leg captured** (hover/pressed/focus, above). No code change.
-2. R054 — measurement only; **still-difference #3 RETIRED as a phantom** (event Flickable 418/380, thumb ratio 0.90
-   = a real bar); added `scrollInfo` to the toolbox. No code change.
-3. R053 — **ported P03 into the task editor and gated its policy on real scrollability**; narrow bar PASS, wide PASS.
-4. R052 — attempted P03 port, measured, reverted; retired the old #3 as a phantom (clip line ≠ compressed box).
-5. R051 — measurement only; P01 dark narrow leg PASS ⇒ P01 CLOSED (4 legs). Corrected R047's dot colour.
-6. R050 — measurement only; P01 narrow leg PASS (light); popover immune to the dialog finding.
-7. R049 — measurement only; E03 clause 3 **BLOCKED on a ruling**; new 仍差 #8 (now #7).
-8. R048 — measurement only; **E03 clauses 1+2 PASS**.
+1. R056 — measurement only; **D08 light leg captured**; #A/#B above. No code change.
+2. R055 — measurement only; **D08 dark leg captured** (hover/pressed/focus). No code change.
+3. R054 — measurement only; event Flickable 418/380 → the old "compressed box" still-difference RETIRED as a phantom;
+   added `scrollInfo` to the toolbox. No code change.
+4. R053 — **ported P03 into the task editor and gated its policy on real scrollability**; narrow + wide PASS.
+5. R052 — attempted P03 port, measured, reverted; retired the old #3 as a phantom (clip line ≠ compressed box).
+6. R051 — measurement only; P01 dark narrow leg PASS ⇒ P01 CLOSED (4 legs). Corrected R047's dot colour.
+7. R050 — measurement only; P01 narrow leg PASS (light); popover immune to the dialog finding.
+8. R049 — measurement only; E03 clause 3 **BLOCKED on a ruling**; new 仍差 #8 (now #7).
 
 ## 外推待确认 (do NOT assume)
-*(R053's 9 older items + R054's block are archived to rounds.md — read them there, don't re-derive.)*
-- **`pointer` takes flat `{action:"pointer", x, y, kind:"move"|"press"|"release"}`**; x/y are window/contentItem
-  coords. With a bare x/y the log prints `hover n/a down n/a`; pass `target` (`{action:"pointer", target:"取消", …}`
-  resolves via `objectNamed` **then** `controlNamed`, which matches `item.text`/`item.hint` + a callable `clicked`)
-  to get real `hover`/`down` values — **and always pass x/y too as the fallback, otherwise a miss sends NaN.**
-  `target` needs UTF-8 CJK labels for these dialogs.
-- **The `press` → `move` off the button → `release` outside** idiom is the way to capture *pressed* without firing
-  the click: dragging out pops the button back up (frames show the normal fill again) and the release does nothing.
-  The dialog stays open and the button keeps `activeFocus`.
-- **Timing: `review-command.py`'s 0.6s (and my own 0.15s) per-send sleeps + poll latency make hand-computed stage
-  times ~0.5–1.0s optimistic.** A press scheduled at "t=5.15s" inside a 6.2s recording landed at ~6.1s and produced
-  **no frame**. Budget **≥2.5s of slack** after the last state change you need, or use a longer `duration`.
-- **Reopening the dialog needs the FULL chain** — `escape`, then a **fresh `date`**, then `view day`, then
-  **`openItem`**, then `pointerObject detailsEdit` ×3. `detailsEdit` resolves even with **no popover open** (it
-  found a point at (682,428) and the click did nothing) ⇒ *always* confirm the dialog is up (a frame, or
-  `scrollInfo`) before driving the footer.
-- **The event-editor footer is at y 535..639 at 1100x692** (保存 535..565 / 取消 572..602 / 删除 609..639, x 384..730,
-  centre x ≈ 557). **R054's 13px-lower reading (Save 546..577) was a post-`resize` layout lag**, not a different
-  dialog: the same `Design review` dialog opened fresh sits at the values in the table above. Trust a freshly opened
-  dialog, not one measured right after a `resize`.
-- **`AppTheme.focusRing` dark = `withAlpha(accent, 0.76)`** (`AppTheme.qml:141`) ⇒ renders **(45,115,159)** over the
-  card; `borderHover` renders **(81,81,81)**; secondary `buttonNeutral` (69,69,69) → `buttonNeutralHover` (79,79,79,
-  +0.055 white) → `buttonNeutralPressed` (89,89,89, +0.105 white) — matches `AppTheme.qml:106-112` exactly.
-  Primary `accentHover`/`accentPressed` = (69,152,204)/(85,161,208). **`strokeWidth` for a `flatPrimary` primary is
-  forced to 0, but a focused one still draws `border.width = max(2,0) = 2`.**
-- **`scrollInfo` is THE instrument for dialog geometry** — `{action:"scrollInfo"}` dumps every Flickable/ScrollView/
-  TextArea with `contentHeight/height/contentY/width/clip/visible/interactive/activeFocus` plus `sceneX/sceneY`, and
-  it reaches dialog Flickables that `objectNamed`/`inspectGeometry`/`regionPosition` **cannot**. One
-  `[UIReview] scrollInfo [...]` line per call in `live-runtime-vm.log`.
-- **Event editor dialog geometry at 1100x692 (dark):** card fill `(38,38,38)`; Flickable `sceneX 387.6, sceneY 131.4,
-  w 340, h 380, contentHeight 418 (range 38)` — the form does **not** fit (R054). Card reserves ~240px of chrome vs
-  the task editor's ~100px. `contentHeight 418` is width-independent (dialog width = `min(380, w-48)`).
-- **Task-dialog form: `contentHeight` = 295** at 760x540 and 1100x692; 96px notes viewport, 4 rows h 31, stacked
-  footer. At 1100x692 the Flickable is 520 ⇒ not scrollable.
-- **Unscrolled baselines (dark, x=350 narrow / x=500 wide): narrow 151 / 191 / 232 / hint 276..285 / notes 323..clip 361
-  / footer 396·433·470; wide 187 / 227 / 268 / notes 359..455 / footer 516·553·590.**
+*(R053's 9 older items are archived to rounds.md — read them there, don't re-derive.)*
+- **`nativeRecord` with `interval == duration` captures ZERO frames** (R056): a 500/500 request produced `frames:[]`.
+  Keep `interval ≤ duration/4` (7000/250 and 9000/250 both fine). The log's `native recording` line carries
+  **per-frame `elapsedMs`** — parse it to map state→frame instead of hand-arithmetic.
+- **The 4-step open chain and the 3-step click CAN go in ONE command list** (R056): `escape`, `date`, `view`, `openItem`,
+  `pointerObject detailsEdit`×3 = 7 items in one call works (the 0.6s spacing is enough), and the recording may be the
+  **first** item of a list whose later items drive the pointer.
+- **Hand-computed stage times are ~0.5–1.0s optimistic** (0.6s + 0.15s per-send sleeps + poll latency). Budget **≥2.5s
+  of slack** after the last state change you need, or lengthen `duration`. Verify with `elapsedMs`.
+- **The `press` → `move` off the button → `release` outside** idiom is how to capture *pressed* without firing the click:
+  the button pops back to normal, the release does nothing, the dialog stays open, and the button keeps `activeFocus`.
+- **The ring follows the press, not the dialog:** nothing has a ring at open in light (R056 #A); press 取消 and it keeps
+  the ring until 保存 is pressed at 3736 ms. So "which button is focused" is only knowable from a frame *after* a press.
+- **Reopening the dialog needs the FULL chain** — `escape`, a **fresh `date`**, `view day`, `openItem`,
+  `pointerObject detailsEdit` ×3. `detailsEdit` resolves even with **no popover open** (it found a point at (682,428)
+  and the click did nothing) ⇒ always confirm the dialog is up (one frame) before driving the footer.
+- **Light event-editor footer at 1100x692: 保存 547..578 / 取消 584..615 / 删除 621..650**, x 384..730, centre x ≈ 557,
+  pitch 37. **Dark (R055): 535..565 / 572..602 / 609..639.** The 12px gap is unexplained (#B) — re-measure dark with the
+  x=450 scan before trusting either set as "the" geometry.
+- **Light tokens:** card/fill renders **(247,247,247)** but the button base is ≈**(251,252,254)**; `focusRing` light =
+  `accent`@0.64 = **(120,179,216)**; hover hairline **(209,211,215)**; `accent` (48,140,198) /
+  `accentHover` (69,152,204) / `accentPressed` (85,161,208) — the accent three are **identical in both themes**.
+  `borderHover` dark = (81,81,81) exact.
+- **`scrollInfo` is THE instrument for dialog geometry** — one `[UIReview] scrollInfo [...]` line per call in
+  `live-runtime-vm.log`, reaching dialog Flickables that `objectNamed`/`inspectGeometry`/`regionPosition` cannot. Parse
+  the line as JSON and filter on `parent`.
+- **Event editor dialog geometry at 1100x692 (BOTH themes):** card fill light #f7f7f7 / dark #262626; visible Flickable
+  `sceneX 387.6, sceneY 131.4, w 340, h 380, contentHeight 418` (range 38, does not fit). A hidden second instance reads
+  `sceneX 26.8, sceneY 31.6, h 580, contentHeight 422` — **use `visible:true` to pick the live one.**
+- **Task-dialog form: `contentHeight` = 295** at 760x540 and 1100x692; 96px notes viewport, 4 rows h 31, stacked footer.
+  At 1100x692 the Flickable is 520 ⇒ not scrollable.
 - **A wheel probe is only evidence of "not scrollable" if its point is on a non-control item.** Proven point:
   `windowWheel x350 y300 angleY:-600` at 760x540; at 1100x692 that y lands on the due-date field (use y≈315).
-- **`resize` needs ~3s to settle and its frames/geometry lag one resize.** Resize in its own batch, `sleep 3`, then record.
-- **A fresh enter needs an app restart** after `escape` (the day-view selection is not restored).
+- **`resize` needs ~3s to settle and its frames/geometry lag one resize.** Resize in its own batch, `sleep 3`, record.
 - **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it** (`nohup … & disown`); `timeout 180` kills the app.
   A rebuilt binary requires a **kill+relaunch**. Kill the pid **read from `live-app.pid`**, never `pkill -f 'kos-calendar'`.
-- **`nativeRecord` frames land in the app's CWD** = where `start-review-vm.sh` was invoked. `nativeRecord` =
-  `{action,prefix,duration,interval}` → `<prefix>-NNNN.png`; **frame counts vary — glob the prefix, never assume an index.**
-  It is **timer-based and non-blocking** (50ms timer, captures via `grabWindow`), so pointer commands interleave with it.
+  It takes **~12s** before the new pid appears in `live-app.pid`; the app may need another few seconds before it answers
+  commands — a single `scrollInfo` settles that faster than reading logs.
+- **`nativeRecord` frames land in the app's CWD** = the calendar task dir. `{action,prefix,duration,interval}` →
+  `<prefix>-NNNN.png`; **frame counts vary — glob the prefix, never assume an index.** Timer-based and non-blocking.
 - **Harness shapes:** `windowWheel` = `{action,x,y,angleY}`; `resize` = `{width,height}`; `openItem` =
-  `{kind,titleContains}`; `view` = `{view:"month"|"week"|"day"}`; `date` = `{date:"YYYY-MM-DD"}`; `pointerObject`
-  needs THREE commands (`move`,`press`,`release`). Fields are FLAT.
-- **`review-command.py` is not executable here — call it as `python3 review-command.py '<json>'`**, and it accepts a
-  LIST of commands (0.6s apart). **In-place write only** to `command.json` (atomic replace trips the QML dir watcher).
-  Poll is `interval:100`. **`Bash` CWD drifts between calls — always `cd` to the task dir explicitly.**
+  `{kind,titleContains}`; `view` = `{view:"month"|"week"|"day"}`; `date` = `{date:"YYYY-MM-DD"}`; `pointerObject` needs
+  THREE commands (`move`,`press`,`release`). Fields are FLAT, and `pointer` needs `kind`.
+- **`review-command.py` is not executable here — call it as `python3 review-command.py '<json>'`**; it accepts a LIST of
+  commands (0.6s apart) and prints nothing on success. **In-place write only** to `command.json` (atomic replace trips
+  the QML dir watcher). Poll is `interval:100`. **`Bash` CWD drifts between calls — always `cd` to the task dir explicitly.**
 - **Fixtures on 2026-04-02:** VEVENTs = Morning planning 08:00 / Short appointment 10:15 / Long review with a
   deliberately lengthy title 11:00 / **Design review 14:30** / Evening session 18:00. VTODOs (kind `"todo"`) =
   `[UI] Green planning` (09:00), `[UI] Gold review` (12:00, **not** a VEVENT), `[UI] Red review` (16:00),
   `A deliberately long task title to inspect elision` (11:00), `[R019 LONG TASK] …` (11:00).
-- **Light theme**: the notes field is indistinguishable from the card fill (#F7F7F7 vs (248,248,249)) — locate a light
-  field box by its **border** (222,224,226) only. Popover fill `#F5F5F5` / `#262626` dark; editor dialogs `#F7F7F7`
-  light / `#262626` dark. Accent (48,140,198) in both themes; `defaultAccentSeed` #3478f6.
+- **Light theme**: the notes field is indistinguishable from the card fill — locate a light field box by its **border**
+  only. Popover fill `#F5F5F5` / `#262626` dark; editor dialogs `#F7F7F7` light / `#262626` dark. Accent (48,140,198)
+  in both themes; `defaultAccentSeed` #3478f6.
 - **`motionFast`** = 120, **`motionNormal`** = 220 (`AppTheme.qml:174-175`), both 0 under `reduceMotion`.
   `controlHeight` renders **31px here, not the spec's 34**; the dim is `Overlay.modal`, **0.20 light / 0.42 dark**.
-- **Save is deliberately NOT exercised** (isolated-profile discipline) — this is why the primary's *pressed* state was
-  captured by press→drag-out→release-outside.
-- **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in
-  and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md`/`rounds.md` can never be
+- **Save is deliberately NOT exercised** (isolated-profile discipline) — that is why *pressed* is captured by
+  press→drag-out→release-outside.
+- **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in and
+  **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md`/`rounds.md` can never be
   committed — expected, not a failure. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
 
 ## Next round (pick ONLY #1)
-**#1 — D08 light leg: repeat R055's capture with `KOS_APPEARANCE=light`** (kill the dark pid from `live-app.pid`,
-relaunch with `light`, then `date 2026-04-02` → `view day` → `openItem "Design review"` → `pointerObject
-detailsEdit` ×3 → `nativeRecord r056-lit-l 7000/250` with `pointer {x:557,y:599}` move → press → drag-out →
-release, then `pointer {x:557,y:561} move`). Compare the same column scan at x=450 against the dark table above and
-against `_ref-alert-crop.png`. Light tokens to expect: `focusRing` = accent@**0.64**, `borderHover` light,
-`buttonNeutralHover/Pressed` mix toward **black**. Budget slack: ≥2.5s between the last state change and the end of
-the recording.
+**#1 — Re-measure the DARK event-editor footer with R056's exact method, to settle #A and #B at once.** Kill the light
+pid from `live-app.pid`, relaunch `start-review-vm.sh dark`, then ONE list: `escape`, `date 2026-04-02`, `view day`,
+`openItem "Design review"`, `pointerObject detailsEdit` ×3, `nativeRecord r057-dark2 6000/250`; then a second list with
+`pointer {x:557,y:599}` move→press→drag-out→release and `pointer {x:557,y:562}` move. Scan x=450 over **y 520..660**
+and report: does 取消 show the ring **at open** (R055 said yes, R056-light says no), and do the boxes land at 535..565 /
+572..602 / 609..639 (R055) or 547..578 / 584..615 / 621..650 (R056-light)? Also grep the visible EventEditorDialog
+Flickable from `scrollInfo` and compare with `sceneY 131.4, h 380, contentHeight 418`. **If dark lands at 547..578 the
+whole footer sits 12px lower than R055 recorded and R055's dark table (plus the R054 "resize lag" retirement) needs a
+correction in the ledger.**
 
 **#2+ — everything else in 仍差 needs a ruling** (#1 dim snap, #2 shadow, #3 E03 clause 3, #6/#7 per-cell caps);
 **#5 (line pitch)** is cosmetic with no ID; **#4's remaining legs** (task-editor footer, a toolbar `KosButton`,
-hover-drops-the-ring) come after the light leg.
-# R054 — **仍差 #3 RETIRED as a phantom: the event editor's bar is a REAL scrollbar (range 38px)** (2026-10-16)
-
-## 本轮 (R054)
-Atomic step: R053's Next round #1 = "fix the event editor's twin defect: measure, then gate".
-**There is no twin defect — the measurement refuted it, so no code was written this round.**
-
-R053 predicted a stray near-full-length thumb wherever the event form fits. Measured (dark, pid 103791,
-`date 2026-04-02` → `view day` → `openItem {kind:event, titleContains:"Design review"}` (14:30) →
-`pointerObject detailsEdit` move/press/release → `resize 1100x692`):
-- **`scrollInfo`** (new instrument, see 外推) reports the event editor's Flickable: **h 380, contentHeight 418,
-  contentY 0, w 340, sceneX 387.6, sceneY 131.4, clip true, visible true ⇒ range 38px — the form does NOT fit.**
-- The bar is at **x 724–725** (inner half of a 6px bar centred on the right edge 727.6) and its thumb spans
-  **y 133..475 = 342px of a 380px track = 0.90**, exactly the expected `380/418 = 0.909` ⇒ it is a *correct,
-  proportional* scrollbar, not R053's full-length stray mark (that one had ratio 1.00 on range 0).
-- My own frame confirms the clip visually: the 备注 field's box is cut at the clip line (y 511) with **no bottom
-  border** — the form is genuinely clipped, which is precisely what P03's overlay bar exists to signal.
-- Therefore the R053 gate (`contentHeight > height ? AsNeeded : AlwaysOff`) would evaluate to `AsNeeded` at
-  **every** window size (card capped at 620 ⇒ Flickable 380; contentHeight 418 is width-independent because the
-  dialog is `min(380, w-48)`) ⇒ a **permanent no-op**. `EventEditorDialog.qml:271` stays a bare `AsNeeded`.
-
-Evidence: `r054-event-wide.png` (full frame), `r054-clip-bar2x.png` (notes box cut at the clip line),
-`r054-bar3x.png` (bar column) — mirrored under `docs/ui-calendar/` + LEDGER R054.
-
-**Round-level discipline note:** **29 Bash calls (budget 25 — overrun)**, **0 build→screenshot loops** (measurement-only).
-The overrun is inherent to a measurement round that has to *locate* its subject: 2 calls to find the right 2026-04-02
-VEVENT (R053's quoted fixture is a TODO), 6 probe/compare calls, and 5 for mirror+commit bookkeeping. Trimming the
-probe count is possible next time (run `scrollInfo` + `nativeRecord` in one batch).
-The one wasted probe: the R054 drive script's first attempt used `openItem {kind:"event"}` with R053's literal
-title ("Gold review 2026-04-02") — that fixture is a **VTODO**, not a VEVENT; the 2026-04-02 events are
-Design review 14:30 / Long review 11:00 / Short appointment 10:15 / Evening session 18:00 / Morning planning 08:00.
-
-## 仍差 (top 7, visual-impact order)
-1. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
-   `Rectangle`. Enter = page steps 255→204 in one frame with the card still at α=0.00; exit = 204→255 in one frame
-   with the card still at α=1.00. App-wide. **Needs a ruling**; a fix = bind that rectangle's opacity to `revealProgress`.
-2. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
-   `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs a ruling.**
-3. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block (month 18px, week/day 21px,
-   all fixed, no duration→height path), while the ref's week view *does* show proportional top-aligned blocks ⇒ decide
-   reword-the-clause vs build-proportional-blocks. Clauses 1+2 PASS (R048).
-4. `KosButton.qml:67-68` — secondary regains a 1px `AppTheme.border` rim on **hover or activeFocus**; never checked vs
-   ref. `buttonNeutralHover`/`Pressed` never captured; **no button has ever been hovered**. Also open from R045: the
-   disabled footer button's accent→disabled blend animates (~0.69 → 0.63 over 52ms). **No ruling needed.**
-5. **Line pitch 22px at font 15 = 1.47** (R046/R047, both themes) — CJK font-stack leading; same root cause as the
-   recorded `controlHeight` 31-vs-34. App-wide. Cosmetic, no ID covers it.
-6. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91`
-   VTODO (due 11:00) is dropped silently. **Needs a ruling.**
-7. **Month day cell holds 1 chip + `N`; the ref stacks 3** (R049). `CalendarMonthView` cap is 1 (`+8/+8/+11/+9/+7`).
-   Same family as #6. **Needs a ruling.**
-- *Cosmetic, no ID, folded out of the top list (in rounds.md):* D02's radius is **16** vs the spec's named
-  `largeRadius` 24 / `windowCornerRadius` 32 — recommendation stands: **keep 16**.
-- *Retired this round:* R053's #3 (the event editor's "twin defect") — **phantom**, see 本轮.
-
-## 最近已改 (most recent 8)
-1. R054 — measurement only; **仍差 #3 RETIRED as a phantom** (event Flickable 418/380, thumb ratio 0.90 = a real
-   bar); added `scrollInfo` to the toolbox. No code change.
-2. R053 — **ported P03 into the task editor and gated its policy on real scrollability**; narrow bar PASS (thumb
-   travels), wide PASS (no bar), form geometry = R041's at both sizes. Fixed the old #3; filed the event editor's
-   *unmeasured* twin as new #3.
-3. R052 — attempted P03 port, measured, reverted; retired the old #3 as a phantom (clip line ≠ compressed box).
-4. R051 — measurement only; P01 dark narrow leg PASS ⇒ P01 CLOSED (4 legs). Corrected R047's dot colour.
-5. R050 — measurement only; P01 narrow leg PASS (light); popover immune to the dialog finding.
-6. R049 — measurement only; E03 clause 3 **BLOCKED on a ruling**; new 仍差 #8 (now #7).
-7. R048 — measurement only; **E03 clauses 1+2 PASS**.
-8. R047 — measurement only; **P01 long-text dark leg PASS**; dot is accent blue, not green.
-
-## 外推待确认 (do NOT assume)
-*(R053's 9 older items were archived to rounds.md R053 — α-probe method, month/week-grid geometry, popover centring,
-`captureClient` key, `ElideRight`, month chip tinting, `flatPrimary` opt-ins. Read them there, don't re-derive.)*
-- **`scrollInfo` is THE instrument for dialog geometry — it settles what three other probes could not.**
-  `{action:"scrollInfo"}` dumps every Flickable/ScrollView/TextArea with `contentHeight/height/contentY/width/
-  clip/visible/interactive` plus `sceneX/sceneY`, and it reaches the dialog Flickables that `objectNamed`,
-  `inspectGeometry` and `regionPosition` **cannot** (only the *task* editor has `objectName:"editorScroll"`).
-  Output = one `[UIReview] scrollInfo [...]` line per call in `live-runtime-vm.log`. **Use it before any pixel probe
-  on a dialog.** Do not conclude "the bar is stray" from pixels alone — check `contentHeight > height` first.
-- **Event editor dialog geometry at 1100x692 (dark, measured R054):** card fill `(38,38,38)`; Flickable
-  `sceneX 387.6, sceneY 131.4, w 340, h 380, contentHeight 418 (range 38)`, `interactive:false`, `clip:true`;
-  bar renders at **x 724–725**, thumb **y 133..475**; notes viewport h 96 at sceneY 453.4; footer button ListView
-  sceneY 531.4 h 40. The card reserves **~240px** of chrome (vs the task editor's ~100px) — that is why the event
-  form overflows where the task form does not. `contentHeight 418` is width-independent (**dialog width =
-  `min(380, w-48)`**; at 760x540 the card is 508 ⇒ Flickable 268 ⇒ overflow grows to 150).
-- **R053's root-cause story is unverified by the new instrument.** Its gate is *correct by construction*, but the
-  premise behind it ("a bare `AsNeeded` never hides an attached bar") rests on a pixel sighting on a form that
-  `scrollInfo` now reports as **295 ≤ 520 at 1100x692**. Re-derive with `scrollInfo` before quoting the mechanism
-  to justify anything else (the gate itself is safe — it is exactly the wheel handler's predicate).
-- **The attached bar is centred on the Flickable's right edge and `clip: true` cuts its outer half ⇒ a 6px bar renders
-  3px.** At 760x540 it sits at x 553–555; at 1100x692 at x 723–725. **A dark `(23,23,23)` column there is a bar, NOT a
-  border** (field borders read *lighter* than the card: `(65,66,67)`). A **partial** column (broken by the field
-  rows' edges) is still the bar.
-- **Task-dialog form: `contentHeight` = 295 at 760x540 and 1100x692; the Flickable's visible bottom (the clip line) is
-  y 360/361 at 760x540 ⇒ height 236 ⇒ range 59.** At 1100x692 the Flickable is 520 ⇒ not scrollable, so R053's gate
-  correctly hides its bar. The 96px notes viewport, the 4 rows (h 31/31/31) and the stacked footer never change with
-  window size.
-- **Unscrolled baselines (dark, x=350 narrow / x=500 wide): narrow 151 / 191 / 232 / hint 276..285 / notes 323..clip 361
-  / footer 396·433·470; wide 187 / 227 / 268 / notes 359..455 / footer 516·553·590.** Compare against these before
-  calling anything a regression.
-- **A wheel probe is only evidence of "not scrollable" if its point is on a non-control item.** Labels and layout
-  spacing propagate the wheel to the Flickable's `NoButton` MouseArea and scroll it; a `KosTextField`/ComboBox under
-  the point eats it. **Proven point: `windowWheel x350 y300 angleY:-600` at 760x540** (the "Notes" label row). At
-  1100x692 that same y lands on the due-date **field** — use a Label row (e.g. y≈315, the hint) instead.
-- **`resize` needs ~3s to settle, and its frames lag one resize**: a `nativeRecord` started inside ~1s of a `resize`
-  still carries the **old** window size. **Resize in its own batch, `sleep 3`, then record.** (R054 did this — batch
-  `a` = escape/date/view/resize+3.5s, batch `b` = open+click+probe.)
-- **`regionPosition`/`inspectGeometry` cannot reach a dialog Flickable that has no `objectName`** — they returned
-  `[UIReview] region unavailable` three times in R053. `scrollInfo` (class-based) is the workaround. `regionPosition`
-  works on `scheduleViewport`-style names reachable from `window.contentItem`.
-- **The dialog's Flickable** (task editor, measured): top ≈ dialogTop + 83.5; event editor top = sceneY 131.4 with the
-  card top ≈ 36. At 760x540 the task card is ~9px lower than `anchors.centerIn` would put it — unexplained, don't
-  build on centring.
-- **A fresh enter needs an app restart** after `escape` (the day-view selection is not restored).
-- **`start-review-vm.sh` blocks on `wait "$app_pid"` — background it** (`nohup … & disown`); wrapping it in
-  `timeout 180` kills the app. A reverted/rebuilt binary requires a **kill+relaunch** (the running process keeps the
-  old binary). Kill the pid **read from `live-app.pid`**, never `pkill -f 'kos-calendar'` (exit 144).
-- **`nativeRecord` frames land in the app's CWD** = wherever `start-review-vm.sh` was invoked (here
-  `tmp/ui-acceptance/calendar/`). `nativeRecord` = `{action,prefix,duration,interval}` → `<prefix>-NNNN.png`;
-  **frame counts vary — glob the prefix, never assume an index.**
-- **Harness shapes:** `windowWheel` = `{action,x,y,angleY}`; `resize` = `{width,height}`; `openItem` =
-  `{kind,titleContains}`; `view` = `{view:"month"|"week"|"day"}`; `date` = `{date:"YYYY-MM-DD"}`; `pointerObject`
-  needs THREE commands (`move`,`press`,`release`); `scrollInfo` takes no args. Fields are FLAT.
-- **`review-command.py` is not executable here — call it as `python3 review-command.py '<json>'`, and it accepts a
-  LIST of commands** (one call can drive a whole sequence, 0.6s apart). A drive script needs its own sleeps; the
-  helper only guarantees 0.6s between commands.
-- **In-place write only** to `command.json` (atomic replace trips the QML dir watcher). Poll is `interval:100`.
-- **Fixtures on 2026-04-02:** VEVENTs = Morning planning 08:00 / Short appointment 10:15 / **Long review with a
-  deliberately lengthy title 11:00** / **Design review 14:30** / Evening session 18:00. VTODOs (kind `"todo"`) =
-  `[UI] Green planning 2026-04-02` (09:00), `[UI] Gold review 2026-04-02` (12:00), `[UI] Red review 2026-04-02` (16:00),
-  `A deliberately long task title to inspect elision` (11:00), `[R019 LONG TASK] …` (11:00). **"Gold review" is a
-  TODO — do not pass it as `kind:"event"`.** Always send `date` first, own batch.
-  `openItem` → popover; the **Dialog** needs `pointerObject detailsEdit` move/press/release.
-- **The task dialog's footer is fixed** (only the form above it scrolls) — Delete can never scroll out of reach.
-- **Light theme**: the notes field is indistinguishable from the card fill (#F7F7F7 vs (248,248,249)) — locate a light
-  field box by its **border** (222,224,226) only. The popover's fill is `#F5F5F5` light / `#262626` dark — the editor
-  dialogs use `#F7F7F7` light / `#262626` dark. Accent measured (48,140,198) in both themes; `defaultAccentSeed` is #3478f6.
-- **`motionFast`** = 120, **`motionNormal`** = 220 (`AppTheme.qml:174-175`), both 0 under `reduceMotion`.
-  `controlHeight` renders as **31px here, not the spec's 34**; the dim is `Overlay.modal`, **0.20 light / 0.42 dark**.
-- **Save is deliberately NOT exercised** (isolated-profile discipline).
-- **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in
-  and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md`/`rounds.md` can never be
-  committed — expected, not a failure. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.**
-
-## Next round (pick ONLY #1)
-**#1 — 仍差 #4: capture `KosButton` hover / pressed / focus in both themes** (no ruling needed; this is R052's Next#2,
-now carried two rounds — `buttonNeutralHover`/`Pressed` have never been captured and **no button has ever been
-hovered**). Use the event editor's footer, which is 3 stacked full-width buttons: at 1100x692 dark the footer
-ListView sits at `sceneY 531.4 h 40` ⇒ the Save row is centred near **y 551**, Cancel near **y 588**, Delete near
-**y 624** (x ≈ 560). Drive `pointerObject`-free with `pointer` (`{action:"pointer",x,y,kind:"move"|"press"|"release"}`
-— it logs `hover`/`down` for a `target`, so a bare x/y works) and take **continuous frames** with `nativeRecord`
-(≥3 frames: idle → hover → pressed → released). Disabled state: type nothing into 标题 and re-probe Save. Both themes
-(restart per theme — the binary reads `KOS_APPEARANCE`). Continuous frames are mandatory; a static frame cannot pass
-this item.
-
-**#2+ — everything else in 仍差 needs a ruling** (#1 dim snap, #2 shadow, #3 E03 clause 3, #6/#7 per-cell caps),
-and **#5 (line pitch)** is cosmetic with no ID.
+hover-drops-the-ring) come after #1.

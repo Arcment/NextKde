@@ -1,3 +1,50 @@
+# R059 — **popover-Esc RULED: NOT a spec failure.** The harness `escape` **is** a real key event (`ReviewInput.cpp:97-105`: `QKeyEvent(Key_Escape)` → `sendEvent(focusWindow)`, the normal QQuickWindow→`activeFocusItem` route), so R058's null *behaviour* stands — but `spec.md:109` `D08 … Esc 可关闭` belongs to the **弹框** block (D01–D13), `D01` defines 弹框 **by having a scrim** and the popover has none, and the 浮层 family (`O01–O09`, `spec.md:120` O08 names the P01 详情浮层) **never mentions Esc**. ⇒ **D08 Esc stays PASS; no clause fails.** The real defect is internal: `EventDetailsPopover.qml:60` advertises `Popup.CloseOnEscape` that **can never fire**, and the repo already documents this exact failure mode *and* its working fix at `Main.qml:1873-1878`. Needs a 1-line ruling, not a fix. (2026-10-16)
+
+## 本轮 (R059)
+Atomic step: R058's Next #1 = "decide the popover-Esc finding by reading the harness's `escape` implementation". Done.
+**No code change, 0 screenshots, 0 image reads, 8 Bash calls (~4 min).**
+
+**Step 1 — the instrument is real.** `harness/Main.qml:204-205` → `pointerDriver.escape(window)` →
+`harness/ReviewInput/ReviewInput.cpp:97-105` builds `QKeyEvent(KeyPress/Release, Qt::Key_Escape)` and
+`QCoreApplication::sendEvent`s it to `QGuiApplication::focusWindow()`. That is a genuine key event on the normal
+QQuickWindow → `activeFocusItem` route — **not** a "call `close()` on a dialog" shim. R058 corroborates empirically: the
+same mechanism closed the **focused** dialog and was inert against the **unfocused** popover. ⇒ **R058's null result is
+trustworthy; the instrument is exonerated.**
+
+**Step 2 — no spec clause requires the popover to close on Esc.** The section (`spec.md:89`) covers 弹框、tooltip、
+右键菜单、浮层, but its IDs are **two families**: `D01–D13` = 弹框, `O01–O09` = 浮层/tooltip/菜单. `D08` (`spec.md:109`) is
+a **D-row, i.e. 弹框-scoped**. `D01` (`spec.md:102`) defines 弹框 as *"独立圆角卡片浮在父窗口之上；**父窗口整体变暗
+（scrim）**"* — the popover renders **no dim** (R058), so by the spec's own definition it is **not** a 弹框. `O08`
+(`spec.md:120`) names the **P01 详情浮层** as the 浮层 family, and `O01–O09` contain **no Esc clause at all** (O03's
+"移开即消失" is mouse-out). ⇒ **Spec gap, not a failed clause. D08's Esc clause is unaffected and remains PASS (R058,
+2 legs).** No spec.md edit — inventing a clause is the user's call, not the loop's.
+
+**Step 3 — so what *is* wrong: a dead flag, and the repo already has the fix.** `EventDetailsPopover.qml:15 Popup`,
+`:59 modal: false`, `:60 closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape`, and per R058 no
+`focus:`/`Keys`/`activeFocus` anywhere in the file. Non-modal + never takes focus ⇒ `activeFocusItem` stays in the day
+view ⇒ the popup item's key handler never runs ⇒ **`CloseOnEscape` is unreachable**. The repo is not ignorant of this —
+`Main.qml:1873-1875` says verbatim: *"L05: Escape always reaches the open search, whichever item in this window holds
+focus — **the input's own key handler is not enough once it has lost focus**"* — and fixes it with a window-level
+`Shortcut { sequence: "Escape"; enabled: … }` (`Main.qml:1876-1878`), the same idiom as
+`apps/lockscreen/…/SessionMenu.qml:246-251`. `apps/calendar` has exactly **two** Escape mechanisms and the popover uses
+neither.
+
+**⇒ Ruling item, two mutually exclusive 1-line options — A recommended.**
+- **A** add `Shortcut { sequence: "Escape"; enabled: root.visible; onActivated: root.close() }` to
+  `EventDetailsPopover.qml`. Matches `Main.qml:1876-1878`; matches macOS (Escape dismisses a focused popover); keeps
+  `modal:false`.
+- **B** drop `| Popup.CloseOnEscape` from `:60` so the code stops advertising behaviour it cannot deliver.
+- **`focus: true` is the WRONG fix** — it would make the popover steal keyboard focus from the day view and contradict
+  its `modal:false` contract. Suggested clause if the user wants it specced:
+  `O10 | 浮层在可见时 Esc 可关闭（浮层不夺焦，用窗口级 Shortcut 实现）`.
+
+**Discipline: 8 Bash calls (budget 25), 0 image reads, 0 screenshots, ~4 min.** This round produced **no screenshot**, so
+it claims **no visual PASS of anything**; its deliverable is retiring a candidate defect and re-scoping it as a ruling —
+which stops the loop from "fixing" behaviour the spec never asked for.
+
+Next round #1 → the **task-editor footer D08 leg** (`CalendarTaskEditorDialog.qml:81-98`, dark), promoted because
+R058's #1 is now blocked on a ruling rather than on work; pair every `scrollInfo` footer reading with its `contentY`.
+
 # R058 — **D08 clause 3 `Esc 可关闭` PASSES on the event editor (2 legs): one `escape` closes it from a clean open (≤250ms) and one `escape` also clears the editor-over-popover stack (a 2nd escape is a no-op). NEW: a LONE popover ignores `escape` — 2 tries over 9s, zero pixel change, and `EventDetailsPopover.qml:15/59/60` is `Popup` + `modal: false` + `CloseOnEscape` with NO `focus:` anywhere** (2026-10-16)
 
 ## 本轮 (R058)

@@ -4,6 +4,11 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **AQ 卡数字→rating 间距收紧 22→10px（本轮，前端，零 Go/C++ 改动，巡检轮）**：巡检新截图（dev env，见下注）对照 ref-main 发现 AQ 卡数字与 rating 文字（"Unhealthy for Sensitive Groups"）之间空隙过大——Pillow 大写 cap 顶口径实测：ref-main（814×498）数字 "40" 字形底 y243 → rating "Good" cap 顶 y250，ink gap **7px**（×1.46 窗高比 ≈10px）；我方改前截图 1792184837 数字 "114" 底 y266 → rating cap 顶 y288，gap **22px**（偏差 +12，来自 ColumnLayout spacing 10 + 两行字体行高 padding）。`apps/weather/qml/Main.qml:1507` rating Label 加 `Layout.topMargin: -12`（镜像 hero 区 Main.qml:1350/:1393 既有负 margin 先例，只抵行高 padding，spacing:10 不动），注释标明 ref 实测依据。其余一律未动（数字 Label 22px、rating 字号 13、渐变条、desc、头部点阵）。
+  **实测**（本轮二进制截图 tmp/shots/1792185019.png 过体检闸 1180x727）：数字底 y266 → rating cap 顶 y276，gap **10px**（目标 ~10 精确）；顺带 bar→desc gap 16→**21px**（ref 14×1.46≈20.4，也吻合——整体上移后节奏对齐）。
+  **回归**（vs 改动前 1792184837）：AQ 文字区 y276-350 变化 3547px（改动本体）+ mid 区 y350-660 平移带——**shift-12 补偿后仅 19 个噪声点**（3px 网格采样，星空闪烁底噪），即下方内容为纯 12px 上移（卡变矮的预期布局后果，同 hero 收紧轮先例）；top 区 0 变化。qmllint 0 error（158 warning 与基线一致）。测试 6/6 绿、go test ok。
+  **注（重要，截图 env 坑）**：本轮首拍（1792184716）用循环流程给的默认 env 启动，连到了**旧系统服务** `~/.local/libexec/kos-data-service`（10/15 二进制，占着 /run/user/1000/kos-data.sock，快照无阶段二扩展字段）→ UV/VISIBILITY/MOON PHASE/PRESSURE 全 "—"、AQI 0——**非产品回归，是 env 错误**。dev 实例真相：`KOS_DATA_SOCKET=/tmp/kos-weather-dev.sock` + `XDG_STATE_HOME=/tmp/kos-weather-test-state`（dev 服务 10/17 01:30 二进制，快照 04:48 fetched、字段齐全）。**以后轮截图必须带这两个 env**，否则快照缺字段会误判。
+  **残差**（记入仍差 10）：rating cap 高 9px vs ref 7×1.46≈10.2（1px AA 内未动）；rating→渐变条 ink gap 13px（含 y/p 下伸部）vs ref 15×1.46≈22 的 line-box 口径残差 ~3px，视觉冲击低。
 - **AQ 卡头部点阵图标对比度 0.92×→0.40× 文字 + 对角渐隐（本轮，前端，零 Go/C++ 改动，巡检轮）**：巡检新截图（/tmp/inspect-1792184247 过体检闸 1180x727）对照 ref-main 发现 AQ 卡头部点阵图标**过亮且无渐隐**——实测我方圆点峰值 Δ+121 vs 头部 "AIR QUALITY" 文字 Δ+119（比 **0.92**，3×3 均匀 white α0.6），而 ref-main（814×498）实测图标最亮 (284,213)=(52,124,205) vs 卡面 (27,98,175) → 峰值 **Δ+27**、文字最亮 (322,218)=(96,162,241) → Δ+66，图标/文字比仅 **0.38-0.41**，且点阵沿对角渐变（右上最亮、左下近消失）。`apps/weather/qml/Main.qml:1477-1478` Canvas onPaint 逐点 alpha `0.10 + 0.16*(col−row+2)/4`（row0col2 峰值 0.26、row2col0 0.10、平均 0.18；几何 3×3/r1.3/间距 4.5/12×12 未动），onPaint 注释标明 ref 实测数值依据。**踩坑**：code-writer 首版按 `(row+col)` 写——对角方向反了（右下亮），本会话直接改为 `(col−row)` 沿右上方向。
   **实测**（本轮二进制截图 tmp/shots/after-1792184586 过体检闸 1180x727，9 圆心逐一采样）：峰值 (row0,col2) **Δ47** = 0.395× 文字 Δ119（参考 0.38-0.41）、左下 (row2,col0) Δ19、全 9 点 [32,39,47]/[25,32,39]/[19,26,33] 与公式理论值逐一吻合、方向右上亮→左下淡；目视 /tmp/z-aqhead-compare.png：点阵淡于头部文字，与参考同构（我方 3×3 vs 参考点阵排布系既有手绘近似，几何未动）。**回归**（vs 改动前 inspect-1792184247）：变化像素(>8) 3444 = 图标本体 72px + y696-710 逐小时卡顶缘 3372px（既有入场交错截图时序带，见前轮条目）+ 其他 **0**——整窗 MAE 0.181，无布局位移、无星空噪声残留。qmllint 0 error（code-writer 自证；本会话后补 1 行公式方向修正后重编译通过）。测试 6/6 绿、go test ok。
   **注**：参考采样系日景卡面、我方夜景——图标/文字**相对对比度**与昼夜无关（沿用既有相对量裁定先例）；参考点阵因 2x 降采样细节糊，网格排布精确形态不可考，维持既有 3×3 手绘近似。
@@ -177,6 +182,7 @@
 7. ~~滚动边缘效果目前只做了列表**顶边**；列表底边（卡片滚出底缘）未做渐隐~~（**已做**，见已改——`scrollEdgeBottom` 与顶边镜像对称，TEMP 下推卡片取证渲染、终态验证门控；滚动态实拍仍未见，见外推待确认）。
 8. ~~指标瓦片（白@0.12）与同级全宽卡（AQ/10 天，白@0.16）填充 alpha 不一致~~（**已做**，见已改——瓦片统一到 0.16/0.22、符号盒 0.20 保 +0.04 关系；日景材质方向差异另见外推待确认首条（**已执行**，见已改"昼夜分材质"））。
 9. ~~B.4 卡片 hover 只剩 10 天卡一处（指标容器实例随本轮容器移除删去）；瓦片级 hover（玻璃高光+抬升移到每块瓦片）为候选补法~~（**已做**，见已改——hover 同参数族已加到 WeatherMetric 组件 6 瓦 + directionTile/moonPhaseTile/sunsetTile，带帧差 MAE 证据；真实鼠标悬停未在真机点过，见外推待确认）。
+10. AQ 卡 rating 邻域残差（视觉冲击低，见已改"数字→rating 间距"条注）：rating cap 高 9px vs ref 折算 10.2（1px AA 内）；rating→渐变条 ink gap 13px vs ref 折算 ~22 的 line-box 残差 ~3px。逐小时区"逐小时"区头+分段控件在卡外（ref 是 Conditions 卡内右上），系结构性版式适配，是否贴回卡内待用户裁定。
 
 ## 外推待确认
 - **侧栏收起态外观无参考**：Apple 天气没有侧栏收起概念，收起轨道（~33px 半透明深海军蓝叠天空、仅浮一枚开关钮）全系沿用本项目 sidebarSurface/KosSidebarToggle 族外推；收起/展开动画时长与缓动未测（--screenshot 650ms 帧落在动画中段的事实说明动画 >650ms 起步或持续，非缺陷但未被量化）；真机 Ctrl+B 切换手感未复核。若后续要打磨收起态（如轨道加玻璃高光、开关钮居中规则）需用户先裁定目标形态。

@@ -9,6 +9,20 @@ row 24, gap 1, inset 1, band 76, the R074 separators (x=502 reads **237** at eve
 y=156/181), the four rule tokens, the weekend tint, and the timed chip (`:556`, still `radius: 5`) are all untouched.
 (2026-10-17)
 
+# R076 — **A03 done: the multi-day all-day strip is ONE bar. Only the run's outer ends round.**
+The ref was walked first, 1:1, for a chip whose fill crosses a column rule: **there is none in this reference week.**
+Every band row carries its column rule unbroken (x=324/406/487/569/650/732 read 236/242/229 on *every* one of the 21 band
+rows) with chip fills on both sides stopping 1–2 px short of it — so the ref week holds **no multi-day all-day event** and
+cannot arbitrate the clause. It does settle the *rule* the clause needs: **the day boundary is drawn through the band.**
+Edit = `CalendarScheduleView.qml`: one injected accessor (`itemRecord`, bound in `Main.qml`'s two schedule views) +
+`isoDay`/`lastCoveredDay`/`allDayContinues` helpers + `allDayChip`'s single `radius` split into four corner radii
+(`continuesLeft ? 0 : endRadius` … `continuesRight ? 0 : endRadius`). **A single-day item continues neither way, so it
+still gets its radius on all four corners, unchanged.** Our capture, per-row fill envelope: **Mon 30** insetL `4·2·1·1·0…`
+insetR `1` on all 24 rows (round left / square right); **Tue 31** both edges flat (square/square); **Wed 1** insetL flat,
+insetR `5·3·2·2·1…1·2·2·3·5` (square left / round right) ⇒ **one bar, outer ends only**. The boundary that made this
+non-trivial: the popover reads **`2026年3月30日星期一 – 2026年4月1日星期三`**, so the run is Mon–Wed, not Mon–Thu —
+the corner test and the coverage had to agree, and they do. (2026-10-17)
+
 ## 本轮 (R075)
 Atomic step: the standing Next-round #1 — **A01 step 5: the all-day chip's radius**. Evidence:
 `docs/ui-calendar/r075-chip-radius-light.png` (1100x692 light, `view week` + `date 2026-04-02`) and the

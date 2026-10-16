@@ -1,3 +1,25 @@
+# R090 — regression leg FAILED TO BE CLEAN: the two legs differ by exactly one `hourHeight` (40 px) of initial scroll. No code changed.
+
+**Verdict: NOT a content regression — a startup race.** `capture-r089.png` (md5 `2029858ad5e3afb429d3cfd0bf8aa6f8`) vs `capture-r090.png`
+(md5 `e947d8a55aba4450e5cc231b9305d860`), both light 1100x692 `view week` `date 2026-04-02`. Whole-page `ImageChops.difference` (>6 RGB-sum)
+returned **154,551 differing px in 15 runs spanning the whole grid** — not the expected now-line band. The cause: the gutter labels and every
+hour line sit at the SAME absolute y in both (full-width row means 237.0/244.0 identical at y234/254/274/294 — the pitch is exactly
+`hourHeight` 40, so a 40 px scroll maps the line set and the label set onto themselves), while **every timed chip bar moved by exactly −40 px**
+(Mon column x60: `319..330` → `279..290`). One hour.
+
+**Root cause, in the source — `CalendarScheduleView.qml:244` `usefulStartHour()`.** For the Apr 2 week the earliest timed item is 08:00, so
+`8 − 2 = 6` ⇒ `contentY = 6 × 40 = 240` (r089). r090 landed on **7**, which is the function's *hard-coded fallback* (`earliest` still 24,
+i.e. the function ran against an empty model) ⇒ `contentY = 280`. The caller is `positionTimeline()` (`:270`) fired by `autoScrollTimer`
+(`:283-289`, `interval: 450`, re-armed on `firstDate`/`dayCount`/`visible` change **but never on model population**). So the "scroll to the
+first event" affordance is a **race against PIM data arrival**: win it and you land on 06:00, lose it and you land on the default 07:00 —
+one hour of empty grid above the first chip, decided by timing. Two same-theme launches inside the same leg family disagree.
+
+**The regression answer, recovered.** Realigning viewport-clamped (r089 screen `274..691` ↔ r090 screen `234..651`, i.e. content-equal) collapses
+the diff to **450 px in ONE run at r089 y664..691 (28 bottom rows, x0..1099, maxrow 55)** — a viewport-boundary artifact of the realignment.
+The non-scrolling zone (y0..233 = header + all-day band) differs by **163 px confined to y38..60, x35..75** = the sidebar-toggle glyph's
+antialiasing. ⇒ **The all-day band's 3 chips + `+2`, all four band rules, every hour/half-hour line, every gutter label and every timed chip
+are byte-identical. R088+R089 are independently regression-verified.** Figures `docs/ui-calendar/r090-scroll-race.png`.
+
 # R089 — A04 step 2 PASS: the all-day band's overflow is explicit. Thu Apr 2 (4 items, 3 slots) now renders `Design sync` / `Release notes` / **`+2`** — nothing is dropped silently.
 
 **Spec-only, NOT ref-anchored:** `refs/macos-calendar.png`'s 7 columns carry at most 3 chips, so it cannot anchor an overflow form. The form

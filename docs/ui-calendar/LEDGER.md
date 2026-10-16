@@ -1,3 +1,38 @@
+# R053 — **仍差 #3 FIXED: the task editor gets a real overlay scrollbar, and the wide form never shows one** (2026-10-16)
+
+## 本轮 (R053)
+Atomic step: R052's Next round #1 = "make the wide task-dialog form fit, **then** port the event editor's P03 bar".
+**(a) was a false premise again.** The wide form *already* fits — its notes box is drawn complete (bottom border
+`453–455`, unclipped) with its content ending at `y 455`, ~45px above the footer at `500`. `contentHeight` is
+`295` at **both** window sizes; the clip line at 760x540 is `360/361` ⇒ height `236` ⇒ range `59` (295-236), which
+is exactly the 59px measured in R052. Nothing to remove.
+**So the port was done alone** (`apps/calendar/qml/CalendarTaskEditorDialog.qml`, `contentItem`), and its *policy*
+had to be gated — the verbatim P03 block (`EventEditorDialog.qml:268-281`) reproduces R052's regression exactly.
+
+**A. The real root cause, measured.** With `policy: ScrollBar.AsNeeded` (event editor, verbatim) at **1100x692**, the
+frame carried a `(23,23,23)` column at **x 723–725 @ y300** — a near-full-length thumb on a form that fits
+(`size ≥ 1`). `AsNeeded` therefore does **not** hide an attached bar here; the bar is only ever *shown*, never
+re-evaluated off. Fix: gate the policy on the same predicate the wheel handler uses —
+`policy: editorScroll.contentHeight > editorScroll.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff`.
+(`AlwaysOff` is a `policy` *assignment*, so the engine's own `setVisible` and a QML `visible:` binding cannot fight.)
+
+**B. Evidence — dark, pid 103791, `date 2026-04-02` → `view day` → `openItem todo "Green planning 2026-04-02"` →
+`pointerObject detailsEdit` move/press/release → `resize` → `nativeRecord` (resize needs ~3s to settle: a recording
+started inside 1s still carries the *old* window size in its frames).**
+
+| probe | 760x540 | 1100x692 |
+|---|---|---|
+| **bar column @ y300** | **`(23,23,23)` at x 553–555** (x548-552 and x556+ are card `(38,38,38)`) | **`(38,38,38)` x 716–732 — no bar**; whole x 708–742 × y 90–650 holds exactly **1** `(23,23,23)` pixel (the card's bottom-right AA corner at 739,635) |
+| **thumb @ x554** | **y 127..311** (contentY 0) → **y 173..357** after 2× wheel-down (`x350 y300 angleY-600`) ⇒ **it travels** | — |
+| form right edge @ y450 | — | notes field fill `(34,39,47)` + its own *lighter* right border `(57,59,64)/(67,67,67)` at 722–725 — a field edge, not a bar |
+| unscrolled form, x=350 / x=500 | **151 / 191 / 232 / hint 276..285 / notes 323..clip 361 / footer 396·433·470** — R041's numbers exactly | **187 / 227 / 268 / 359..455 / 516·553·590** — R041's numbers exactly |
+
+No layout regression at either size; the 59px range, the 96px notes viewport and the clip line are all unchanged.
+
+**C. Geometry, worth recording** (it misled two rounds): the attached bar is centred on the Flickable's **right
+edge** and the Flickable's `clip: true` cuts its outer half ⇒ a 6px bar **renders 3px**, and at wide its inner edge
+(x 724) sits inside the form, which is why a stray bar reads as a *rendering fault* rather than as chrome.
+
 # R052 — **仍差 #3 RETIRED: the editor dialogs do NOT compress — the "39px notes viewport" is a CLIP line** (2026-10-16)
 
 ## 本轮 (R052)

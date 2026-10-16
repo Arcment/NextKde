@@ -1,3 +1,23 @@
+## R078 — the timed chip's border does not exist in the ref (deleted)
+**Proof first, on the edges that CAN prove it.** R077 could only read the chip's left edge, which abuts the column rule at
+x=406 and therefore cannot distinguish "no border" from "border hidden by the rule". This round read the two edges that can,
+on two different chips, 1:1 raw:
+- Wed blue chip **top** (x500-511): `255,255,255` → `242,242,242` (rule) → `249,249,249` → **`230,242,254`** (AA) → `222,237,254` fill.
+- Wed blue chip **bottom**: fill → **`224,235,248`** (AA) → `242,242,242` (rule) → `253,242,241` (next chip's AA) → red fill.
+- Tue blue chip **top**: `255` → `249` → `236,236,236` (hour line) → **`239,246,255`** (AA) → `222,237,254` fill.
+
+**Every transition goes LIGHTER than the fill, never darker.** A 1px ring — ours was `withAlpha(itemColor, 0.34)` — would
+land as a row darker *and* more saturated than the fill. None of the three has one.
+**Edit** (`CalendarScheduleView.qml:631-633`): `border.width: 1` + `border.color: withAlpha(itemColor, 0.34)` **deleted**,
+replaced by a comment carrying the measurement. Nothing else touched — fill alpha, text colour, `radius: 5`, the R077 bar
+(a child, so structurally unaffected) and the whole all-day band are unchanged.
+**Evidence:** `r078-noborder-light.png` (light week, `view week` + `date 2026-04-02`), `r078-noborder-dark.png` (dark leg),
+`r078-noborder-compare.png` (ref|ours at x6 NEAREST, both edges). **Ours measured after the change** — light: rule `237` at
+x=502 → `30px white` → fill `(216,234,245)` from x=505; top row 277 is fill, bottom 292 → white at 293. Dark: rule `(59,59,59)`
+at 502 → grid `(30,30,30)` → fill `(36,69,90)` from 505; top 277 / bottom 292→293 the same. **The R077 bar reads `509-512 =
+(48,140,198)` in both legs — bit-identical to R077's own dark reading, so it survived.**
+**Next:** the chip's **dark same-hue text** (E01/E02 step 3 — red ink `(117,37,34)`, needs the fill-translation question settled).
+
 ## R077 — the same-hue left stripe, on the chip that actually has one
 **Corrects R073.** The "3px solid same-hue LEFT STRIPE at x=491-493" is not in the all-day band — a classified 2D dump shows
 that region is the band chip's **ring icon** (hollow centre x495-496). A saturation scan finds **no bar at any band chip's

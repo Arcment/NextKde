@@ -4,6 +4,8 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **彩色天气图标落地**（本轮，前端）：新建 `apps/weather/qml/WeatherIcon.qml`（24×24 逻辑坐标 Canvas：黄日 `#ffd257` 带 8 根光线、奶油月 `#f7f3dc` 月牙、白云、蓝雨线 `#6cb8ff`、雪点、闪电，按 weatherCode 分派）；`apps/weather/CMakeLists.txt:18` 加入 QML_FILES；`Main.qml` 逐小时卡图标 Label（font 25px 字符）→ 26×26 WeatherIcon，10 天行图标 Label（22px 字符）→ 24×24 WeatherIcon（isDay:true）；无引用的 `conditionSymbol()` 已删。实测：夜晴渲染奶油月牙、雷暴/雨渲染云+闪电/蓝雨滴，截图确认。
+- **hero 温度占屏比**（本轮，前端）：`Main.qml:676` `font.pixelSize` 92→160。实测截图温度字高 114px / 窗高 727 = **15.7%**（Pillow 量参考图 80px/498 = **16.1%**），对齐。
 - **阶段二后端：每城市 summary**（本轮，全链路）：`services/data-service/weather.go` —— `WeatherLocation.Summary *WeatherLocationSummary`（time/temperature/weatherCode/isDay/tempHigh/tempLow，:46-58）；`OpenMeteoProvider.Summaries`（:403-472，一次批量多坐标请求 current+daily[0]，数组/单对象双解析、按请求序匹配±0.1°校验、≤20 城）；`Summaries` 进 `WeatherProvider` 接口（:110，fixture 可替换）；`fetchWeather` 成功后才拉 summary，失败保留旧值，选中城市的 summary 直接取自 forecast（:676-700）。schema `weather-v1.schema.json` location 加 optional `summary`（未升版本）。Go 测试 ×3（批量解析/单对象/持久化往返）。
 - `shared/qml/foundation/KosSidebar.qml:11,27`：新增 `surfaceColor` 属性（默认不变）。
 - `apps/weather/qml/Main.qml`：侧栏城市卡重做 —— 每城一张 96px 圆角 14 卡：城市名 17px DemiBold + 右上 30px Light 大温度 + 次行当地时间 `7:30PM`（无 summary 回退地区名）+ 底行条件文字与 `H:..° L:..°`；卡背景按该城 summary 的 weatherCode+isDay 走 `skyStopsFor` 天空渐变（`skyPalette` 更名，:19-21）；选中白边 0.55/未选 0.18；文字白 + 微阴影；无 summary 时温度显示 `—`。侧栏面改深海军蓝玻璃 `#0e2340@62%`（透出天空）。
@@ -15,13 +17,12 @@
 - `shared/qml/foundation/KosApplicationWindow.qml:20`：按用户裁定，`windowCornerRadius` 32→8。注意这是共享组件，其他 modernDesign 应用窗口圆角同步变为 8px。
 
 ## 仍差（按视觉冲击排序）
-1. 天气/小时图标仍是文本字符（☀︎☁︎🌙）—— 参考是彩色绘制图标（黄日/白云/蓝雨），日间符号偏黄 `#ffd257` 系。
-2. hero 温度占屏比仍小于参考（参考约屏高 1/5；现在 92px ≈ 1/8）。
-3. 侧栏卡细节：参考卡里城市名字重更粗、卡间距/圆角接近但卡内字号可再压一档；"● 地点"小标题与搜索框形态和参考不符（参考是圆角胶囊搜索框、无小标题）。
-4. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
-5. 顶部工具栏（更新时间/设置/刷新位置形态）与参考右上搜索框布局不符。
-6. Conditions 卡无温度走势曲线。
-7. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
+1. 侧栏卡细节：参考卡里城市名字重更粗、卡间距/圆角接近但卡内字号可再压一档；"● 地点"小标题与搜索框形态和参考不符（参考是圆角胶囊搜索框、无小标题）。
+2. 天空是纯渐变，参考为带云照片质感 —— 渐变近似已接受，若要求更高需程序化云纹理。
+3. 顶部工具栏（更新时间/设置/刷新位置形态）与参考右上搜索框布局不符。
+4. Conditions 卡无温度走势曲线。
+5. WeatherIcon code 1/2 夜间也画太阳+云（drawSun 不分昼夜），夜间应画月+云。
+6. 缺卡片：空气质量 / 风罗盘 / 月相 / 日落 / UV —— 受后端字段限制，见"外推待确认"。
 
 ## 外推待确认
 - summary 字段形态（tempHigh/tempLow 命名、无 summary 时卡的 `—` 回退）为本轮外推，无参考约束；如要改字段名需同步 Go/schema/QML 三处。
@@ -32,3 +33,8 @@
 - 深色模式的天空背景取值（参考图只有浅色）：现用深夜蓝 `#0c1a33→#274d79`。
 - 夜间玻璃卡 fill 0.16 是否太透（实测 21:00 夜空下卡片略发灰蓝）。
 - hover / 选中 / 按下的具体取值（参考图都是静态态）。
+
+## 遗留物（可直接利用，非垃圾）
+- `apps/weather/qml/WeatherIcon.qml`（162 行，`Canvas` 手绘的 Apple 风格天气图标，
+  24×24 逻辑坐标空间、按控件尺寸缩放）：由上一轮在被中断前创建，**目前还没被任何地方引用**。
+  它正对应"仍差"第 1 项（图标仍是文本字符），本轮可直接接入 `Main.qml` 的图标位或按需重写。

@@ -1,3 +1,48 @@
+# R048 — **E03 row elision, week view: clauses 1+2 PASS measured; clause 3 not judgeable there** (2026-10-16)
+
+## 本轮 (R048)
+Atomic step: Next round #1 of R047 = **E03, the long title's *row* elision, week view first**. Measurement +
+judgment only, **no product code touched, no build**.
+
+Route, light, one restart: `date 2026-04-02` → `view week` → `captureClient r048-week.png` (1100x692).
+
+**Declared criterion first** (`CalendarScheduleView.qml`): all-day chip (`:292`) and timed chip (`:413`) are a
+`Label` with `anchors.fill: parent`, **`leftMargin: 5` / `rightMargin: 4`**, `font.pixelSize: 9`,
+`verticalAlignment: VCenter`, **`elide: Text.ElideRight`**. Chips are fixed **`Layout.preferredHeight: 21`**
+(`:389`); a cell renders **`cellItems.slice(0, 2)`** (`:388`; all-day `:270`); a trailing
+`Item { Layout.fillHeight: true }` (`:428`) top-packs the cell.
+
+**Grid geometry measured:** vertical rules at y 165..470 sit at **x = 52, 201.5, 351.5, 501.5, 651.5, 801.5,
+951.5** ⇒ column pitch **149.5**; chips inset **3px** ⇒ **144 wide**; chip fill light **(216,234,245)**; hour-row
+pitch ≈ **54px**.
+
+| # | E03 clause | verdict | evidence |
+|---|---|---|---|
+| 1 | short blocks show **one readable priority line** | **PASS** | every chip is one line, VCentered, no wrap, colour-coded by list (six columns checked) |
+| 2 | long titles **elide inside bounds** | **PASS (2 measurements)** | below |
+| 3 | **tall blocks top align** | **NOT JUDGEABLE HERE** | `:389` fixes every chip at 21px ⇒ the week view has **no duration-proportional block** to test. Not a pass, not a fail — deferred. **E03 stays PENDING.** |
+
+**Clause 2, Latin — 周一 30 · 11:00** ("Long review with a deliberately lengthy title"). Chip x **55→198**; ink
+**61→192**; text-box left declared 60 (first ink 61 ✓), text-box right declared **194** ⇒ last ink **192**, *2px
+inside the declared box, 6px clear of the chip edge*. Tail is a literal **`…`**: three dark dots at **x 186 / 189 /
+192**, **pitch 3px**, min-lum 77 — not a fade, not a hard clip; no ink at 194–198 (fill 213–222), 199–200 white
+gutter.
+
+**Clause 2, CJK — 周四 2 · 11:00 second chip** ("[R019 LONG TASK] 任务长标题…"). Chip x **505→648**, ink
+**511→641**; `…` dots at **634 / 637 / 640**; limit 644 ⇒ inside. The glyph **immediately before** the dots is a
+**complete** CJK box (**625–632**, 8px, clean fill gap at 633) ⇒ **no mid-glyph clip, no ellipsis-over-glyph
+overlap** — the failure mode CJK elision usually has.
+
+**New observation, NOT filed as an E03 defect (仍差 #9):** `slice(0, 2)` silently caps a cell at two chips with no
+`+N`. On 2026-04-02 11:00 the fixtures hold **three** items (the "Long review…" event, the VTODO at
+`calendar.ics:91` due `20260402T110000`, and the VTODO at `:287`) and the cell renders **two** — the `:91` VTODO is
+dropped with no trace. E03's text covers elision, not overflow ⇒ needs a ruling, not a silent fix.
+
+**Instrument note:** `ElideRight` emits a literal `…`, not a gradient fade, and at 9px the dots read as *faint
+grey* even in a 4x NEAREST zoom — **confirm elision by column min-lum profile** (dark minima at 3px pitch), never by
+eye alone. Sampling a chip's interior must avoid the text rows (a row 1px off the chip's bottom edge reads as white
+and silently invalidates a scan).
+
 # R046 — **P01's long-text sub-case re-judged after 21 rounds: PASS**, light, measured (2026-10-16)
 
 ## 本轮 (R046)

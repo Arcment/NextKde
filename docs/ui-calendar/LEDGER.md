@@ -1,183 +1,157 @@
-## R078 — the timed chip's border does not exist in the ref (deleted)
-**Proof first, on the edges that CAN prove it.** R077 could only read the chip's left edge, which abuts the column rule at
-x=406 and therefore cannot distinguish "no border" from "border hidden by the rule". This round read the two edges that can,
-on two different chips, 1:1 raw:
-- Wed blue chip **top** (x500-511): `255,255,255` → `242,242,242` (rule) → `249,249,249` → **`230,242,254`** (AA) → `222,237,254` fill.
-- Wed blue chip **bottom**: fill → **`224,235,248`** (AA) → `242,242,242` (rule) → `253,242,241` (next chip's AA) → red fill.
-- Tue blue chip **top**: `255` → `249` → `236,236,236` (hour line) → **`239,246,255`** (AA) → `222,237,254` fill.
+# R078 — **E01/E02 step 2: the timed chip has no border, and the ref says so on the two edges that can prove it.**
+Deleted `timedChip`'s `border.width: 1` + `border.color: withAlpha(itemColor, 0.34)`. **R077 could only read the chip's left
+edge, which abuts the column rule at x=406 and so cannot tell "no border" from "border hidden by the rule".** This round read
+the top and bottom edges — of **two different chips** — as raw 1:1 profiles. Ref Wed blue chip **top**: 255 → 242 (rule) →
+249 → **230,242,254** (AA) → (222,237,254) fill. Ref Wed blue chip **bottom**: fill → **224,235,248** (AA) → 242 (rule) →
+253,242,241 (next chip). Ref Tue blue chip **top**: 255 → 249 → 236 (hour line) → **239,246,255** (AA) → fill. **Every
+transition goes LIGHTER than the fill; never darker.** A 1px ring at any alpha lands as a row darker *and* more saturated —
+none of the three has one. Fill, text, `radius: 5`, the R077 bar (a child, structurally unaffected) and the whole all-day
+band untouched. (2026-10-17)
 
-**Every transition goes LIGHTER than the fill, never darker.** A 1px ring — ours was `withAlpha(itemColor, 0.34)` — would
-land as a row darker *and* more saturated than the fill. None of the three has one.
-**Edit** (`CalendarScheduleView.qml:631-633`): `border.width: 1` + `border.color: withAlpha(itemColor, 0.34)` **deleted**,
-replaced by a comment carrying the measurement. Nothing else touched — fill alpha, text colour, `radius: 5`, the R077 bar
-(a child, so structurally unaffected) and the whole all-day band are unchanged.
-**Evidence:** `r078-noborder-light.png` (light week, `view week` + `date 2026-04-02`), `r078-noborder-dark.png` (dark leg),
-`r078-noborder-compare.png` (ref|ours at x6 NEAREST, both edges). **Ours measured after the change** — light: rule `237` at
-x=502 → `30px white` → fill `(216,234,245)` from x=505; top row 277 is fill, bottom 292 → white at 293. Dark: rule `(59,59,59)`
-at 502 → grid `(30,30,30)` → fill `(36,69,90)` from 505; top 277 / bottom 292→293 the same. **The R077 bar reads `509-512 =
-(48,140,198)` in both legs — bit-identical to R077's own dark reading, so it survived.**
-**Next:** the chip's **dark same-hue text** (E01/E02 step 3 — red ink `(117,37,34)`, needs the fill-translation question settled).
+## 本轮 (R078)
+Atomic step: **E01/E02 step 2 — delete the timed chip's 1px border.** Evidence: `docs/ui-calendar/r078-noborder-light.png`
+(light week, `view week` + `date 2026-04-02`), `r078-noborder-dark.png` (dark leg), `r078-noborder-compare.png`
+(ref | ours at ×6 NEAREST, both edges).
+**Measured on ours, both legs.** Light: column rule `237` at **x=502** → white 503-504 → fill `(216,234,245)` from **x=505**;
+top row **277** is fill, bottom **292** → white **293**. Dark: rule `(59,59,59)` at 502 → grid `(30,30,30)` → fill
+`(36,69,90)` from **x=505**; top **277**, bottom **292→293** identical. **The R077 bar reads `509-512 = (48,140,198)` in both
+legs — bit-identical to R077's dark reading, so it survived the edit.**
+**Why both themes:** the deleted border was a colour (`withAlpha(…, 0.34)`), so it is a colour change even though it reads as
+a deletion — same rule R077 applied to the bar.
+**Not touched:** `timedChip`'s fill alpha, `radius: 5`, the R077 bar, the Label margins; the all-day chip and band entirely.
 
-## R077 — the same-hue left stripe, on the chip that actually has one
-**Corrects R073.** The "3px solid same-hue LEFT STRIPE at x=491-493" is not in the all-day band — a classified 2D dump shows
-that region is the band chip's **ring icon** (hollow centre x495-496). A saturation scan finds **no bar at any band chip's
-left edge**; the band carries four 12x12 icons ~4px inside their column rules. The stripe is a **timed grid chip** property:
-blue x409-411 = (59,134,247), red x328-330 = (235,76,70) ⇒ **~2.4 ref px of ink, ~2 ref px inside the chip's fill, round
-caps, absolute (not proportional to chip height)**; ref text ink starts 7 ref px in.
-**Edit** (`CalendarScheduleView.qml:timedChip`): derived `stripeWidth = Math.round(chipHeight/4)` = 4, `stripeInset =
-stripeWidth`, capsule `radius: width/2`, vertical margin 2, `color: itemColor(modelData)`, Label `leftMargin` 5 → 13.
-All-day chip / band geometry / fill translation / border untouched.
-**Evidence:** `r077-timed-stripe-light.png` (light, stripe at x59-62 in a chip starting at 55), `r077-timed-stripe-compare.png`
-(ref ×1.8 vs ours 1:1 at matched feature scale), `r077-timed-stripe-dark.png` (dark, stripe x509-512 = (48,140,198)).
-**Next:** the timed chip's 1px border (the ref has no ring: rule 236 → fill 222,237,254), then dark same-hue chip text.
-
-# R076 — **A03 done: the multi-day all-day strip is ONE bar; only the run's outer ends round.**
-The ref was walked 1:1 first for a chip crossing a column rule — **there is none in this reference week.** Every band row
-carries its rule unbroken (x=324/406/487/569/650/732 read **236/242/229 on all 21 band rows**, chip fills on both sides
-stopping 1–2 px short) ⇒ the ref week holds **no multi-day all-day event**, so A03 is **spec-only, no ref anchor**; the ref
-does settle the half the clause needs — **the day boundary is drawn *through* the band.** Edit: one injected accessor
-(`itemRecord`, bound in `Main.qml`'s two schedule views) + `isoDay`/`lastCoveredDay`/`allDayContinues` in the view +
-`allDayChip`'s single `radius` split into four corner radii. **Our capture, per-row fill envelope:** Mon 30 `insetL 4·2·1·1·0…`,
-`insetR 1` on all 24 rows (round left / **square right**); Tue 31 both edges flat (**square/square**); Wed 1 `insetL` flat,
-`insetR 5·3·2·2·1…1·2·2·3·5` (**square left** / round right) ⇒ one bar, outer ends only. Single-day items continue neither
-way and are **unchanged** (Thu 2's `Design sync`/`Release notes` still fully rounded). (2026-10-17)
-
-## 本轮 (R076)
-Atomic step: the standing Next-round #1 — **A03: is the multi-day strip continuous, which corners round?** Evidence:
-`docs/ui-calendar/r076-strip-light.png` (1100x692 light, `view week` + `date 2026-04-02`) + the ref|before|after composite
-`docs/ui-calendar/r076-strip-compare.png` (ref band 1:1 / ours AFTER 1:1 / ours BEFORE 1:1 / ours AFTER 2x, Mon..Thu rows).
-
-**Ref number the round turned on (measurement-only half).** `refs/macos-calendar.png` band rows y126-143/145-162/164-181; at
-every separator on every band row the rule is *visible and darker than both neighbours* (487 → `486=255 · 487=242 · 488=238
-· 489=purple`; 569 → `567=purple · 568=252 · 569=229 · 570=248`) ⇒ **the ref's chips never cross a column rule**, and the
-Thu chip's fill-left edge per row (`y126→499, 127→494, 128→492, 129→491, 130→490, 131→490, 132..138→489, 139→491, 140→492,
-141→493, 142→496`) is **a symmetric arc on BOTH edges** (right edge mirrors it) ⇒ **do not read the ref as authorising
-"outer corners only" for a *single-day* chip; it says nothing about a multi-day run at all.**
-**Ours after the edit** (chips x53..200 / 203..350 / 353..500, rows y157..180, `!=white` = envelope): the joint between two
-continued chips is **flat for all 24 rows** — the only thing between them is the R074 1 px rule. **Not touched:** the R075
-radius (`row/3` = 8), row 24 / gap 1 / inset 1 / band 76, the R074 separators, the four rule tokens, the weekend tint, the
-timed chip (`radius: 5`). **Light only, and it must stay that way: the change is pure corner geometry on a fill
-`AppTheme.withAlpha` already verifies in both legs.**
-
-## A03 status (tester's call, R076)
-**`Multi-day all-day strip visually continuous, only outer corners rounded` — PASS.** Verified on the fixture that can show
-it: `Multi-day review` runs **Mon 30 · Tue 31 · Wed 1** (three columns = exactly one interior joint to test) and renders as
-one bar. **Caveat recorded, not a failure: the clause has NO ref anchor in this image** (see 本轮) — it is satisfied against
-the spec text plus the macOS idiom, so it is **PASS, and re-checkable only by the spec.** The supporting measurement that
-stopped this being guesswork: the popover prints **`2026年3月30日星期一 – 2026年4月1日星期三 · 全天`** ⇒ the run is Mon–Wed,
-so Wed's right end *is* the strip's end and a rounded corner there is correct — **the corner test and the coverage agree.**
+## E01/E02 status (tester's call, R078)
+**`Chip carries a saturated same-hue bar at its left edge` — PASS** (timed chip, the only family the ref anchors it on),
+light + dark. **`Chip has no border/ring` — now PASS**, on ref-anchored evidence from three independent edges, light + dark.
+**Still NOT passed and NOT started:** the ref's chip **text is dark same-hue** (red chip ink **(117,37,34)** on a (251,228,227)
+wash; blue chip ink (99,131,172)+) where ours is grey `AppTheme.text`. **Do not read this round as "the chip language is
+done".**
 
 ## 仍差 (top 8, visual-impact order)
-1. **E01/E02 — the chip language, the biggest unexamined mass.** Ref chip = light desaturated same-hue fill + **dark same-hue
-   text** + a **3px solid same-hue LEFT STRIPE** (R073 measured it 1:1: x=491-493 = (187,62,216) over a light purple fill at
-   488-489) + small radius; a *second* all-day style is near-white (248) with a **coloured ring icon**. Ours: blue-filled
-   all-day pills; the timed chip is `radius: 5` + 1px border + no stripe. Contradicts our dark theme's
-   solid-saturated-fill/white-text idiom ⇒ first question is whether that translation is legitimate, **second** is the
-   stripe's width at our scale (ref 3 px on an 81 px column; ours is 150 px ⇒ ×1.85 ⇒ ~6, or literal 3 — the round must rule
-   on it from the crop, not assume). **No ruling needed, just never reviewed.**
-2. **A02 — band expansion / shared bottom edge.** The band's height is a fixed 76 today; the ref grows the band with the
-   number of all-day rows and shares the bottom edge with the 2px `allDaySeparator`. **Never reviewed. Needs a fixture with
-   1 and 4 all-day rows to be measurable at all** — do not start it without deciding that first.
-3. **Ref gutter labels are 12-hour and two-tone** (dark hour number + smaller lighter `AM`/`PM`), right-aligned on the **suffix's**
-   right edge (digit (89,89,89), suffix (176..193)); ours is single-size 24-hour `07:00`. **Needs ruling F.**
-4. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated `Rectangle`.
+1. **E01/E02 step 3 — the chip's text colour.** Ref text = **dark same-hue** (measured above); ours = `AppTheme.text`. **Next
+   round #1.** Open sub-question: the ref's ink is a *translation* of the calendar colour, not the colour at reduced alpha —
+   settle which before writing a number.
+2. **The all-day BAND chip's icon — ours has NONE.** Four 12×12 blobs at x247-258 / 329-340 / 491-502 / 654-665 ⇒ ~4 ref px
+   inside each column rule, on an 18-ref-px row ⇒ ours ~**15 px at ×1.33, ~5 px in**. Ring-shaped (hollow centres), *coloured
+   per calendar*. Needs a decision on the icon's source/shape before it can be built — **do not start it without one.**
+3. **A02 — band expansion / shared bottom edge.** The band's height is a fixed 76; the ref grows it with the number of all-day
+   rows and shares the bottom edge with the 2px `allDaySeparator`. **Never reviewed. Needs a fixture with 1 and 4 all-day rows
+   to be measurable at all** — do not start without deciding that first.
+4. **Ref gutter labels are 12-hour and two-tone** (dark hour number + smaller lighter `AM`/`PM`), right-aligned on the
+   **suffix's** right edge (digit (89,89,89), suffix (176..193)); ours is single-size 24-hour `07:00`. **Needs ruling F.**
+5. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated `Rectangle`.
    **R058 re-confirmed both directions.** App-wide. **Needs ruling A.**
-5. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
+6. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
    `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs ruling B.**
-6. **`slice(0, 2)` per cell drops a 3rd item with no `+N`** (R048). **R072 aimed it at the BAND — and R076 shows that
-   claim was wrong:** with `Multi-day review` absent from Apr 2, Thursday's band holds exactly **2** all-day items, so this
-   fixture hides nothing and the empty third row is simply unused. The month day cell holds 1 chip + `N` where the ref
-   stacks 3. **Needs ruling D — and needs a 3-all-day-item day before the band half can be reproduced at all.**
-7. **`EventDetailsPopover.qml:60` `CloseOnEscape` is dead code** (R059; **NOT a spec failure** — ruling C) and **E03 clause 3
-   is blocked on a ruling, not failed (R049)**: no view produces a tall block while the ref's week view shows proportional
-   30-min vs 60-min chips ⇒ **ruling E**. Clauses 1+2 PASS (R048).
-8. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (R076, measured on the ref: Thu chip
-   489..567 in a 487..569 column). ~3.7 px at our scale ⇒ visually near-identical; **do not chase it without a ruling**, it
-   rides on A01's erratum G (the spec's "inset 2–3" is the same number read in ref px).
+7. **`slice(0, 2)` per cell drops a 3rd item with no `+N`** (R048; R076 proved R072's "aim it at the band" wrong — Apr 2
+   carries exactly 2 all-day items). The month day cell holds 1 chip + `N` where the ref stacks 3. **Needs ruling D — and
+   needs a 3-all-day-item day before the band half can be reproduced at all.**
+8. **Ref band chips are inset ~2 ref-px from their column rule; ours sit at inset 1** (R076: Thu chip 489..567 in a 487..569
+   column). ~3.7 px at our scale ⇒ near-identical; **do not chase it without a ruling** — it rides on ruling G (the spec's
+   "inset 2–3" is the same number read in ref px).
 - *Cosmetic, no ID:* the band's empty third slot is visibly ruled (R074's separators cross it) — **ruling D, do not patch.**
   `secondary` hover = neutral grey 79 no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. D02 radius **16** vs
   spec 24/32 — **keep 16**. Topmost visible gutter label is **half-clipped** when a scroll offset lands an hour line exactly on
   the viewport top (R066; scroll artifact, not a form defect).
 
 ## 最近已改 (most recent 8)
-1. R076 — **A03**: `allDayChip`'s `radius` → four corner radii, square where `allDayContinues(item, columnDate, ±1)`;
-   new injected `itemRecord` on the view (bound in `Main.qml`'s two `CalendarScheduleView`s) + `isoDay` / `isoDayPattern` /
+1. R078 — **E01/E02 step 2**: `timedChip`'s `border.width: 1` + `border.color: withAlpha(itemColor, 0.34)` **deleted**
+   (`CalendarScheduleView.qml:631-633`), replaced by a comment carrying the three-edge measurement. Nothing else touched.
+2. R077 — **E01/E02 step 1**: `timedChip` gained a saturated same-hue left bar — derived `stripeWidth`/`stripeInset` (= 4, from
+   `chipHeight/4`), capsule `radius: width/2`, vertical margin 2, `color: itemColor(modelData)`; Label `leftMargin` 5 → 13.
+3. R076 — **A03**: `allDayChip`'s `radius` → four corner radii, square where `allDayContinues(item, columnDate, ±1)`; new
+   injected `itemRecord` on the view (bound in `Main.qml`'s two `CalendarScheduleView`s) + `isoDay` / `isoDayPattern` /
    `lastCoveredDay` / `allDayContinues`. Single-day chips bit-identical to R075.
-2. R075 — **A01 step 5**: `allDayChip` `radius: 5` → `Math.round(root.allDayRowHeight / 3)` = **8** (ref r≈6 on an 18px row).
-3. R074 — **A01 step 4**: the band's `allDayColumn` gained the grid's column separators (1px `gridLine` left edge + right rim
+4. R075 — **A01 step 5**: `allDayChip` `radius: 5` → `Math.round(root.allDayRowHeight / 3)` = **8** (ref r≈6 on an 18px row).
+5. R074 — **A01 step 4**: the band's `allDayColumn` gained the grid's column separators (1px `gridLine` left edge + right rim
    on the last column); y=215 = 237 at 52/202/352/502/652/802, identical to the grid; boundaries single-width.
-4. R073 — **A01 step 3**: `allDayBandInset` 3 → **1**; band 80 → **76** (derived); separator 236/237 → **232/233**, first hour
+6. R073 — **A01 step 3**: `allDayBandInset` 3 → **1**; band 80 → **76** (derived); separator 236/237 → **232/233**, first hour
    line 238 → **234**. Verified the gap stayed 1.
-5. R072 — **A01 step 2**: row 18→**24**, gap 2→**1**, band 48→**80**, all derived from four new tokens; the band's
+7. R072 — **A01 step 2**: row 18→**24**, gap 2→**1**, band 48→**80**, all derived from four new tokens; the band's
    `ColumnLayout` re-anchored to stop surplus spreading into the spacings.
-6. R071 — **measurement only.** Dark weekend tint = **(37,37,37)** in band *and* grid; weekday 30; gutter and header row
+8. R071 — **measurement only.** Dark weekend tint = **(37,37,37)** in band *and* grid; weekday 30; gutter and header row
    untinted; 155 = 39 and 204/205 = 84 unchanged.
-7. R070 — **weekend section tint**: `weekendField` + `isWeekendColumn()`; one background `Rectangle` first-child in the band's
-   `allDayColumn` and in `hourCell` (gutter-guarded). Light 249/255, dark 37/30.
-8. R069 — separator **above** the all-day band: `AppTheme.border` → new `sectionRule` **#F2F2F2 / white@0.04**; light 242, dark 39.
 
-## 外推待确认 (live only — R053's 9 older items and the earlier blocks are archived to rounds.md tail)
-- **THE REFERENCE WEEK CONTAINS NO MULTI-DAY ALL-DAY EVENT (R076).** Measured, not assumed: all 21 band rows carry the
-  column rule unbroken with chip fills on both sides, and every chip's fill is inset 1–2 px inside **one** column. ⇒ **A03's
-  clause has no ref anchor; the ref can only anchor single-day all-day chips.** Corollary: **a claim that "the ref does X for
+## 外推待确认 (live only — R053's 9 older items, R070/R072's settled notes and the earlier blocks are archived to rounds.md tail)
+- **A CHIP EDGE CAN ONLY PROVE "NO BORDER" IF IT DOES NOT ABUT A RULE (R078).** The left edge sits on the column rule and
+  R077 mis-read a 1px border there; a **top or bottom** edge — or, better, two of them on two chips — carries the answer.
+  **Idiom: read the RAW profile across the edge and check monotonicity** — a real border is a row darker *and* more saturated
+  than the fill; a corner/AA row is *lighter*. Ours has neither, so on a chip whose fill is a light wash, **an AA transition
+  and no-transition are the same verdict.**
+- **THE REF'S SAME-HUE LEFT STRIPE IS A TIMED-GRID-CHIP PROPERTY, AND THE BAND CHIP HAS AN ICON INSTEAD (R077).** R073's
+  "x=491-493 = (187,62,216) stripe" is the **band icon's left arc** (ring, hollow centre x495-496). ⇒ **never cite the ref for
+  a stripe in the all-day band**, and never read a saturated 3px run without checking it is constant-width top-to-bottom.
+  Corollary: **the band's chips do have a coloured element — a ~12×12 per-calendar ring icon ~4 px inside their column rule.**
+- **THE REF BAR IS AN ABSOLUTE STROKE, NOT A FRACTION OF THE CHIP (R077).** 2.4 ref px on an 11 ref px 30-min chip *and* on a
+  22 ref px 60-min chip. ⇒ ours stays `chipHeight/4` = 4 on the fixed 16 px chip **regardless of duration**. The horizontal
+  scale is the one to use for its width (×1.85 on the column); the ink envelope is ~2.4 px, not the 3 px it reads at its
+  thinnest.
+- **OUR `timedChip` GEOMETRY AFTER R078 (light 1100x692):** chip = column + 3 (Container `anchors.margins: 3`), so Thu =
+  **505..648**; **fill 505-508, bar 509-512** (4 px, capsule), text ink from **518**. Light fill `(216,234,245)`, dark fill
+  `(36,69,90)`, bar `(48,140,198)` in both legs. **No border pixel at any edge, light or dark.** The Label's `leftMargin` is
+  derived (`inset + width + 5`) — do not retype 13 if either token moves.
+- **THE REFERENCE WEEK CONTAINS NO MULTI-DAY ALL-DAY EVENT (R076).** Measured, not assumed: all 21 band rows carry the column
+  rule unbroken with chip fills on both sides, and every chip's fill is inset 1–2 px inside **one** column. ⇒ **A03's clause
+  has no ref anchor; the ref can only anchor single-day all-day chips.** Corollary: **a claim that "the ref does X for
   multi-day strips" cannot be made from this image** — say "spec-only" instead.
-- **ALL-DAY RANGE ARITHMETIC SUBTRACTS EXACTLY ONE DAY — NEVER TWO (R076).** The ICS carries
-  `DTEND;VALUE=DATE:20260403` for `Multi-day review`, the record's end is the **inclusive last day (Apr 2)**, and the popover
-  proves the truth: it prints **`2026年3月30日星期一 – 2026年4月1日星期三`**. `Main.qml:itemDetailsRange` and the new
-  `lastCoveredDay` both subtract one day and **agree with the popover** ⇒ the model is consistent; any new range math must
-  subtract one day and be checked against that popover string. **Corollary: the corner rule and the column membership use
-  *different* sources (record `start`/`end` vs the service's date expansion) — they agree today, so any future all-day
-  membership change must be re-checked against the corners.** **Second corollary (a correction to the record):
-  R072's "Thursday carries 3 all-day items" is WRONG — Apr 2 holds exactly 2 (`Design sync`, `Release notes`); nothing is
-  hidden by `slice(0, 2)` on this fixture.**
-- **A SQUARE JOINT ONLY READS AS "ONE BAR" BECAUSE THE COLUMN RULE IS DRAWN THROUGH THE BAND (R074 + R076).** The ref does
-  the same (its rule is unbroken through every band row). ⇒ **if the R074 separators are ever removed, A03's rendering
-  collapses back into "one pill per day".** The two changes are a pair.
+- **ALL-DAY RANGE ARITHMETIC SUBTRACTS EXACTLY ONE DAY — NEVER TWO (R076).** The ICS carries `DTEND;VALUE=DATE:20260403` for
+  `Multi-day review`, the record's end is the **inclusive last day (Apr 2)**, and the popover proves the truth: it prints
+  **`2026年3月30日星期一 – 2026年4月1日星期三`**. `Main.qml:itemDetailsRange` and the new `lastCoveredDay` both subtract one day
+  and **agree with the popover** ⇒ the model is consistent; any new range math must subtract one day and be checked against
+  that popover string. **Corollary: the corner rule and the column membership use *different* sources (record `start`/`end`
+  vs the service's date expansion) — they agree today, so any future all-day membership change must be re-checked against the
+  corners. Second corollary: R072's "Thursday carries 3 all-day items" is WRONG — Apr 2 holds exactly 2 (`Design sync`,
+  `Release notes`); nothing is hidden by `slice(0, 2)` on this fixture.**
+- **A SQUARE JOINT ONLY READS AS "ONE BAR" BECAUSE THE COLUMN RULE IS DRAWN THROUGH THE BAND (R074 + R076).** The ref does the
+  same (its rule is unbroken through every band row). ⇒ **if the R074 separators are ever removed, A03's rendering collapses
+  back into "one pill per day". The two changes are a pair.**
 - **`itemRecord` IS A NEW INJECTED PROPERTY ON `CalendarScheduleView` (R076), bound in `Main.qml`'s two schedule views
-  (`itemAllDay:`/`itemRecord:`/`itemHour:` neighbours). A view that omits it gets `({})` ⇒ `continuesLeft/Right` false ⇒
-  every chip fully rounded (falls back to the R075 shape, no crash, no binding error).** Any *new* schedule-view instance
-  must bind it or silently lose A03.
+  (`itemAllDay:`/`itemRecord:`/`itemHour:` neighbours). A view that omits it gets `({})` ⇒ `continuesLeft/Right` false ⇒ every
+  chip fully rounded (falls back to the R075 shape, no crash, no binding error).** Any *new* schedule-view instance must bind
+  it or silently lose A03.
 - **A LITERAL `8` WOULD HAVE BEEN WRONG TO WRITE; `row/3` IS THE RULE (R075).** Ref chip radius ≈ **6 ref-px on an 18 ref-px
-  row = one third of the row height**. **Any future corner in this view must be derived from the box it rounds, not typed.**
-  Corollary: **the ref's corner is a SQUIRCLE (continuous curvature)** — its first row reads 4.5 where a true circle of r=6
-  would read ~6 ⇒ **compare arc *length and orientation* against the box, never the first-row inset alone.**
-- **MEASURING A CORNER: THE DECISIVE IDIOM IS A PER-ROW FILL-START INSET (R075).** Crop the chip's top-left, then for each
-  row print the **x where the fill reaches full coverage**, minus the chip's left edge. The row where the inset reaches **0**
-  is the **radius**. **R076 addendum — the cheap screening version:** for a *joint* (round vs square) a `!= white` envelope is
-  enough and costs one scan: **flat over all 24 rows = square; symmetric 4·2·1·1·0…0·1·1·2·4 = round.** **Caveat: read the
-  *fill* channel, not luminance** — antialiased text and the ring icon sit inside the chip and poison a luminance scan.
-- **`captureClient` RETURNS `false` ON A NESTED RELATIVE PATH AND THE PNG IS SILENTLY NOT WRITTEN (R075).** The app's CWD is
-  the **task dir** (`/proc/<pid>/cwd` → **`/home/amao/nextkde`**), so pass a **FLAT filename**; the PNG lands in the repo
-  root and must be moved. **Always read the success flag in `live-runtime-vm.log`** (`… capture <name> true`).
+  row = one third of the row height**. **Any future corner — or bar, R077's `chipHeight/4` — must be derived from the box it
+  sits in, not typed.** Corollary: **the ref's corner is a SQUIRCLE (continuous curvature)** — its first row reads 4.5 where a
+  true circle of r=6 would read ~6 ⇒ **compare arc *length and orientation* against the box, never the first-row inset alone.**
+- **MEASURING A CORNER, A JOINT OR A STRIPE (R075/R076/R077/R078).** Corner: per-row **fill-start inset** — the row where the
+  inset reaches 0 is the radius. Joint: per-row **`!= white` envelope** — flat over all rows = square, symmetric 4·2·1·1·0… =
+  round. Stripe: a saturated run whose **width is constant over the chip's full height** (a ring's arc fakes a 3px run on its
+  tangent rows). Border: **monotonicity of the raw profile across an edge that does not abut a rule**. **Caveat: read the
+  *fill* channel, not luminance** — antialiased text and ring icons sit inside the chip and poison a luminance scan.
+- **`captureClient` RETURNS `false` ON A NESTED RELATIVE PATH AND THE PNG IS SILENTLY NOT WRITTEN (R075).** Pass a **FLAT
+  filename**; it lands in the app's CWD, which is **whatever directory `start-review-vm.sh` was launched from** — R078 launched
+  from the task dir and the PNGs appeared **there** (R075 saw the repo root). **Always read the success flag in
+  `live-runtime-vm.log`** (`… capture <name> true`) and then `ls` the actual CWD.
 - **THE BAND RULES ITS COLUMNS WITH THE GRID'S TOKEN (R074).** `allDayColumn`: left-edge 1px `gridLine` per column + right rim
-  on `index === root.dayCount - 1`. **Measured: y=215 (band) and y=250 (grid) produce the SAME run list**
-  (52/202/352/502/652/802, all 237) and the boundary pixels are single-width (501=255, 502=237, 503=255). ⇒ **no band-only
-  token; never "invent" a lighter band line.** **Corollary: never read a subpixel-attenuated separation colour as a distinct
-  token without checking a second column.** R075/R076 re-confirmed: the separator is still 237.
-- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED by R074, R075 and R076.** `sectionRule` **y=155**
-  (242, 1px); band interior **156..231 = 76**; `allDaySeparator` **232-233** (217, 2px); first hour line **234** (237). Chips:
+  on `index === root.dayCount - 1`. **Measured: y=215 (band) and y=250 (grid) produce the SAME run list** (52/202/352/502/652/802,
+  all 237) and the boundary pixels are single-width (501=255, 502=237, 503=255). ⇒ **no band-only token; never "invent" a
+  lighter band line.**
+- **THE ALL-DAY BAND'S Y-MAP (R073, light, 1100x692) — re-confirmed UNCHANGED by R074–R078.** `sectionRule` **y=155** (242,
+  1px); band interior **156..231 = 76**; `allDaySeparator` **232-233** (217, 2px); first hour line **234** (237). Chips:
   **157-180**, gap **181**, **182-205**, third slot 206-231. **R072: the band grew 48 → 80 and R073 shrank it to 76, so it is
   net +28 vs R070 — the grid has permanently lost ~28px of viewport; check the visible hour range before touching either.**
-- **A `ColumnLayout` TALLER THAN ITS ITEMS SPREADS THE SURPLUS INTO ITS SPACINGS (R072).** Measured: a band 74px tall holding
-  two 24px chips on `spacing: 1` rendered the leading gap as **7**, the between-gap as **13** and the trailing gap as **6**.
-  **The fix is to remove the surplus, not to fight the distribution:** `anchors.top/left/right` + `height: implicitHeight`.
-  **Any future band-height work must re-check this.**
-- **REF ALL-DAY BAND, MEASURED 1:1 (R072/R073/R075/R076).** Rows **y126-143, y145-162, y164-181** ⇒ **row 18, gap 1, pitch 19**;
-  top rule **y=124** 1px (242); bottom separator **y=183-184** 2px (217); **inset ≈1 on BOTH legs** (R073); content
-  **125..182 = 58**; band total **60**. Chip radius **≈6 = row/3**; chip fill inset **1–2 px** inside its column. The ref renders
-  a *second*, near-white chip style beside the tinted ones. Our scale: vertical **×1.33** (40 hour pitch vs 27), horizontal
-  **×1.85** (150px column vs 81.3). **Ours now: row 24 / gap 1 / inset 1 / radius 8 / band 76 / 2-row content 49 /
-  separators present / strip continuous — every *form* item matched.**
-- **OUR COLUMN MAP AT 1100x692 (R071/R072/R074/R075/R076):** x=0 rim (53,53,53) dark / (224,224,224) light; gutter x 1..51;
+- **REF ALL-DAY BAND, MEASURED 1:1 (R072/R073/R075/R076/R077).** Rows **y126-143, y145-162, y164-181** ⇒ **row 18, gap 1,
+  pitch 19**; top rule **y=124** 1px (242); bottom separator **y=183-184** 2px (217); **inset ≈1 on BOTH legs** (R073); content
+  **125..182 = 58**; band total **60**. Chip radius **≈6 = row/3**; chip fill inset **1–2 px**; **per-calendar ring icon 12×12
+  ~4 px inside the column rule**. Ours now: row 24 / gap 1 / inset 1 / radius 8 / band 76 / 2-row content 49 / separators
+  present / strip continuous — every *form* item matched **except the icon (see 仍差 #2)**.
+- **REF TIMED CHIP, MEASURED 1:1 (R077 + R078).** Outer pitch **27 px/hour**; a 1-hour chip spans **y331..356 = 26 px**; chip
+  spans its column's full width minus ~1 px each side (rule 487 → fill 488…569). Fill = light desaturated same-hue wash (blue
+  (222,237,254), red (251,228,227)); **text = dark same-hue** (red ink (117,37,34)); **left bar 2.4 px, ~3 px in, round caps**;
+  **no border/ring on any edge (R078, three edges)**. Ours: fill `withAlpha(itemColor, .19 light / .36 dark)`, text
+  `AppTheme.text`, bar done (R077), border deleted (R078). Ref chip ink starts **7 ref px** in from the fill edge. Ours: chip =
+  column + 3, text ink from column + 16.
+- **REF EVENT CHIP COLOUR IDIOM (R063 + R075 + R077).** Light desaturated same-hue fill + dark same-hue text + saturated
+  same-hue left bar + small radius. **The ref has NO popover, menu, tooltip or hover frame** ⇒ the D/O families are
+  HIG+token-anchored only. **The ref's tinted chips carry their icon at the LEFT INSIDE EDGE** (the purple star's disc starts
+  ~2 px in, the ring icon at ~4 px) — which is why a corner crop of a ref chip always contains the icon: **crop the *second*
+  chip row for a clean corner, or read the numeric profile instead.**
+- **OUR COLUMN MAP AT 1100x692 (R071/R072/R074–R078):** x=0 rim (53,53,53) dark / (224,224,224) light; gutter x 1..51;
   separators at **x=52/202/352/502/652/802 in BOTH the band and the grid**, **pitch 150**, 7×149px delegates starting at 52
-  (delegate edges land on 201.7/351.4/501.1…, so a chip at inset 1 shows its fill on 53..200 / 203..350 / 353..500).
-  Columns **Mon 30 · Tue 31 · Wed 1 · Thu 2 · Fri 3 · Sat 4 · Sun 5** (locale week starts Monday) ⇒ **weekend = the last two**.
-  **The band's right rim is on Sun's right edge (x=1102) and is therefore clipped at 1100.**
-- **WEEKEND TINT IS A *COLUMN* PROPERTY, NOT A BAND PROPERTY (R070/R071).** Ref: weekday columns **255** in band *and* grid,
-  Sat/Sun **249** in both; the band has **no tint of its own**; the day-header row is not tinted. Ours: `weekendField`
-  (light `#F9F9F9` = 249, dark `white@0.03` = 37) + `isWeekendColumn(column)` (`getDay()` ∈ {0,6} — date-driven so it survives
-  a Mon-start week), consumed by **two** first-child background Rectangles: the band's `allDayColumn` and the `hourCell`
-  delegate (**guarded `columnIndex > 0`**). **R074: the band's separators are drawn ON TOP of the tint.**
+  (delegate edges land on 201.7/351.4/501.1…, so a band chip at inset 1 shows its fill on 53..200 / 203..350 / 353..500, and a
+  timed chip — Container margins 3 — starts at 55/205/355/505…). Columns **Mon 30 · Tue 31 · Wed 1 · Thu 2 · Fri 3 · Sat 4 ·
+  Sun 5** (locale week starts Monday) ⇒ **weekend = the last two**. **The band's right rim is on Sun's right edge (x=1102) and
+  is therefore clipped at 1100.**
 - **FOUR LOCAL TOKENS OWN THE GRID'S RULES (R065/R067/R069).** `CalendarScheduleView.qml:51-75`: `gridLine` (light `#EDEDED` /
   dark white@0.13), `gridLineMinor` (light `#F4F4F4` / dark white@0.06), `allDaySeparator` (light `#D9D9D9` / dark white@0.24),
   `sectionRule` (light `#F2F2F2` / dark white@0.04). **`AppTheme.border` now has ZERO consumers in this view.** *Don't call
@@ -187,10 +161,10 @@ so Wed's right end *is* the strip's end and a rounded corner there is correct �
   by THREE things — the grid's top/left/right edges AND the band's column separators.**
 - **THE ALL-DAY SEPARATOR IS 2px AND SPANS THE GUTTER (R067).** A `ColumnLayout` sibling of the `ScrollView` with
   `Layout.fillWidth: true` ⇒ full window width, matching the ref. **R068: the top boundary spans identically.**
-- **ONE LINE PER BOUNDARY (R065).** A cell must never draw both a top and a bottom edge, and never both a left and a right
-  edge: adjacent edges land on the same pixel row and render as 2px. The right rim is drawn only by
-  `columnIndex === root.dayCount`. **R067 corollary:** the separator and the first hour line are **adjacent rows** with
-  different weights — never read them as one band. **R074 applied it to the band verbatim** and **measured it single-width.**
+- **ONE LINE PER BOUNDARY (R065).** A cell must never draw both a top and a bottom edge, and never both a left and a right edge:
+  adjacent edges land on the same pixel row and render as 2px. The right rim is drawn only by `columnIndex === root.dayCount`.
+  **R067 corollary:** the separator and the first hour line are **adjacent rows** with different weights — never read them as
+  one band. **R074 applied it to the band verbatim** and **measured it single-width.**
 - **Our schedule grid field is pure WHITE (255,255,255)** light / **(30,30,30)** dark — not the app's 247 card fill. **Weekend
   columns are 249 light / 37 dark; the gutter is NOT tinted. The all-day band shares the column's fill.**
 - **THE GUTTER LABEL IS RIGHT-ANCHORED AND SIZE-DERIVED (R066).** font 11, `anchors.right` + `rightMargin: 7`, vertical
@@ -198,16 +172,7 @@ so Wed's right end *is* the strip's end and a rounded corner there is correct �
   merges every text band into one.
 - **`hourHeight` is THE pitch constant (R064).** `CalendarScheduleView.qml:49`. Chip height =
   `Math.round(root.hourHeight * 21 / 54)` = **16**. Half-hour line = `Math.round(parent.height / 2)` = **20**. **R072 added a
-  second derived family for the band — the four `allDay*` tokens; use them.**
-- **REF EVENT CHIPS (R063 + R073 + R075).** Chip = **light desaturated same-hue fill + dark same-hue text + a 3px solid
-  same-hue LEFT STRIPE** + **radius ≈ row/3** (R075). **R073 measured the stripe at 1:1: x=491-493 = (187,62,216) over a
-  light purple fill (488-489) — 3px, fully saturated, not a compression artifact.** Contradicts our dark theme's
-  solid-saturated-fill + white-text ⇒ the E family's first question is whether our dark translation is legitimate.
-  **R070/R073 addendum:** a *second* all-day chip style is **near-white (248) with a coloured ring icon**.
-  **The ref has NO popover, menu, tooltip or hover frame** ⇒ the D/O families are HIG+token-anchored only.
-  **R075 addendum: the ref's tinted chips carry their icon at the LEFT INSIDE EDGE** (the purple star's disc starts ~2px in),
-  which is why a corner crop of a ref chip always contains the icon — **crop the *second* chip row for a clean corner, or
-  read the numeric profile instead.**
+  second derived family for the band — the four `allDay*` tokens; R077 added the chip's `stripeWidth`/`stripeInset`.**
 - **REF FACT SHEET (R063, compacted).** `.loop/refs/macos-calendar.png` = **814x522, 1:1, WEEK view** (Apr 2026) + 243px
   sidebar + mini calendar. Day headers (text y108-116) → **all-day band (y 124–184)** → hour grid 8 AM–8 PM. Gutter labels
   193/220/247/274/301/328 = **pitch 27**; the red `9:41` pill **replaces** the 10 AM label. Now-line y=238. **7 equal day
@@ -215,70 +180,78 @@ so Wed's right end *is* the strip's end and a rounded corner there is correct �
   h 1.33** ⇒ ref pitch 27 ≈ **36** (the contract says 40; 40 was chosen). Hour lines and vertical separators are both
   **1px (237,237,237)**. Gutter label (ref x 215..238): digit **(89,89,89)**, `AM`/`PM` suffix **(176..193)**, right ink edge
   238 vs grid line 243 ⇒ 5 ref-px. **Columns: Sun 29 · Mon 30 · Tue 31 · Wed 1 · Thu 2 · Fri 3 · Sat 4.**
-- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075/R076).** `harness/Main.qml` matches `command.action` only
+- **HARNESS COMMAND FORM IS FLAT (R064, re-confirmed R075–R078).** `harness/Main.qml` matches `command.action` only
   (`captureClient{path}`, `escape`, `resize{width,height}`, `sidebar{expanded}`, `view{view}`, `date{date}`,
   `openItem{kind,titleContains}`); a command with no `action` **silently hits the fallback**. `openItem` searches
-  `reviewWindow.selectedItems` — **the items of the *selected* date**, so a popover test must send `date` first, and
-  **"no popover appeared" is a usable negative result.** `review-command.py` takes **ONE argv that is a JSON list**, bumps
-  `sequence` itself, writes **in place** (never `os.replace`). **R069–R076: the whole drive list in ONE invocation works fine.**
-- **launch/re-launch:** `start-review-vm.sh` blocks on `wait "$app_pid"` — background it (`nohup … & disown`). A rebuilt binary
-  needs a **kill+relaunch**; kill the pid **read from `live-app.pid`**, never `pkill`. ~20s to the new pid. Include
-  `resize 1100x692`. It starts in `--view week --date 2026-10-15`, so every drive list must re-send `view week` + the date.
-  **R076: the app stays usable between captures — a second capture that needs no rebuild costs only a drill, not a relaunch.**
-  **The app's CWD is `/home/amao/nextkde`, so a flat capture filename lands in the repo root — move it into `tmp/`.**
-  App stderr goes to **`live-runtime-vm.log`** — read the capture success flags there before believing any capture.
+  `reviewWindow.selectedItems` — **the items of the *selected* date**, so a popover test must send `date` first, and **"no
+  popover appeared" is a usable negative result.** `review-command.py` takes **ONE argv that is a JSON list**, bumps
+  `sequence` itself, writes **in place** (never `os.replace`) — it is **6 lines**; read it rather than guess. **R069–R078: the
+  whole drive list in ONE invocation works fine.**
+- **launch/re-launch:** `start-review-vm.sh light|dark` blocks on `wait "$app_pid"` — background it (`nohup … & disown`). A
+  rebuilt binary needs a **kill+relaunch**; kill the pid **read from `live-app.pid`**, never `pkill`. ~24 s to the new pid
+  (26 s is a safe sleep). Include `resize 1100x692`. It starts in `--view week --date 2026-10-15`, so every drive list must
+  re-send `view week` + the date. **The theme is fixed at launch — a dark leg costs a full kill+relaunch; a second capture in
+  the same theme costs only a drill.** **App stderr goes to `live-runtime-vm.log`** — read the capture success flags there
+  before believing any capture.
 - **Fixtures on 2026-04-02** (live = `profile/pim/calendar.ics`; the repo-root `calendar-fixture.ics` is **stale, no VTODOs**):
   VEVENTs Morning planning 08:00 / Short appointment 10:15 / **Long review with a deliberately lengthy title** 11:00 /
   **Design review** 14:30 / Evening session 18:00; plus a **`Multi-day review`** all-day strip with
   **`DTSTART;VALUE=DATE:20260330` + `DTEND;VALUE=DATE:20260403`** (line 574) ⇒ it **covers Mon 30 · Tue 31 · Wed 1 only**
-  (R076, popover-confirmed) and therefore **does not appear on Thursday at all**.
-  `Design sync` + `Release notes` are two separate **single-day** all-day VEVENTs on **2026-04-02** (R072) ⇒ **Apr 2 carries
-  exactly 2 all-day items**, both rendered, both fully rounded. VTODOs (kind `"todo"`): `[UI] Green planning` 09:00,
-  `[UI] Gold review` 12:00, `[UI] Red review` 16:00, `A deliberately long task title to inspect elision` 11:00,
-  **`[R019 LONG TASK] 任务长标题与编辑表单检查`** (the record for any wrapping-title test).
-- **Row-band measurement idiom (worked eighteen times, R046/R062–R076):** scan the target column (or row) for pixels that are
+  (R076, popover-confirmed) and therefore **does not appear on Thursday at all**. `Design sync` + `Release notes` are two
+  separate **single-day** all-day VEVENTs on **2026-04-02** (R072) ⇒ **Apr 2 carries exactly 2 all-day items**, both rendered,
+  both fully rounded. VTODOs (kind `"todo"`): `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00,
+  `A deliberately long task title to inspect elision` 11:00, **`[R019 LONG TASK] 任务长标题与编辑表单检查`** (the record for any
+  wrapping-title test). **R077: the timed chips land in 5 consecutive hour cells on Thursday (319/359/399/439/479 by stripe
+  band) — the VTODOs render as timed chips too, 7 stripe bands in a column.** **R078: Thu chip rows measured at x=600 are
+  277-292 / 317-332 / 357-372 / 397-402 / 405-406 / 409-412 / 415-420 / 423-425 / 427-430 / 517-532 / 677-691.**
+- **Row-band measurement idiom (worked twenty times, R046/R062–R078):** scan the target column (or row) for pixels that are
   **not** the background, threshold, group into bands, read the band **centre** (text) or **start** (cap-tops). A **row/column
   mean over a wide span** is the cheapest way to find horizontal lines. **Caveats:** keep the window strictly inside the
   region; the all-day separator and the first hour line can be **adjacent rows** (232/233 vs 234 — different weights, don't
-  merge); the x=0 rim merges every band, start at x ≥ 3; for **full-width** rules a row-mean over x 0..1099 is exact.
+  merge); the x=0 rim merges every band, start at x ≥ 3; for **full-width** rules a row-mean over x 0..1099 is exact —
+  **but a row-mean over a *populated* grid is poisoned by chips (R078), so find hour lines in an empty column instead.**
   **R070: the decisive idiom for a *per-column* property is a VERTICAL profile of one empty column.** **R071: fix the column
   map first with a single row run-scan in an empty grid row.** **R072: a vertical profile of the band column also catches a
   LAYOUT defect (7/13/6 spacing) that a screenshot alone reads as "roughly right".** **R074: an ASYMMETRIC check — the same
   run-scan at the band row AND the grid row — proves "now matches" in one call.** **R075: for a CORNER, per-row fill-start
-  inset.** **R076: for a JOINT, the per-row `!= white` envelope — flat = square, symmetric = round.**
+  inset.** **R076: for a JOINT, the per-row `!= white` envelope.** **R077: for a STRIPE, a saturation run-scan whose width must
+  be constant over the chip's full height; a classified 2D ASCII dump (one char per pixel) is the cheapest way to see an icon
+  you were told was a stripe.** **R078: for a BORDER, a raw RGB profile across an edge that abuts no rule — check
+  monotonicity.**
 - **Pillow crops need ABSOLUTE paths**; a glob and a literal path in the same `for` list crashes the crop script — assert
   `im.size` first. **A composite (a 1:1 strip pasted above a 2–3× zoom) answers "overall form + local detail" in ONE image
-  read.** **R075: for a SHAPE comparison, scale the two crops so the *feature* is the same size — otherwise the eye reads
-  the scale difference as a shape difference.** **R076: label the rows in the composite (`ImageDraw.text`, the default bitmap
-  font is enough) — a three-row before/after/ref stack is unreadable unlabelled.**
-- **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in (name them
-  **`r0NN-<slug>.png`**) and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first). `state.md`/`rounds.md`
-  can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude Opus 5` trailer.** A prepend Edit whose
-  only `old_string` is the previous round's heading **deletes that heading** — re-append it. **R069/R071: two different PNGs can
-  be byte-identical in SIZE — `md5sum` before concluding a capture is stale.**
+  read.** **R075: for a SHAPE comparison, scale the two crops so the *feature* is the same size.** **R076: label the rows in
+  the composite (`ImageDraw.text`).** **R077: `LANCZOS` for a ×1.8 upscale of a ref crop; `NEAREST` when the point is to see
+  pixel structure.** **R078: a ×6 `NEAREST` edge crop is the right tool for "is there a 1px ring" — but back it with the raw
+  numbers; the eye cannot reliably beat them at 1px.**
+- **`tmp/` is gitignored.** The committable artifact is the mirror under **`docs/ui-calendar/`**: copy screenshots in (name
+  them **`r0NN-<slug>.png`**) and **prepend** the round summary to `docs/ui-calendar/LEDGER.md` (newest first) — **prepend
+  with `Path.write_text(entry + old)`; an `Edit` whose only `old_string` is the previous round's heading deletes that
+  heading.** `state.md`/`rounds.md` can never be committed — expected. **Commits must end with the `Co-Authored-By: Claude
+  Opus 5` trailer.** **R069/R071: two different PNGs can be byte-identical in SIZE — `md5sum` before concluding a capture is
+  stale (R078: both legs are 3050463 bytes and differ).**
 
 ## Next round (pick ONLY #1)
-**#1 — E01/E02: the ref chip's 3px same-hue LEFT STRIPE.** This is the biggest unexamined visual mass and the stripe is the
-one part of it already **measured 1:1** (R073: `macos-calendar.png` x=491-493 = **(187,62,216)** over the light purple fill at
-488-489 — 3px, fully saturated). **Step 1 only, and atomic: add the left stripe to the all-day chip.** Do **not** touch the
-fill/text colour translation, the radius, or the band geometry in the same round. **The one number to rule on before editing:
-the stripe is 3 *ref* px on an 81 px ref column and our column is 150 px (×1.85 ⇒ ~6)** — read the ref crop again and derive
-it (a typed `3` would repeat R075's literal-`8` mistake; our vertical family uses ×1.33, our horizontal ×1.85, so pick the
-axis the *stroke* belongs to and say why). **Do NOT touch** the four corner radii just set (R076), the R074 separators, the
-R075 radius, or any band geometry. **Evidence either way:** the light capture + a ref|ours stripe composite mirroring
-`docs/ui-calendar/r076-strip-compare.png`.
+**#1 — E01/E02 step 3: the `timedChip` text is dark same-hue in the ref, grey `AppTheme.text` in ours.** Measured 1:1:
+the red chip's ink is **(117,37,34)** on a (251,228,227) wash; the blue chip's ink starts **(99,131,172)**. Ours
+(`CalendarScheduleView.qml` `timedChip`'s `Label`) is `color: AppTheme.text`. **Step 1 of the round is to settle the
+translation, not to pick a number:** the ref ink is *not* the calendar colour at some alpha over the wash — check whether a
+saturation/value mapping reproduces (59,134,247)→(99,131,172) and (235,76,70)→(117,37,34) with the *same* parameters; if it
+does not, say so and pick the closest defensible rule (e.g. HSL lightness clamp) rather than fudging per colour. Then verify
+the chosen rule on BOTH chips and in BOTH themes. **Do NOT change** the fill alpha, `radius: 5`, the R077 bar, the R078
+border deletion, or anything in the all-day band. **Evidence:** a light + dark capture plus a ref|ours text-colour composite.
 
-**Then (unlocked, ref-anchored, one per round):** **A02** — but it **cannot start until a fixture with 1 and 4 all-day rows
-exists** (the fixed 76px band is unmeasurable against a ref that grows); **N02** (now-line + red badge — needs a capture of the
-**current** week); V01–V05 (month — **no ref anchor**, use `spec.md` + HIG only); the E01/E02 fill+text translation (needs a
-ruling on whether our dark saturated-fill/white-text idiom is legitimate).
+**Then (unlocked, ref-anchored, one per round):** **the all-day band chip's 12×12 per-calendar ring icon** (new in R077,
+needs a ruling on the icon's source before it can start); **A02** — blocked until a fixture with 1 and 4 all-day rows exists;
+**N02** (now-line + red badge — needs a capture of the **current** week); V01–V05 (month — **no ref anchor**, use `spec.md` +
+HIG only).
 
 **Optional QoL (only if a round has slack — NOT an atomic step of its own):** make `review-command.py` rewrite an already-nested
 `path` into a flat basename so a round stops paying the R075 diagnosis cost.
 
-**Still blocked on rulings A–G** (unchanged): dim snap, shadow magnitude, popover Esc, `slice(0,2)` / month 1-chip cap (D also
-now needs a 3-all-day-item day to be reproducible in the band), E03 clause 3, **F = 12-hour two-tone gutter labels**,
+**Still blocked on rulings A–G:** dim snap (A), shadow magnitude (B), popover `CloseOnEscape` + E03 clause 3 (C/E; clauses 1+2
+PASS R048), `slice(0,2)` / month 1-chip cap (D — also needs a 3-all-day-item day), **F = 12-hour two-tone gutter labels**,
 **G = A01's spec literals (gap 2, inset 2–3) vs the ref's measured 1**. **The `code-writer` subagent is NOT registered in this
-session** — R072–R076's edits were made directly; do not retry `code-writer` each round. **Not `DONE` — all spec IDs do not
-pass.** (T01/T02/T03 and **A01** are PASS-pending-final-regression; **A03 PASS**; A01 also carries ruling G; everything else is
-PENDING or ruling-blocked.)
+session** — R072–R078's edits were made directly; do not retry `code-writer` each round. **Not `DONE` — all spec IDs do not
+pass.** (T01/T02/T03 and **A01** are PASS-pending-final-regression; **A03 PASS**; **E01/E02 clauses 1+2 PASS (timed chip bar +
+no border)**; everything else is PENDING or ruling-blocked.)

@@ -1,3 +1,73 @@
+# R071 — **The dark leg of the weekend tint: measured, exact, and visible. No code change was needed.**
+`weekendField` dark = `white@0.03` over the (30,30,30) field ⇒ predicted **36.75 → 37**; measured **37, exactly**, on both
+weekend columns in **both** the all-day band and the hour grid. Weekday columns stay **30**, the gutter stays **30**, and the
+day-header row is **not** tinted. On the tinted column y=155 = **39** and y=204/205 = **84** are unchanged; the hour line at
+y=206 reads **65** vs **59** on a weekday — the dark `gridLine` token is *translucent*, so it blends with the tint under it,
+where the light `#EDEDED` line is opaque and does not. (2026-10-17)
+
+## 本轮 (R071)
+Atomic step: R070's standing Next-round #1 — "the dark leg: measure `weekendField` in the dark theme; verify, do not assume."
+**Measurement-only round; the derived token survived contact.** Evidence: `docs/ui-calendar/r071-weekend-tint-dark.png`
+(1100x692, dark, `view week` + `date 2026-04-02`). Kill-by-pid of the light app, `start-review-vm.sh dark`, relaunch pid
+128304, one flat 4-command drive list (`resize` + `view` + `date` + `captureClient`). *The new PNG is byte-the-same **size**
+as R070's light one (3050463) — `md5sum` differs; R069's warning earned its keep for the second round running.*
+
+**Method.** R070's decisive idiom, reused: a full-width **row run-scan** to fix the column map, then a **vertical profile**
+per column. Row 400 (empty grid) returns the whole grid in one line — the cheapest possible column map.
+
+**Column map (row 400, dark).** `x=0` = 1px rim **(53,53,53)**, gutter `x 1..51` = **30**, then 1px separators at
+**x=52/202/352/502/652/802** ⇒ **pitch 150** and 7 columns of 149px: Mon 53..201, Tue 203..351, Wed 353..501, Thu 503..651,
+Fri 653..801, **Sat 803..951**, **Sun 953..1099**.
+
+**The three checks, all PASS.**
+1. **Weekday column stays 30.** Fri x=700: band interior y=156..203 = **30**, grid y=400 = **30**.
+2. **Weekend reads the derived value in BOTH regions.** Sat x=880 and Sun x=1050: band y=156..203 = **(37,37,37)** *and*
+   grid y=400 = **(37,37,37)**. Derived `white@0.03` over 30 = 30 + 0.03×225 = **36.75 → 37** — the token is right and the
+   tint is real, not an artefact of the chip rendering.
+3. **The four rules hold on the tinted column.** y=155 = **(39,39,39)** (`sectionRule`, 30 + 0.04×225 = 39) and y=204/205 =
+   **(84,84,84)** (`allDaySeparator`, 30 + 0.24×225 = 84) — identical to a weekday column.
+
+**Exclusions, measured not assumed.** The **gutter** (band row y=180, x 1..54) = **30**; the **day-header row**
+(y 119..154 on a weekend column) = **30**, and a full-width scan at y=130 is 30 across ⇒ the header is not tinted, matching
+the ref's 254-vs-255. The `hourCell` tint rect's `columnIndex > 0` guard does its job.
+
+**The one asymmetry found (recorded, not a defect).** The dark `gridLine` token is **translucent** `white@0.13`: over 30 it
+gives **59**, over the tint 37 it gives **37 + 0.13×218 = 65.3 → 65**. **Measured: y=206 = 59 on Fri, 65 on Sat/Sun.** The
+light token is the **opaque** `#EDEDED` = 237, so R070 measured 237 on *both* ⇒ light is layering-invariant, dark is not.
+This is the honest consequence of a translucent rule over a lighter field and the ref has **no dark theme** to arbitrate; a
+Δ6/255 = 2.4% shift on a 1px line is not a form defect. Same cause, one pixel over: the shared separator at **x=802** reads
+**(65,65,65)** rather than 59, i.e. the Sat cell's fill reaches one pixel left, under the boundary line. Noted so a future
+round does not "discover" it as a bug.
+
+**Eyes.** 周六 4 / 周日 5 read as one continuous lighter section from the `sectionRule` at the top of the all-day band down to
+the window floor; the header row above and the gutter to the left stay dark. Δ7 on a 149px-wide, ~500px-tall field is
+subtle but unambiguous at 100%. **The tint is not "nothing".**
+
+## 仍差 (top 8, visual-impact order)
+1. **A01 — the all-day band's own form** (its tint sub-item is CLOSED/refuted in R070; its dark leg is CLOSED in R071). Ours:
+   row 18, gap 2, inset 2–3, radius 5. Ref (R068): rows **≈22.6**, pitch ≈24.6, gap ≈1.3, inset ≈1.35, radius ≈8 (scaled
+   ×1.33/×1.35) ⇒ **rows ~20% short, inset ~2× too big, radius 5 vs 8.** Ref-anchored, no spec ID. Steps 2–4, one per round.
+2. **E01/E02 — the chip language, the biggest unexamined mass.** Ref chip = light desaturated same-hue fill + **dark same-hue
+   text** + a **2–3px solid same-hue LEFT STRIPE** + small radius. Ours: all-day chips are blue-filled pills; the timed chip is
+   `radius: 5` + 1px border + no stripe. This also contradicts our dark theme's solid-saturated-fill/white-text idiom ⇒ first
+   question is whether that translation is legitimate. **No ruling needed, just never reviewed.**
+3. **Ref gutter labels are 12-hour and two-tone** (dark hour number + smaller lighter `AM`/`PM`), right-aligned on the
+   **suffix's** right edge (digit (89,89,89), suffix (176..193)); ours is single-size 24-hour `07:00`. **Needs ruling F.**
+4. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`): `Overlay.modal` is a plain un-animated
+   `Rectangle`. **R058 re-confirmed both directions.** App-wide. **Needs ruling A.**
+5. **Shadow magnitude** (D03 follow-up): peak Δ≈10/255 = 3.9%; macOS alerts read ~Δ25–40 at 1px. Touching
+   `KosSurface.effectiveElevation` / the `0.38` factor is **app-wide**. **Needs ruling B.**
+6. **`EventDetailsPopover.qml:60` `CloseOnEscape` is dead code** (R059; **NOT a spec failure**). **Needs ruling C.**
+7. **E03 clause 3 blocked on a ruling, not failed (R049)** — no view produces a tall block, while the ref's week view shows
+   proportional 30-min vs 60-min chips ⇒ **ruling E**. Clauses 1+2 PASS (R048).
+8. **`slice(0, 2)` per cell hides items with no `+N`** (R048): 周四 2 · 11:00 shows 2 of 3; the `calendar.ics:91` VTODO (due 11:00)
+   is dropped silently. **Needs ruling D.** Same family: the month day cell holds 1 chip + `N` where the ref stacks 3.
+- *Cosmetic, no ID, folded out:* two neutral-button idioms diverge and one has no ref (R061): `secondary` hover = neutral grey 79,
+  no edge; `flat` hover = accent tint (35,60,81) **with** a 1px edge. Light `buttonNeutral` base reads ≈(251,252,254) vs the
+  rendered card (247,247,247) (R056). D02's radius is **16** vs the spec's 24/32 — **keep 16**. Hover is a flat fill, no
+  `borderHover` edge (R057/R060). The topmost visible gutter label is **half-clipped** when a scroll offset lands an hour line
+  exactly on the viewport top (R066; scroll artifact, not a form defect).
+
 # R070 — **The "band tint" premise was WRONG: the reference tints the WEEKEND COLUMNS, not the band.**
 Re-measured: ref weekday columns are **255** in band *and* grid; Sat/Sun are **249** in *both*. Implemented that instead — a
 weekend section tint over the whole schedule field (band + hour grid, day-header row excluded). Light measured exact:

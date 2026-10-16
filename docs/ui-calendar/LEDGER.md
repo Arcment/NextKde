@@ -1,3 +1,59 @@
+# R061 — **D08 third and last surface (toolbar flat `KosButton` "添加", `Main.qml:2379`), dark: PASS.** Tri-state captured
+on the month view's selected-day card. **The fills are `button`/`buttonHover`/`buttonPressed` (accent-tinted blue), NOT the
+`buttonNeutral*` set R060 predicted** — the code is right and the prediction was wrong (`flat:` and `secondary:` are two
+different branches). Focus ring `accent`@0.76 persists after release-outside. No ref counterpart exists. (2026-10-16)
+
+## 本轮 (R061)
+Atomic step: R060's Next #1 = "a toolbar `KosButton` (`Main.qml:2379`), the third and last uncovered D08 surface".
+**No code change. 5 Bash calls for the drive/measure, 0 build→screenshot loops, 3 image reads ≈ 9 min.**
+
+**1 — Instrument (new fact).** `pointer {target: …}` resolves through `controlNamed`, which matches on
+`item.text === label` — i.e. the **rendered, translated** label. `target:"Add"` therefore found nothing and silently
+logged `NaN NaN` (two dead captures), while **`target:"添加"` resolved instantly and logged the centre plus the live
+`hover`/`down` state**: `move 添加 1047 554.5 hover true down false` → `press 添加 1047 554.5 hover true down true`.
+⇒ For **any** `KosButton`, `pointer{target:"<label>"}` is a free geometry+state probe that `scrollInfo` cannot give.
+Also: this app runs Chinese translations under the review locale — **use the on-screen label, not the source string**.
+
+**2 — Geometry (dark, 1100x692, month view, card fill = (31,36,43) = `mix(windowRaised, accent, 0.035)`).**
+Capsule box **x 1008..1086 (79 wide) × y 539..569 (31 tall)** — the 31 is `controlHeight` as rendered (not the spec's 34).
+
+| state | fill @ x=1047 | band y | notes |
+|---|---|---|---|
+| rest | **transparent** | — | column reads pure card fill (31,36,43) y524–561 except glyph pixels |
+| hover | **(35,60,81)** | 539..569 (31) | +1px `border` rim (71,78,87) top / (68,76,83) bottom; + inner highlight |
+| pressed | **(36,67,92)** | 539..569 (31) | same rim reads (37,76,102) — it is being taken over by the ring |
+| after release-outside | transparent again | 539..569 | ring only; interior (29,34,39) = card under the elevation-0.42 shadow |
+
+**3 — The fills are the accent-tinted triple, and that is correct.** `KosButton.qml:53-65`: the `flat` branch returns
+`"transparent"` **only** while `flat && !hovered && !down`; hovered/pressed then fall through to the *default* branch,
+`buttonHover`/`buttonPressed` = `mix(button, accent, 0.13 / 0.21)` (`AppTheme.qml:98-99`). `buttonNeutral*`
+(69/79/89) belongs to the **`secondary:` branch**. ⇒ **R060's "expect buttonNeutral 69/79/89" was a bad prediction;
+code correct, expectation retracted.** The app deliberately keeps two neutral-ish idioms: `secondary` = neutral grey,
+`flat` = accent tint.
+
+**4 — Hover changes the *shape*, not just the fill.** `strokeWidth` (`KosButton.qml:69`) is 0 only while
+`flat && !hovered && !activeFocus`, so a flat button **gains a 1px `border` stroke on hover** — a real difference from
+`secondary`, which never gets an edge (R057). `showInnerHighlight` is `(!flat || hovered)` (line 80) ⇒ hover fill reads
+**(45,69,89) at y540** (inside the top edge) vs **(35,60,81)** at the middle: the hover fill is **graded, not flat**.
+
+**5 — Focus ring: `accent`@0.76 = (43,115,160)**, rows **y539-540 and y568-569**, and it **persists after
+press→drag-out→release-outside** while the fill reverts to transparent — the ring is then the only drawn thing.
+Exactly R060's shape, reproduced on a third surface. ⇒ **D08 三态 + 焦点环 PASSES on the last surface.**
+
+**6 — The scale animation exists but is sub-pixel here.** `hoverScale` 1.012 / `pressScale` 0.968 with `motionFast`
+(`KosButton.qml:27-32`): pressed height would be 31→30.0. So R060's 31→29 is **2 ring rows + ≤1px of scale**, which
+neither contradicts nor is measured apart at this size. Do not read "no animation" into a 31px button.
+
+**7 — No reference counterpart.** `macos-calendar.png`'s toolbar contains only the Week/Month/Year segmented control and
+two **circular icon** buttons (spiral, search) — there is **no text button**, and the ref frame shows **no hover/press
+state of any kind**. This surface is therefore a **token-conformance check, not a visual ref comparison**. Noted in
+passing: the ref's toolbar buttons read **neutral**, while ours is **accent-tinted** — with no ref hover frame and no
+spec clause, that is a note, not a defect (仍差 #5).
+
+**Discipline: 21+ Bash calls (budget 25), 3 image reads, 0 build loops, ~9 min.** Deliverable = **D08 now fully covered
+on all three surfaces** (event-editor footer R055–R057, task-editor footer R060, popover Esc R058/R059, toolbar flat
+button R061). There is **no further unblocked visual work left in D08** — Next round is the rulings.
+
 # R060 — **D08 task-editor footer, dark: PASS.** Tri-state captured for the primary; the footer *shape* matches the
 event editor exactly (height 31 / pitch 37 / gap 6 / x 384..730) and every fill lands on its declared token. Absolute
 y's differ (516 vs 548) only because the task dialog is shorter — which is expected, not a defect. (2026-10-16)

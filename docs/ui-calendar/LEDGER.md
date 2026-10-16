@@ -1,3 +1,30 @@
+# R072 — **A01 step 2: the all-day band's row geometry now matches the reference's scaled form — row 24, gap 1, band 80.**
+Reference measured at 1:1 this round: all-day rows sit at y126-143 / y145-162 / y164-181 ⇒ **row 18, gap 1, pitch 19**, inside a
+band whose top rule is y=124 and whose 2px bottom separator is y=183-184 (**60px total**). Our vertical factor against the
+reference is **1.33** (40px hour pitch vs 27), so **row 18 → 24**, gap 1 → 1, and **band 60 → 80**. Ours went `Layout.preferredHeight`
+18 → **24**, `spacing` 2 → **1**, band 48 → **80**, all now derived from four new tokens (`allDayRowHeight` / `allDayRowGap` /
+`allDayBandRows` / `allDayBandInset`) so the band height can never drift from the row height again. **A trap found and fixed on
+the way:** a `ColumnLayout` taller than its items does *not* leave the slack at the bottom — it spreads the surplus into its
+spacings (leading half-spacing, between, trailing half), so the first capture rendered *inset 3 + gap 1* as **7 / 13 / 6** and
+the chips drifted apart; anchoring the layout to the top and binding `height: implicitHeight` removed the surplus. The band's top
+boundary (`sectionRule`, y=155) is unchanged; its **bottom separator moved 204/205 → 236/237** and the following hour lines shift
+with it (first hour line 204 → 238). Inset and radius are *not* touched — steps 3 and 4. `(2026-10-17)`
+
+## 本轮 (R072)
+Atomic step: the standing Next-round #1 — **A01 step 2, the all-day band's row geometry (row height and gap only)**. Ref-anchored
+(R068/R072), no spec ID. Evidence: `docs/ui-calendar/r072-band-light.png` (1100x692, light, `view week` + `date 2026-04-02`) and
+`r072-band-light-spread.png` (the first capture, kept as the record of the ColumnLayout surplus-spreading trap).
+*The review fixture gained two all-day events on 2026-04-02 (`Design sync`, `Release notes`) so that a column renders **two**
+all-day rows and the **gap** becomes measurable at all — `Multi-day review` alone gave one row per column.*
+
+Vertical profile, Thursday column (x=577), light: **155** `sectionRule` (242) · 156-158 white = **3px inset** · **159-182 chip (24)**
+· **183 = the 1px gap** · **184-207 chip (24)** · 208-235 empty (third row slot, `slice(0, 2)` caps the column at two chips —
+ruling D) · **236-237** `allDaySeparator` 2px (217) · **238** first hour line (237). Neighbour check: x=300 (Tue, one chip) puts
+its single chip at the **top** (159-182) with the slack below — the spreading is gone; x=860 (Sat) has no chip and keeps the 249
+weekend tint.
+
+---
+
 # R071 — **The dark leg of the weekend tint: measured, exact, and visible. No code change was needed.**
 `weekendField` dark = `white@0.03` over the (30,30,30) field ⇒ predicted **36.75 → 37**; measured **37, exactly**, on both
 weekend columns in **both** the all-day band and the hour grid. Weekday columns stay **30**, the gutter stays **30**, and the

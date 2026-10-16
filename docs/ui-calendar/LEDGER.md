@@ -1,3 +1,27 @@
+# R127 — **L03's DARK LEG — the segmented Day/Week/Month control: PASS 5/5, and all three light-only colour tokens solved on dark.** Read-only round: no source, no build — the R126 dark instance (204727) was still ALIVE, so the dark capture was free and the light leg came from the R124 PNG. Figure `docs/ui-calendar/r127-seg-dark-light-3x.png`.
+
+## 本轮 (R127)
+Atomic step: Next #1 of R126. L03 is 5/5 on light (R105), but three of its clauses are colour tokens that had only ever been read light — `tahoe.segmentTrack` / `tahoe.segmentPill` (R097, `Main.qml:114-118` → `LiquidSegmentedControl.qml:119-127`) and the segment's `mutedTextColor` (R099, `Main.qml:1787`). No relaunch: the dark instance was up, so `r126-dark-s02-c01.png` was read directly.
+
+### The five clauses, reproduced on dark — every number is R105's light number
+- **Width 196 ∈ [180,210]:** the track's own border pixels run **x562..757** = **196** (left rim x562, right rim x757, plane at x558/x758). R097's light reading was the same 562..757.
+- **Height 28:** a vertical scan at x580 (track only, no lens) gives top rim **y36**, bottom rim **y63**, plane at y35/y64 ⇒ **y36..63 = 28**.
+- **Centred −0.5 px vs the main region:** expanded, the sidebar is x0..219 with its rim at x220, so the main region is x221..1099, centre **660**; the track's centre is **659.5** ⇒ **−0.5**. R105's light clause reproduced exactly.
+- **Order Day·Week·Month:** ink boxes left→right **x592..599 / x655..664 / x719..727**, centres **595.5 / 659.5 / 723.0** — identical to R105's light centres. (The labels render CJK on this fixture — 日/周/月 — one glyph each, ink 11 tall.)
+- **Pill on Week:** the lens's border pixels are x630 and x689 ⇒ box ≈629.5..689.5, **centre 659.5 = Week's own ink centre**. Width **60**. The pill marks segment 2 (Week), never the ink.
+
+### The three light-only colour tokens, solved on dark (plane (30,30,30))
+- **`segmentTrack` = `Qt.rgba(1,1,1,0.06)` over the dark plane, PLUS the track's own gradient** (`LSC:92-100`, white@0.04 → black@0.02). Base = 30 + 225·0.06 = **43.5**. The gradient then predicts **51.5 / 46.4 / 43.1** at y37 / y49 / y61; the capture gives **50 / 47 / 42** — Δ ≤ 1.5 on all three, and the **monotone 8-level ramp 50→42 down the track is the gradient's signature**: a flat token could not produce it.
+- **`segmentPill` = `#3C3C3C` (60), PLUS the lens's own 3-stop gradient** (`LSC:133-138`, white@0.09 → white@0.025@0.58 → black@0.025). Six-row fit down the lens: predicted **76.6 (y39) / 72.1 (y44) / 62.9 (y55) / 59.8 (y60)**, measured **76 / 71 / 62 / 59** — Δ ≤ 1.1 everywhere. The lens is **opaque** as its own comment demands (a translucent pill would composite down onto the track).
+- **`mutedTextColor` = `labelPrimary` on dark too — the R099/C05 clause holds.** Ink peaks per label: Day **(236,230,237)**, Week **(242,242,241)**, Month **(233,225,226)** — i.e. all three at `#F2F2F2` = 242. A muted state would have been `labelSecondary` (`F2F2F2`@0.58) over the track ⇒ **≈160**, and it is nowhere in the frame. Dark mirrors light, where all three cores read 8 / 0 / 12 against the plane.
+- **Bonus, the shared control's lens shadow is dark-aware.** `LSC:113` `Qt.rgba(0,0,0, AppTheme.dark ? 0.24 : 0.10)` at `lens.y+1`. The one row the shadow pokes below the pill is **y62 = (32,32,32)**; predicted 0.76·42.5 = **32.3**. Light would be 225.
+- **The 1 px rims are `AppTheme.border` on the track** (`LSC:85-86`) and **white@0.16 on the lens** (`LSC:126`): track rims 62 over plane 30 / 222 over plane 255; lens rims 77 over the pill. Not an L03 clause; recorded so the next reader does not re-derive it.
+
+### 外推 (R127)
+- **A GRADIENT-BEARING TOKEN IS PROVED BY ITS RAMP, NOT ITS MIDPOINT (load-bearing).** `segmentTrack`'s dark base alone is 43.5; the capture reads 47 at mid-height — so the midpoint *alone* would have "failed" by 3.5. What proves the token is that the whole column walks **50 → 42** in the direction and magnitude the gradient predicts. ⇒ **When a token carries a gradient, measure ≥3 rows and fit the slope; a single row is a coin flip.**
+- **AN OPAQUENESS COMMENT IS A TESTABLE CLAIM (load-bearing).** `Main.qml:109` says the pill is opaque on purpose "so a translucent pill [does not composite] down". On dark the pill's six-row fit holds against **60**, not against anything blended with the track ⇒ **opaque, confirmed a second way.**
+- **A LEG-INVARIANT GEOMETRY IS CHEAPEST TO RE-PROVE ON THE LEG WITH THE WORSE CONTRAST.** Every L03 length on dark came out byte-equal to light (196 / 28 / 60 / centres 595.5·659.5·723.0) — a control whose form is tokenised cannot move between legs, so the dark read is the *confirmation*, not a new measurement.
+
 # R126 — **the dark leg of the LAST two light-only PASSes: S02/S03/S05 (R121) and C01-C04/C06 (R122) — ALL PASS.** Read-only round: no source, no build — the R125 dark instance (204727) was still alive, so the capture was **free**. One batch (week / sidebar expanded / 2026-04-02 / 1100x692) → one capture. Figure `docs/ui-calendar/r126-dark-chrome-sidebar.png`.
 
 ## 本轮 (R126)

@@ -4615,3 +4615,14 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Source re-read `Main.qml:1637-1685`: Row anchored right/top, `rightMargin 14.5`, `topMargin 10.5`, `spacing 14`, model `#28c840`/`#febc2e`/`#ff5f57`, 14×14 radius 7, `opacity: 0.85`. Order green/yellow/red left→right (settings-app order, per R122 not the macOS ref's authority) ✓.
 - 6x crop `r153-dots-6x.png` visually confirms: three round dots green/yellow/red on the light band, window corner radius top-right.
 - **PASS — R122 window dots closed byte-consistent. Next: toolbar search field (R129/R130) LIGHT leg (only ever measured dark).**
+
+## R154 — toolbar search field, LIGHT leg (R129/R130 re-verify) — PASS
+- Atomic step: Next #1. Fresh relaunch (light, background-launch bare, pid alive). Drive: resize 1100x692 / sidebar expand / pointer press+release (1035,50) / capture `r154-search-open.png`.
+- **HARNESS GOTCHA (new): the `pointer` action's `kind` only implements `press`/`release`/`move` (`ReviewInput.cpp:74-83`) — `kind:"click"` is a SILENT NO-OP.** Two false starts (captures `r154-search-light.png` / `-b.png` byte-identical toolbar crops, field never opened; log prints `pointer click undefined … hover n/a`) before reading the driver. Correct sequence: press → one `none` → release.
+- False-start 1 also produced a red herring: a dark-outlined box x1009..1062 y67..140 = the themed tooltip (fill 242,242,242) under the hovered toggle — expected, R135.
+- **GEOMETRY byte-consistent:** field rect x736..1015 = **280 w** × y36..63 = **28 h**; right border inner edge **1016 = pinned right edge** ✓; left border x736 ✓; **capsule radius 14** — corner profile (y36→x746, y37→744, y38→742, y39→741, y40→740, y41→739, y42→738, y44→737) fits an r=14 circle centred (750,50) ✓ (`radius: height/2`); input content ink from **x748 ⇒ leftMargin 12** ✓, right content 1004 ✓.
+- **LIGHT tones (first measurement — the field had only ever been measured dark):** face **(210,210,210) = `searchFill` "#D2D2D2" EXACT**; focused border **1 px (0,136,255) = `accent` "#0088FF" EXACT** (`border.width: input.activeFocus ? 1 : 0`); placeholder "Search" ink x748..788 y45..54, tone labelSecondary.
+- Source re-read `Main.qml:1817-1925` (toolbarSearch: maxWidth cap 280, anchored right = searchToggle.left − 6, radius height/2, insets 12, focus border accent, deferred-focus timer) + `Main.qml:141-149` (accent #0088FF; searchFill #D2D2D2 light / #3A3A3A dark).
+- Crops: `r154-c1.png`, `r154-field-3x.png`, `r154-c4.png`.
+- **PASS — R129/R130 search field closed, light leg byte-consistent. No source change, no build.**
+- Next: window dots DARK leg (R126 last measured; R153 covered light only).

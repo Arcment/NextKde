@@ -4883,3 +4883,6 @@ Next #1 option (b). Checked for new rulings/spec updates since R191: NONE — sp
 
 ## R193 (2026-10-17) — HOLD (32nd consecutive)
 Next #1 option (b). Checked for new rulings/spec updates since R192: NONE — spec.md mtime still 2026-10-17 04:56 (predates R161); git head = R192 docs commit 6498d5f; .loop/ROUND = 193; .loop/DEADLINE 1792236870 (10-17, rolling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+
+## R194 (2026-10-17) — HOLD (33rd consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R193: NONE — spec.md mtime still unchanged (predates R161); git head = R193 hold commit f0a0bf0; .loop/ROUND = 194; .loop/DEADLINE 1792236870 (10-17, rolling, not a ruling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.

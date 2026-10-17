@@ -5373,3 +5373,17 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - Verdict: PASS. Mon (start day) and Tue–Fri (continuing) chips all show the ring; `+2` overflow row has none (correct — not a chip). Geometry matches ref crop (outer 12 / stroke 3 / hole 6, centred, ink-coloured). First crop x221.. falsely suggested an iconless Monday — collapsed-sidebar grid starts x≈62; re-crop x60.. settled it. Geometry note for the ledger: ref ring is 12/18 of row height, ours 12/24 — ruling literal wins (7.5 直译优先); "承认够不到".
 - Dark leg not exercised this round (chipInk is theme-aware); fold into the next regression spot-check.
 - state.md Next: R-OVERFLOW (drop the silent slice(0,2) cap; 3 columns + `+N`).
+
+## R298 (2026-10-18) — R-DIM: scrim follows card reveal — implemented; static verified; mid-anim frame pending
+- Change: `shared/qml/foundation/KosWorkspaceDialog.qml:26` — Overlay.modal scrim color `…(dark?0.42:0.2)` → `… * root.revealProgress`. Same animated property as the card ⇒ 220ms OutCubic in / 120ms InCubic out, reduceMotion instant (motionNormal/motionFast go 0). Shadow: verification-only — two-layer shadowAmbient/shadowKey KosSurface confirmed, nothing touched.
+- Build OK. Relaunch light; date 2026-04-02 → view day → openItem(kind=event, "Morning") = detail POPOVER (not dialog) → click 编辑(670,388) → 编辑日程 dialog. escape does NOT close it; 取消 at (550,596) works.
+- Static: settled-open scrim reads (204,204,204) on white = full 0.2 alpha ✓ (light).
+- NOT settled: captureClient latency (≥300ms) missed the 220ms window; nativeRecord frames exclude the Overlay.modal scrim layer (card visible, scrim absent) — scrim animation must be verified with captureClient tight timing (`fast-command.py 0.03` press→capture ≈160ms). Card exit anim visible in recording (closed by fr-24); enter-anim re-click missed (popover 编辑 y was 388, clicked 437).
+- Next: mid-enter + mid-exit scrim alpha frames → R-DIM PASS. state.md has the full recipe.
+
+## R299 (2026-10-18) — R-DIM mid-anim attempt: BLOCKED (编辑 dialog stopped opening)
+- Goal (state Next #1): mid-enter scrim frame via fast-command click+capture. NOT achieved.
+- Instance was alive (day view 2026-04-02, popover open). Pre-frame confirmed 编辑 pill x665–705 / y389–411.
+- Dialog refused to open all round: press/release gap 0.03 & 0.06, single click, outside-click reset, ×+re-openItem, corrected schema + (670,388). Log shows every click delivered; scrim stayed 255, popover persisted. R298 opened it with the same recipe on this build ⇒ stuck instance suspected; alternative suspect: R-DIM's Overlay at revealProgress=0 (scrim invisible, alpha 0, but may still grab input).
+- Findings recorded: (a) openItem schema is FLAT (kind/titleContains on the command object, harness/Main.qml:225) — nested {"item":…} silently no-ops; (b) harness 100ms poll ⇒ capture must sit ≥0.08–0.12 after the click in the fast-command list, else the frame precedes the click's effect (r299-enter.png caught the button mid-press, pre-dialog).
+- No code change, no build. Bash budget exhausted before relaunch. Checkpoint in state.md: next round relaunches light, re-drives, retries mid-enter (gap 0.08–0.12) + mid-exit (取消); if fresh instance also fails, debug KosWorkspaceDialog Overlay input grab at revealProgress=0.

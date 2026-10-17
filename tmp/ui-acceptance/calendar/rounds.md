@@ -4792,3 +4792,10 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - 仍差 unchanged: all 7 entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
 - Checkpoint stands: blocked on a user ruling.
 - *(archived from state.md window)* R169 — hold, nothing done (8th consecutive). Checked for rulings/spec updates: none since R168 (spec mtime 04:56 unchanged; git head = R168 docs commit a639642). Checkpoint stands: blocked on a user ruling.
+
+## R178
+Atomic step: HOLD the checkpoint (17th consecutive hold).
+- Checked for new rulings/spec updates since R177: NONE. spec.md mtime 2026-10-17 04:56 (unchanged, predates R161); .loop/DEADLINE 10-16 19:34; git head = R177 hold commit (9cb156d); tracked tree clean except .loop/ROUND — no ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold).
+- 仍差 unchanged: all 7 entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling.

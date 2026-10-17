@@ -5384,3 +5384,10 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 ## R296 (2026-10-18) — R-H PASS (light) [archived from state.md]
 - All-day band chip ring icon: 12×12, radius 6, border 3, transparent fill, colour chipInk, x=3 (+jointOverlap when continuesLeft), vertically centred (CalendarScheduleView.qml:599); label leftMargin 5→19 (+jointOverlap) (:612).
 - PASS light: every band chip shows the ring; `+N` overflow row correctly has none. Geometry 12/3/6 matches ref crop.
+
+## R306 (2026-10-18) — R-YEAR dots 修复 PASS
+- code-writer: Main.qml `updateEventRange()` week 分支后插 year 分支 (first=1/1, last=12/31, else=day 不动). rebuild OK.
+- 验证 (r306b-year.png, 2026, selectedDate=4/2): 纯 accent (0,136,255) 3-4px 点在 3/29–31、4/1–4 (4/2 在 disc 下); 4/5 及其余月无假点; 2025 (dateNavPrevious) 全年无点 = 窗口随年份. dot 在数字下方不压行. R-YEAR step 2 闭环.
+- 新 bug 入册: year view 选中 disc 泄漏到月尾占位格 (implicit date=selectedDate, 三月 26 下方空格画灰 disc 无数字; 2025 同现). 修法: disc 判定加 getMonth 守卫. → R307 Next #1.
+- 陷阱: `pgrep -f 'kos-calendar --watch-qml'` 匹配 loop 监督进程自身, 用 `pgrep -x kos-calendar`; relaunch 后窗口 1100×692, 须先 resize 1280×800 再驱动.
+- Loop 1/2, Bash 21/25.

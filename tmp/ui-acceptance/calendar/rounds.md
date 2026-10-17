@@ -5175,3 +5175,8 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - **All-day band:** 全天 label; Design sync / Release notes full-width blue-bar tab chips, single-line elide; `+2` overflow row. Matches R128/R150/R158 pins.
 - **Chrome:** day header `周四 2` + today disc on 2; segment pill on 日; heading `2026年4月2日星期四`; `< 今天 >`; search/more; dots; field (30,30,30). Matches R097/R126/R143.
 - Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** All five rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) are now swept clean. Nothing actionable remains; H / Year / R134 tooltip-y / A-B dim+shadow stay ruling-blocked. Next: hold.
+
+## R252 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.

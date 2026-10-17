@@ -1,15 +1,10 @@
-# R251 — REGRESSION SWEEP #5 PASS (day view dark @1100×692 expanded sidebar — zero regressions, no code change). **NOT `DONE`** — all 5 rotation legs now swept clean; remaining open items are ALL ruling-blocked (H/Year/tooltip-y/A/B). No actionable deltas left — hold until a ruling lands.
+# R252 — HOLD round (no code change, no screenshot). All 5 rotation legs swept clean in R247–R251; remaining open items are ALL ruling-blocked (H/Year/tooltip-y/A/B). Nothing actionable — re-listed held items and holding until a ruling lands.
 
-## 本轮 (R251)
-Atomic step: Next #1 — regression sweep #5, day view dark expanded sidebar. NO code change.
-- Relaunch: pid stale (no live proc) → `start-review-vm.sh dark`. **Drive gotcha (NEW): `view` action key is `view` (`command.view`, harness Main.qml:218), NOT `value`** — first drive with `"value":"day"` silently no-opped (stayed on month); re-drove `{"action":"view","view":"day"}`. Also resize 1100×692 / sidebar `expanded:true` / date 2026-04-02.
-- **r251-day-dark-full.png + crops (gutter 2×, chip 2×, allday 1:1, halves 1:1):**
-  - **Gutter two-tone (R243/R244) PASS:** digit bright + AM muted, same baseline, ink-centred on hour lines; 12-hour (7 AM … 4 PM); first visible label 7 AM (R159). Pitch 40.
-  - **Timed chips + R246 secondary PASS:** every chip = title 11 medium top-aligned + Row(clock glyph 11×11 ring+hands, spacing 5) + secondary 10; formats EXACT — "8 – 8:45AM", "9AM", "10:15 – 10:30AM", "11AM – 1PM" (shared period drops start meridiem), "12PM", "2:30 – 3:30PM", "4PM". Stripe 3, dark fill alpha 0.36, radius 3.
-  - **T01 side-by-side PASS (day view dark):** 11 AM slot = blue "Long review with a deliberately lengthy title 11AM – 1PM" + green "[R019 LONG TASK] 任务长标题与编辑表单检查 任…" halves with 2px gap, both title+glyph+secondary, elided.
-  - **All-day band PASS:** 全天 label; Design sync / Release notes full-width blue-bar tab chips, single-line elide; `+2` overflow row; separator + grid rule below.
-  - **Day header + chrome PASS:** `周四 2` with today disc on 2; segment pill on 日; heading `2026年4月2日星期四`; `< 今天 >`; search/more; dots; field (30,30,30).
-- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.**
+## 本轮 (R252)
+Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build, NO screenshot (5 consecutive clean sweeps R247–R251; nothing suspicious to spot-check; per state: do NOT invent deltas).
+- Ruled-blocked items re-listed below in 仍差 (per the standing ruling's per-round re-list requirement).
+- Rotation legs coverage (all zero-regression): R247 week expanded light+dark · R248 day light + week dark collapsed · R249 month light expanded · R250 month dark collapsed + agenda panel · R251 day dark expanded.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
 
 ## 仍差 (top 8, visual-impact order)
 1. **All-day BAND chip's icon — ours has NONE.** Ref 12×12 ring stroke 3 / hole 6. **Still blocked on ruling H.**
@@ -22,6 +17,7 @@ Atomic step: Next #1 — regression sweep #5, day view dark expanded sidebar. NO
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R252 — **HOLD round (all legs swept, ruling-blocked items re-listed) — no code change.**
 0. R251 — **Regression sweep #5: day dark expanded (timed chips + glyph + gutter + all-day band) — PASS, no code change.**
 0. R250 — **Regression sweep #4: month dark collapsed + agenda panel — PASS, no code change.**
 0. R249 — **Regression sweep #3: month light expanded (R-MONTH + mini-month + chrome) — PASS, no code change.**

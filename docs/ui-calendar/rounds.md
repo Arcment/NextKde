@@ -4911,14 +4911,225 @@ Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R196
 - No build, no screenshot, no re-verify (nothing new to measure). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists).
 - NOT DONE.
 
-## R204 (2026-10-17) — HOLD (43rd consecutive)
-- Audit: spec.md mtime unchanged (2026-10-17 04:56); git head = R203 hold commit 2c4b981; `.loop/ROUND` = 204; no source changes under apps/. No new rulings or spec updates since R203.
-- Atomic step: Next #1 option (b) — hold the checkpoint. No build, no screenshot, no re-verify (nothing new to measure).
-- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE both legs, twin-covered (R161).
-- Checkpoint stands: blocked on a user ruling. NOT DONE.
 
-## R215 (2026-10-17) — HOLD (54th consecutive)
-- Checked for new rulings/spec updates since R214: NONE — spec.md mtime unchanged (2026-10-17 04:56); git head = R214 docs commit 1309f54; `.loop/ROUND` = 215; `git status apps/` empty.
-- Atomic step: Next #1 option (b) — hold the checkpoint. No build, no screenshot, no re-verify (nothing new to measure).
-- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE both legs, twin-covered (R161).
-- Checkpoint stands: blocked on a user ruling. NOT DONE.
+## R200 (2026-10-17) — HOLD, 39th consecutive. Checked for new rulings/spec updates since R199: NONE (spec.md mtime 2026-10-17 04:56 unchanged; git head = R199 hold commit 46a9cfa; .loop/ROUND = 200; no source changes under apps/). Option (b) taken: checkpoint stands, blocked on a user ruling. No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — all ruling-blocked; sweep COMPLETE both legs, every closed item twin-covered. NOT DONE.
+
+## R201 (2026-10-17) — HOLD, 40th consecutive. Checked for new rulings/spec updates since R200: NONE (spec.md mtime 2026-10-17 04:56 unchanged; git head = R200 docs commit 984ff1c; .loop/ROUND = 201; no source changes under apps/). Option (b) taken: checkpoint stands, blocked on a user ruling. No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — all ruling-blocked; sweep COMPLETE both legs, every closed item twin-covered. NOT DONE.
+R202 — HOLD (41st consecutive). Checked for new rulings/spec updates since R201: NONE (spec.md mtime 2026-10-17 04:56 unchanged; git head = R201 hold commit cf581a4; .loop/ROUND = 202; no source changes under apps/, last = R159 8145412). No source, no build, no screenshot, no re-verify. 仍差 unchanged — everything ruling-blocked (E02's two font clauses + the 11-item list reported R140). Checkpoint stands: blocked on a user ruling. NOT DONE.
+R195 archive — hold, nothing done (34th consecutive). Checked for rulings/spec updates: none since R194 (spec mtime 2026-10-17 04:56 unchanged; git head = R194 docs commit 011b092). Checkpoint stands: blocked on a user ruling.
+
+## R203 (2026-10-17) — HOLD, 42nd consecutive. Checked for new rulings/spec updates since R202: NONE (spec.md mtime 2026-10-17 04:56 unchanged; git head = R202 docs commit c7301b6; .loop/ROUND = 203). R203 audit: Main.qml / CalendarScheduleView.qml carry post-04:56 mtimes (09:39 / 17:24) but `git diff apps/` is EMPTY — content byte-identical to HEAD, touch-only, not a change; last real source change remains R159 (8145412). Option (b) taken: checkpoint stands, blocked on a user ruling. No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140); sweep COMPLETE both legs, every closed item twin-covered. NOT DONE.
+
+## R204 (2026-10-17) — HOLD (43rd consecutive)
+- Audit: spec.md mtime unchanged (2026-10-17 04:56); git head = R203 hold commit 2c4b981; `.loop/ROUND` = 204; `git status`/`git diff apps/` EMPTY. No new rulings or spec updates since R203.
+- Atomic step: Next #1 option (b) — hold the checkpoint. No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — held, nothing new to measure).
+- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE both legs, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+- state.md window rotated to R204..R197; R196 entry archived below.
+- Archived from state.md: R196 — hold, nothing done (35th consecutive). Checked for rulings/spec updates: none since R195 (spec mtime 2026-10-17 04:56 unchanged; git head = R195 hold commit 045c190; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
+
+## R205 (2026-10-17) — HOLD (44th consecutive)
+- Checked for new rulings/spec updates since R204: NONE. spec.md mtime unchanged (2026-10-17 04:56); git head = R204 docs commit 079469a; `git status`/`git diff apps/` empty.
+- No source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling (E02 font clauses + 11-item list).
+- Archived R197 hold entry from state.md window (now R205..R198).
+- Next: unchanged — hold unless a ruling lands.
+
+## R206 (2026-10-17) — HOLD (45th consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R205: NONE — spec.md mtime unchanged (2026-10-17 04:56), git head = R205 hold commit a8d087d, `.loop/ROUND` = 206, `git status`/`git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold per R161). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list, reported R140; no channel). 仍差 unchanged, all ruling-blocked. state.md window moved to R206..R199 (R198 archived to rounds.md tail).
+
+## R207 (2026-10-17) — HOLD (46th consecutive)
+- Next #1 option (b): checked for new rulings/spec updates since R206 — NONE. `spec.md` mtime unchanged (2026-10-17 04:56); git head = R206 docs commit b5e10c6; `git status`/`git diff apps/` empty.
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged (all ruling-blocked): E02 chip text block · E01/E02 inset-stripe scale · band chip icon (ruling H) · gutter label format (ruling F) · month slice cap (ruling D) · dim snap + shadow (rulings A/B) · Year word / C05 count / popover escape (ruling E/C/G) · ToolTip y (open).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+
+## R208 (2026-10-17) — HOLD (47th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R207: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R207 hold commit (61ee320); `.loop/ROUND` = 208; `git status`/`git diff apps/` EMPTY (only dirty file = `docs/ui-calendar/HEALTH.md`, the outer loop's heartbeat line, not a ruling). No source, no build, no screenshot, no re-verify (idle hold per R161 note). 仍差 unchanged — all ruling-blocked; sweep COMPLETE, twin-covered (R161). Checkpoint stands: blocked on a user ruling. state.md window rolled to R208..R200 (R199 archived here).
+
+## R209 (2026-10-17) — HOLD (48th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R208: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R208 docs commit a91ecbe; `.loop/ROUND` = 209; `git status`/`git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: the sweep is COMPLETE both legs and twin-covered (R161); everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Next round: re-check for rulings; hold if none.
+
+## R210 (2026-10-17) — HOLD (49th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R209: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R209 hold commit 093fe08; `.loop/ROUND` = 210; `git status`/`git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold per R161 note). Checkpoint stands: the sweep is COMPLETE both legs and twin-covered (R161); everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Next round: re-check for rulings; hold if none. state.md window rolled to R210..R203 (R202/R200 archived here; R201 was already archived).
+
+## R211 (2026-10-17) — HOLD (50th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R210: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R210 docs commit d9c686a; `.loop/ROUND` = 211; `git status`/`git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold per R161 note). Checkpoint stands: the sweep is COMPLETE both legs and twin-covered (R161); everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Next round: re-check for rulings; hold if none. state.md window rolled to R211..R204 (R203 archived here).
+
+## R212 — HOLD (51st consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R211: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56); git head = R211 hold commit 10ab864; `git status apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+
+## R213 — HOLD (52nd consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R212: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56); git head = R212 docs commit (29776e9); `.loop/ROUND` = 213; `git status apps/` empty. No source, no build, no screenshot, no re-verify. Checkpoint stands: sweep COMPLETE both legs, every closed item twin-covered (R161); everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). NOT `DONE`. state.md window now R213..R206 (R205 entry moved here).
+
+## R214 — HOLD (53rd consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R213: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56); git head = R213 hold commit (fea6a79); `.loop/ROUND` = 214; `git status apps/` empty. No source, no build, no screenshot, no re-verify. Checkpoint stands: sweep COMPLETE both legs, every closed item twin-covered (R161); everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). NOT `DONE`. state.md window now R214..R207 (R206 entry moved here).
+
+## R215 — HOLD (54th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R214: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R214 docs commit (1309f54); `.loop/ROUND` = 215; `git status apps/` EMPTY. No source, no build, no screenshot, no re-verify (idle hold). 仍差 unchanged — everything on it is ruling-blocked (E02's two font clauses + the 11-item list, reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+
+## R216 — HOLD (55th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R215: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R215 docs commit (fe19f29); `.loop/ROUND` = 216; `git status apps/` EMPTY. No source, no build, no screenshot, no re-verify (idle hold). 仍差 unchanged — everything on it is ruling-blocked (E02's two font clauses + the 11-item list, reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT `DONE`. state.md window now R216..R209 (R208 entry moved here).
+- **R217 — HOLD (56th consecutive).** Atomic step = Next #1 option (b). Checked for new rulings/spec updates since R216: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds), git head = R216 docs commit 542f88d, `.loop/ROUND` = 217, `git status apps/` + `git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — nothing new to measure). 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+
+## R218 — HOLD (57th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R217: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R217 hold commit (91e0f05); `.loop/ROUND` = 218; `git status apps/` EMPTY, `git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). 仍差 unchanged — everything on it is ruling-blocked (E02's two font clauses + the 11-item list, reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT `DONE`. state.md window now R218..R211 (R210 entry moved here).
+
+## R219 — HOLD (58th consecutive)
+Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R218: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R218 docs commit 832774a; `.loop/ROUND` = 219; `git status apps/` empty, `git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — nothing new to measure, held). Sweep COMPLETE both legs, every closed item twin-covered (R161). 仍差 unchanged: everything on it is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+## R220 (2026-10-17) — HOLD (59th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R219: **NONE** (spec.md mtime 2026-10-17 04:56 unchanged; git head = R219 hold commit 0e9b537; `.loop/ROUND` = 220; `git status`/`git diff apps/` empty).
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140). Sweep COMPLETE both legs, twin-covered (R161). NOT `DONE`.
+- Next round: same Next #1 — if a new ruling/spec update has landed, pick up the first unblocked item; else hold again.
+
+## R221 (2026-10-17) — HOLD (60th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R220: **NONE** (spec.md mtime 2026-10-17 04:56 unchanged; git head = R220 docs commit 18d106d; `.loop/ROUND` = 221; `git status`/`git diff apps/` empty).
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140). Sweep COMPLETE both legs, twin-covered (R161). NOT `DONE`.
+- Next round: same Next #1 — if a new ruling/spec update has landed, pick up the first unblocked item; else hold again.
+
+## R222 (2026-10-17) — HOLD (61st consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R221: **NONE** (spec.md mtime 2026-10-17 04:56 unchanged; git head = R221 hold commit 6ae4102; `.loop/ROUND` = 222; `git status`/`git diff apps/` empty).
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140). Sweep COMPLETE both legs, twin-covered (R161). NOT `DONE`.
+- Next round: same Next #1 — if a new ruling/spec update has landed, pick up the first unblocked item; else hold again.
+
+## R223 (2026-10-17) — HOLD (62nd consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R222: **NONE** (spec.md mtime 2026-10-17 04:56 unchanged; git head = R222 docs commit 6f06ade; `.loop/ROUND` = 223; `git status`/`git diff apps/` empty).
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140). Sweep COMPLETE both legs, twin-covered (R161). NOT `DONE`.
+- Next round: same Next #1 — if a new ruling/spec update has landed, pick up the first unblocked item; else hold again.
+
+## R224 (2026-10-17) — HOLD (63rd consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint. Checked for new rulings/spec updates since R223: **NONE** (spec.md mtime 2026-10-17 04:56 unchanged; git head = R223 hold commit 956cc20; `.loop/ROUND` = 224; `git status`/`git diff apps/` empty).
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140). Sweep COMPLETE both legs, twin-covered (R161). NOT `DONE`.
+- Next round: same Next #1 — if a new ruling/spec update has landed, pick up the first unblocked item; else hold again.
+
+## R225 (2026-10-17) — HOLD (64th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R224: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56); git head = R224 docs commit 8817ff2; `.loop/ROUND` = 225; `git status apps/` / `git diff apps/` empty. No source, no build, no screenshot, no re-verify. Everything in 仍差 remains ruling-blocked (E02's two font clauses + the 11-item list from R140; no channel exists). Checkpoint stands: **blocked on a user ruling**. NOT `DONE`.
+## R226 (2026-10-17) — HOLD (65th consecutive)
+Checked for new rulings/spec updates since R225: none (spec.md mtime 2026-10-17 04:56 unchanged; git head = R225 hold commit 5e2dea4; git status/git diff apps/ and spec.md empty; .loop/ROUND=226). Idle hold per R161 note — no source, no build, no screenshot. Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered.
+
+- **R227 — hold (66th consecutive).** Checked for rulings/spec updates since R226: none (spec.md mtime 2026-10-17 04:56 unchanged; git head = R226 docs commit 84e34e2; git status/diff apps/ empty). No source, no build, no screenshot, no re-verify (idle hold per R161 note). Checkpoint stands: blocked on a user ruling. Archived R219 entry from the state window to rounds tail.
+## R228 (2026-10-17) — HOLD (67th consecutive)
+Checked for new rulings/spec updates since R227: none (spec.md mtime 2026-10-17 04:56 unchanged; git head = R227 hold commit b403ac6; git status/git diff apps/ and spec.md empty; .loop/ROUND=228). Idle hold per R161 note — no source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered.
+
+## R229 — HOLD (68th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R228: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R228 docs commit 32ec11c; `.loop/ROUND` = 229; `git status apps/` EMPTY, `git diff apps/` empty.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.
+
+## R230 — HOLD (69th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R229: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R229 hold commit 5e782f8; `.loop/ROUND` = 230; `git status apps/` EMPTY.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.
+
+## R231 — HOLD (70th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R230: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R230 docs commit f75f23d; `.loop/ROUND` = 231; `git status apps/` EMPTY.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.
+
+## R232 — HOLD (71st consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R231: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R231 hold commit 9152262; `.loop/ROUND` = 232; `git status apps/` EMPTY.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Window slide: R221 archived to rounds.md tail (window = R232..R222).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.
+
+## R233 — HOLD (72nd consecutive)
+Checked for new rulings/spec updates since R232: **NONE.** spec.md mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R232 docs commit (62c52b7); `.loop/ROUND` = 233; `git status apps/` EMPTY. No source, no build, no screenshot (idle hold). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item ruling-blocked list reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered (R161).
+
+## R234 — HOLD (73rd consecutive hold)
+Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R233: NONE. `spec.md` mtime unchanged (2026-10-17 04:56, predates all recent rounds); git head = R233 hold commit (8248faf); `.loop/ROUND` = 234; `git status apps/` empty.
+- No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — held, nothing new to measure).
+- 仍差 unchanged: everything on it is ruling-blocked (E02 font clauses + 11-item list, reported R140; no channel). Sweep COMPLETE, twin-covered (R161). Not `DONE`.
+
+## R235 — HOLD (74th consecutive)
+- **Checked for new rulings/spec updates since R234: NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R234 docs commit (30be550); `.loop/ROUND` = 235; `git status apps/` EMPTY.
+- No source, no build, no screenshot, no re-verify (idle hold; per R161 note). Checkpoint stands: **blocked on a user ruling** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+- 仍差 unchanged; sweep COMPLETE, every closed item twin-covered (R161). NOT DONE.
+- *(R224 archived from state.md window at R235: hold, nothing done (63rd consecutive); checked for rulings/spec updates — none since R222 (spec mtime unchanged; git head = R222 docs commit 6f06ade; git status apps/ empty). Checkpoint stood: blocked on a user ruling.)*
+
+## R236 (2026-10-17) — HOLD (75th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R235: NONE (spec.md mtime 2026-10-17 04:56 unchanged, predates the rounds; git head = R235 hold commit 78b85bb; .loop/ROUND = 236; git status apps/ empty).
+- No source, no build, no screenshot, no re-verify (idle hold; per R161 note). Checkpoint stands: **blocked on a user ruling** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+- 仍差 unchanged; sweep COMPLETE, every closed item twin-covered (R161). NOT DONE.
+- *(R225 archived from state.md window at R236: hold, nothing done (64th consecutive); checked for rulings/spec updates — none since R224 (spec mtime unchanged; git head = R224 docs commit 8817ff2; git status/diff apps/ empty). Checkpoint stood: blocked on a user ruling.)*
+
+## R237 — HOLD (76th consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R236: NONE — spec.md mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R236 docs commit 2c15e2c; `.loop/ROUND` = 237; `git status apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R238 — HOLD (77th consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — spec.md mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R237 hold commit dc5bab4; `.loop/ROUND` = 238; `git status apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+- *(R227 archived from state.md window at R238: hold, nothing done (66th consecutive); checked for rulings/spec updates — none since R226 (spec mtime unchanged; git head = R226 docs commit 84e34e2; git status/diff apps/ empty). Checkpoint stood: blocked on a user ruling.)*
+
+## R239 — HOLD (78th consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R238: **NONE** — `spec.md` mtime unchanged (2026-10-17 04:56); git head = R238 docs commit 5d98795; `.loop/ROUND` = 239; `git status apps/` EMPTY.
+- No source edit, no build, no screenshot, no re-verify (idle hold; nothing new to measure).
+- Checkpoint stands: sweep COMPLETE both legs, every closed item twin-covered (R161); all of 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). NOT `DONE`.
+- state.md window rotated to R239..R231; R230 moved to rounds.md tail.
+
+## R240 — RULING LANDED; R-CHIP clause 1 + R-SCALE implemented and verified
+- **spec.md mtime jumped 04:56 → 22:50:48** — first change since R238. New section 「用户裁决（2026-10-17 22:55，人工拍板 — 立即生效，解除 hold）」 with four rulings: **R-CHIP** (chip height = round(hourHeight*0.96) ⇒ 38; title 11–12 medium; secondary 10–11; T01 side-by-side halves, never shrink/hide), **R-GUTTER/F** (12-hour two-tone: digits labelPrimary + smaller AM/PM same baseline; keep x263 anchor, 40 pitch, R159 top-row-hidden), **R-MONTH/D** (month cells stack 3 then +N, truncate not overflow), **R-SCALE/G** (ref-measured beats spec literal estimates, tie-break 7.5 直译优先; stripe ≈ 2.4×1.35 ≈ 3). Remaining held: ring icon (H), segment `Year`, R134 tooltip y, A/B dim+shadow — 保持 hold.
+- Implemented via code-writer in `CalendarScheduleView.qml`: chip height `Math.round(root.hourHeight*0.96)`=38 (`:824-827`); title `font.pixelSize: 11` + `Font.Medium` (`:899-901`); forced re-derivation `stripeWidth: 3` literal (old round(chipHeight/4) would have given 10) with R-SCALE comment (`:834-839`), `stripeInset = stripeWidth` unchanged.
+- Build OK (7 targets). Launch light, resize 1100x692, date 2026-04-02, capture `r240-light-week.png`.
+- **Verified (light):** 08:00 chip fill y317..354 = **38 exactly** (hour lines 314/354; top margin 3, bottom flush to next hour line ⇒ 38/40 = 0.95); consecutive chips 317/357/397/437/477 pitch 40. Stripe **x635..637 = 3 px** full-sat (61,174,233); fill inset 3 (fill from x632); title ink from x643 (= 3+3+5 margin), 11 Medium vertically centered, chipInk blue (`r240-chip08-4x.png`).
+- **Expected transitional break:** the 11:00 two-chip hour overflows — chip 2 lands y477..514 and garbles 12:00's slot. T01 side-by-side = next+1.
+- 仍差: E02 secondary line (no accessor yet — NEXT) · T01 side-by-side · R-GUTTER · R-MONTH · ring icon (H, blocked) · Year/tooltip-y/A/B (blocked).
+- state.md window rotated to R240..R233.
+
+## R241 — R-CHIP clause 2: timed chip SECONDARY line (time range) implemented and verified
+- Atomic step: Next #1 — E02's secondary clause.
+- **Ref evidence** (fresh crops of refs/macos-calendar.png): the secondary is the **TIME RANGE** — "🕐 11AM – 1PM" (small clock glyph + range, same chip-ink hue) under the title; ref 1-hour chips (26 px) show title ONLY, the secondary appears on the taller (2-hour) chip.
+- Implemented via code-writer:
+  1. `Main.qml:1301-1314` new `itemSecondary(item)`: all-day → ""; else start "HH:MM" (start/due), " – end" appended when the record's end carries T(HH:MM); todos render their due time.
+  2. `CalendarScheduleView.qml:28` accessor declaration `property var itemSecondary`.
+  3. TimedChip text block → Column: title 11 Medium TOP-aligned (topMargin 2; ref puts title near the top, never centred), secondary 10 regular below (spacing 1, same inkColor), visible when text ≠ "" and chip height ≥ 34.
+  4. Wired `itemSecondary: root.itemSecondary` into both `CalendarScheduleView` instances (`Main.qml:2654/2686`).
+- Build OK. The live instance was stale (22:55 pid, pre-build binary) — killed, relaunched (pid 2062778), resize 1100x692, date 2026-04-02, capture `r241-light-week.png`.
+- **Verified (light):** "Morning planning" chip — title ink from x645 near chip top (317+2), secondary "08:00 – 08:45" 10 px same blue ink below, bottom whitespace, nothing overflows y354; todos show due-only secondary ("09:00"); a 2-hour event reads "11:00 – 13:00"; stripe/fill/radius untouched. Half-hour line bleeds through the 0.19-alpha fill — pre-existing (r240 crop shows the same). T01 garble at 12:00 unchanged (transitional).
+- Notes: ref's 1-hour chips hide the secondary (no room at 26 px); ours shows it at 38 px — defensible under E02 (the ruling asks for the line; 38 px fits). The ref's clock glyph is NOT implemented — text-only this round, glyph listed in 仍差.
+- state.md window rotated to R241..R234.
+
+## R242 (2026-10-17 ~23:2x) — T01 side-by-side rework (R-CHIP clause 3) — PASS
+- Atomic step: state Next #1. Ref evidence: `.loop/refs/macos-calendar.png` crop x320-580 y195-275 (read once at 4× NEAREST): ref Wed column (406..487) 11AM row = "Art…" (≈409..447) + "Me…" (≈447..486) side by side, each ≈half column, full chip height, title-only, elided.
+- code-writer edit: `CalendarScheduleView.qml` hour-cell chip ColumnLayout (stacking, the garble source) → anchored `Item { id: chipHost; anchors.margins: 3 }` with `visibleItems = hourCell.cellItems.slice(0, 2)`; delegate `width: (chipHost.width − (n−1)·2)/n`, `x: index·(width+2)`, height 0.96·hourHeight unchanged; trailing layout spacer deleted; T01 comment added.
+- **Loop 1 FAIL (instructive):** built, relaunched, screenshot showed ZERO timed chips, no QML error, all-day band fine. Root cause: delegate declared `required property var modelData` but used the Repeater context `index` unqualified — Qt6 resolves it as `undefined` in required-property delegates ⇒ `x = NaN` ⇒ silently invisible. Fix: `required property int index` (`:826`). Loop 2 (the round's last) clean.
+- Verify (light 1100x692 expanded, `r242-light-week.png`): Wed 09:00 pair fills 513..567 + 570..625 (55/56 px, gap 2, inset 3) with stripes, elided titles, secondaries ("[UI] G… 09:00" / "Revie… 09:30"); Thu 11:00 pair "Long…"/"[R019…"; Wed 14:00 "Desig…"/"Prepa…"; singles full 113 (Mon fill 275..387); chip height 38 unchanged (317..354 / 357..393); **12:00 row clean in every column — R240's garble gone**.
+- Notes: `>2` same-hour still `slice(0,2)` (ruling silent; not invented). Half chips keep secondary at 38px (R241 accepted deviation). `sidebar` command key `open:true` errored (`Cannot assign [undefined] to bool`) though sidebar ended expanded — key unconfirmed. `inspectGeometry` key is `names` (array), not `objectName`.
+- Ledgered: R242 chipHost + half-width lanes + required-index fix. Next: R-GUTTER.
+
+## R243 (2026-10-17) — R-GUTTER clause: 12-hour two-tone gutter labels (ruling F)
+- Atomic step: state Next #1. Ref evidence: `.loop/refs/macos-calendar.png` 1:1 crop x188-246 y192-260 (6× NEAREST): "9" digit ink x218..223 (6 w) y216..224 (9 tall) core ~90 gray; "AM" x227..234 (starts +3~4 from digit) y219..224 (6 tall), core ~175-198 — SAME bottom baseline (224), smaller+lighter. Red 9:41 pill below unchanged.
+- code-writer edit: `CalendarScheduleView.qml:706-752` — single zero-padded 24h `Label` (mutedText 11) replaced by `Item { id: hourLabel }` (same anchors: rightMargin 7, top −implicitHeight/2, R158 visible clause verbatim) containing digitText (11, `AppTheme.text`) + meridiemText (8, `AppTheme.mutedText`, `anchors.right: parent.right`, digit baseline-anchored to it, gap 3); 12-hour text `h%12, 0→12`, AM/PM by `<12`.
+- **Loop 1 FAIL: rendered all-black — `AppTheme.labelPrimary`/`labelSecondary` DO NOT EXIST on the shared singleton** (`shared/qml/foundation/AppTheme.qml` has only `text` :153 / `mutedText` :154; labelPrimary/Secondary live on Main.qml's `tahoe` object). Undefined color ⇒ Label default black; both tones identical. Fix: `AppTheme.text` / `AppTheme.mutedText`.
+- Verify loop 2 (light 1100x692 expanded, `r243b-light-week.png`): two-tone ✓ — 8 digit core (33,38,60)≈primary vs AM core (114,122,135)=mutedText; same baseline ✓ (8AM digit bottom 314 = AM bottom 314); AM cap 6 : digit 9 = ref ratio ✓; 12-hour ✓ (7 AM…12 PM, `12 PM` correct at noon); pitch 40 exact (band tops 266/306/346/386/426/466/506/546/586/626/666) ✓; ink right edge x264 (vs old x263 — 'M' sidebearing, anchor unchanged) ✓; R159 top-row-hidden intact (first band 07:00) ✓; no QML errors.
+- **仍差 (next round first): vertical centre shifted — digit ink 266..274 ⇒ ink centre 270 vs the 07:00 line y274 (old 24h label ink 270..277 centre 273.5 ≈ ON the line; ref ink is centred on the line). Cause: Item top = meridiemText (font 8) line-box top while topMargin still −digitText.implicitHeight/2 ⇒ digit baseline lands ON the line instead of ink-centred. One-number fix next round (shift Item top down ~4px, e.g. topMargin −round(digitText.implicitHeight/2)+4 — re-measure, don't trust this arithmetic blindly).**
+- Not verified this round (loop budget spent): DARK leg of R-GUTTER — do it next round after the centre fix.
+- Note: harness `sidebar` key is `expanded` (bool) — `harness/Main.qml:214`, NOT `open`. Record supersedes R242's unconfirmed `open:true`.
+- Ledgered: R-GUTTER two-tone structure + AppTheme.text/mutedText tokens. Next: centre fix → then R-MONTH.
+
+## R244 (2026-10-17 ~23:3x) — R-GUTTER residual: ink-centre fix + dark leg — PASS, ITEM CLOSED
+- Atomic step: state Next #1. Ref behaviour: ref "9AM" digit ink 216..224 with line 220 ⇒ ink CENTRE on the hour line.
+- code-writer edit: `CalendarScheduleView.qml:718` — `anchors.topMargin: -Math.round(digitText.implicitHeight / 2) + 4` (comment appended :714-715). Single-line change, nothing else touched.
+- Build OK; killed stale pid, relaunched via start-review-vm.sh (light pid 2124325).
+- **Verify LIGHT (`r244a-light-week.png` + 6× zoom `r244a-gutter-zoom.png`):** digit ink rows 271..276 / 311..318 / 351..358 / 391..398 ⇒ ink centres 273.5 / 314.5 / 354.5 / 394.5 vs hour lines 274 / 314 / 354 / 394 — ON the line ✓; pitch 40 unchanged ✓; two-tone + same baseline + gap 3 intact ✓ (visually digits straddle the gray hour lines, 7 AM…11 AM).
+- **Verify DARK (`r244b-dark-week.png` + zoom `r244b-gutter-zoom.png`):** identical geometry (ink centred on lines 274/314/354/394); bright digit (AppTheme.text) vs dimmer AM (mutedText) two-tone ✓; same baseline ✓; 12-hour ✓; no QML errors in live-runtime-vm.log territory (rendered clean).
+- R-GUTTER CLOSED (structure R243 + centre R244 + both legs). Ledgered at `CalendarScheduleView.qml:718`.
+- Next: R-MONTH (ruling D) — month day cells stack up to 3 then `+N`, truncate not overflow (currently `slice(0, 2)`).
+
+## R245 (2026-10-17 ~23:5x) — R-MONTH (ruling D): verify stack-3/`+N`/truncate — PASS, ITEM CLOSED, NO CODE CHANGE
+- Atomic step: state Next #1 — R-MONTH: month day cells stack up to 3 then `+N`, truncate per ref, no row overflow.
+- **Finding before touching anything:** the state.md claim "currently `slice(0, 2)`" was wrong — grep shows the only `slice(0, 2)` is the WEEK view's chip host (`CalendarScheduleView.qml:840`). The month view (`CalendarMonthView.qml`, untouched this loop) already has `visibleItemCount = Math.max(0, Math.min(3, Math.floor((height − topPadding − bottomPadding − 26) / 20)))` (`:97`), slices to it (`:154`), `clip: true` (`:96`), and a `+N` label (`:131-135`). Git log: file last modified before the loop started.
+- **Verified DARK month view on 2026-04-02 via window-height sweep (live R244 instance, no rebuild):**
+  - 692 h → `r245a-month-692.png`: dayHeight ~70 ⇒ 1 chip + `+N` (Thu "+13" = 14−1). Truncated cleanly.
+  - 920 h → `r245b-month-920.png`: dayHeight ~92 ⇒ 2 chips + `+N` (Thu "+12" = 14−2).
+  - 1000 h → `r245c-month-1000.png`: **3 chips + `+N`** (Mon 30: 9−3 = "+6"; Thu 2: Design sync / Release notes / R087 card C, "+11" = 14−3). Adjacent rows clean ⇒ clip holds, no overflow.
+- All three = ruling D's exact text ("最多 3 条，超出 +N；格子不够高时按参考截断，不得溢出到相邻行"). R-MONTH CLOSED with zero diff. Note: no month-view ref image exists; ruling D text is the sole authority (R-SCALE consistent).
+- Ledgered: month-view pin added to state.md. Window restored to 1100×692.
+- Next: timed-chip secondary clock glyph (ref 2-hour chip "🕐 11AM – 1PM").

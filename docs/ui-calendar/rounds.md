@@ -4634,3 +4634,213 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Verdict: R122/R126 window dots CLOSED both legs.
 - Archived from state.md: R147 entry — "M-group band tops re-verified light leg: PASS; pinned tops 561/582/603/624/645/666/688 reproduced (pitch 21); '545' = weekday-header centre; R144's conflict RESOLVED (units mislabel)."
 - Next: segment control DARK leg (R143 covered light only).
+
+## R156 — segment control re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare). Drive: resize 1100x692 → capture `r156-segment-dark.png`. Crop `r156-segment-dark-4x.png` (1:1 strip + 4x NEAREST).
+- **Track: exterior x562..757 = 196 w (rims 61-62 both ends), y36..63 = 28 h; interior fill 46-47 (pinned 47), vertical ramp 50→42 (col x580: 50…42) = pinned exactly.**
+- **Lens: rims x630/x689 (76) ⇒ lens w 60 ✓; fill ramp 76→59 (col x645: 76…59) = pinned; lens rim 76-77 vs pinned 77 ✓.**
+- **Label ink peaks: 日 236 / 周 242 / 月 233 — byte-EXACT vs pinned 236/242/233.** Ink 11 tall (y45..55); centres 596 / 660 / 723 (pinned 595.5/659.5/723.0). Note: single-row y50 peaks read lower (222/241/203) — the pinned figures are full-bbox maxima, which is how R097/R127 measured them.
+- Verdict: R097/R127 segment control CLOSED both legs (light R143, dark R156).
+- Archived from state.md: R154 entry — "Toolbar search field re-verified LIGHT leg: PASS — rect x736..1015 (280 w) × y36..63 (28 h), capsule r14, insets 12, face #D2D2D2 exact, focused border #0088FF exact, placeholder labelSecondary; gotcha: pointer kind:'click' is a silent no-op — use press+release."
+- Next: nothing non-blocked remains open; pick the next closed id for re-verification from the R156 state.md list or move to wrap-up.
+- Archived from state.md (R156 windowing): R148 entry — "T-group timed-chip y-map re-verified light leg: PASS — all 7 pinned chips reproduce (11:00b 454 vs 455, 1 px AA); extra 16:00 WTODO chip pitch-consistent; per-event colours ⇒ colour-agnostic scan required."
+
+## R157 — mini-month selected disc re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1290546, environ KOS_APPEARANCE=dark). Drive: resize 1100x692 / sidebar expanded → capture `r157-minidisc-dark.png`. Ledger figure `docs/ui-calendar/r157-minidisc-dark-4x.png` (1:1 strip + 4x NEAREST).
+- **Selected disc (Oct 15, Thu col): bbox x101..118 × y598..615 = 18×18 — x-range BYTE-EQUAL to light R144 (x101..118). Face interior (142,142,147) = `selectionDisc` #8E8E93 EXACT (clean samples at (110,613); (103,600)/(116,601) are outside-disc AA).**
+- **Circle profile symmetric: row widths 2/8/10/12/14 → 16 core (x102..117, full 18 with AA at rows 606-607) → 14/12/10/8/2 — consistent with the light pinned profile.**
+- **Disc centred on digit ink: "15" ink x106..114 y603..610, centre 606.5 = disc centre 606.5 ✓ (disc top 598 = ink top 603 − 5, matching the R144 model). White digits (255) both discs.**
+- **Today disc (Oct 17, Sat col): bbox x157..174 × y598..615 = 18×18, face (229,72,77) = `todayRed` EXACT, white digit ink.**
+- Verdict: R116/R117 mini discs CLOSED both legs (light R144, dark R157).
+- Next: nothing non-blocked remains open; continue re-verifying closed ids on the uncovered leg or wrap up.
+- Archived from state.md (R157 windowing): R149 entry — "S-group sidebar list re-verified light leg: PASS — separator/Today row/pitch 30/box 12×12/radius 3/label left 32 all byte-consistent."
+
+## R158 — all-day band y-map + envelope re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1304330, environ KOS_APPEARANCE=dark). Drive: resize 1100x692 / sidebar expanded / date 2026-04-02 → capture `r158-band-dark.png`. Ledger figures `docs/ui-calendar/r158-band-dark-1x.png` + `r158-band-dark-thu-4x.png`.
+- Scroll-state control: Thu timed fills at x700 = 08:00 317-332 / 10:00 397-412 / 11:00 437-452 / 14:00 557-572 — byte-consistent with the R148 y-map ⇒ same contentY as every pinned measurement.
+- **Rules: `sectionRule` y155 = (39,39,39) EXACT; 3-row interior 156..231 (row1 fill 157..180, gap 181, row2 182..205, row3 207..230); `allDaySeparator` 232-233 = (84,84,84) EXACT; grid top rule 234 = (59,59,59) weekday / (65,65,65) weekend EXACT.**
+- **Envelope (R128/R150 model) at y175, exact-fill scan (40,76,95): (274,625) / (631,744) / (750,863) — BYTE-EXACT to pinned. Thu row 2 `Release notes` fill 631..744 (y200). Sun AND Sat carry no fill in 156..231; weekend plane (37,37,37).**
+- **Thu chip fill (40,76,95) = `:589` dark mix for itemColor (61,174,233) EXACT. Overflow `+2` ink bbox x635..645 y215..222 (n=58, subpixel-AA cores), centre y218.5 ≈ pinned 218 — x-range byte-equal.**
+- **NEW OBSERVATION (not a regression, previously unrecorded): a clipped "06:00" gutter-label sliver at y234..237, x~230..269 — the 06:00 label (ink 230..237 centred on the top rule 234, `CalendarScheduleView.qml:711-725` text `"0"+rowIndex+":00"`) is mostly covered by the all-day band; its bottom 4 ink rows peek out below the separator. The ref's topmost gutter label (8 AM) sits fully below the band. Never flagged by R066/R152 censuses. Non-blocked; candidate for a future atomic fix.**
+- Verdict: R106/R107/R128 band y-map + R128/R150 envelope CLOSED both legs (dark R142 y-map / R142+R158 envelope; light R142+R150).
+- Next: the 06:00 gutter sliver is the only non-blocked open item — either fix it (clip/offset the topmost label) or re-verify another closed id.
+- Archived from state.md (R158 windowing): R150 entry — "All-day band chip envelope re-verified light leg: PASS — exact-fill runs 274..625 / 631..744 / 750..863 byte-consistent, fill (222,241,251) exact, Sun empty; Thu row 2 = `Release notes`."
+
+## R159 (2026-10-17) — FIXED the clipped "06:00" gutter-label sliver (R158's new finding) — PASS both legs
+- Atomic step: Next #1 — fix the sliver: hide the hour label whose line coincides with the grid top rule when the timeline is hour-aligned.
+- **Source change (`CalendarScheduleView.qml`, the T03 hour Label's `visible`, was `:725-733` → now `:725-740`): added the clause `hourCell.rowIndex * root.hourHeight > timelineScroll.contentItem.contentY + 0.5` to the existing `visible` condition.** Rationale: `positionTimeline()` always leaves contentY hour-aligned (`usefulStartHour() * 40`, logged contentY 240), so the topmost visible hour line sits ON the grid top rule under the band separator and the flickable `clip: true` slices its straddling label in half — the fragment. The 0.5 absorbs contentY rounding; mid-scroll (non-aligned contentY) the topmost fully-visible line is > contentY so its label is kept; labels fully above the top were already clipped.
+- Build: ninja OK (7 targets). Relaunch light (pid 1333029) → drive resize 1100x692 / sidebar expanded / date 2026-04-02 / capture `r159-fix-light.png`. Relaunch dark (pid 1336363) → same drive → `r159-fix-dark.png`.
+- **BOTH LEGS PASS.** Top-rule crop (x210..285 × y220..250, 8x): NO glyph fragment below the band separator on either leg; first label now 07:00, fully below the band — matches the ref's topmost-label model.
+- **R152 pins re-measured and held: 9 labels 07:00..15:00 in y235..600, ink height 8, pitch 40 exact, right edge x263 (dark byte-equal to R152's pin; light x264 = one more AA shoulder at the looser scan threshold — rightMargin model untouched).** 06:00's absence is the intended fix, not a regression (N02's now-pill clearance logic untouched).
+- Ledger figures: `docs/ui-calendar/r159-fix-light.png`, `r159-fix-dark.png`.
+- 仍差 shrinks by one: the ONLY non-blocked open item is CLOSED; everything remaining on the list is ruling-blocked (E02 fonts, inset/stripe scale, band-chip icon, gutter 12-hour two-tone, month slice count, dim/shadow, segment 4th word + label count + popover clauses + ToolTip y).
+- Next: no non-blocked items remain. Either (a) take a ruling decision from the user on one of the blocked items, or (b) re-verify another closed id on the unverified leg for extra assurance. If nothing actionable: the sweep is complete and only the ruling-blocked list stands — report and hold, do not invent work.
+- Archived from state.md (R160 windowing): R152 entry — "Gutter hour labels re-verified light leg: PASS — 11 labels, ink right edge x263 all byte-consistent (rect right 265 = 272−7, sidebearing 2), ink 8 tall, pitch 40 exact, tone mutedText (113,117,130); source :714-720 re-read confirms anchor model. Harness note: launcher now kills the app under timeout — background-launch instead."
+
+## R160 (2026-10-17) — mini-month date-band tops + weekday header re-verified, DARK leg — PASS (verification only, no source, no build)
+- Atomic step: Next #1 option (a). The M-group band tops (R147) and weekday header (R151-era) had only ever been measured on the light leg — the last uncovered twin after R155-R159.
+- Fresh relaunch dark (background-launch bare; pid 1345557, environ KOS_APPEARANCE=dark). Drive: resize 1100x692 / sidebar expanded → capture `r160-minimonth-dark.png`. Crop x0..220 × y528..692 (1x + 3x NEAREST, single read).
+- **Weekday-header ink rows 541..548 — BYTE-EQUAL to the light pin (centre 544.5).**
+- **Date-row digit-ink tops 561 / 582 / 624 / 645 / 666 — ALL EXACT, pitch 21 exact.** Row 3's digit run is swallowed by the two 18 px discs (y598..615) — byte-equal to R157's dark disc bbox, expected. Row 7 (adjacent-month sliver at the 692 clip): faint ink, core ~64 over plane (40,40,40), top ~688 — consistent with the light measurement (686-687 AA), not a conflict.
+- **New dark tone measurements (first for the band; light tones were never pinned):** weekday-header ink (153,153,153) ≈ #999999; current-month digit ink ~(226,228,230) (AA peaks); adjacent-month ink ~(120,120,120); mini-month plane (40,40,40).
+- Verdict: M-group band tops CLOSED both legs (light R147, dark R160).
+- Ledger figures: `docs/ui-calendar/r160-minimonth-dark-1x.png`, `r160-minimonth-dark-3x.png`.
+- Next: the mini-month heading (R151, light only — month-title ink + chevron tone on dark) is the last known uncovered twin; after that, hold the checkpoint (blocked on a user ruling).
+
+## R161 — mini-month heading re-verified DARK leg (R151 twin) — PASS — last uncovered twin closed; checkpoint held
+- Atomic step: Next #1 option (a) — re-verify the mini-month heading (R151 measured light only) on the dark leg. **Verification only, no source, no build.**
+- Instance alive from R160 (pid 1345557, dark). Re-drove resize 1100x692 / sidebar expand / view week / date 2026-04-02 → `r161-heading-dark.png`; crop x0..220 × y505..545 (1x + 4x NEAREST, one read).
+- **Title: bright-row profile (x12..208, thr>170) = band 519..530, strict core (>200) rows 519..530; light pin was 519..531 (thr180 dark-ink) — within 1 px AA (dark row 531 is zero even at thr>140; the light count included one faint AA row).** Core columns (>200) **x80..139** vs light thr<100 x79..138 — 1 px AA shift, still centred on the button axis (mid 109.5 vs 110).
+- **Title ink tone: dark core (242,242,242) — the dark labelPrimary, consistent with R156's segment ink peak 242 and R135's tooltip ink (241,240,240). The pinned "ink 0/255" is the LIGHT-leg literal; per-leg labelPrimary differs by design. Not a conflict.**
+- **Chevrons: left `<` ink x23..27, rows 519..528 = 10 tall — EXACT vs pin (5×9–10 at x23..27, rows 519..528). Right `>` ink x191..196, rows 520..528 = 9 tall — EXACT vs pin (core x191..195, rows 520..528; x196 = AA shoulder). Centres (25.5, 523.5)/(193, 524) vs button centres 26/194 — AA-level.** *(First right-chevron scan polluted by the weekday-header row 541..548 ink (153,153,153) inside x180..210 — re-scanned x188..200 bounded y<535.)*
+- Chevron tone: 1-px AA stroke, cores (150..173) with peaks (157,157,157)/(173,173,173) — same shoulder-band situation R151 recorded for the light pin (156,156,156); geometry is the pin, and it holds.
+- Plane (40,40,40) EXACT = dark sidebar plane. 4x crop `r161-h-4x.png`: white bold title between two muted chevrons on the dark plane, muted weekday row below.
+- **PASS — R151's heading closed byte-consistent on the dark leg. With this, EVERY closed spec item now has both legs measured; the sweep is COMPLETE and no non-blocked work remains. Checkpoint: blocked on a user ruling (E02's two font clauses + the 11-item ruling-blocked list, reported R140).**
+
+## R162 — HOLD — no new rulings or spec updates since R161; checkpoint stands (nothing done, no source, no build, no re-verify)
+- Atomic step: Next #1 option (b). R161 already spent the session's one allowed idle re-verify; two idle rounds in a row = hold, not loop.
+- Ruling check: `spec.md` mtime 2026-10-17 04:56 — predates R161's 17:29 entry, no spec edit since. `.loop/DEADLINE` / `TASK.md` / `NOTICE-duplicate-loop.md` all mtime 2026-10-16. No new files, no ruling message, no uncommitted spec changes.
+- 仍差 unchanged — all 7 real entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Next: unchanged — hold; pick up the first unblocked item only if a ruling/spec update lands after R162.
+
+## R163 (2026-10-17) — HOLD (2nd consecutive), nothing done
+- Atomic step: Next #1 option (b) — hold the checkpoint. No source, no build, no screenshot, no re-verify.
+- Ruling check: `spec.md` mtime 2026-10-17 04:56 — unchanged since R162's check, still predates R161. `.loop/DEADLINE` 10-16 19:34 / `TASK.md` 10-16 20:40. Git head = R162 docs commit; only session artifacts (state.md/rounds.md/LEDGER.md/ROUND/health.state/pim-vm.log) touched. No ruling message anywhere.
+- 仍差 unchanged — all 7 real entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Next: unchanged — hold; pick up the first unblocked item only if a ruling/spec update lands after R163.
+
+## R164 (2026-10-17) — HOLD (3rd consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R163: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R163's hold commit (9af24a6); tracked tree clean except `docs/ui-calendar/HEALTH.md` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161/R162 note idle rounds = hold, not loop — nothing new to measure, and re-verify at most one item per session when truly idle).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+
+## R165 — HOLD (4th consecutive)
+Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R164: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, git head = R164's docs commit, tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping).
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). Checkpoint stands: sweep COMPLETE both legs, twin-covered; everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- State.md rolling window trimmed: R157 archived to rounds.md tail; 最近已改 now R165..R158.
+
+## R166 — HOLD (5th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R165: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R165's hold commit (15a61d6); tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R158 archived to rounds.md tail (already recorded); 最近已改 now R166..R159.
+
+## R167 — HOLD (6th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R166: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R166's docs commit (3e0958e); tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R159 archived to rounds.md tail (already recorded); 最近已改 now R167..R160.
+
+## R168 — HOLD (7th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R167: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R167's hold commit (f83fc8b); tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R160 archived to rounds.md tail (already recorded); 最近已改 now R168..R161.
+
+## R169 — HOLD (8th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R168: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R168's docs commit (a639642); tracked tree clean except `.loop/ROUND` + state/rounds (this round's bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R160 archived to rounds.md tail (already recorded); 最近已改 now R169..R161.
+
+## R170 — HOLD (9th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R169: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `.loop` control files (PROMPT/TASK/NOTICE/health) all 10-16, `git log` head = R169's hold commit (4e4872f); tracked tree clean except `.loop/ROUND` + state/rounds (this round's bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R161 archived to rounds.md tail (already recorded); 最近已改 now R170..R162; duplicate "1." numbering fixed.
+
+## R161 — VERIFICATION ONLY (dark leg), no source (archived from state.md window)
+- Mini-month heading re-verified DARK leg: PASS — title core rows 519..530 / cols x80..139 (1 px AA of the light pin), ink (242,242,242) = dark labelPrimary; chevrons left x23..27 r519..528 EXACT, right x191..196 r520..528 EXACT, cores ≈(157,157,157); plane (40,40,40). **Last uncovered twin closed — every closed item now measured on both legs.**
+- **R171 — HOLD (10th consecutive).** Next #1 option (b). Checked for new rulings/spec updates since R170: NONE (spec.md mtime 2026-10-17 04:56 unchanged; .loop control files PROMPT 20:18 / TASK 20:40 / NOTICE 19:57 all 10-16; git head = R170 docs commit 85cc5cb; only .loop/ROUND newer). No source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling. state.md window advanced to R171..R163 (R162 archived here).
+- **R162 — HOLD.** Checked for rulings/spec updates: none since R161 (spec mtime 04:56 predates it; .loop control files all 2026-10-16). Checkpoint stands. *(archived R171)*
+
+## R172 — HOLD (11th consecutive; checkpoint = blocked on a user ruling)
+- Next #1 option (b). Checked for new rulings/spec updates since R171: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R171 hold commit 39d0494; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
+- Not `DONE`.
+
+## R173 — HOLD (12th consecutive; checkpoint = blocked on a user ruling)
+- Next #1 option (b). Checked for new rulings/spec updates since R172: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R172 docs commit 56f28f5; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
+- Not `DONE`.
+- *(Archived from state.md window: R165 — hold, nothing done (4th consecutive); checked none since R164; spec mtime 04:56 unchanged; git head = R164 docs commit.)*
+
+## R174 — HOLD (13th consecutive; checkpoint = blocked on a user ruling)
+- Next #1 option (b). Checked for new rulings/spec updates since R173: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R173 hold commit f9f18d0; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
+- Not `DONE`.
+- *(Archived from state.md window: R166 — hold, nothing done (5th consecutive); checked none since R165; spec mtime 04:56 unchanged; git head = R165 hold commit.)*
+
+## R175 — HOLD (14th consecutive). Checked for new rulings/spec updates since R174: NONE (spec.md mtime 2026-10-17 04:56 unchanged, predates R161; .loop/DEADLINE 10-16 19:34; git head = R174 docs commit 057166e; tracked tree clean except .loop/ROUND + this round's bookkeeping). No source, no build, no screenshot, no re-verify (idle hold per R161 note). 仍差 unchanged — all ruling-blocked. Sweep COMPLETE both legs, twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT DONE.
+
+## R176 — HOLD (15th consecutive)
+- Atomic step: Next #1 option (b) — HOLD the checkpoint.
+- Checked for new rulings/spec updates since R175: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; `git log` head = R175 hold commit 23eb96e; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — nothing new to measure).
+- 仍差 unchanged: all 7 entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling.
+- *(archived from state.md window)* R168 — hold, nothing done (7th consecutive). Checked for rulings/spec updates: none since R167 (spec mtime 04:56 unchanged; git head = R167 hold commit f83fc8b). Checkpoint stands: blocked on a user ruling.
+
+## R177 (2026-10-17) — HOLD (16th consecutive)
+- Atomic step: Next #1 option (b) — HOLD the checkpoint.
+- Checked for new rulings/spec updates since R176: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; `git log` head = R176 docs commit 93bc468; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — nothing new to measure).
+- 仍差 unchanged: all 7 entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling.
+- *(archived from state.md window)* R169 — hold, nothing done (8th consecutive). Checked for rulings/spec updates: none since R168 (spec mtime 04:56 unchanged; git head = R168 docs commit a639642). Checkpoint stands: blocked on a user ruling.
+
+## R178
+Atomic step: HOLD the checkpoint (17th consecutive hold).
+- Checked for new rulings/spec updates since R177: NONE. spec.md mtime 2026-10-17 04:56 (unchanged, predates R161); .loop/DEADLINE 10-16 19:34; git head = R177 hold commit (9cb156d); tracked tree clean except .loop/ROUND — no ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold).
+- 仍差 unchanged: all 7 entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling.
+
+## R179 (2026-10-17) — HOLD (18th consecutive)
+- Next #1 option (b). Checked for new rulings/spec updates since R178: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; `git log` head = R178 docs commit 9e43cfd; no ruling message anywhere (`.loop/ROUND` = 179, iter bookkeeping only; `HEALTH.md` diff = watchdog heartbeats only).
+- No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists).
+
+## R180 — HOLD (19th consecutive)
+- **Checked for new rulings/spec updates since R179: NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; `git log` head = R179 docs commit a0e5be0; `.loop/ROUND` = 180. Files newer than the R179 session: only `.loop/ROUND`, `.loop/health.state` (watchdog heartbeat), and this round's own state/rounds/ledger/log files — no ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140).
+- **R181 (2026-10-17) — HOLD (20th consecutive).** Checked for new rulings/spec updates since R180: none (spec.md mtime 04:56 unchanged, predates R161; .loop/DEADLINE 10-16 19:34; git head = R180 docs commit 156a113). No source, no build, no screenshot, no re-verify — idle hold. 仍差 unchanged (all ruling-blocked); sweep complete, twin-covered. Checkpoint stands: blocked on a user ruling. NOT DONE (E02 font clauses FAIL, ruling-blocked).
+
+## R182 (2026-10-17) — HOLD (21st consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R181: NONE — spec.md mtime 2026-10-17 04:56 unchanged (predates R161); .loop/DEADLINE 10-16 19:34; git head = R181's hold commit 651043d; .loop/ROUND = 182; only ROUND counter, health heartbeat, R181's own state/rounds/LEDGER writes and pim-vm.log newer than the R181 session.
+- No source, no build, no screenshot, no re-verify (idle hold). Sweep COMPLETE both legs, every closed item twin-covered (R161). 仍差 all ruling-blocked: E02's two font clauses (chip text) + the 11-item ruling-blocked list (reported R140).
+- Checkpoint stands: blocked on a user ruling. NOT DONE.
+
+## R174 (2026-10-17) — HOLD (13th consecutive) *(archived from state.md window R183)*
+- Atomic step: Next #1 option (b). No new rulings/spec updates since R173 (spec mtime 04:56 unchanged; .loop/DEADLINE 10-16; git head = R173 hold commit f9f18d0). Checkpoint stands: blocked on a user ruling. NOT DONE.
+
+## R183 (2026-10-17) — HOLD (22nd consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R182: NONE — spec.md mtime 2026-10-17 04:56 unchanged (predates R161); .loop/DEADLINE 10-16 19:34; git head = R182's docs commit 1237190; .loop/ROUND = 183; only the ROUND counter newer than R182's session.
+- No source, no build, no screenshot, no re-verify (idle hold). Sweep COMPLETE both legs, every closed item twin-covered (R161). 仍差 all ruling-blocked: E02's two font clauses (chip text) + the 11-item ruling-blocked list (reported R140).
+- Checkpoint stands: blocked on a user ruling. NOT DONE.
+
+## R184 (2026-10-17) — HOLD (23rd consecutive)
+- Checked for new rulings/spec updates since R183: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R183 hold commit e72bcf4; `.loop/ROUND` = 184.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R185 (2026-10-17) — HOLD (24th consecutive)
+- Checked for new rulings/spec updates since R184: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R184 docs commit 4691a3f; `.loop/ROUND` = 185.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R186 (2026-10-17) — HOLD (25th consecutive)
+- Checked for new rulings/spec updates since R185: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R185 hold commit b150f76; `.loop/ROUND` = 186.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R178 (archived from state.md window 2026-10-17) — HOLD (17th consecutive)
+- Checked for rulings/spec updates: none since R177 (spec mtime 04:56 unchanged; .loop/DEADLINE 10-16; git head = R177 hold commit 9cb156d). Checkpoint stands: blocked on a user ruling.
+
+## R187 (2026-10-17) — HOLD (26th consecutive)
+- Checked for new rulings/spec updates since R186: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R186 docs commit 0540943; `.loop/ROUND` = 187.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).

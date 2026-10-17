@@ -4545,3 +4545,16 @@ Atomic step: Next #1 of R134 — style the dark-leg ToolTip (Qt Basic leaking). 
 - Disc: **x101..118 × y556..573 = 18×18 exact**, centre (109.5, 564.5), centred in the Thu column (cells 96..124). Row profile 8/12/14/16/16/18×8/16/16/14/12/8 = true circle, radius 9. Face **(142,142,147) = #8E8E93 exact** (pinned `selectionDisc`). White digit inside; row 1 = Mar30–Apr5, disc on Apr 2. 4x crop `r144-minirow-4x.png` visually confirms header 一二三四五六日 + 30 31 1 **[2]** 3 4 5.
 - **PASS — byte-consistent with pinned R115/R117. No source change, no build.**
 - Observation (no action): disc centre y 564.5 does not reconcile with the pinned date-band tops (545 then 561/582…); flagged in state.md for a future band-top re-verify. Not opened as an item.
+
+## R147 — re-verify CLOSED M-group (mini month date-band tops), light leg — PASS, pinned reconciled; R144's flagged conflict RESOLVED
+- Rounds R145/R146 errored out before any output (`.loop/iter-145/146.err` = unrecognized_model, status 0) — no results were recorded; this round = 147. Tree audited (`git status` on apps/ clean) before proceeding; measurement-only round, no edits to audit.
+- Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the mini month's date-band tops (pinned 545 then 561/582/603/624/645/666/688), light leg** — the exact item R144 flagged as irreconcilable with the disc centre.
+- Light leg, fresh relaunch (>60 s; backgrounded, confirmed alive pid 1113069). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r147-minimonth-light.png`.
+- Measurement (dark-ink row profile, x12..208; thr180 run list): (519,531) heading · **(541,548) weekday header** · (556,573) = the selected disc (18 tall) + row-1 digits · **(582,589) (603,610) (624,631) (645,652) (666,673) (686,691)** = rows 2-7 ink.
+- **Date-row digit-ink tops = 561, 582, 603, 624, 645, 666, 686/687 — pitch 21 exact.** Pinned 561/582/603/624/645/666 reproduce EXACTLY; the 7th (pinned 688) reads 686-687 within AA and is clipped by the 692-tall window.
+- **The pinned "545" is the weekday-header ink CENTRE (541..548 → 544.5), NOT a date-row top.** ⇒ the pinned list is internally consistent as [weekday-header centre; seven digit-ink tops].
+- **R144's conflict RESOLVED — bookkeeping units, not geometry:** "date-band tops" are digit-ink tops, not cell tops. Row-1 cell top ≈ 554.5 (ink top 561 − (21−8)/2); the 18×18 disc (556..573) is centred on row-1's ink — disc centre 564.5 = ink centre (561+568)/2 = 564.5. No discrepancy remains.
+- Side observation (no action): the grid renders **7 date rows** (Mar 30 … May 17); the 7th (May 11-17, all adjacent-month muted) is clipped at the window bottom — visible only as a sliver. The pinned 7-top list is therefore complete, not spurious.
+- 3x crop `r147-minimonth-crop-3x.png` visually confirms: heading 2026年4月, header 一二三四五六日, rows 30 31 1 **[2]** 3 4 5 … 27 28 29 30 1 2 3, muted 4-10 tail.
+- **PASS — byte-consistent with pinned; M-group band-top bookkeeping closed. No source change, no build.** code-writer still not registered (nothing to implement).
+- *(Archived from state.md 最近已改: R137 — released-rim under dialog scrim settled at REST both legs; item CLOSED.)*

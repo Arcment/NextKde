@@ -4725,3 +4725,9 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
 - Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
 - state.md rolling window trimmed: R158 archived to rounds.md tail (already recorded); 最近已改 now R166..R159.
+
+## R167 — HOLD (6th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R166: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R166's docs commit (3e0958e); tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R159 archived to rounds.md tail (already recorded); 最近已改 now R167..R160.

@@ -1,9 +1,7 @@
-# R272 — HOLD round (no code change) + one opportunistic regression spot-check: week collapsed light PASS. spec.md mtime unchanged — no new ruling; ruling-blocked items (H/Year/tooltip-y/A-B) re-listed.
+# R273 — HOLD round (no code change, no spot-check). spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items (H/Year/tooltip-y/A-B) re-listed below.
 
-## 本轮 (R272)
-Atomic step: Next #1 taken verbatim — hold round with one opportunistic regression spot-check. NO code change, NO build (code untouched since R246). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling landed (sed re-confirms spec.md:145-146 H / Year / R134 tooltip-y / A-B still 保持 hold).
-- Spot-check leg: **week collapsed light** — the one leg NOT covered by the R247–R251 rotation sweeps (R247 week expanded light+dark, R248 day light + collapsed week dark, R249 month light expanded, R250 month dark collapsed + agenda, R251 day dark expanded). Stale pid was dead → relaunched `start-review-vm.sh light`, drove resize/sidebar-collapsed/view week/date 2026-04-02, captured `r272-week-collapsed-light.png`.
-- Spot-check verdict: **PASS.** Clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9:30 pair, Wed 11 AM pair, Wed 2:30 pair), all-day band "Multi-day review" span + Thu "+2" overflow + Fri "R087 sole", two-tone gutter, weekend column tint, 周 pill selected, Thu-2 today ring — all match R247 baseline. Sidebar collapsed renders full-width content as expected. No regression.
+## 本轮 (R273)
+Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build (code untouched since R246), NO spot-check (all 6 rotation legs R247–R251 + R272 already swept clean; nothing suspicious observed since). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling landed (sed re-confirms spec.md tail: H / Year / R134 tooltip-y / A-B dim+shadow still 保持 hold).
 - Ruled-blocked items re-listed below in 仍差 (per the standing ruling's per-round re-list requirement).
 - Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
 
@@ -18,6 +16,7 @@ Atomic step: Next #1 taken verbatim — hold round with one opportunistic regres
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R273 — **HOLD round (no new ruling; no code change, no spot-check).**
 0. R272 — **HOLD round + regression spot-check week collapsed light PASS (no new ruling; no code change).**
 0. R271 — **HOLD round + regression spot-check week expanded light PASS (no new ruling; no code change).**
 0. R270 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
@@ -25,8 +24,7 @@ Atomic step: Next #1 taken verbatim — hold round with one opportunistic regres
 0. R268 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R267 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R266 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
-0. R265 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
-*(older rounds archived in rounds.md tail — R252–R270 holds; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
+*(older rounds archived in rounds.md tail — R265 holds back to R252; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
 
 ## 外推待确认 (live only)
 - **THE 2026-10-17 22:50 RULING (load-bearing): four rulings landed in spec.md, effective immediately. R-CHIP: chip height = round(hourHeight*0.96) ⇒ 38; title 11–12 medium; secondary 10–11 (DONE R241); T01 = side-by-side halves, never shrink/hide (DONE R242). R-GUTTER (F): 12-hour two-tone — DONE R243+R244. R-MONTH (D): month cells stack 3 then +N, truncate not overflow — DONE R245 (was already implemented). R-SCALE (G): ref-measured beats spec literal estimates (tie-break 7.5 直译优先); stripe ≈ 3; record derivation in LEDGER. STILL HELD BY THE SAME RULING: all-day ring icon (H), segment 4th word Year, R134 tooltip y, A/B dim+shadow magnitude — 每轮在 state.md 列一次，不要自行发明.**

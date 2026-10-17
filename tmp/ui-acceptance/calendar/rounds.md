@@ -5277,3 +5277,9 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Spot-check verdict: PASS — clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9:30 / 11 AM / 2:30 pairs), all-day band "Multi-day review" span + Thu "+2" overflow + Fri "R087 sole", two-tone gutter, weekend column tint, 周 pill selected, Thu-2 today ring, collapsed sidebar renders full-width content. No regression, no delta invented.
 - Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
 - Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R273 — HOLD round (no code change, no spot-check)
+- Pre-round: spec.md mtime still 2026-10-17 22:50 — no new ruling; H / Year / R134 tooltip-y / A-B dim+shadow re-confirmed 保持 hold (spec.md tail re-read).
+- Spot-check skipped: all 6 rotation legs (R247–R251 + R272 week-collapsed-light) already swept clean; nothing suspicious since — per Next-round rule the check is optional.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.

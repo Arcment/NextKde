@@ -5122,3 +5122,21 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - **Verify DARK (`r244b-dark-week.png` + zoom `r244b-gutter-zoom.png`):** identical geometry (ink centred on lines 274/314/354/394); bright digit (AppTheme.text) vs dimmer AM (mutedText) two-tone ✓; same baseline ✓; 12-hour ✓; no QML errors in live-runtime-vm.log territory (rendered clean).
 - R-GUTTER CLOSED (structure R243 + centre R244 + both legs). Ledgered at `CalendarScheduleView.qml:718`.
 - Next: R-MONTH (ruling D) — month day cells stack up to 3 then `+N`, truncate not overflow (currently `slice(0, 2)`).
+
+## R245 (2026-10-17 ~23:5x) — R-MONTH (ruling D): verify stack-3/`+N`/truncate — PASS, ITEM CLOSED, NO CODE CHANGE
+- Atomic step: state Next #1 — R-MONTH: month day cells stack up to 3 then `+N`, truncate per ref, no row overflow.
+- **Finding before touching anything:** the state.md claim "currently `slice(0, 2)`" was wrong — grep shows the only `slice(0, 2)` is the WEEK view's chip host (`CalendarScheduleView.qml:840`). The month view (`CalendarMonthView.qml`, untouched this loop) already has `visibleItemCount = Math.max(0, Math.min(3, Math.floor((height − topPadding − bottomPadding − 26) / 20)))` (`:97`), slices to it (`:154`), `clip: true` (`:96`), and a `+N` label (`:131-135`). Git log: file last modified before the loop started.
+- **Verified DARK month view on 2026-04-02 via window-height sweep (live R244 instance, no rebuild):**
+  - 692 h → `r245a-month-692.png`: dayHeight ~70 ⇒ 1 chip + `+N` (Thu "+13" = 14−1). Truncated cleanly.
+  - 920 h → `r245b-month-920.png`: dayHeight ~92 ⇒ 2 chips + `+N` (Thu "+12" = 14−2).
+  - 1000 h → `r245c-month-1000.png`: **3 chips + `+N`** (Mon 30: 9−3 = "+6"; Thu 2: Design sync / Release notes / R087 card C, "+11" = 14−3). Adjacent rows clean ⇒ clip holds, no overflow.
+- All three = ruling D's exact text ("最多 3 条，超出 +N；格子不够高时按参考截断，不得溢出到相邻行"). R-MONTH CLOSED with zero diff. Note: no month-view ref image exists; ruling D text is the sole authority (R-SCALE consistent).
+- Ledgered: month-view pin added to state.md. Window restored to 1100×692.
+- Next: timed-chip secondary clock glyph (ref 2-hour chip "🕐 11AM – 1PM").
+
+## R246 (2026-10-17) — timed-chip clock glyph + 12-hour secondary — DONE, light+dark
+- Next #1. Ref measured via 8×/20× NEAREST crops of the "Stretchin…" chip secondary: outlined clock ring 8×8 ref px, stroke ~1, hands 12+3, ink = text ink (26,67,123); left of text, gap 4, glyph bottom = digit baseline (glyph 8 vs digit cap 6). Other ref chips confirm: "Hike with…" "🕐 10AM – 12…", "Sign language…" "🕐 12 – 2PM" ⇒ 12-hour, shared period drops start meridiem.
+- code-writer: `CalendarScheduleView.qml:950-999` secondary Label → Row { glyph Item 11×11 (ring r5.5 border 1.5 chipInk; hand-12 1.5×4; hand-3 3.5×1.5; spacing 5; verticalCenter on label) + Label 10 }; `Main.qml:1308-1338` `formatClock12()` (12h, minutes only when nonzero, 12-not-0) + `itemSecondary` with start-meridiem drop. All-day still "".
+- Verify: build ok; relaunch light, `date` no-oped twice — **harness `Main.qml:221` reads `command.date`, NOT `value`** (recorded as load-bearing). Date 2026-04-02 then applied. r246-light.png: all timed chips show ring glyph + "8 – 8:45AM" / "10:15 – 10:30AM" / "11AM – 1PM" / "2:30 – 3:30PM" / "3 – 4:15PM"; 6× crops confirm glyph structure/tone/gap vs ref. r246-dark.png same date: glyph renders in light chipInk on dark fill.
+- 24h-vs-12h sanity: ref secondary and R243 gutter both 12-hour ⇒ 12-hour chosen; consistent.
+- Next: regression sweep (R240-R246 areas) while holds stand. Not DONE.

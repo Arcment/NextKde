@@ -5140,3 +5140,10 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Verify: build ok; relaunch light, `date` no-oped twice — **harness `Main.qml:221` reads `command.date`, NOT `value`** (recorded as load-bearing). Date 2026-04-02 then applied. r246-light.png: all timed chips show ring glyph + "8 – 8:45AM" / "10:15 – 10:30AM" / "11AM – 1PM" / "2:30 – 3:30PM" / "3 – 4:15PM"; 6× crops confirm glyph structure/tone/gap vs ref. r246-dark.png same date: glyph renders in light chipInk on dark fill.
 - 24h-vs-12h sanity: ref secondary and R243 gutter both 12-hour ⇒ 12-hour chosen; consistent.
 - Next: regression sweep (R240-R246 areas) while holds stand. Not DONE.
+
+## R247 (2026-10-17) — regression sweep #1 — PASS both legs, no code change
+- Next #1. Week view 1100×692 expanded, date 2026-04-02, light + dark. Spot-checked every area closed in R240-R246 against pinned values.
+- Light (r247-light.png; 2× chip crop _r247-light-chips2x.png; band crop _r247-light-band.png): chip height/title/stripe ✓; 1-item full-width vs 2-item halves with 2px gap, each half own tone (Wed 9AM, 11AM, 2PM) ✓; glyph ring+hands tone=gap=5 ✓; "8 – 8:45AM"/"9AM"/"10:15 – 10:30AM"/"11AM – 1PM"/"3 – 4:15PM" 12h + shared-period meridiem drop ✓; gutter two-tone baseline ✓; all-day band y-map + "+2" ✓; segment pill on 周 ✓.
+- Dark (r247-dark.png; 3× Wed crop _r247-dark-wed3x.png): glyph light chipInk on dark fill ✓; green/purple halves keep tones ✓; band ✓.
+- Verdict: zero regressions. Held items unchanged (H ring icon · Year word · R134 tooltip y · A/B dim+shadow).
+- Next: regression sweep #2 — day view light + collapsed-sidebar week dark.

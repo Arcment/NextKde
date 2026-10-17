@@ -1,14 +1,15 @@
-# R246 — TIMED-CHIP CLOCK GLYPH + 12-HOUR SECONDARY DONE (light+dark). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
+# R247 — REGRESSION SWEEP #1 PASS (week expanded light+dark, R240-R246 areas all match pinned values; no code change). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
 
-## 本轮 (R246)
-Atomic step: Next #1 — timed-chip secondary clock glyph (ref 2-hour chips read "🕐 11AM – 1PM"; ours was text-only).
-- **Ref measured** (`_r246_ref_glyph20x.png`): outlined clock ring 8×8 ref px, stroke ~1, hands 12+3, same ink as the secondary text (26,67,123 family); sits LEFT of the time text, gap 4 ref px, glyph bottom = digit baseline (glyph 8 tall vs digit cap 6).
-- **Changed** (via code-writer):
-  - `CalendarScheduleView.qml:950-999` — secondary Label → Row: clock-glyph Item 11×11 (ring radius 5.5 border 1.5 `timedChip.inkColor`, hand-to-12 Rectangle 1.5×4 at top-centre, hand-to-3 3.5×1.5 at right-centre), spacing 5, glyph `anchors.verticalCenter: secondaryLabel.verticalCenter`; visible clause + height≥34 unchanged; label `width: parent.width - 16`.
-  - `Main.qml:1308-1338` — new `formatClock12()`: 12-hour AM/PM, minutes only when nonzero, `12` not `0`; `itemSecondary` now returns e.g. "11AM – 1PM", drops the START meridiem when both ends share a period ("8 – 8:45AM", "12 – 2PM" ref style). All-day still returns "".
-- **Verified light** (r246-light.png, 2026-04-02): every timed chip shows the ring glyph + 12-hour range — "8 – 8:45AM", "10:15 – 10:30AM", "11AM – 1PM", "12PM", "2:30 – 3:30PM", "3 – 4:15PM", "4PM". Glyph tone = chip ink, gap/size read like the ref.
-- **Verified dark** (r246-dark.png, same date): glyph ring+hands render in light chipInk on dark chip fill; "11AM – 1PM" correct.
-- 12h-vs-24h sanity check: ref secondary AND R243 gutter are both 12-hour ⇒ 12-hour chosen. Consistent.
+## 本轮 (R247)
+Atomic step: Next #1 — regression sweep, week view 1100×692 expanded, date 2026-04-02, light+dark. NO code change.
+- **Light (r247-light.png + 2× crop _r247-light-chips2x.png, band crop _r247-light-band.png):**
+  - R240/R242 chips: height/title 11 top-aligned/stripe 3 all correct; 1-item full-width, 2-item halves with 2px gap (Wed 9AM "[UI] G…/Revie…", Wed 11AM "Long …/[R019…", Wed 2PM "Desig…/Prepa…" — each half keeps its own event tone).
+  - R241/R246 secondary: clock glyph ring+hands present, tone = chip ink, gap 5; "8 – 8:45AM" / "9AM" / "10:15 – 10:30AM" / "11AM – 1PM" / "3 – 4:15PM" — 12-hour with shared-period start-meridiem drop all correct.
+  - R243/R244 gutter: digit 11 + AM 8 two-tone, same baseline, ink centred on hour line.
+  - R106-R158 all-day band y-map: 全天 label, Multi-day span, Design sync/Release notes stack, R087 sole, "+2" overflow — all in place.
+  - Segment control 日/周/月 pill on 周; chrome/toolbar/mini-month normal.
+- **Dark (r247-dark.png + 3× Wed crop _r247-dark-wed3x.png):** glyph ring+hands render in light chipInk on dark fill; [R019] green and Prepa… purple halves keep own tones on dark fills; "3 – 4:15PM" correct; band/overflow fine.
+- Verdict: **PASS both legs, zero regressions found. Nothing fixed, nothing broken.**
 
 ## 仍差 (top 8, visual-impact order)
 1. **All-day BAND chip's icon — ours has NONE.** Ref 12×12 ring stroke 3 / hole 6. **Still blocked on ruling H.**
@@ -21,6 +22,7 @@ Atomic step: Next #1 — timed-chip secondary clock glyph (ref 2-hour chips read
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R247 — **Regression sweep #1: week expanded light+dark vs R240-R246 pinned values — PASS, no code change.** Chip stack/secondary+glyph/gutter/band y-map/segment all match.
 0. R246 — **Timed-chip clock glyph + 12-hour secondary.** `CalendarScheduleView.qml:950-999` Row(glyph 11×11 ring stroke 1.5 + hands 12/3, gap 5) ; `Main.qml:1308-1338` `formatClock12` + itemSecondary AM/PM with shared-period start-meridiem drop. Light+dark verified. CLOSED.
 0. R245 — R-MONTH verified, NO code change. Month view already cap-3/`+N`/clip (`CalendarMonthView.qml:97/154/96/131`); verified 1/2/3-chip at 692/920/1000 h, dark. CLOSED.
 0. R244 — R-GUTTER ink-centre fix. `CalendarScheduleView.qml:718` topMargin +4 ⇒ digit ink centred on the hour line. Light+dark. CLOSED.
@@ -28,7 +30,6 @@ Atomic step: Next #1 — timed-chip secondary clock glyph (ref 2-hour chips read
 0. R242 — T01 side-by-side (R-CHIP clause 3). `CalendarScheduleView.qml:805-940` chipHost + half-width lanes; `required property int index` at `:826`.
 0. R241 — R-CHIP clause 2: secondary line. `Main.qml:1301-1314` (now shifted) itemSecondary; `CalendarScheduleView.qml:28` accessor; wired `Main.qml:2654/2686`.
 0. R240 — R-CHIP clause 1: chip height `Math.round(hourHeight*0.96)`=38; title 11 Medium; stripe 3 literal.
-0. R239..R234 — holds (78th..73rd).
 *(older rounds archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
@@ -68,6 +69,6 @@ Atomic step: Next #1 — timed-chip secondary clock glyph (ref 2-hour chips read
 - **Fixtures on 2026-04-02** (`profile/pim/calendar.ics` under tmp/ui-acceptance/calendar/): VEVENTs 08:00/10:15/11:00/14:30/18:00 every day 2026-03-29…04-04 + `Multi-day review` all-day 0330→0403 + `R087 card C/D` (0402) + `R087 sole` (0403) + `Design sync`/`Release notes` all-day 0402; Wed also `Review checklist` 10:00 + 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]`. UID-ordered since R083. WTODOs: green 09:00, gold 12:00, red 16:00, long task 11:00, `[R019 LONGTASK]` 11:00. Week starts MONDAY. R139: fixture carries NO colour data. *(R246: live profile shows evolved fixtures — "Morning planning" 08:00–08:45, "Short appointme…" 10:15–10:30, "Long review with…" 11:00–13:00, gold 12:00, "Design review" 14:30–15:30, red 16:00; Wed-only 09:30 "Revie…" and 14:30 "Prepa…".)*
 
 ## Next round (pick ONLY #1)
-**#1 — No unblocked visual deltas remain: timed-chip glyph (R246), gutter (R244), chip stack (R242), month truncation (R245) all closed. All remaining items are ruling-blocked (H: all-day ring icon · `Year` segment word · R134 tooltip y · A/B dim+shadow). Next round = REGRESSION SWEEP: week view light+dark at 1100×692 expanded, spot-check the areas from 最近已改 R240-R246 (chip height/title/secondary/glyph, gutter two-tone, all-day band y-map, segment control) against their pinned values; fix only an actual regression, else record PASS and hold.**
+**#1 — Regression sweep #2 (different surfaces than R247): day view light @1100×692 expanded (timed chips + gutter + all-day band on the day layout), then collapsed-sidebar week dark spot-check of the same R240-R246 areas. Fix only an actual regression, else record PASS and hold. If both pass, subsequent rounds repeat sweeps on rotation (month view / mini-month / toolbar) or hold — do NOT invent new deltas; H/Year/tooltip-y/A/B stay ruling-blocked.**
 **Held items to re-list each round (per the ruling): all-day band ring icon (H) · segment 4th word `Year` · R134 tooltip y · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).**
 **Not `DONE` — H/Year/tooltip-y/A/B still ruling-blocked.**

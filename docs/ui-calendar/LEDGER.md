@@ -1,9 +1,10 @@
-# R140 — RULING-BLOCKED LIST REPORTED AND STOPPED. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+# R141 — RE-VERIFIED CLOSED ID R124 (timed chip radius 3) — PASS, light leg. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
 
-## 本轮 (R140)
-Atomic step: Next #1 of R139 — report the ruling-blocked list, do not act on it.
-- **The list (11 items) was delivered verbatim to the user and recorded in `rounds.md` R140:** 1. chip-height model (E02 fonts vs T01 two-per-cell) · 2. inset-and-stripe scale convention (G-class) · 3. band chip's ring icon (H) · 4. 12-hour two-tone gutter labels (F) · 5. month day cell `slice(0,2)` (D) · 6. dim snap (A) + shadow magnitude D03 (B) · 7. fourth `Year` segment + C05 label count · 8. popover `CloseOnEscape` + E03 clause 3 (E/C) · A01 spec literals vs ref's measured 1 (G) · R134's ToolTip y-discrepancy.
-- **No action on any item. No source change, no build, no screenshot.** code-writer still not registered.
+## 本轮 (R141)
+Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **R124, the timed chip's radius 3.**
+- Light leg, fresh relaunch. First batch used wrong keys (`value`) ⇒ MONTH/Oct; re-issued `{"action":"view","view":"week"},{"action":"date","date":"2026-04-02"}` (reconfirms R138's wrong-key rule).
+- **PASS:** Thu 08:00 chip fill x632..743 × y317..332 (byte-consistent with pinned); corner mask top row starts x633, row 2 x632 ⇒ radius 3 (5 would start x635, 1 flat); stripe reads as a 4-px hole x636..639 — independent stripe confirmation. Crop `r141-chip-corner-12x.png`.
+- **No source change, no build.** code-writer still not registered.
 
 ## 仍差 (top 8, visual-impact order — ALL ruling-blocked)
 1. **The timed chip's text block — E02's "title 11–12 medium, secondary 10–11" vs our 9/no-secondary.** Root cause is the **chip height** (16 on a 40 px hour = 0.40, vs the ref's 26 on 27 = 0.96), colliding with **T01**'s two-chips-per-cell. **Blocked on a ruling (chip-height model).**
@@ -17,8 +18,9 @@ Atomic step: Next #1 of R139 — report the ruling-blocked list, do not act on i
 - **ALL CLOSED (re-swept R138, both legs):** every plane/rule/separator token · A01/A02/A04 · L03 · L05 · A03 · T01/T02/T03 · M01-M04 · S02/S03/S05 · C01-C04/C06 · C05 · E01 4/4 · E02 column gap · N02 · the timed chip's radius · the two reds · the month title's ink · the month chevrons · **the itemColor base (blessed R139)**. Full text: `rounds.md` tail.
 
 ## 最近已改 (most recent 8)
-0. R140 — **report only, no source.** The 11-item ruling-blocked list delivered verbatim; nothing acted on.
-1. R139 — **verification only, no source.** Provenance settled: itemColor (61,174,233) = host Breeze SystemPalette.highlight; BLESSED; fixture + code exonerated.
+0. R141 — **verification only, no source.** R124 re-verified light leg: timed chip radius 3 PASS (corner mask x633/x632; geometry byte-consistent).
+1. R140 — **report only, no source.** The 11-item ruling-blocked list delivered verbatim; nothing acted on.
+2. R139 — **verification only, no source.** Provenance settled: itemColor (61,174,233) = host Breeze SystemPalette.highlight; BLESSED; fixture + code exonerated.
 1. R138 — **verification only, no source.** Full two-leg sweep PASS; itemColor drift found and bounded to DATA (blends exact on both legs).
 2. R137 — **verification only.** Dark rim under the dialog scrim settles at REST: x49 78 vs rest-pred 75.4; `hovered` FALSE logged post-release. Released-rim item CLOSED both legs.
 3. R136 — **verification only.** Released-rim settled by direct read; light rim 201 = rest 251×0.80; `escape` restores hover.
@@ -66,6 +68,6 @@ Atomic step: Next #1 of R139 — report the ruling-blocked list, do not act on i
 - **Fixtures on 2026-04-02** (live = `profile/pim/calendar.ics` under `tmp/ui-acceptance/calendar/`): VEVENTs **08:00 / 10:15 / 11:00 / 14:30 / 18:00 on EVERY day 2026-03-29…2026-04-04** (rendered at :00/:15 per the y-map) + **`Multi-day review` all-day `20260330`→`20260403`** + `R087 card C`/`card D` (`20260402`) + `R087 sole` (`20260403`) + `Design sync`/`Release notes` (all-day `20260402`). Wed also carries `Review checklist` (10:00 second chip) and 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]` (R138 re-read). UID-ordered since R083. WTODOs: `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00, `A deliberately long task title…` 11:00, **`[R019 LONGTASK]` 11:00**. **R128: THE WEEK STARTS MONDAY — Apr-2 week = Mon 30 (272) … Sun 5; Sun is the empty all-day column.** **R139: the fixture carries NO colour data; event itemColor comes from the HOST palette (blessed (61,174,233)).**
 
 ## Next round (pick ONLY #1)
-**#1 — NOTHING ACTIONABLE REMAINS. The sweep is COMPLETE both legs (R138) and the ruling-blocked list was REPORTED (R140). Every open item needs a ruling that has no channel; do not invent one and do not act on the list.** If this round must still run: pick one CLOSED id from the「ALL CLOSED」line, re-verify it on ONE leg with a single screenshot, record the result, and stop. Do not open new items.
+**#1 — NOTHING ACTIONABLE REMAINS. The sweep is COMPLETE both legs (R138) and the ruling-blocked list was REPORTED (R140). Every open item needs a ruling that has no channel; do not invent one and do not act on the list.** If this round must still run: pick one CLOSED id from the「ALL CLOSED」line (R124 done R141; pick a different one), re-verify it on ONE leg with a single screenshot, record the result, and stop. Do not open new items.
 **`code-writer` is STILL not registered (do not retry).** R097 used `general-purpose`; **R098-R140 were done inline.**
 **Not `DONE` — E02's two font clauses remain FAIL (ruling-blocked). The sweep itself is COMPLETE both legs (R138); the last open non-blocked item (itemColor provenance) closed R139; the ruling-blocked list was reported R140.**

@@ -5053,3 +5053,10 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - No source, no build, no screenshot, no re-verify (idle hold; per R161 note). Checkpoint stands: **blocked on a user ruling** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
 - 仍差 unchanged; sweep COMPLETE, every closed item twin-covered (R161). NOT DONE.
 - *(R224 archived from state.md window at R235: hold, nothing done (63rd consecutive); checked for rulings/spec updates — none since R222 (spec mtime unchanged; git head = R222 docs commit 6f06ade; git status apps/ empty). Checkpoint stood: blocked on a user ruling.)*
+
+## R236 (2026-10-17) — HOLD (75th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R235: NONE (spec.md mtime 2026-10-17 04:56 unchanged, predates the rounds; git head = R235 hold commit 78b85bb; .loop/ROUND = 236; git status apps/ empty).
+- No source, no build, no screenshot, no re-verify (idle hold; per R161 note). Checkpoint stands: **blocked on a user ruling** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+- 仍差 unchanged; sweep COMPLETE, every closed item twin-covered (R161). NOT DONE.
+- *(R225 archived from state.md window at R236: hold, nothing done (64th consecutive); checked for rulings/spec updates — none since R224 (spec mtime unchanged; git head = R224 docs commit 8817ff2; git status/diff apps/ empty). Checkpoint stood: blocked on a user ruling.)*

@@ -4696,3 +4696,15 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Chevron tone: 1-px AA stroke, cores (150..173) with peaks (157,157,157)/(173,173,173) — same shoulder-band situation R151 recorded for the light pin (156,156,156); geometry is the pin, and it holds.
 - Plane (40,40,40) EXACT = dark sidebar plane. 4x crop `r161-h-4x.png`: white bold title between two muted chevrons on the dark plane, muted weekday row below.
 - **PASS — R151's heading closed byte-consistent on the dark leg. With this, EVERY closed spec item now has both legs measured; the sweep is COMPLETE and no non-blocked work remains. Checkpoint: blocked on a user ruling (E02's two font clauses + the 11-item ruling-blocked list, reported R140).**
+
+## R162 — HOLD — no new rulings or spec updates since R161; checkpoint stands (nothing done, no source, no build, no re-verify)
+- Atomic step: Next #1 option (b). R161 already spent the session's one allowed idle re-verify; two idle rounds in a row = hold, not loop.
+- Ruling check: `spec.md` mtime 2026-10-17 04:56 — predates R161's 17:29 entry, no spec edit since. `.loop/DEADLINE` / `TASK.md` / `NOTICE-duplicate-loop.md` all mtime 2026-10-16. No new files, no ruling message, no uncommitted spec changes.
+- 仍差 unchanged — all 7 real entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Next: unchanged — hold; pick up the first unblocked item only if a ruling/spec update lands after R162.
+
+## R163 (2026-10-17) — HOLD (2nd consecutive), nothing done
+- Atomic step: Next #1 option (b) — hold the checkpoint. No source, no build, no screenshot, no re-verify.
+- Ruling check: `spec.md` mtime 2026-10-17 04:56 — unchanged since R162's check, still predates R161. `.loop/DEADLINE` 10-16 19:34 / `TASK.md` 10-16 20:40. Git head = R162 docs commit; only session artifacts (state.md/rounds.md/LEDGER.md/ROUND/health.state/pim-vm.log) touched. No ruling message anywhere.
+- 仍差 unchanged — all 7 real entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Next: unchanged — hold; pick up the first unblocked item only if a ruling/spec update lands after R163.

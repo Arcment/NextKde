@@ -5421,3 +5421,12 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - 修法 (交下轮): updateEventRange 插 `else if (activeView === "year")`: first=1/1, last=12/31 of selectedDate.getFullYear(). rebuild + 重启 + 驱动验证 (4/1–4/4 全点, 2025 无点).
 - 诊断技巧入册: 判"点"须纯色扫描 ((0,136,255) accent vs 数字 fringe (64,138,213)); selectedItems=itemsForDate(selectedDate) 是现成的探针.
 - Budget: bash 25/25, loop 0/2 (纯诊断). screenshots: r305a-month-apr / r305b-year / r305c-dots-mar / r305c-dots-apr / r305d-apr34 / r305e-apr2.
+
+## R307 (2026-10-18) — R-YEAR disc 泄漏修复 PASS
+- Atomic: state.md Next #1 (year view 选中 disc 泄漏到月外占位格). Loop 1/2, PASS.
+- Fix: code-writer 在 Main.qml yearDayCell `isSelected` 加 `yearDayCell.inMonth &&` 守卫 (一行, :2820). 占位格不再画 disc.
+- New gotcha: captureClient `path` 相对 app cwd (=repo root) — 截图落 /home/amao/nextkde/r307a.png; 以后 path 写 `tmp/ui-acceptance/calendar/…`.
+- Drive: relaunch light → resize 1280×800 → date 2026-04-02 → press/release segmentButton3 (724,50) → capture.
+- Verify (r307a.png): 四月 2 灰 disc+白字 ✓; 三月尾行 30/31 后空格无 disc (泄漏修复) ✓; dots 3/29–3/31、4/1–4/4 不回归, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓.
+- → R-YEAR step 1+2 全部闭环. Next: R-YEAR dark spot-check → dark spot-checks 合并 regression leg → light 最终回归 → DONE.
+- Screenshots: r307a.png (repo root, 应移入 tmp/). Bash ~13/25.

@@ -5333,3 +5333,5 @@ Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Y
 Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
 ## R284 (2026-10-18) — PLAIN HOLD
 Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+## R285 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.

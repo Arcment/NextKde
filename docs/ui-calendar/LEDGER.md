@@ -1,18 +1,14 @@
-# R248 — REGRESSION SWEEP #2 PASS (day view light + collapsed week dark, R240-R246 areas all match pinned values; no code change). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
+# R249 — REGRESSION SWEEP #3 PASS (month view light @1100×692 expanded: R-MONTH cap-1/+N/clip + mini-month + toolbar chrome — zero regressions, no code change). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
 
-## 本轮 (R248)
-Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: day view light @1100×692 expanded, then collapsed-sidebar week dark. NO code change.
-- **Day light (r248-day-light.png + 2× crop _r248-day-light-chips2x.png):**
-  - All-day band: 全天 label, Design sync/Release notes stack, `+2` overflow — correct y-map.
-  - Timed chips full-width: title top-aligned, secondary Row(glyph, gap 5) + Label 10; clock ring+hands in chipInk; 12-hour "8 – 8:45AM"/"10:15 – 10:30AM"/"11AM – 1PM"/"12PM"/"9AM" — shared-period meridiem drop correct.
-  - T01 side-by-side works in day view too: Thu 11:00 "Long review…" (blue) + "[R019 LONG TASK]…" (green) halves with 2px gap, each keeps own tone.
-  - Gutter two-tone: "7 AM"/"8 AM"… digit `AppTheme.text` + AM `mutedText`, same baseline, ink on hour line; pitch 40.
-  - Stripe 3, chip heights ≈38, per-event tones (blue/green/gold/red) correct.
-- **Week dark collapsed (r248-week-dark.png + crop _r248-week-dark-3x.png):**
-  - Sidebar collapsed (rim x0, gutter x1..51, separators pitch 150); segment pill on 周.
-  - Band: Multi-day span Mon–Wed, Design sync/Release notes Thu, R087 sole Fri, `+2`.
-  - Chip glyphs render light chipInk on dark fills; T01 halves Wed 9AM ("Revi…"/"9:3…") + Thu 11AM ("Long…"/"R019…"); Wed 2PM "Desig…/Prepa…"; secondaries correct.
-- Verdict: **PASS both legs, zero regressions found. Nothing fixed, nothing broken.**
+## 本轮 (R249)
+Atomic step: Next #1 — regression sweep #3, month view light expanded. NO code change.
+- Relaunch note: first drive reused R248's dark instance (capture came back (30,30,30)); launcher refuses when an owned instance is alive → killed pid, relaunched `start-review-vm.sh light`, re-drove resize 1100×692 / sidebar expanded / view month / date 2026-04-02.
+- **r249-month-light.png + r249-crops.png (2× cells / 2× mini-month / 1:1 chrome):**
+  - **R-MONTH areas PASS:** every event cell = exactly 1 chip + `+N` top-right (30→+8, 31→+8, 1→+11, 2→+13, 3→+8, 4→+7) — matches R245 pin at 1100×692 (1 chip + N); chips clipped to cell, stripe 3, radius ≈5, single-line elide; today cell (2) bordered + tinted.
+  - **Mini-month PASS:** heading `2026年4月` with two 28×28 buttons; MONDAY-first 7-col header; 6 rows 30/31/1…4/5/6/10; today+selected `2` grey disc; adjacent-month days muted. Matches R112/R115-R118/R144 pins.
+  - **Toolbar chrome PASS:** segment pill on 月 (3rd slot); heading `2026年4月` left, `< 今天 >` right; search/more buttons; window dots — matches R097/R127/R143 pins.
+  - Cell 21 hover `+` + tint in full shot = cursor hover artifact (pinned R245 hover behaviour), not a delta.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.**
 
 ## 仍差 (top 8, visual-impact order)
 1. **All-day BAND chip's icon — ours has NONE.** Ref 12×12 ring stroke 3 / hole 6. **Still blocked on ruling H.**
@@ -25,14 +21,14 @@ Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: 
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
-0. R248 — **Regression sweep #2: day light + collapsed week dark vs R240-R246 pinned values — PASS, no code change.**
+0. R249 — **Regression sweep #3: month light expanded (R-MONTH + mini-month + chrome) — PASS, no code change.**
+0. R248 — **Regression sweep #2: day light + collapsed week dark — PASS, no code change.**
 0. R247 — **Regression sweep #1: week expanded light+dark — PASS, no code change.**
 0. R246 — **Timed-chip clock glyph + 12-hour secondary.** `CalendarScheduleView.qml:950-999` Row(glyph 11×11 ring stroke 1.5 + hands 12/3, gap 5) ; `Main.qml:1308-1338` `formatClock12` + itemSecondary AM/PM with shared-period start-meridiem drop. Light+dark verified. CLOSED.
 0. R245 — R-MONTH verified, NO code change. Month view already cap-3/`+N`/clip. CLOSED.
 0. R244 — R-GUTTER ink-centre fix. `CalendarScheduleView.qml:718` topMargin +4 ⇒ digit ink centred on the hour line. CLOSED.
 0. R243 — R-GUTTER two-tone (ruling F). `CalendarScheduleView.qml:706-752` digit 11 `AppTheme.text` + AM/PM 8 `AppTheme.mutedText`, baseline-anchored, 12-hour.
 0. R242 — T01 side-by-side (R-CHIP clause 3). `CalendarScheduleView.qml:805-940` chipHost + half-width lanes; `required property int index` at `:826`.
-0. R241 — R-CHIP clause 2: secondary line. `Main.qml:1301-1314` (now shifted) itemSecondary; `CalendarScheduleView.qml:28` accessor; wired `Main.qml:2654/2686`.
 *(older rounds archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
@@ -41,13 +37,13 @@ Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: 
 - **THE SHARED AppTheme SINGLETON HAS NO labelPrimary/labelSecondary (R243, load-bearing).** `shared/qml/foundation/AppTheme.qml` offers `text` (:153, primary) and `mutedText` (:154, softer); labelPrimary/labelSecondary exist ONLY on Main.qml's `tahoe` object (:130-136). Referencing `AppTheme.label*` yields undefined ⇒ Label default black, SILENTLY.
 - **QT6 REQUIRED-PROPERTY DELEGATES RESOLVE UNDECLARED `index` AS UNDEFINED (R242, load-bearing).** Always declare `required property int index` alongside modelData when a Repeater delegate needs it.
 - **NEVER HAND-WRITE `harness/command.json` (R142/R143, load-bearing).** If clobbered, re-seed `{"sequence":0,"action":"none"}` and drive via `python3 review-command.py '<JSON list of objects>'`. **App fixtures live on 2026-04-02 — drive `date` there.**
-- **A STALE LIVE INSTANCE SERVES THE OLD BINARY (R241).** If `live-app.pid` predates the build, kill it and relaunch via `start-review-vm.sh`. The launcher resets `command.json` ⇒ re-issue resize/sidebar/view/date after every relaunch.
+- **A STALE LIVE INSTANCE SERVES THE OLD BINARY AND THE OLD THEME (R241/R249).** If `live-app.pid` predates the build OR the theme leg is wrong, kill the pid first — `start-review-vm.sh` refuses to start while an owned instance is alive (prints "Owned review instance still running" and exits 1) — then relaunch via `start-review-vm.sh light|dark`. The launcher resets `command.json` ⇒ re-issue resize/sidebar/view/date after every relaunch. Theme is fixed at launch (KOS_APPEARANCE) — there is no runtime theme action.
 - **AN EVENT'S itemColor IS ENVIRONMENT-DERIVED (host SystemPalette.highlight), PER-EVENT TONES DIFFER (R139/R148). Never pin a chip colour literal; scan colour-agnostically.**
 - **HARNESS / COMMAND / TOKEN RULES.** `review-command.py` takes ONE argv that is a JSON list OF OBJECTS. `pointer` kind only `press`/`release`/`move`. One command per write, 0.6 s sleep, in place (no atomic replace). **Capture = `captureClient` + ABSOLUTE `path`.** Pillow crops need ABSOLUTE paths. zlib level 0 ⇒ compare `md5sum`, never size. **`kill -0 $(cat live-app.pid)` FIRST.** Background-launch the script bare and poll the pid. Week starts MONDAY. App starts `--view week --date 2026-10-15` sidebar COLLAPSED. Console → `live-runtime-vm.log`. Actions: `resize`/`sidebar`/`view`/`date`/`position`/`wheel`/`flick`/`stop`/`openItem`/`windowWheel`/`pointer`/`pointerObject`/`inspect`/`inspectGeometry`/`runtimeInfo`/`scrollInfo`/`typeText`/`escape`/`nativeRecord`/`regionWheel`/`regionPosition`/`captureClient(path)` — pad with `{"action":"none"}`. **A static screenshot can never settle an animation.** Crops: 1:1 + 2–7× zoom in ONE read; `NEAREST` for pixel structure, `LANCZOS` for smooth upscale. **No `numpy`** — `PIL` `get_flattened_data()`. tmp/ gitignored; committable mirror `docs/ui-calendar/` with **`LEDGER.md` = byte copy of `state.md`**. **A `python3 -c` payload containing backticks is mangled — use a heredoc.**
 
 ## Pinned geometry (unchanged — derivations in rounds.md tail)
+- **MONTH VIEW (R245 dark / R249 light — both re-verified live, ruling D closed).** `CalendarMonthView.qml` never modified this loop. `visibleItemCount = max(0, min(3, floor((dayHeight − 36) / 20)))` (`:97`), chips 18 h spacing 2, slice `:154`, `clip: true` `:96`, `+N` top-right `:131-135`. dayHeight = (gridH − 30 − 18)/6; at window 1100×692 ⇒ 1 chip + `+N` (R249 light: 30→+8, 1→+11, 2→+13, 3→+8, 4→+7); 920 ⇒ 2; 1000 ⇒ 3. Grid: 7-col header 30 + 6 rows, cell padding 5/5, date-disc 24 radius 12, chip radius 5, stripe 3, font 9. Hover adds a 24×24 `+` KosToolButton. Bottom agenda panel ~172 tall.
 - **OUR TIMED-CHIP SECONDARY POST-R246 (light+dark): Row(glyph, spacing 5) + Label 10; glyph 11×11 ring radius 5.5 border 1.5 `timedChip.inkColor`, hands 12 (1.5×4 top-centre) + 3 (3.5×1.5 right-centre); visible when text ≠ "" and height ≥ 34. `itemSecondary` 12-hour: minutes only when nonzero, start meridiem dropped on shared period ("8 – 8:45AM", "11AM – 1PM").**
-- **MONTH VIEW (R245, dark, live evolved fixtures; ruling D closed).** `CalendarMonthView.qml` never modified this loop. `visibleItemCount = max(0, min(3, floor((dayHeight − 36) / 20)))` (`:97`), chips 18 h spacing 2, slice `:154`, `clip: true` `:96`, `+N` top-right `:131-135`. dayHeight = (gridH − 30 − 18)/6; at window 1100×692 ⇒ 1 chip + `+N`; 920 ⇒ 2; 1000 ⇒ 3. Grid: 7-col header 30 + 6 rows, cell padding 5/5, date-disc 24 radius 12, chip radius 5, stripe 3, font 9. Hover adds a 24×24 `+` KosToolButton. Bottom agenda panel ~172 tall.
 - **THE GUTTER HOUR LABELS (R066; two-tone R243, ink-centred R244 — CLOSED).** Two-tone 12-hour: digit font 11 `AppTheme.text`, meridiem font 8 `AppTheme.mutedText`, gap 3, SAME baseline; right anchor rightMargin 7 ⇒ ink right x264; pitch **40 exact**; topMargin = −round(digitText.implicitHeight/2) + 4 ⇒ digit ink CENTRE on the hour line. R159: label whose hour line IS the grid top rule is hidden — first visible band 07:00. Structure `CalendarScheduleView.qml:706-752`.
 - **TIMED CHIP POST-R242 (light): height 38 = `Math.round(hourHeight*0.96)`; top margin 3, text Column topMargin 2.** Title 11 Medium TOP-aligned; stripe 3 literal, stripeInset 3, capsule radius 1; radius 3, fill alpha 0.36 dark / 0.19 light, chipInk, opacity 0.5 completed.
 - **T01 SIDE-BY-SIDE (R242, light, expanded 1100x692): chipHost `Item { anchors.margins: 3 }` (`:814-940`), `visibleItems = cellItems.slice(0, 2)`.** Chip `width = (chipHost.width − (n−1)·2) / n`, `x = index·(width+2)`. Measured: 1 item ⇒ full 113; 2 ⇒ halves 55/56 with 2px gap. `>2` still capped at 2. **R248: works in DAY view too (Thu 11AM blue+green halves).**
@@ -56,7 +52,7 @@ Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: 
 - **THE `toolbarAdd` TOOLTIP — THEMED (R135).** `Main.qml:17-27`; fill bbox x26..97 × y68..95 byte-equal both legs; top 68 = button bottom 64 + 4 ⇒ BELOW (R134 y-discrepancy stays OPEN). Sites `Main.qml:880/:953/:1023/:1965`; delays `KosWindowControls.qml:25`, `KosSidebarToggle.qml:13`, `LiquidNavBar.qml:278`; style `ApplicationRunner.cpp:133`.
 - **THE TOOLBAR SEARCH FIELD (R129/R130/R154).** Opened: x736..1016 = 280w × y36..63; 280 = maxWidth cap (`:1814-1817`); left-edge-only animation `motionFast` 150ms OutCubic; LIGHT face #D2D2D2, focused border #0088FF, radius 14. ObjectNames: toolbarSidebarToggle 1721 · toolbarAdd 1739 · toolbarViewSegment 1752-1754 · toolbarSearchToggle 1791 · toolbarSearch 1811 · toolbarSearchInput 1897 · toolbarMore 1938.
 - **THE SEGMENT CONTROL (R097/R127/R143/R156 — PASS both legs).** Track x562..757 = 196, y36..63, centre 659.5; lens w 60. Tokens: `segmentTrack` white@0.06 dark / 0x787878@0.025 light; `segmentPill` #3C3C3C dark / #E7E7E7 light; `mutedTextColor: labelPrimary`.
-- **THE MINI MONTH, EXPANDED (R112/R115-R118/R144/R147/R151/R157/R160/R161 — PASS).** Cells 12..208; cellWidth 28, cellHeight 21; date-band tops = digit-ink tops; 18×18 discs; today (229,72,77), selected #8E8E93. Heading: two 28×28 buttons at centres 26/194; title font 13 DemiBold.
+- **THE MINI MONTH, EXPANDED (R112/R115-R118/R144/R147/R151/R157/R160/R161 — PASS; R249 light re-verified).** Cells 12..208; cellWidth 28, cellHeight 21; date-band tops = digit-ink tops; 18×18 discs; today (229,72,77), selected #8E8E93 (selected wins when today==selected). Heading: two 28×28 buttons at centres 26/194; title font 13 DemiBold.
 - **THE DARK CHROME AND DARK SIDEBAR LIST (R126).** Top band y0..29 planes (40,40,40)/(30,30,30); outer corner radius 30. Dots #28c840/#febc2e/#ff5f57 opacity 0.85, disc 14, gaps 14, centres 1022.5/1050.5/1078.49. Sidebar list: box 12×12 r3, pitch 30, label left 32, label 13/heading 11.
 - **THE SIDEBAR CATEGORY LIST (S02/S03, R121/R126/R149 PASS light).** Today row 44 + separator. Heading leftMargin 12 font 11 topMargin 16 bottomMargin 6. CategoryRow pitch 30; label 13 left 32; elide tail inset 12.
 - **THE ALL-DAY BAND'S Y-MAP — BOTH LEGS (R106/R107/R128/R142/R150/R158).** `sectionRule` y=155; interior 156..231 = 76; `allDaySeparator` 232-233; grid top rule 234. 0-row: interior 26, separator 182-183, rule 184. ⇒ band = 1 + 25N. Rules span x221..1099.
@@ -72,6 +68,6 @@ Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: 
 - **Fixtures on 2026-04-02** (`profile/pim/calendar.ics` under tmp/ui-acceptance/calendar/): VEVENTs 08:00/10:15/11:00/14:30/18:00 every day 2026-03-29…04-04 + `Multi-day review` all-day 0330→0403 + `R087 card C/D` (0402) + `R087 sole` (0403) + `Design sync`/`Release notes` all-day 0402; Wed also `Review checklist` 10:00 + 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]`. UID-ordered since R083. WTODOs: green 09:00, gold 12:00, red 16:00, long task 11:00, `[R019 LONGTASK]` 11:00. Week starts MONDAY. R139: fixture carries NO colour data. *(R246: live profile shows evolved fixtures — "Morning planning" 08:00–08:45, "Short appointme…" 10:15–10:30, "Long review with…" 11:00–13:00, gold 12:00, "Design review" 14:30–15:30, red 16:00; Wed-only 09:30 "Revie…" and 14:30 "Prepa…".)*
 
 ## Next round (pick ONLY #1)
-**#1 — Regression sweep #3 (rotation): month view light @1100×692 expanded (R-MONTH cap-3/+N/clip areas) + mini-month/toolbar chrome spot-check in the same pass; if it passes, hold — do NOT invent new deltas. H/Year/tooltip-y/A/B stay ruling-blocked.**
+**#1 — Regression sweep #4 (rotation): month view dark @1100×692 collapsed sidebar + bottom agenda panel spot-check (14项 rows, 全天 blue tabs, 添加/日程 right column); if it passes, hold — do NOT invent new deltas. H/Year/tooltip-y/A/B stay ruling-blocked.**
 **Held items to re-list each round (per the ruling): all-day band ring icon (H) · segment 4th word `Year` · R134 tooltip y · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).**
 **Not `DONE` — H/Year/tooltip-y/A/B still ruling-blocked.**

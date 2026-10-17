@@ -5073,3 +5073,33 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - No source edit, no build, no screenshot, no re-verify (idle hold; nothing new to measure).
 - Checkpoint stands: sweep COMPLETE both legs, every closed item twin-covered (R161); all of 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). NOT `DONE`.
 - state.md window rotated to R239..R231; R230 moved to rounds.md tail.
+
+## R240 — RULING LANDED; R-CHIP clause 1 + R-SCALE implemented and verified
+- **spec.md mtime jumped 04:56 → 22:50:48** — first change since R238. New section 「用户裁决（2026-10-17 22:55，人工拍板 — 立即生效，解除 hold）」 with four rulings: **R-CHIP** (chip height = round(hourHeight*0.96) ⇒ 38; title 11–12 medium; secondary 10–11; T01 side-by-side halves, never shrink/hide), **R-GUTTER/F** (12-hour two-tone: digits labelPrimary + smaller AM/PM same baseline; keep x263 anchor, 40 pitch, R159 top-row-hidden), **R-MONTH/D** (month cells stack 3 then +N, truncate not overflow), **R-SCALE/G** (ref-measured beats spec literal estimates, tie-break 7.5 直译优先; stripe ≈ 2.4×1.35 ≈ 3). Remaining held: ring icon (H), segment `Year`, R134 tooltip y, A/B dim+shadow — 保持 hold.
+- Implemented via code-writer in `CalendarScheduleView.qml`: chip height `Math.round(root.hourHeight*0.96)`=38 (`:824-827`); title `font.pixelSize: 11` + `Font.Medium` (`:899-901`); forced re-derivation `stripeWidth: 3` literal (old round(chipHeight/4) would have given 10) with R-SCALE comment (`:834-839`), `stripeInset = stripeWidth` unchanged.
+- Build OK (7 targets). Launch light, resize 1100x692, date 2026-04-02, capture `r240-light-week.png`.
+- **Verified (light):** 08:00 chip fill y317..354 = **38 exactly** (hour lines 314/354; top margin 3, bottom flush to next hour line ⇒ 38/40 = 0.95); consecutive chips 317/357/397/437/477 pitch 40. Stripe **x635..637 = 3 px** full-sat (61,174,233); fill inset 3 (fill from x632); title ink from x643 (= 3+3+5 margin), 11 Medium vertically centered, chipInk blue (`r240-chip08-4x.png`).
+- **Expected transitional break:** the 11:00 two-chip hour overflows — chip 2 lands y477..514 and garbles 12:00's slot. T01 side-by-side = next+1.
+- 仍差: E02 secondary line (no accessor yet — NEXT) · T01 side-by-side · R-GUTTER · R-MONTH · ring icon (H, blocked) · Year/tooltip-y/A/B (blocked).
+- state.md window rotated to R240..R233.
+
+## R241 — R-CHIP clause 2: timed chip SECONDARY line (time range) implemented and verified
+- Atomic step: Next #1 — E02's secondary clause.
+- **Ref evidence** (fresh crops of refs/macos-calendar.png): the secondary is the **TIME RANGE** — "🕐 11AM – 1PM" (small clock glyph + range, same chip-ink hue) under the title; ref 1-hour chips (26 px) show title ONLY, the secondary appears on the taller (2-hour) chip.
+- Implemented via code-writer:
+  1. `Main.qml:1301-1314` new `itemSecondary(item)`: all-day → ""; else start "HH:MM" (start/due), " – end" appended when the record's end carries T(HH:MM); todos render their due time.
+  2. `CalendarScheduleView.qml:28` accessor declaration `property var itemSecondary`.
+  3. TimedChip text block → Column: title 11 Medium TOP-aligned (topMargin 2; ref puts title near the top, never centred), secondary 10 regular below (spacing 1, same inkColor), visible when text ≠ "" and chip height ≥ 34.
+  4. Wired `itemSecondary: root.itemSecondary` into both `CalendarScheduleView` instances (`Main.qml:2654/2686`).
+- Build OK. The live instance was stale (22:55 pid, pre-build binary) — killed, relaunched (pid 2062778), resize 1100x692, date 2026-04-02, capture `r241-light-week.png`.
+- **Verified (light):** "Morning planning" chip — title ink from x645 near chip top (317+2), secondary "08:00 – 08:45" 10 px same blue ink below, bottom whitespace, nothing overflows y354; todos show due-only secondary ("09:00"); a 2-hour event reads "11:00 – 13:00"; stripe/fill/radius untouched. Half-hour line bleeds through the 0.19-alpha fill — pre-existing (r240 crop shows the same). T01 garble at 12:00 unchanged (transitional).
+- Notes: ref's 1-hour chips hide the secondary (no room at 26 px); ours shows it at 38 px — defensible under E02 (the ruling asks for the line; 38 px fits). The ref's clock glyph is NOT implemented — text-only this round, glyph listed in 仍差.
+- state.md window rotated to R241..R234.
+
+## R242 (2026-10-17 ~23:2x) — T01 side-by-side rework (R-CHIP clause 3) — PASS
+- Atomic step: state Next #1. Ref evidence: `.loop/refs/macos-calendar.png` crop x320-580 y195-275 (read once at 4× NEAREST): ref Wed column (406..487) 11AM row = "Art…" (≈409..447) + "Me…" (≈447..486) side by side, each ≈half column, full chip height, title-only, elided.
+- code-writer edit: `CalendarScheduleView.qml` hour-cell chip ColumnLayout (stacking, the garble source) → anchored `Item { id: chipHost; anchors.margins: 3 }` with `visibleItems = hourCell.cellItems.slice(0, 2)`; delegate `width: (chipHost.width − (n−1)·2)/n`, `x: index·(width+2)`, height 0.96·hourHeight unchanged; trailing layout spacer deleted; T01 comment added.
+- **Loop 1 FAIL (instructive):** built, relaunched, screenshot showed ZERO timed chips, no QML error, all-day band fine. Root cause: delegate declared `required property var modelData` but used the Repeater context `index` unqualified — Qt6 resolves it as `undefined` in required-property delegates ⇒ `x = NaN` ⇒ silently invisible. Fix: `required property int index` (`:826`). Loop 2 (the round's last) clean.
+- Verify (light 1100x692 expanded, `r242-light-week.png`): Wed 09:00 pair fills 513..567 + 570..625 (55/56 px, gap 2, inset 3) with stripes, elided titles, secondaries ("[UI] G… 09:00" / "Revie… 09:30"); Thu 11:00 pair "Long…"/"[R019…"; Wed 14:00 "Desig…"/"Prepa…"; singles full 113 (Mon fill 275..387); chip height 38 unchanged (317..354 / 357..393); **12:00 row clean in every column — R240's garble gone**.
+- Notes: `>2` same-hour still `slice(0,2)` (ruling silent; not invented). Half chips keep secondary at 38px (R241 accepted deviation). `sidebar` command key `open:true` errored (`Cannot assign [undefined] to bool`) though sidebar ended expanded — key unconfirmed. `inspectGeometry` key is `names` (array), not `objectName`.
+- Ledgered: R242 chipHost + half-width lanes + required-index fix. Next: R-GUTTER.

@@ -1,7 +1,7 @@
-# R278 — PLAIN HOLD round. No new ruling (spec.md mtime unchanged, 2026-10-17 22:50). No code change, no build. Regression sweep stays COMPLETE (10/10 legs). Ruling-blocked items (H/Year/tooltip-y/A-B) re-listed below.
+# R279 — PLAIN HOLD round. No new ruling (spec.md mtime unchanged, 2026-10-17 22:50). No code change, no build. Regression sweep stays COMPLETE (10/10 legs). Ruling-blocked items (H/Year/tooltip-y/A-B) re-listed below.
 
-## 本轮 (R278)
-Atomic step: Next #1 taken verbatim — **plain hold** (regression spot-checks exhausted: every view×theme×sidebar leg covered in R247–R251 + R272/R274/R275/R276/R277, all PASS). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B. No spot-check this round (per state.md Next #1: "plain hold rounds from here"). Nothing fixed, nothing broken, nothing invented.
+## 本轮 (R279)
+Atomic step: Next #1 taken verbatim — **plain hold**. Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B. No spot-check (sweep 10/10 exhausted, R277). Nothing fixed, nothing broken, nothing invented.
 - Verdict: HOLD. **When a ruling lands on H / Year / R134 tooltip-y / A-B dim+shadow, resume with it as the next atomic step.**
 
 ## 仍差 (top 8, visual-impact order)
@@ -15,6 +15,7 @@ Atomic step: Next #1 taken verbatim — **plain hold** (regression spot-checks e
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R279 — **PLAIN HOLD round (no new ruling; no code change, no build, no spot-check — sweep already 10/10).**
 0. R278 — **PLAIN HOLD round (no new ruling; no code change, no build, no spot-check — sweep already 10/10).**
 0. R277 — **HOLD round + regression spot-check #10 day dark collapsed PASS — REGRESSION SWEEP COMPLETE 10/10 (no new ruling; no code change).**
 0. R276 — **HOLD round + regression spot-check #9 day light collapsed PASS (no new ruling; no code change).**
@@ -23,7 +24,7 @@ Atomic step: Next #1 taken verbatim — **plain hold** (regression spot-checks e
 0. R273 — **HOLD round (no new ruling; no code change, no spot-check).**
 0. R272 — **HOLD round + regression spot-check week collapsed light PASS (no new ruling; no code change).**
 0. R271 — **HOLD round + regression spot-check week expanded light PASS (no new ruling; no code change).**
-*(older rounds archived in rounds.md tail — R270 holds back to R252; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
+*(older rounds archived in rounds.md tail — R271 HOLD + week expanded light re-PASS, back to R252; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
 
 ## 外推待确认 (live only)
 - **MONTH-CELL HOVER ARTIFACT (R275, load-bearing).** A full-cell light-blue fill + a BARE `+` top-right on a month cell with no chips = the hovered-cell highlight + quick-add button; it follows the pointer and lands wherever the pointer parked at launch (R274 dark: Apr 14; R275 light: Apr 15). Not data — never read it as an event day. To move the pointer use `{"action":"pointer","kind":"move","x":…,"y":…}`; the `position` action requires a week/day timeline and is REJECTED in month view ("No visible timeline for manual command") — a `position` re-test in month view silently changes nothing.
@@ -45,6 +46,6 @@ Atomic step: Next #1 taken verbatim — **plain hold** (regression spot-checks e
 - **Fixtures on 2026-04-02** (`profile/pim/calendar.ics` under tmp/ui-acceptance/calendar/): VEVENTs 08:00/10:15/11:00/14:30/18:00 every day 2026-03-29…04-04 + `Multi-day review` all-day 0330→0403 + `R087 card C/D` (0402) + `R087 sole` (0403) + `Design sync`/`Release notes` all-day 0402; Wed also `Review checklist` 10:00 + 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]`. UID-ordered since R083. WTODOs: green 09:00, gold 12:00, red 16:00, long task 11:00, `[R019 LONGTASK]` 11:00. Week starts MONDAY. R139: fixture carries NO colour data. *(R246: live profile shows evolved fixtures — "Morning planning" 08:00–08:45, "Short appointme…" 10:15–10:30, "Long review with…" 11:00–13:00, gold 12:00, "Design review" 14:30–15:30, red 16:00; Wed-only 09:30 "Revie…" and 14:30 "Prepa…".)*
 
 ## Next round (pick ONLY #1)
-**#1 — PLAIN HOLD round (repeat of R278): check spec.md mtime for a new ruling; if unchanged, no code change, no build, no spot-check. Re-list the ruling-blocked items. Spot-checks remain EXHAUSTED (10/10 legs, R277 closed the sweep). Do NOT invent deltas.**
+**#1 — PLAIN HOLD round (repeat of R279): check spec.md mtime for a new ruling; if unchanged, no code change, no build, no spot-check. Re-list the ruling-blocked items. Spot-checks remain EXHAUSTED (10/10 legs, R277 closed the sweep). Do NOT invent deltas.**
 **Held items to re-list each round (per the ruling): all-day band ring icon (H) · segment 4th word `Year` · R134 tooltip y · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03). When a ruling lands on any of these, resume with it as the next atomic step.**
 **Not `DONE` — H/Year/tooltip-y/A/B still ruling-blocked.**

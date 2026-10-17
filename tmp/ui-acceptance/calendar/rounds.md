@@ -5313,3 +5313,9 @@ No new ruling (spec.md mtime 2026-10-17 22:50 unchanged); no code change, no bui
 - Regression spot-checks remain EXHAUSTED: 10/10 legs (R247–R251 + R272 week-collapsed-light + R274 month-dark-expanded + R275 month-light-collapsed + R276 day-light-collapsed + R277 day-dark-collapsed) all PASS. Plain hold rounds from here per state.md Next #1.
 - Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
 - Verdict: HOLD. Nothing fixed, nothing broken, nothing invented. Resume only when a ruling lands.
+
+## R279 — PLAIN HOLD (no new ruling; no code change, no build, no spot-check)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow.
+- Regression spot-checks remain EXHAUSTED: 10/10 legs (R247–R251 + R272 week-collapsed-light + R274 month-dark-expanded + R275 month-light-collapsed + R276 day-light-collapsed + R277 day-dark-collapsed) all PASS. Plain hold rounds from here per state.md Next #1.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented. Resume only when a ruling lands.

@@ -4626,3 +4626,21 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Crops: `r154-c1.png`, `r154-field-3x.png`, `r154-c4.png`.
 - **PASS — R129/R130 search field closed, light leg byte-consistent. No source change, no build.**
 - Next: window dots DARK leg (R126 last measured; R153 covered light only).
+
+## R155 — window dots re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1272871). Drive: resize 1100x692 → capture `r155-dots-dark.png`. Crop `r155-dots-dark-5x.png` (1:1 strip + 5x NEAREST).
+- **Cores byte-EXACT: green (38,174,59) / yellow (220,164,44) / red (221,85,78) = #28c840/#febc2e/#ff5f57 @0.85 over band plane (30,30,30) — plane (30,30,30) EXACT.** Matches R126 pinned dark cores exactly.
+- **Geometry: row y=17 core runs 1016..1028 / 1044..1056 / 1072..1084 (13 px core, AA shoulder each side ⇒ disc 14); centres x 1022.5 / 1050.5 / 1078.5, pitch 28, gaps 14 ✓. Column core y11..23, shoulders y10/y24 ⇒ y-centre 17.5 — R153's light leg read 17; 1 px AA, not a conflict (R153 itself noted derivation 17.5).**
+- Verdict: R122/R126 window dots CLOSED both legs.
+- Archived from state.md: R147 entry — "M-group band tops re-verified light leg: PASS; pinned tops 561/582/603/624/645/666/688 reproduced (pitch 21); '545' = weekday-header centre; R144's conflict RESOLVED (units mislabel)."
+- Next: segment control DARK leg (R143 covered light only).
+
+## R156 — segment control re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare). Drive: resize 1100x692 → capture `r156-segment-dark.png`. Crop `r156-segment-dark-4x.png` (1:1 strip + 4x NEAREST).
+- **Track: exterior x562..757 = 196 w (rims 61-62 both ends), y36..63 = 28 h; interior fill 46-47 (pinned 47), vertical ramp 50→42 (col x580: 50…42) = pinned exactly.**
+- **Lens: rims x630/x689 (76) ⇒ lens w 60 ✓; fill ramp 76→59 (col x645: 76…59) = pinned; lens rim 76-77 vs pinned 77 ✓.**
+- **Label ink peaks: 日 236 / 周 242 / 月 233 — byte-EXACT vs pinned 236/242/233.** Ink 11 tall (y45..55); centres 596 / 660 / 723 (pinned 595.5/659.5/723.0). Note: single-row y50 peaks read lower (222/241/203) — the pinned figures are full-bbox maxima, which is how R097/R127 measured them.
+- Verdict: R097/R127 segment control CLOSED both legs (light R143, dark R156).
+- Archived from state.md: R154 entry — "Toolbar search field re-verified LIGHT leg: PASS — rect x736..1015 (280 w) × y36..63 (28 h), capsule r14, insets 12, face #D2D2D2 exact, focused border #0088FF exact, placeholder labelSecondary; gotcha: pointer kind:'click' is a silent no-op — use press+release."
+- Next: nothing non-blocked remains open; pick the next closed id for re-verification from the R156 state.md list or move to wrap-up.
+- Archived from state.md (R156 windowing): R148 entry — "T-group timed-chip y-map re-verified light leg: PASS — all 7 pinned chips reproduce (11:00b 454 vs 455, 1 px AA); extra 16:00 WTODO chip pitch-consistent; per-event colours ⇒ colour-agnostic scan required."

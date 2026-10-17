@@ -1,12 +1,13 @@
-# R150 — RE-VERIFIED CLOSED all-day BAND chip envelope (light leg) — PASS, byte-consistent. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+# R151 — RE-VERIFIED CLOSED mini-month heading (title ink + chevrons, light leg) — PASS. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
 
-## 本轮 (R150)
-Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the all-day BAND chip envelope, light leg**.
-- Light leg, fresh relaunch (pid 1178813; start script hit its known 120 s timeout, confirmed alive before driving). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r150-band-light.png`.
-- **At the clean row y=175 the EXACT-fill (222,241,251) runs are (274,625) / (631,744) / (750,863) — ALL THREE pinned envelopes reproduce byte-consistently** (merged Mon–Wed · Thu `Design sync` · Fri `R087 sole`). Edges: x272/629/748 = (237,237,237) AA shoulder then fill; x627/746/865 pure white ⇒ inset 1 from the separators holds. Fill tone exact at y158/160/168/175.
-- Row-1-only check: x400 (merged) and x800 (Fri) fill 157..180 only, white below. Band rules all present at x700: sectionRule y155 (242) · allDaySeparator y232 (217) · grid top rule y234 (237). Sat 867..984 / Sun 986..1099 = only the 249 weekend field ⇒ **Sun EMPTY holds**.
-- NOTE (not a conflict): Thu x700 carries a SECOND fill row 182..205 = `Release notes` (all-day 20260402) on band row 2; the pinned list describes row 1 (y156..181).
-- **PASS — envelope closed byte-consistent. No source change, no build.**
+## 本轮 (R151)
+Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the mini-month heading — title ink + chevron buttons, light leg**.
+- Light leg, fresh relaunch (pid 1198312; launcher exited 124 at its 150 s wrapper = known timeout, app alive). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r151-minimonth-light.png`.
+- **Title `2026年4月`: ink rows 519..531 = 13 tall (font 13 DemiBold ✓), cols x79..138, tone (0,0,0) pure black on the 255 field ✓ (pinned ink 0/255).** Weekday header 541..548 reproduced (context check).
+- **Chevrons: left `<` ink core x23..27 (x28 = AA shoulder), rows 519..528 = 10 tall; right `>` ink x190..195 (core x191..195), rows 520..528 = 9 tall — pinned 5×9–10 at x23..27 / x191..196 reproduced within 1 px AA.** Ink centres (25.5, 523.5) / (192.5, 524) vs pinned button centres 26/194 — AA-level.
+- Tone NOTE (not a conflict): the arrows are a 1-px AA stroke — core 114..131, shoulder 150..175; the pinned (156,156,156) sits in the shoulder band (an AA-sampled reading of the same stroke). Geometry byte-consistent.
+- 4x crop `r151-heading-4x.png` visually confirms: bold black title centred, muted chevrons both sides, muted weekday row below.
+- **PASS — mini-month heading closed byte-consistent. No source change, no build.**
 
 ## 仍差 (top 8, visual-impact order — ALL ruling-blocked)
 1. **The timed chip's text block — E02's "title 11–12 medium, secondary 10–11" vs our 9/no-secondary.** Root cause is the **chip height** (16 on a 40 px hour = 0.40, vs the ref's 26 on 27 = 0.96), colliding with **T01**'s two-chips-per-cell. **Blocked on a ruling (chip-height model).**
@@ -17,18 +18,18 @@ Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: 
 6. **Dim snaps while the card animates** (`KosWorkspaceDialog.qml:24-27`) + **shadow magnitude (D03)**. App-wide. **Blocked on rulings A and B.**
 7. **The ref's segment carries a 4th word `Year`; C05's label COUNT.** **Both ruling-blocked.**
 8. **E/C = popover `CloseOnEscape` + E03 clause 3; G = A01's spec literals vs the ref's measured 1; R134's ToolTip y-discrepancy (theming settled, position open).** **All ruling-blocked.**
-- **ALL CLOSED (re-swept R138, both legs):** every plane/rule/separator token · A01/A02/A04 · L03 · L05 · A03 · T01/T02/T03 · M01-M04 · S02/S03/S05 · C01-C04/C06 · C05 · E01 4/4 · E02 column gap · N02 · the timed chip's radius · the two reds · the month title's ink · the month chevrons · the itemColor base (blessed R139) · the mini-month band tops (R147) · the T-group timed-chip y-map (R148) · the S-group sidebar list (R149) · **the all-day band chip envelope (R150)**. Full text: `rounds.md` tail.
+- **ALL CLOSED (re-swept R138, both legs):** every plane/rule/separator token · A01/A02/A04 · L03 · L05 · A03 · T01/T02/T03 · M01-M04 · S02/S03/S05 · C01-C04/C06 · C05 · E01 4/4 · E02 column gap · N02 · the timed chip's radius · the two reds · the month title's ink · the month chevrons · the itemColor base (blessed R139) · the mini-month band tops (R147) · the T-group timed-chip y-map (R148) · the S-group sidebar list (R149) · the all-day band chip envelope (R150) · **the mini-month heading (R151)**. Full text: `rounds.md` tail.
 
 ## 最近已改 (most recent 8)
-0. R150 — **verification only, no source.** All-day band chip envelope re-verified light leg: PASS — exact-fill runs 274..625 / 631..744 / 750..863 byte-consistent, fill (222,241,251) exact, Sun empty; Thu row 2 = `Release notes` (noted, no conflict).
-1. R149 — **verification only, no source.** S-group sidebar list re-verified light leg: PASS — separator/Today row/pitch 30/box 12×12/radius 3/label left 32 all byte-consistent.
-2. R148 — **verification only, no source.** T-group timed-chip y-map re-verified light leg: PASS — all 7 pinned chips reproduce (11:00b 454 vs 455, 1 px AA); extra 16:00 WTODO chip pitch-consistent; per-event colours ⇒ colour-agnostic scan required.
-3. R147 — **verification only, no source.** M-group band tops re-verified light leg: PASS; pinned tops 561/582/603/624/645/666/688 reproduced (pitch 21); "545" = weekday-header centre; R144's conflict RESOLVED (units mislabel).
-4. R144 — **verification only, no source.** M-group selected disc PASS byte-consistent (#8E8E93 exact · 18×18 · circle profile · white digit · Thu col centred).
-5. R143 — **verification only, no source.** R097/R127 re-verified light leg: segment track/lens/ink PASS byte-consistent (track x562..757 y36..63 · 250/222/232/233 · ink 8/0/12).
-6. R142 — **verification only, no source.** R128 re-verified light leg: band y-map/tones PASS (155=242 · 232-233=217 · 234=237 · weekend 249; interior 76).
-7. R141 — **verification only, no source.** R124 re-verified light leg: timed chip radius 3 PASS (corner mask x633/x632; geometry byte-consistent).
-- *(R140 and earlier archived to `rounds.md` tail.)*
+0. R151 — **verification only, no source.** Mini-month heading re-verified light leg: PASS — title 13-tall pure-black ink x79..138 rows 519..531; chevrons 5×9–10 at pinned x-ranges within 1 px AA; arrow tone = AA shoulder reading of the 1-px stroke (pinned 156 in shoulder, core 114-131).
+1. R150 — **verification only, no source.** All-day band chip envelope re-verified light leg: PASS — exact-fill runs 274..625 / 631..744 / 750..863 byte-consistent, fill (222,241,251) exact, Sun empty; Thu row 2 = `Release notes` (noted, no conflict).
+2. R149 — **verification only, no source.** S-group sidebar list re-verified light leg: PASS — separator/Today row/pitch 30/box 12×12/radius 3/label left 32 all byte-consistent.
+3. R148 — **verification only, no source.** T-group timed-chip y-map re-verified light leg: PASS — all 7 pinned chips reproduce (11:00b 454 vs 455, 1 px AA); extra 16:00 WTODO chip pitch-consistent; per-event colours ⇒ colour-agnostic scan required.
+4. R147 — **verification only, no source.** M-group band tops re-verified light leg: PASS; pinned tops 561/582/603/624/645/666/688 reproduced (pitch 21); "545" = weekday-header centre; R144's conflict RESOLVED (units mislabel).
+5. R144 — **verification only, no source.** M-group selected disc PASS byte-consistent (#8E8E93 exact · 18×18 · circle profile · white digit · Thu col centred).
+6. R143 — **verification only, no source.** R097/R127 re-verified light leg: segment track/lens/ink PASS byte-consistent (track x562..757 y36..63 · 250/222/232/233 · ink 8/0/12).
+7. R142 — **verification only, no source.** R128 re-verified light leg: band y-map/tones PASS (155=242 · 232-233=217 · 234=237 · weekend 249; interior 76).
+- *(R141 and earlier archived to `rounds.md` tail.)*
 
 ## 外推待确认 (live only)
 - **NEVER HAND-WRITE `harness/command.json` (R142/R143, load-bearing).** A bare list breaks review-command.py (`list indices must be integers`); the app reads ONE object with a `sequence` field. If clobbered, re-seed `{"sequence":0,"action":"none"}` and drive via `python3 review-command.py '<JSON list of objects>'`. Wrong keys: `view` action takes key **`view`** (not `name`), `date` takes **`date`** (not `value`) — a wrong key silently sets `viewIndex = −1` (MONTH).
@@ -68,6 +69,6 @@ Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: 
 - **Fixtures on 2026-04-02** (live = `profile/pim/calendar.ics` under `tmp/ui-acceptance/calendar/`): VEVENTs **08:00 / 10:15 / 11:00 / 14:30 / 18:00 on EVERY day 2026-03-29…2026-04-04** (rendered at :00/:15 per the y-map) + **`Multi-day review` all-day `20260330`→`20260403`** + `R087 card C`/`card D` (`20260402`) + `R087 sole` (`20260403`) + `Design sync`/`Release notes` (all-day `20260402`). Wed also carries `Review checklist` (10:00 second chip) and 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]` (R138 re-read). UID-ordered since R083. WTODOs: `[UI] Green planning` 09:00, `[UI] Gold review` 12:00, `[UI] Red review` 16:00, `A deliberately long task title…` 11:00, **`[R019 LONGTASK]` 11:00**. **R128: THE WEEK STARTS MONDAY — Apr-2 week = Mon 30 (272) … Sun 5; Sun is the empty all-day column.** **R139: the fixture carries NO colour data; event itemColor comes from the HOST palette (blessed (61,174,233)).** *(R148: WTODOs render their own hues — green/gold/red. R150: Thu band = `Design sync` row 1 + `Release notes` row 2.)*
 
 ## Next round (pick ONLY #1)
-**#1 — re-verify ONE more CLOSED id on ONE leg, single screenshot: the month view's title ink + chevron buttons (closed: "the month title's ink · the month chevrons"), light leg** — title font 13 DemiBold / ink 0/255; chevrons = two 28×28 buttons at centres 26/194, arrow ink 5×9–10 at x23..27/x191..196 tone (156,156,156). Single capture, dark-ink row/col profile in the heading region, record, stop. Re-verified already: R124 (R141), R128 (R142/R150), R097/R127 (R143), M-disc (R144), band tops (R147), T-group y-map (R148), S-group (R149) — pick something else next time.
-**`code-writer` is STILL not registered (do not retry).** R097 used `general-purpose`; **R098-R150 were done inline.**
+**#1 — re-verify ONE more CLOSED id on ONE leg, single screenshot: the gutter label right-anchor (R066: font 11, right-anchored, rightMargin 7), light leg** — drive to 2026-04-02 week, scan the gutter (x ≥ 3) for label ink: right edges should land at 51−7 = x44, ink 8 tall at the hour pitch 40. Single capture, record, stop. Re-verified already: R124 (R141), R128 (R142/R150), R097/R127 (R143), M-disc (R144), band tops (R147), T-group y-map (R148), S-group (R149), band envelope (R150), mini-month heading (R151) — pick something else next time.
+**`code-writer` is STILL not registered (do not retry).** R097 used `general-purpose`; **R098-R151 were done inline.**
 **Not `DONE` — E02's two font clauses remain FAIL (ruling-blocked). The sweep itself is COMPLETE both legs (R138); the last open non-blocked item (itemColor provenance) closed R139; the ruling-blocked list was reported R140.**

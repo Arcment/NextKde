@@ -1,52 +1,53 @@
-# R302 — R-YEAR step 1 DONE: 4th Year segment (width 228 → slot pitch 56 = ref), non-dead year skeleton. Next: R-YEAR step 2.
+# R304 — R-YEAR step 2: ①③ PASS (day-click select 双态 / ‹ 导航), ② event dots 未渲染. Next: 查 dots.
 
-## 本轮 (R302)
-Atomic step: **R-YEAR step 1 — segmented control gains 4th `Year` segment wired to a minimal year view skeleton (state.md Next #1).**
-- **Code (all `apps/calendar/qml/Main.qml`, via code-writer):** `segmentWidth` 196→224→**228** (final; 224 gave pitch 55 vs ref 56.0 — fixed in 2nd loop); comment 228x28; `activeView` adds "year" (viewIndex 3, mapping 0=month/1=week/2=day/3=year, segment mirror `i<=2 ? 2-i : 3`); `headerTitle` year branch → `String(visibleMonth.getFullYear())`; `shiftView` year branch (±1 year, visibleMonth → Jan 1, early return); `labels` + `qsTr("Year")`; KosPageCache `pages` + yearPage.
-- **yearPage skeleton (~:2735-2848):** 3×4 GridLayout, 12 ItemDelegate month cells (MMMM label + 7×6 mini-grid of 42 day cells, offset via `localeFirstDayOfWeek`, today disc `selectionDisc` + white DemiBold, day font 9 / month label 12 DemiBold). `onClicked` → selectedDate=monthStart, visibleMonth=monthStart, **viewIndex=0** (routes to month view ⇒ segment+cells non-dead). No event dots / day-cell selection yet (step 2).
-- **Live verify (light 1280×800, collapsed):** track 528..751 = 内容区 224 ⇒ **slot pitch 56 = ref 56.0**; capsule centre ≈639.5 = window centre (重新居中 ✓); pill W 52 / h 24 = ref 51–52.4 / 24; r ≈11.5 目测 ✓. Click (724,50) press→release → pill on Year, title "2026", 12-month grid renders, today (10-18) disc in 十月. `r302b-year.png` / `r302b-capsule-4x.png`.
-- **Focus ring note:** after click the pill shows a 2px blue focus ring — Qt focus visualization, ref static image has no click state; not a defect (existing 3-segment behavior, unchanged).
-- **Loop budget used: 2/2** (loop 1 = 224 build, pitch 55 found; loop 2 = 228, pitch 56 ✓). Stop per discipline.
+## 本轮 (R304)
+Atomic step: **R-YEAR step 2 — day-cell 选中双态 + event dots + year 导航 (state.md Next #1).**
+- **Code (`apps/calendar/qml/Main.qml` yearPage ~2749-2866, via code-writer):** yearDayCell 增 `isSelected`(`root.sameDay`) + `eventCount`(`root.itemsForDate`); disc 三态 `isToday ? AppTheme.todayRed(#E5484D) : (isSelected ? selectionDisc : transparent)`; label 白字/DemiBold 同步; 3×3 accent dot (anchors.bottom, **外推**, 无参考); 末位 MouseArea (inMonth-gated, onClicked=selectedDate, 不路由). month-cell ItemDelegate onClicked(→month view) 未动.
+- **⚠️ STALE-INSTANCE 陷阱 (load-bearing):** 本轮第一次截图全部作废 — `start-review-vm.sh` 启动时旧实例仍在跑, live-runtime-vm.log 里还留着 R302 的 capture 行; 旧二进制表现出「today disc 灰 / 点 day 跳 month view」全与旧代码一致. **规则: rebuild 后重启, 必须先 `grep -a capture live-runtime-vm.log` 确认无旧轮记录再驱动.** kill 旧 pid (live-app.pid / `pgrep -f watch-qml`) 后重启即好.
+- **Live verify (light 1280×800 collapsed, fresh instance):**
+  - ① 点 (219,710)=十月15 → **留在 year view**; p15 disc=(142,142,147)=selectionDisc, p18=(229,72,77)=todayRed #E5484D. today 红优先、selected 灰次之, 双态 ✓ (`r304c-year.png`/`r304d-select15.png`).
+  - ③ `pointer target:"dateNavPrevious"` press→release (1163,94) → 标题 **2025**, 12 个月网格换 2025 布局 (1/1=周四), 灰 disc 随 shiftView year 分支落到 2025-10-15. **shiftView year 分支 live 验证 ✓** (`r304e-prev.png`). › 同一对称分支未单独点 (对称).
+  - ② **event dots 未渲染**: 四月 1/2/3 (fixtures 0329–0403 应有事件) 无任何 dot 像素 (NEAREST 放大确认; 前次"蓝像素"是数字子像素彩边, 误报).
+- **Loop budget: 2/2** (loop1 全耗在 stale instance 排查; loop2 fresh 验证). Bash 25/25, 到顶收工.
 
 ## 仍差 (top 8, visual-impact order)
-1. **R-YEAR step 2: year view = 12 个月网格 from mini-month 组件 — day-cell click selects, event dots per day, year nav (‹ › shift ±1 year 已有 shiftView 分支，未 live 验证).** ← NEXT #1
-2. R-YEAR dark spot-check (fold into regression leg after step 2).
-3. R-DIM mid-EXIT frame — 120ms InCubic vs 100ms poll + ~100ms capture latency. LOW value: consider accepting and marking R-DIM PASS.
-4. R-H dark-theme spot-check (fold into next regression leg).
-5. R-OVERFLOW dark spot-check (fold into next regression leg).
-6. R-DIM dark spot-check (fold into next regression leg).
-7. *(reserved)*
+1. **R-YEAR step 2 收尾 — event dots 不渲染, 先查数据再查绑定:** 先 `date`→2026-04-02 + view month 确认 fresh VM 里 pim 确有 4/1–4/3 fixtures (若 month view 也没 chip = VM 无数据/ICS 未播种, 与 dots 无关); 有数据则查 eventCount 绑定时机 (yearPage 懒实例化 vs pim.occurrences 到达顺序; `itemsForDate` 读 `itemsByDate` 属性, 理论上响应式, 但需 live 复查). 另: dot anchors.bottom 落在 18px cell 底缘, 与下行视觉间距需目测. ← NEXT #1
+2. R-YEAR step 3 (可选): dot 样式/间距对齐 ref (ref 无 year 参考图 → 全部按 7.1 外推待确认).
+3. R-YEAR dark spot-check (fold into regression leg).
+4. R-DIM mid-EXIT frame — 120ms InCubic vs 100ms poll. LOW value: consider accepting, mark R-DIM PASS.
+5. R-H dark spot-check (fold into regression leg).
+6. R-OVERFLOW dark spot-check (fold into regression leg).
+7. R-DIM dark spot-check (fold into regression leg).
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
-0. R302 — **R-YEAR step 1: 4th Year segment (segmentWidth 228, pitch 56) + non-dead yearPage 3×4 skeleton; viewIndex 3=year.**
-0. R301 — no code change; R-TOOLTIP-Y closed (ref 无 tooltip; live below+4 byte-equal R135). driver: argv[1]-only gotcha.
-0. R300 — no code change; R-DIM mid-enter CONFIRMED (scrim 211 mid / 204 settled / 255 pre). pointer "click" is a no-op — press→release required; fast-command gap ≥0.12.
-0. R299 — no code change; attempt blocked; openItem flat-schema finding.
-0. R298 — **R-DIM: scrim alpha × revealProgress (220 OutCubic / 120 InCubic, reduceMotion instant).**
-0. R297 — **R-OVERFLOW: timed same-hour max 3 columns + plain `+N`. PASS light.**
+0. R304 — **R-YEAR step 2: day-cell 选中 (todayRed/selectionDisc 双态) + MouseArea 留 year view + event dots (未渲染, 见仍差#1) + ‹› year 导航验证.**
+0. R302 — **R-YEAR step 1: 4th Year segment (segmentWidth 228, pitch 56) + yearPage 3×4 skeleton; viewIndex 3=year.**
+0. R301 — no code; R-TOOLTIP-Y closed. driver: argv[1]-only gotcha.
+0. R300 — no code; R-DIM mid-enter CONFIRMED. pointer "click"=no-op; fast-command gap ≥0.12.
+0. R299 — no code; blocked; openItem flat-schema finding.
+0. R298 — **R-DIM: scrim alpha × revealProgress (220 OutCubic / 120 InCubic).**
+0. R297 — **R-OVERFLOW: timed same-hour max 3 cols + `+N`. PASS light.**
 0. R296 — **R-H ring icon on all-day band chips. PASS light.**
-0. R295 — plain hold. 0. R294 — plain hold.
-*(older: R293/R292/R291/R290/R277… archived in rounds.md tail)*
+*(older: R295/R294/R293/R292/R291/R290/R277… archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
-- **YEAR SEGMENT MAPPING (R302, load-bearing): viewIndex 0=month/1=week/2=day/3=year; segment i→`2-i` (i≤2) else 3. Harness `view` action (`harness/Main.qml:217-219`) still maps ONLY month/week/day — driving to year requires pointer press→release on the Year slot (light 1280×800 collapsed: slot centres ≈556/612/668/724, y≈50).** Ctrl+4 not wired (deliberate, step-2 scope).
-- **REVIEW-COMMAND ARGV (R301, load-bearing): `review-command.py` parses ONLY `sys.argv[1]`. Pass the whole batch as ONE JSON array argument; separate argv objects are silently ignored.**
-- **POINTER KINDS (R300, load-bearing): only `press` / `release` / `move` exist (ReviewInput.cpp:74-83). `"click"` = bare MouseMove, SILENT NO-OP. Any button activation = press cmd then release cmd at same coords.**
-- **FAST-COMMAND GAP (R300, load-bearing): ≥0.12 strictly. Commands written <100ms apart get skipped (single command.json + 100ms poll).**
-- **DIALOG COORDS (current 1280×800 collapsed layout, R300): popover 编辑 pill center (763,491); 编辑日程 取消 (647,650); popover opened via flat openItem. 取消 closes BOTH dialog and popover → plain day view. escape does NOT close dialog.**
-- **R-DIM MEASURED (R300): scrim at (950,120) over white — pre 255, mid-enter 211, settled 204, after exit 255. Enter 220 OutCubic confirmed live; exit completes but 120ms mid-frame uncapturable with current poll+latency.**
-- **OPENITEM SCHEMA (R299, load-bearing): `{"action":"openItem","kind":"event","titleContains":"Morning"}` — FLAT keys (harness/Main.qml:225). Nested {"item":…} no-ops.**
-- **DRIVE KEYS (load-bearing): `date` key `date`; `sidebar` key `expanded`; `view` key `view`. Shared `AppTheme` has `text`/`mutedText`, NO labelPrimary/Secondary. QT6 delegates: `required property int index`. motionNormal=220, motionFast=120, 0 under reduceMotion.**
-- **NEVER hand-write `harness/command.json`; re-seed `{"sequence":0,"action":"none"}` if clobbered. Capture = `captureClient` + ABSOLUTE path. Launcher resets command.json ⇒ re-issue resize/sidebar/view/date after relaunch. Theme fixed at launch. start-review-vm.sh never exits — background it, seed AFTER pid. Restart after rebuild: kill the `kos-calendar --watch-qml` pid (pkill -f kos-calendar REFUSES — matches the claude loop process itself).**
-- **ICS EDITING GOTCHA (R297): insert new VEVENTs AFTER a complete `END:VEVENT`; re-add `BEGIN:VEVENT\nUID:` yourself. `replaceExisting=true` wipes todos — re-create the trio.**
-- **THIS RUN'S GRID GEOMETRY (collapsed sidebar, day view): week MONDAY. App starts `--view week --date 2026-10-15` collapsed; fixtures on 2026-04-02 — drive `date` there.**
-- **OUR TOKENS. `CalendarScheduleView.qml:95-112`: gridLine (#EDEDED / white@0.13), gridLineMinor (#F4F4F4 / white@0.06), allDaySeparator (#D9D9D9 / white@0.24), sectionRule (#F2F2F2 / white@0.04). Schedule field WHITE light / (30,30,30) dark. Weekend 249/37. Sidebar plane (228,228,228).**
+- **STALE INSTANCE (R304, load-bearing): 重启后必须核对 live-runtime-vm.log 无旧 capture 行; 旧实例会静默顶替新启动, 表现=旧代码行为.**
+- **YEAR SEGMENT MAPPING (R302, load-bearing): viewIndex 0=month/1=week/2=day/3=year; segment i→`2-i` (i≤2) else 3. Harness `view` action 只映射 month/week/day — 进 year 须 pointer press→release Year slot (light 1280×800 collapsed: slot centres ≈556/612/668/724, y≈50).**
+- **YEAR NAV (R304): `pointer target:"dateNavPrevious"/"dateNavNext"` 可用, 无需坐标; press→release 各一条.**
+- **REVIEW-COMMAND ARGV (R301): 整批命令作为一个 JSON 数组传 argv[1]; review-command.py 每条 sleep 0.6 已满足 ≥0.12 gap.**
+- **POINTER KINDS (R300): 只有 press/release/move; "click"=静默 no-op.**
+- **DIALOG COORDS (R300, 1280×800 collapsed): popover 编辑 pill (763,491); 取消 (647,650); escape 不关 dialog.**
+- **DRIVE KEYS: `date` key `date`; `sidebar` key `expanded`; `view` key `view`. QT6 delegates: `required property int index`. motionNormal=220, motionFast=120.**
+- **NEVER hand-write `harness/command.json`; re-seed `{"sequence":0,"action":"none"}` if clobbered. Launcher resets command.json ⇒ relaunch 后重发 resize/sidebar/view/date. Theme fixed at launch. start-review-vm.sh never exits — background it, seed AFTER pid. Restart after rebuild: kill `kos-calendar --watch-qml` pid (pkill -f kos-calendar 会误杀 claude loop 自身).**
+- **ICS EDITING GOTCHA (R297): 新 VEVENT 插在完整 `END:VEVENT` 之后; `replaceExisting=true` 会清 todos.**
+- **THIS RUN'S GRID (collapsed, day view): week MONDAY. App starts `--view week --date 2026-10-15` collapsed; fixtures 2026-04-02 — drive `date` 过去.**
+- **OUR TOKENS. `CalendarScheduleView.qml:95-112`: gridLine #EDEDED/white@0.13, minor #F4F4F4/0.06, allDaySep #D9D9D9/0.24, sectionRule #F2F2F2/0.04. Sidebar plane (228,228,228). AppTheme.todayRed=#E5484D (`shared/qml/foundation/AppTheme.qml:87`).**
 - **`hourHeight` THE pitch (`:53`). Chip 38, half-hour 20. Ref timed chip: pitch 27; fill (222,237,254); bar (59,134,247) 2.4px; ink (26,67,123); radius ≈2. Ref gutter two-tone. Ref all-day: pitch 19; radius ≈6 alpha ≈0.16.**
-- **Fixtures (R297): days 0329–0403 Morning planning 08:00–08:45, Short appointment 10:15–10:30, Long review 11:00–13:00, Design review 14:30–15:30, Evening session 18:00–19:30; Thu 04-02 ALSO Overflow one/two/three @08:00. Todos: Review checklist 04-01 09:30 (personal), Prepare notes 04-01 14:30 (inbox), long-task-title 04-02 11:00 (personal). itemColor env-derived — never pin chip colours.**
-- **Crops: 1:1 + zoom in ONE read; `NEAREST` structure / `LANCZOS` smooth. No `numpy`. tmp/ gitignored; mirror `docs/ui-calendar/` with `LEDGER.md` = byte copy of `state.md`. Heredoc for `python3 -c` payloads. A static screenshot can never settle an animation.**
+- **Fixtures (R297): 0329–0403 Morning planning 08:00–08:45, Short appointment 10:15–10:30, Long review 11:00–13:00, Design review 14:30–15:30, Evening session 18:00–19:30; Thu 04-02 ALSO Overflow one/two/three @08:00. Todos: Review checklist 04-01 09:30, Prepare notes 04-01 14:30, long-task-title 04-02 11:00. itemColor env-derived.**
+- **Crops: 1:1+zoom ONE read; NEAREST 结构/LANCZOS 平滑. 子像素彩边会伪造"蓝色像素" — 判色前 NEAREST 放大. tmp/ gitignored; mirror `docs/ui-calendar/` `LEDGER.md`=byte copy of state.md. Heredoc for python3. 静态截图不能判动效.**
 
 ## Next round (pick ONLY #1)
-**#1 — R-YEAR step 2: 把 yearPage 骨架升级为 mini-month 级网格（spec R-YEAR：用现有 mini-month 组件拼 12 个月网格；无参考图部分按 7.1 标「外推待确认」）。最小闭环：① day-cell 点击 → selectedDate（并留在 year view，日期 disc 落在所选日，today 与 selected 双态区分）；② 月格内事件 dot（复用 mini-month 的点样式）；③ ‹/› 导航在 year 视图 ±1 年（live 验证 shiftView year 分支）。**
-**Then (later rounds): R-YEAR dark spot-check → dark spot-checks of R-H + R-OVERFLOW + R-DIM folded into the next regression leg. Optional: R-DIM mid-exit, else mark R-DIM fully PASS.**
+**#1 — R-YEAR step 2 收尾: event dots 不渲染的根因. 顺序: ① `date`→2026-04-02 + `view`→month, 截图确认 fresh VM 有 4/1–4/3 事件 chip (没有 = ICS 播种问题, 转查 pim-vm.log/fixture 路径); ② 有数据则回 year view 看 4/1–4/3 是否出 dot; ③ 仍无 → 派 code-writer 查 eventCount 绑定 (`itemsForDate` 在 yearDayCell 上的依赖收集; yearPage 懒加载时机), 或把 dot 改绑 `root.itemsByDate[dateKey(...)]` 直读. 目测确认 dot 3px 在数字下方、不与下行相撞.**
+**Then (later): R-YEAR dark spot-check → dark spot-checks of R-H + R-OVERFLOW + R-DIM folded into next regression leg. Optional: R-DIM mid-exit else mark PASS.**
 **Not `DONE`.**

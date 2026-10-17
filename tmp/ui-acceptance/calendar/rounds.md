@@ -5362,3 +5362,14 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 
 ## R294 — PLAIN HOLD
 spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep 10/10 exhausted, R277). Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R295 — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep 10/10 exhausted, R277). Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R296 (2026-10-18) — R-H: all-day band ring icon — PASS (light)
+- Pre-round: spec.md mtime moved to 2026-10-18 01:16 — 第二批裁决 landed: R-H, R-YEAR, R-OVERFLOW, R-DIM, R-TOOLTIP-Y. Held-item list cleared; resumed with R-H (top of 仍差).
+- Change: `apps/calendar/qml/CalendarScheduleView.qml` — new ring Rectangle at :596-609 (12×12, radius 6, border.width 3, transparent, colour = allDayChip.inkColor, x = 3 + jointOverlap when continuesLeft, vertically centred); Label leftMargin 5 → 19 (+ jointOverlap) at :612. Gap 4 follows the R246 timed-glyph precedent.
+- Build OK (`kos-calendar kos-pim-service`). Relaunch light; drove date 2026-04-02; capture r296-light.png.
+- Verdict: PASS. Mon (start day) and Tue–Fri (continuing) chips all show the ring; `+2` overflow row has none (correct — not a chip). Geometry matches ref crop (outer 12 / stroke 3 / hole 6, centred, ink-coloured). First crop x221.. falsely suggested an iconless Monday — collapsed-sidebar grid starts x≈62; re-crop x60.. settled it. Geometry note for the ledger: ref ring is 12/18 of row height, ours 12/24 — ruling literal wins (7.5 直译优先); "承认够不到".
+- Dark leg not exercised this round (chipInk is theme-aware); fold into the next regression spot-check.
+- state.md Next: R-OVERFLOW (drop the silent slice(0,2) cap; 3 columns + `+N`).

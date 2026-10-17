@@ -5134,7 +5134,242 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Ledgered: month-view pin added to state.md. Window restored to 1100×692.
 - Next: timed-chip secondary clock glyph (ref 2-hour chip "🕐 11AM – 1PM").
 
-## R248 — Regression sweep #2 (day light + collapsed week dark) — PASS, no code change
-- Day light @1100×692 expanded (r248-day-light.png, crop _r248-day-light-chips2x.png): band 全天/Design sync/Release notes/+2 correct; full-width chips title top-aligned + secondary Row(glyph,5)+Label 10 with ring+hands in chipInk; 12-hour shared-period drop ("8 – 8:45AM","11AM – 1PM","12PM"); T01 halves work in day view (Thu 11AM blue+green, 2px gap); gutter two-tone "7 AM" baseline-anchored ink-on-line; stripe 3, heights ≈38, per-event tones correct.
-- Week dark collapsed (r248-week-dark.png, crop _r248-week-dark-3x.png): rim x0/gutter 1..51/pitch 150; segment pill on 周; band Multi-day span + Thu stack + R087 sole + +2; glyphs light chipInk on dark fills; T01 Wed 9AM + Thu 11AM halves; Wed 2PM Desig…/Prepa…; secondaries correct.
-- Verdict: PASS both legs, zero regressions. Next: sweep #3 month view + mini-month/toolbar chrome.
+## R246 (2026-10-17) — timed-chip clock glyph + 12-hour secondary — DONE, light+dark
+- Next #1. Ref measured via 8×/20× NEAREST crops of the "Stretchin…" chip secondary: outlined clock ring 8×8 ref px, stroke ~1, hands 12+3, ink = text ink (26,67,123); left of text, gap 4, glyph bottom = digit baseline (glyph 8 vs digit cap 6). Other ref chips confirm: "Hike with…" "🕐 10AM – 12…", "Sign language…" "🕐 12 – 2PM" ⇒ 12-hour, shared period drops start meridiem.
+- code-writer: `CalendarScheduleView.qml:950-999` secondary Label → Row { glyph Item 11×11 (ring r5.5 border 1.5 chipInk; hand-12 1.5×4; hand-3 3.5×1.5; spacing 5; verticalCenter on label) + Label 10 }; `Main.qml:1308-1338` `formatClock12()` (12h, minutes only when nonzero, 12-not-0) + `itemSecondary` with start-meridiem drop. All-day still "".
+- Verify: build ok; relaunch light, `date` no-oped twice — **harness `Main.qml:221` reads `command.date`, NOT `value`** (recorded as load-bearing). Date 2026-04-02 then applied. r246-light.png: all timed chips show ring glyph + "8 – 8:45AM" / "10:15 – 10:30AM" / "11AM – 1PM" / "2:30 – 3:30PM" / "3 – 4:15PM"; 6× crops confirm glyph structure/tone/gap vs ref. r246-dark.png same date: glyph renders in light chipInk on dark fill.
+- 24h-vs-12h sanity: ref secondary and R243 gutter both 12-hour ⇒ 12-hour chosen; consistent.
+- Next: regression sweep (R240-R246 areas) while holds stand. Not DONE.
+
+## R247 (2026-10-17) — regression sweep #1 — PASS both legs, no code change
+- Next #1. Week view 1100×692 expanded, date 2026-04-02, light + dark. Spot-checked every area closed in R240-R246 against pinned values.
+- Light (r247-light.png; 2× chip crop _r247-light-chips2x.png; band crop _r247-light-band.png): chip height/title/stripe ✓; 1-item full-width vs 2-item halves with 2px gap, each half own tone (Wed 9AM, 11AM, 2PM) ✓; glyph ring+hands tone=gap=5 ✓; "8 – 8:45AM"/"9AM"/"10:15 – 10:30AM"/"11AM – 1PM"/"3 – 4:15PM" 12h + shared-period meridiem drop ✓; gutter two-tone baseline ✓; all-day band y-map + "+2" ✓; segment pill on 周 ✓.
+- Dark (r247-dark.png; 3× Wed crop _r247-dark-wed3x.png): glyph light chipInk on dark fill ✓; green/purple halves keep tones ✓; band ✓.
+- Verdict: zero regressions. Held items unchanged (H ring icon · Year word · R134 tooltip y · A/B dim+shadow).
+- Next: regression sweep #2 — day view light + collapsed-sidebar week dark.
+
+## R249 — Regression sweep #3: month view light @1100×692 expanded — PASS, no code change
+- Next #1 taken verbatim. Relaunch wrinkle: first drive reused R248's dark instance (capture sampled (30,30,30) chrome); `start-review-vm.sh` refuses to start while an owned instance is alive ("Owned review instance still running", exit 1) — killed the pid, relaunched `light`, re-drove resize/sidebar/view/date. Lesson folded into state.md (theme is fixed at launch; no runtime theme action).
+- Artifacts: `r249-month-light.png` (1100×692, chrome (255,255,255)) + `r249-crops.png` (week-1 cells 2×, mini-month 2×, chrome 1:1).
+- **R-MONTH areas (ruling D, R245 pins):** every event cell = exactly 1 chip + `+N` top-right at this geometry (30→+8, 31→+8, 1→+11, 2→+13, 3→+8, 4→+7); chips clipped to cell, stripe 3, radius ≈5, single-line elide; today cell (2) bordered + tinted. No overflow, no truncation artifact.
+- **Mini-month:** heading `2026年4月` + two 28×28 nav buttons; MONDAY-first header; 6 rows (30/31/1…4/5/6/10); today+selected `2` grey disc (selected wins); adjacent-month muted. Matches R112/R115-R118/R144.
+- **Toolbar chrome:** segment pill on 月; heading + `< 今天 >`; search/more; window dots. Matches R097/R127/R143.
+- Cell 21 hover `+` + tint = cursor hover artifact (pinned R245 hover behaviour), not a delta.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** Next: sweep #4 — month dark collapsed + agenda panel spot-check.
+
+## R250 — Regression sweep #4 PASS (month view dark @1100×692 COLLAPSED sidebar + bottom agenda panel — zero regressions, no code change)
+- Relaunch: killed R249's light instance, `start-review-vm.sh dark`. **Drive-key gotcha: `sidebar` action reads `command.expanded` (bool), NOT `state`** — first drive with `"state":"collapsed"` silently no-opped (harness Main.qml:214); re-drove `{"action":"sidebar","expanded":false}`. resize 1100×692 / view month / date 2026-04-02.
+- Artifacts: `r250-month-dark-full.png` (collapsed, chrome topband (30,30,30), sidebar n/a collapsed, grid (30,30,30), agenda tint (31,37,44)) + crops (cell30 4×, cell31 4×, cells1-3 2×, today 3×, agenda 1:1).
+- **R-MONTH dark pins (R245) re-verified:** first-row counts EXACT — 30→+8, 31→+8 (4× crops settle the 1:1 misread "+6"), 1→+11, 2→+13, 3→+8, 4→+7; every cell exactly 1 chip, single-line elide, stripe 3 visible, clipped to cell; today cell 2 bordered + tinted + tinted chip (Design sync).
+- **Bottom agenda panel:** heading `2026年4月2日星期四 14 项` (bold + muted count); 添加 top-right; rows = blue vertical bar + 全天 blue tab, title Design sync / Release notes, subtitle 日历日程, blue 日程 link right; third row clipped by panel bottom. Panel bg tinted (31,37,44).
+- **Collapsed geometry:** mini-month absent (lives in sidebar) ✓; grid spans rim x0 → full width; toolbar chrome (segment pill on 月, heading 2026年4月, `< 今天 >`, search/more, dots) matches R097/R127/R143 dark pins.
+- Cell 22 hover `+` + tint = cursor hover artifact (pinned R245 hover behaviour), not a delta.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** Remaining uncovered rotation leg: day view dark.
+
+## R251 — Regression sweep #5 PASS (day view dark @1100×692 EXPANDED sidebar — zero regressions, no code change)
+- Relaunch: `live-app.pid` pointed at a dead proc → `start-review-vm.sh dark`. **Drive-key gotcha (NEW): `view` action reads `command.view` (harness Main.qml:218), NOT `value`** — first drive with `"value":"day"` silently no-opped (capture succeeded, still on month); re-drove `{"action":"view","view":"day"}`. Also resize 1100×692 / `{"action":"sidebar","expanded":true}` / date 2026-04-02.
+- Artifacts: `r251-day-dark-full.png` + crops `r251-c1-gutter.png` (2×), `r251-c2-chip.png` (2×), `r251-c3-allday.png` (1:1), `r251-c4-halves.png` (1:1).
+- **Gutter two-tone (R243/R244) re-verified in day dark:** digit bright + AM muted, same baseline, ink-centred on hour lines; 12-hour "7 AM"…"4 PM"; first visible 7 AM (R159); pitch 40.
+- **Timed chips + R246 secondary re-verified:** title 11 medium top-aligned + Row(clock glyph, spacing 5) + secondary 10 on every chip; formats EXACT — "8 – 8:45AM", "9AM", "10:15 – 10:30AM", "11AM – 1PM" (shared period drops start meridiem), "12PM", "2:30 – 3:30PM", "4PM". Stripe 3, dark fill alpha 0.36, radius 3.
+- **T01 side-by-side re-verified in day dark:** 11 AM slot = blue "Long review with a deliberately lengthy title 11AM – 1PM" + green "[R019 LONG TASK] 任务长标题与编辑表单检查 任…" halves with 2px gap, both with glyph+secondary, elided.
+- **All-day band:** 全天 label; Design sync / Release notes full-width blue-bar tab chips, single-line elide; `+2` overflow row. Matches R128/R150/R158 pins.
+- **Chrome:** day header `周四 2` + today disc on 2; segment pill on 日; heading `2026年4月2日星期四`; `< 今天 >`; search/more; dots; field (30,30,30). Matches R097/R126/R143.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** All five rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) are now swept clean. Nothing actionable remains; H / Year / R134 tooltip-y / A-B dim+shadow stay ruling-blocked. Next: hold.
+
+## R252 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R253 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Code untouched since R246 ⇒ no regression is even possible; per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R254 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Code untouched since R246 ⇒ no regression is even possible; per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Pre-round ruling check (NEW this round): spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- state.md 最近已改 window trimmed to 8 (R246/R245/R244 entries moved to this archive; all CLOSED, details in their own round entries above).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R255 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Code untouched since R246 ⇒ no regression is even possible; per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- state.md 最近已改 window trimmed to 8 (R247 entry moved to this archive; regression sweep #1 PASS, details in its own round entry above).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R256 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Code untouched since R246 ⇒ no regression is even possible; per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R257 — HOLD round (2026-10-18 00:19)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R258 — HOLD round (2026-10-18 00:21)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R259 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R258 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R260 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R259 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R261 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; sed re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 保持 hold. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R260 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R262 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; sed re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 保持 hold. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R261 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+- R263 — HOLD round. Pre-round: spec.md mtime unchanged (2026-10-17 22:50); grep re-confirms spec.md:145-146 — H (all-day ring icon) / segment 4th word Year / R134 tooltip y / A-B dim+shadow magnitude 保持 hold. No code change, no build, no screenshot (code untouched since R246; R247–R251 sweeps clean; nothing suspicious to spot-check). Ruling-blocked items re-listed in state.md. Verdict: HOLD.
+- R264 — HOLD round. Pre-round: spec.md mtime unchanged (2026-10-17 22:50); grep re-confirms spec.md:145-146 — H (all-day ring icon) / segment 4th word Year / R134 tooltip y / A-B dim+shadow magnitude 保持 hold. No code change, no build, no screenshot (code untouched since R246; R247–R251 sweeps clean; nothing suspicious to spot-check). Ruling-blocked items re-listed in state.md. Verdict: HOLD.
+- R265 — HOLD round. Pre-round: spec.md mtime unchanged (2026-10-17 22:50); grep re-confirms spec.md:145-146 — H (all-day ring icon) / segment 4th word Year / R134 tooltip y / A-B dim+shadow magnitude 保持 hold. No code change, no build, no screenshot (code untouched since R246; R247–R251 sweeps clean; nothing suspicious to spot-check). Ruling-blocked items re-listed in state.md. Verdict: HOLD.
+- R266 — HOLD round. Pre-round: spec.md mtime unchanged (2026-10-17 22:50); sed re-confirms spec.md:145-146 — H (all-day ring icon) / segment 4th word Year / R134 tooltip y / A-B dim+shadow magnitude 保持 hold. No code change, no build, no screenshot (code untouched since R246; R247–R251 sweeps clean; nothing suspicious to spot-check). Ruling-blocked items re-listed in state.md. Verdict: HOLD.
+- R267 — HOLD round. Pre-round: spec.md mtime unchanged (2026-10-17 22:50); sed re-confirms spec.md:145-146 — H (all-day ring icon) / segment 4th word Year / R134 tooltip y / A-B dim+shadow magnitude 保持 hold. No code change, no build, no screenshot (code untouched since R246; R247–R251 sweeps clean; nothing suspicious to spot-check). Ruling-blocked items re-listed in state.md. Verdict: HOLD.
+
+## R268 (2026-10-18) — HOLD
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build, no screenshot. Code untouched since R246; all 5 rotation legs (R247–R251) swept clean; nothing suspicious to spot-check — no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R269 (2026-10-18) — HOLD
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build, no screenshot. Code untouched since R246; all 5 rotation legs (R247–R251) swept clean; nothing suspicious to spot-check — no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R270 (2026-10-18) — HOLD
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build, no screenshot. Code untouched since R246; all 5 rotation legs (R247–R251) swept clean; nothing suspicious to spot-check — no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R271 (2026-10-18) — HOLD + regression spot-check (week expanded light)
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build. Stale pid found dead → relaunched via start-review-vm.sh light, drove resize/sidebar-expanded/view week/date 2026-04-02, captured r271-week-expanded-light.png.
+- Spot-check of the R247 leg: PASS — clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9 AM, 11 AM, 2 PM pairs), all-day band with "+2" overflow, two-tone gutter, chip height/mass all match. No regression, no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R272 (2026-10-18) — HOLD + regression spot-check week collapsed light PASS
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build. Stale pid found dead → relaunched via start-review-vm.sh light, drove resize/sidebar-collapsed/view week/date 2026-04-02, captured r272-week-collapsed-light.png.
+- Spot-check leg chosen: week collapsed light — the only leg not covered by the R247–R251 rotation (R247 week expanded light+dark, R248 day light + collapsed week dark, R249 month light expanded, R250 month dark collapsed + agenda, R251 day dark expanded).
+- Spot-check verdict: PASS — clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9:30 / 11 AM / 2:30 pairs), all-day band "Multi-day review" span + Thu "+2" overflow + Fri "R087 sole", two-tone gutter, weekend column tint, 周 pill selected, Thu-2 today ring, collapsed sidebar renders full-width content. No regression, no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R273 — HOLD round (no code change, no spot-check)
+- Pre-round: spec.md mtime still 2026-10-17 22:50 — no new ruling; H / Year / R134 tooltip-y / A-B dim+shadow re-confirmed 保持 hold (spec.md tail re-read).
+- Spot-check skipped: all 6 rotation legs (R247–R251 + R272 week-collapsed-light) already swept clean; nothing suspicious since — per Next-round rule the check is optional.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
+
+## R274 — HOLD round + regression spot-check #7: month dark expanded PASS
+- Pre-round: spec.md mtime still 2026-10-17 22:50 — no new ruling; H / Year / R134 tooltip-y / A-B dim+shadow re-confirmed 保持 hold (spec.md tail re-read).
+- No code change, no build (code untouched since R246).
+- Spot-check leg 7 (new combination, unswept): month view, DARK, sidebar EXPANDED, fixture date 2026-04-02. Launched via start-review-vm.sh dark (stale pid dead → fresh launch), drove resize 1280×800 + sidebar expanded:true + view month + date 2026-04-02; capture → r274-month-dark-expanded.png.
+- Eyeball verdict: PASS. Dark palette coherent across sidebar / toolbar / month grid / agenda panel; today (Apr 2) cell outlined with +13 badge; multi-day chips span Mon–Wed with +8/+11 truncation badges; chip stripes + truncation behave (no overflow into adjacent cells); agenda panel lists 2 all-day items (Design sync, Release notes) with 14 项 count. No mixed-theme artifacts, no layout breakage.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
+
+## R275 — HOLD + regression spot-check #8: month light collapsed PASS (2026-10-18)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items re-listed in state.md.
+- Fresh launch (old pid dead) → light → 1280×800, sidebar collapsed, view month, date 2026-04-02 → `r275-month-light-collapsed.png`.
+- Verdict **PASS**: light palette coherent; today cell 2 outlined + `+13`; multi-day chips Mon–Wed `+6/+6/+11` striped; Design sync / R087 sole / Morning planning chips striped; out-month days muted; agenda panel 14 项 with 2 all-day.
+- Anomaly: Apr 15 cell full-cell blue fill + bare `+`, no chips, no fixture data (grep: no 20260415 in profile/). `position` action rejected in month view ("No visible timeline") — pointer never moved, first re-test invalid. Re-drove with `pointer` kind `move` → tint + `+` gone from row 3 (`r275-crop-row3-hover.png`). **It is the hovered-cell highlight + quick-add button, follows the pointer** (R274's Apr-14 tint = same artifact). Benign, macOS-like.
+- No code change, no build. HOLD.
+
+## R276 — HOLD + regression spot-check #9: day light collapsed PASS (2026-10-18)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items re-listed in state.md.
+- Fresh launch (stale pid dead) → light → 1280×800, sidebar collapsed, view day, date 2026-04-02 → `r276-day-light-collapsed.png`.
+- Verdict **PASS**: title 2026年4月2日星期四; all-day band Design sync / Release notes / `+2`; timed chips Morning planning 8–8:45AM, Green planning 9AM, Short appointment 10:15–10:30, Long review + [R019 LONG TASK] side-by-side halves at 11AM (T01), Gold review 12PM, Design review 2:30–3:30PM, Red review 4PM, Evening session 6–7:30PM — every secondary carries the clock glyph (R246); gutter digit+AM two-tone same baseline (R243); 12-hour shared-meridiem `8 – 8:45AM` (R246). No hover-tint artifact this launch; no mixed theme; no layout breakage.
+- Crop check `/tmp/r276-crop-gutter.png` (2×): glyph ring+hands left of secondary, gap ~4, baseline-aligned; gutter two-tone intact.
+- No code change, no build. HOLD. Regression sweep now 9/11 legs; remaining unswept: day dark collapsed.
+## R277 — HOLD + regression spot-check #10: day DARK collapsed PASS — sweep complete 10/10
+No new ruling (spec.md mtime 2026-10-17 22:50 unchanged); no code change, no build (untouched since R246). Killed stale ALIVE light instance → relaunch dark → resize 1280×800, sidebar collapsed, view day, date 2026-04-02 → r277-day-dark-collapsed.png. PASS: title 2026年4月2日星期四; all-day band Design sync/Release notes/+2 (no ring icon = held H); timed chips 8–8:45AM / Green 9AM / 10:15–10:30 / Long review 11–1 + LONG TASK side-by-side halves (T01) / Gold 12PM / 2:30–3:30PM / Red 4PM / 6–7:30PM, all secondaries with clock glyph (R246); gutter two-tone (R243); shared-meridiem `8 – 8:45AM` + both-meridiem `11AM – 1PM`; dark theme clean, no artifact. Crops 2× (gutter, all-day) confirmed. **Regression sweep COMPLETE: R247–R251 + R272/R274/R275/R276/R277 = 10/10 legs.** Next: plain hold rounds; resume only on a ruling landing (H / Year / R134 tooltip-y / A-B dim+shadow).
+
+## R278 — PLAIN HOLD (no new ruling; no code change, no build, no spot-check)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow.
+- Regression spot-checks remain EXHAUSTED: 10/10 legs (R247–R251 + R272 week-collapsed-light + R274 month-dark-expanded + R275 month-light-collapsed + R276 day-light-collapsed + R277 day-dark-collapsed) all PASS. Plain hold rounds from here per state.md Next #1.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented. Resume only when a ruling lands.
+
+## R279 — PLAIN HOLD (no new ruling; no code change, no build, no spot-check)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow.
+- Regression spot-checks remain EXHAUSTED: 10/10 legs (R247–R251 + R272 week-collapsed-light + R274 month-dark-expanded + R275 month-light-collapsed + R276 day-light-collapsed + R277 day-dark-collapsed) all PASS. Plain hold rounds from here per state.md Next #1.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented. Resume only when a ruling lands.
+
+## R280 — PLAIN HOLD (no new ruling; no code change, no build, no spot-check)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow.
+- Regression spot-checks remain EXHAUSTED: 10/10 legs (R247–R251 + R272–R277 spot-checks) all PASS. Plain hold rounds from here per state.md Next #1.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented. Resume only when a ruling lands.
+## R281 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+## R282 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+## R283 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+## R284 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+## R285 (2026-10-18) — PLAIN HOLD
+Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (regression sweep already 10/10 COMPLETE, R277). Verdict: HOLD. Ruling-blocked items re-listed in state.md. Next round = plain hold unless a ruling lands.
+
+## R286 (2026-10-18 01:06) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R287 (2026-10-18) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R288 (2026-10-18 01:08) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R289 (2026-10-18 01:10) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R290 (2026-10-18 01:12) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R291 (2026-10-18) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R292 (2026-10-18) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R293 (2026-10-18) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R294 — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep 10/10 exhausted, R277). Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R295 — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep 10/10 exhausted, R277). Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R296 (2026-10-18) — R-H: all-day band ring icon — PASS (light)
+- Pre-round: spec.md mtime moved to 2026-10-18 01:16 — 第二批裁决 landed: R-H, R-YEAR, R-OVERFLOW, R-DIM, R-TOOLTIP-Y. Held-item list cleared; resumed with R-H (top of 仍差).
+- Change: `apps/calendar/qml/CalendarScheduleView.qml` — new ring Rectangle at :596-609 (12×12, radius 6, border.width 3, transparent, colour = allDayChip.inkColor, x = 3 + jointOverlap when continuesLeft, vertically centred); Label leftMargin 5 → 19 (+ jointOverlap) at :612. Gap 4 follows the R246 timed-glyph precedent.
+- Build OK (`kos-calendar kos-pim-service`). Relaunch light; drove date 2026-04-02; capture r296-light.png.
+- Verdict: PASS. Mon (start day) and Tue–Fri (continuing) chips all show the ring; `+2` overflow row has none (correct — not a chip). Geometry matches ref crop (outer 12 / stroke 3 / hole 6, centred, ink-coloured). First crop x221.. falsely suggested an iconless Monday — collapsed-sidebar grid starts x≈62; re-crop x60.. settled it. Geometry note for the ledger: ref ring is 12/18 of row height, ours 12/24 — ruling literal wins (7.5 直译优先); "承认够不到".
+- Dark leg not exercised this round (chipInk is theme-aware); fold into the next regression spot-check.
+- state.md Next: R-OVERFLOW (drop the silent slice(0,2) cap; 3 columns + `+N`).

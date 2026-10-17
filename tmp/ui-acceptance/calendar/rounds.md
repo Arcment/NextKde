@@ -4936,3 +4936,9 @@ R195 archive — hold, nothing done (34th consecutive). Checked for rulings/spec
 
 ## R206 (2026-10-17) — HOLD (45th consecutive)
 Next #1 option (b). Checked for new rulings/spec updates since R205: NONE — spec.md mtime unchanged (2026-10-17 04:56), git head = R205 hold commit a8d087d, `.loop/ROUND` = 206, `git status`/`git diff apps/` empty. No source, no build, no screenshot, no re-verify (idle hold per R161). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list, reported R140; no channel). 仍差 unchanged, all ruling-blocked. state.md window moved to R206..R199 (R198 archived to rounds.md tail).
+
+## R207 (2026-10-17) — HOLD (46th consecutive)
+- Next #1 option (b): checked for new rulings/spec updates since R206 — NONE. `spec.md` mtime unchanged (2026-10-17 04:56); git head = R206 docs commit b5e10c6; `git status`/`git diff apps/` empty.
+- No source, no build, no screenshot, no re-verify (idle hold per R161 note).
+- 仍差 unchanged (all ruling-blocked): E02 chip text block · E01/E02 inset-stripe scale · band chip icon (ruling H) · gutter label format (ruling F) · month slice cap (ruling D) · dim snap + shadow (rulings A/B) · Year word / C05 count / popover escape (ruling E/C/G) · ToolTip y (open).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE`.

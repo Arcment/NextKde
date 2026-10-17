@@ -4774,3 +4774,5 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
 - Not `DONE`.
 - *(Archived from state.md window: R166 — hold, nothing done (5th consecutive); checked none since R165; spec mtime 04:56 unchanged; git head = R165 hold commit.)*
+
+## R175 — HOLD (14th consecutive). Checked for new rulings/spec updates since R174: NONE (spec.md mtime 2026-10-17 04:56 unchanged, predates R161; .loop/DEADLINE 10-16 19:34; git head = R174 docs commit 057166e; tracked tree clean except .loop/ROUND + this round's bookkeeping). No source, no build, no screenshot, no re-verify (idle hold per R161 note). 仍差 unchanged — all ruling-blocked. Sweep COMPLETE both legs, twin-covered (R161). Checkpoint stands: blocked on a user ruling. NOT DONE.

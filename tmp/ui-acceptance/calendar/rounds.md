@@ -4821,3 +4821,8 @@ Atomic step: HOLD the checkpoint (17th consecutive hold).
 - Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R182: NONE — spec.md mtime 2026-10-17 04:56 unchanged (predates R161); .loop/DEADLINE 10-16 19:34; git head = R182's docs commit 1237190; .loop/ROUND = 183; only the ROUND counter newer than R182's session.
 - No source, no build, no screenshot, no re-verify (idle hold). Sweep COMPLETE both legs, every closed item twin-covered (R161). 仍差 all ruling-blocked: E02's two font clauses (chip text) + the 11-item ruling-blocked list (reported R140).
 - Checkpoint stands: blocked on a user ruling. NOT DONE.
+
+## R184 (2026-10-17) — HOLD (23rd consecutive)
+- Checked for new rulings/spec updates since R183: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R183 hold commit e72bcf4; `.loop/ROUND` = 184.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).

@@ -5063,3 +5063,7 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 
 ## R237 — HOLD (76th consecutive)
 Next #1 option (b). Checked for new rulings/spec updates since R236: NONE — spec.md mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R236 docs commit 2c15e2c; `.loop/ROUND` = 237; `git status apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R238 — HOLD (77th consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — spec.md mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R237 hold commit dc5bab4; `.loop/ROUND` = 238; `git status apps/` empty. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+- *(R227 archived from state.md window at R238: hold, nothing done (66th consecutive); checked for rulings/spec updates — none since R226 (spec mtime unchanged; git head = R226 docs commit 84e34e2; git status/diff apps/ empty). Checkpoint stood: blocked on a user ruling.)*

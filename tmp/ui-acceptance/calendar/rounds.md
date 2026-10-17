@@ -4767,3 +4767,10 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
 - Not `DONE`.
 - *(Archived from state.md window: R165 — hold, nothing done (4th consecutive); checked none since R164; spec mtime 04:56 unchanged; git head = R164 docs commit.)*
+
+## R174 — HOLD (13th consecutive; checkpoint = blocked on a user ruling)
+- Next #1 option (b). Checked for new rulings/spec updates since R173: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; git head = R173 hold commit f9f18d0; tracked tree clean except `.loop/ROUND` + state/rounds bookkeeping. No ruling message anywhere.
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note).
+- 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list from R140). Sweep COMPLETE, every closed item twin-covered (R161).
+- Not `DONE`.
+- *(Archived from state.md window: R166 — hold, nothing done (5th consecutive); checked none since R165; spec mtime 04:56 unchanged; git head = R165 hold commit.)*

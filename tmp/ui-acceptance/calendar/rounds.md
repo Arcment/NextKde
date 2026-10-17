@@ -5221,3 +5221,15 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
 - No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R258 holds, nothing suspicious.
 - Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R260 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R259 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R261 — HOLD round (2026-10-18)
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; sed re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 保持 hold. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- No opportunistic spot-check: code untouched since R246, 5 clean sweeps R247–R251 + R252–R260 holds, nothing suspicious.
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.

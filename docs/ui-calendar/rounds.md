@@ -4876,3 +4876,37 @@ Atomic step: HOLD the checkpoint (17th consecutive hold).
 - Checked for new rulings/spec updates since R190: **NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-17 19:34 (outer loop's rolling session deadline — advanced one day from 10-16, not a ruling); `git log` head = R190 docs commit 4252060; `.loop/ROUND` = 191.
 - No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
 - Checkpoint stands: blocked on a user ruling. NOT `DONE` — E02's two font clauses remain FAIL (ruling-blocked).
+
+## R192 (2026-10-17) — HOLD (31st consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R191: NONE — spec.md mtime still 2026-10-17 04:56 (predates R161); git head = R191 hold commit b81321f; .loop/ROUND = 192. No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+*(archived from state.md window)* R185 — hold, nothing done (24th consecutive). Checked for rulings/spec updates: none since R184 (spec mtime 04:56 unchanged; .loop/DEADLINE 10-16; git head = R184 docs commit 4691a3f). Checkpoint stands: blocked on a user ruling.
+
+## R193 (2026-10-17) — HOLD (32nd consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R192: NONE — spec.md mtime still 2026-10-17 04:56 (predates R161); git head = R192 docs commit 6498d5f; .loop/ROUND = 193; .loop/DEADLINE 1792236870 (10-17, rolling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+
+## R194 (2026-10-17) — HOLD (33rd consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R193: NONE — spec.md mtime still unchanged (predates R161); git head = R193 hold commit f0a0bf0; .loop/ROUND = 194; .loop/DEADLINE 1792236870 (10-17, rolling, not a ruling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+
+## R195 (2026-10-17) — HOLD (34th consecutive)
+Next #1 option (b). Checked for new rulings/spec updates since R194: NONE — spec.md mtime still 2026-10-17 04:56 (predates R161); git head = R194 docs commit 011b092; .loop/ROUND = 195; .loop/DEADLINE 1792236870 (10-17, rolling, not a ruling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+
+## R196 (2026-10-17) — HOLD (35th consecutive)
+Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R195: **NONE**. `spec.md` mtime unchanged (2026-10-17 04:56); git head = R195 hold commit 045c190; `.loop/ROUND` = 196; no source changes under apps/; `.loop/DEADLINE` rolling (not a ruling).
+- No source edit, no build, no screenshot, no re-verify (idle hold; per R161 note).
+- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, twin-covered.
+- state.md window rolled to R196..R189 (R187 line archived; already recorded here).
+- Checkpoint stands: blocked on a user ruling.
+
+## R197 (2026-10-17) — HOLD (36th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R196: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R196 docs commit 5d3ac50; `.loop/ROUND` = 197; no source changes under apps/. No source, no build, no screenshot, no re-verify (idle hold; nothing new to measure). 仍差 unchanged — everything on it is ruling-blocked. Checkpoint stands: blocked on a user ruling. Window trimmed: R189 entry archived here.
+
+## R198 (2026-10-17) — HOLD (37th consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R197: NONE — spec.md mtime unchanged (2026-10-17 04:56), git head = R197 hold commit 00b1efc, no source changes under apps/.
+- No build, no screenshot, no re-verify (nothing new to measure). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- NOT DONE.
+
+## R199 (2026-10-17) — HOLD (38th consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R198: NONE — spec.md mtime unchanged (2026-10-17 04:56), git head = R198 docs commit 529db14, no source changes under apps/.
+- No build, no screenshot, no re-verify (nothing new to measure). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- NOT DONE.

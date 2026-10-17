@@ -1,7 +1,8 @@
-# R273 — HOLD round (no code change, no spot-check). spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items (H/Year/tooltip-y/A-B) re-listed below.
+# R274 — HOLD round + regression spot-check #7 (month dark expanded PASS). No code change, no build. spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items (H/Year/tooltip-y/A-B) re-listed below.
 
-## 本轮 (R273)
-Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build (code untouched since R246), NO spot-check (all 6 rotation legs R247–R251 + R272 already swept clean; nothing suspicious observed since). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling landed (sed re-confirms spec.md tail: H / Year / R134 tooltip-y / A-B dim+shadow still 保持 hold).
+## 本轮 (R274)
+Atomic step: Next #1 taken verbatim — hold round with ONE opportunistic regression spot-check on a previously unswept leg: **month view, DARK, sidebar EXPANDED**, fixture date 2026-04-02. No code change, no build (code untouched since R246). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling (sed re-confirms spec.md tail: H / Year / R134 tooltip-y / A-B dim+shadow still 保持 hold).
+- Spot-check: fresh launch (old pid dead) → start-review-vm.sh dark → resize 1280×800 + sidebar expanded + view month + date 2026-04-02 → r274-month-dark-expanded.png. Eyeball verdict **PASS**: dark palette coherent everywhere; today cell outlined + `+13`; multi-day chips span Mon–Wed with `+8/+11` badges; stripes + truncation OK, no overflow; agenda panel correct (2 all-day items, 14 项).
 - Ruled-blocked items re-listed below in 仍差 (per the standing ruling's per-round re-list requirement).
 - Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
 
@@ -16,6 +17,7 @@ Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build (co
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R274 — **HOLD round + regression spot-check #7 month dark expanded PASS (no new ruling; no code change).**
 0. R273 — **HOLD round (no new ruling; no code change, no spot-check).**
 0. R272 — **HOLD round + regression spot-check week collapsed light PASS (no new ruling; no code change).**
 0. R271 — **HOLD round + regression spot-check week expanded light PASS (no new ruling; no code change).**
@@ -23,8 +25,7 @@ Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build (co
 0. R269 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R268 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R267 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
-0. R266 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
-*(older rounds archived in rounds.md tail — R265 holds back to R252; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
+*(older rounds archived in rounds.md tail — R266 holds back to R252; R251 regression sweep #5 day dark expanded PASS; R250 regression sweep #4 month dark collapsed + agenda panel PASS; R249 regression sweep #3 month light expanded PASS; R248 regression sweep #2 day light + collapsed week dark PASS; R247 regression sweep #1 week expanded light+dark PASS; R246 timed-chip clock glyph + 12-hour secondary CLOSED; R245 R-MONTH CLOSED)*
 
 ## 外推待确认 (live only)
 - **THE 2026-10-17 22:50 RULING (load-bearing): four rulings landed in spec.md, effective immediately. R-CHIP: chip height = round(hourHeight*0.96) ⇒ 38; title 11–12 medium; secondary 10–11 (DONE R241); T01 = side-by-side halves, never shrink/hide (DONE R242). R-GUTTER (F): 12-hour two-tone — DONE R243+R244. R-MONTH (D): month cells stack 3 then +N, truncate not overflow — DONE R245 (was already implemented). R-SCALE (G): ref-measured beats spec literal estimates (tie-break 7.5 直译优先); stripe ≈ 3; record derivation in LEDGER. STILL HELD BY THE SAME RULING: all-day ring icon (H), segment 4th word Year, R134 tooltip y, A/B dim+shadow magnitude — 每轮在 state.md 列一次，不要自行发明.**
@@ -45,6 +46,6 @@ Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build (co
 - **Fixtures on 2026-04-02** (`profile/pim/calendar.ics` under tmp/ui-acceptance/calendar/): VEVENTs 08:00/10:15/11:00/14:30/18:00 every day 2026-03-29…04-04 + `Multi-day review` all-day 0330→0403 + `R087 card C/D` (0402) + `R087 sole` (0403) + `Design sync`/`Release notes` all-day 0402; Wed also `Review checklist` 10:00 + 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]`. UID-ordered since R083. WTODOs: green 09:00, gold 12:00, red 16:00, long task 11:00, `[R019 LONGTASK]` 11:00. Week starts MONDAY. R139: fixture carries NO colour data. *(R246: live profile shows evolved fixtures — "Morning planning" 08:00–08:45, "Short appointme…" 10:15–10:30, "Long review with…" 11:00–13:00, gold 12:00, "Design review" 14:30–15:30, red 16:00; Wed-only 09:30 "Revie…" and 14:30 "Prepa…".)*
 
 ## Next round (pick ONLY #1)
-**#1 — All 6 rotation legs (R247–R251 + R272 week-collapsed-light) swept clean; every actionable spec ID is done. NO new work — do NOT invent deltas. Each round: re-list the ruling-blocked items below and hold; optionally one opportunistic regression spot-check of any leg if something suspicious. When a ruling lands on H / Year / R134 tooltip-y / A-B dim+shadow, resume with it as the next atomic step.**
+**#1 — All 7 regression spot-checks (R247–R251 + R272 week-collapsed-light + R274 month-dark-expanded) swept clean; every actionable spec ID is done. NO new work — do NOT invent deltas. Each round: re-list the ruling-blocked items below and hold; optionally one opportunistic regression spot-check of any remaining leg (remaining unswept: month light collapsed, day light collapsed, day dark collapsed, month dark collapsed…). When a ruling lands on H / Year / R134 tooltip-y / A-B dim+shadow, resume with it as the next atomic step.**
 **Held items to re-list each round (per the ruling): all-day band ring icon (H) · segment 4th word `Year` · R134 tooltip y · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).**
 **Not `DONE` — H/Year/tooltip-y/A/B still ruling-blocked.**

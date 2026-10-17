@@ -4593,3 +4593,25 @@ Atomic step: Next #1 of R134 — style the dark-leg ToolTip (Qt Basic leaking). 
 - Tone NOTE (not a conflict): the arrows are a 1-px AA stroke — core 114..131, shoulder 150..175. The pinned (156,156,156) sits in the shoulder band = an AA-sampled reading of the same stroke; geometry is what this round pinned, and it holds.
 - 4x crop `r151-heading-4x.png` visually confirms: bold black title centred between the two muted chevrons, muted weekday row below.
 - **PASS — mini-month heading closed byte-consistent. No source change, no build.** code-writer still not registered (nothing to implement).
+
+## R152 — gutter hour labels right-anchor (R066), light leg — PASS (verification only, no source)
+Atomic step: Next #1 — re-verify the gutter hour labels, light leg, single capture.
+- Fresh relaunch (light). **Harness change: `timeout 150 ./start-review-vm.sh light` killed the app child with the launcher's process group (pid died; log truncated at QML load). Fix: background-launch the bare script, poll `kill -0 $(cat live-app.pid)` — app stayed alive.** Drive: resize 1100x692 / sidebar expand / view week / date 2026-04-02 → `r152-gutter-light.png`.
+- Scan window **x221..270 strictly inside the gutter** (first lesson: chips' ink crosses x272 into column 1 — a wider window pollutes the census with 20-tall blobs).
+- **11 labels, ink y270..277 / 310..317 / 350..357 / 390..397 / 430..437 / 470..477 / 510..517 / 550..557 / 590..597 / 630..637 / 670..677.**
+- **Right anchor: all 11 ink right edges = x263 byte-consistent** (left 237/238 uniform — zero-padded 24-hour strings equal width). Text rect right = 272 − rightMargin 7 = 265; digit sidebearing insets ink to 263 — consistent.
+- **Font 11 ⇒ ink 8 tall ✓; pitch 40 EXACT ✓; tone darkest (113,117,130) = AppTheme.mutedText ✓.**
+- Source `CalendarScheduleView.qml:714-720` re-read: `anchors.right: parent.right` (parent.right IS the grid line), `rightMargin: 7`, `font.pixelSize: 11`, zero-padded text, `color: AppTheme.mutedText`. N02 intact: today-less week ⇒ no now-pill ⇒ all labels visible (18:00 clipped off-window).
+- 5x crop `r152-gutter-5x.png`: 07:00/08:00 right edges aligned, muted gray single tone.
+- **PASS — R066 closed byte-consistent. Next: window dots (R122) light leg.**
+
+## R153 — window dots (R122), light leg — PASS (verification only, no source)
+Atomic step: Next #1 — re-verify the three window dots, light leg, single capture (dots are chrome — visible at any view).
+- Fresh relaunch (light), **background-launched bare script per the R152 harness note; pid alive after 1 s; drove immediately.** Commands: resize 1100x692 / capture `r153-dots-light.png` (no sidebar/view/date needed).
+- **Colour census (top band y0..29, saturation >30): exactly three dots — green x1015..1029, yellow x1043..1057, red x1071..1085; halo rows y10..24. Cores (≥full-sat pixels): green (72,208,93) n129, yellow (254,198,77) n129, red (255,119,112) n129.**
+- **Opacity math byte-consistent with the pinned literals @0.85 over a (252,252,252) band: #28c840 → (72,208,93) EXACT; #febc2e → (254,198,77) EXACT; #ff5f57 → (255,119,112) EXACT.** The dots are transmissive (opacity 0.85), so the measured tone is literal×0.85 + band×0.15 — all three land on the measured cores to the last bit.
+- **Centres: green 1022 / yellow 1050 / red 1078 (halo midpoints) = pinned 1022.5/1050.5/1078.5 within AA; pitch 28, gaps 28−14 = 14 ✓. Right edge: red halo ends x1085 = 1100 − rightMargin 14.5 ✓. Circle profile symmetric (row widths 3/9/11/15/15/15/17/17/17/15/15/15/11/9/3) = disc 14 + AA ✓.**
+- **y-centre CLARIFICATION: measured 17 (halo 10..24). The R122 derivation (topMargin 10.5 + radius 7) gives 17.5 — matches. The R153 task line's "y-centre ≈15" was imprecise; the authoritative pinned figure is topMargin 10.5 ⇒ centre ≈17.5.** No conflict.
+- Source re-read `Main.qml:1637-1685`: Row anchored right/top, `rightMargin 14.5`, `topMargin 10.5`, `spacing 14`, model `#28c840`/`#febc2e`/`#ff5f57`, 14×14 radius 7, `opacity: 0.85`. Order green/yellow/red left→right (settings-app order, per R122 not the macOS ref's authority) ✓.
+- 6x crop `r153-dots-6x.png` visually confirms: three round dots green/yellow/red on the light band, window corner radius top-right.
+- **PASS — R122 window dots closed byte-consistent. Next: toolbar search field (R129/R130) LIGHT leg (only ever measured dark).**

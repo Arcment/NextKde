@@ -5256,3 +5256,9 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - No code change, no build, no screenshot. Code untouched since R246; all 5 rotation legs (R247–R251) swept clean; nothing suspicious to spot-check — no delta invented.
 - Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
 - Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R270 (2026-10-18) — HOLD
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build, no screenshot. Code untouched since R246; all 5 rotation legs (R247–R251) swept clean; nothing suspicious to spot-check — no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.

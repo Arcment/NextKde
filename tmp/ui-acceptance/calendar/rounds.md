@@ -5192,3 +5192,10 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
 - state.md 最近已改 window trimmed to 8 (R246/R245/R244 entries moved to this archive; all CLOSED, details in their own round entries above).
 - Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.
+
+## R255 — HOLD round (no code change, no screenshot)
+- Next #1 taken verbatim: all 5 rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) swept clean with zero regressions; every actionable spec ID is done. Code untouched since R246 ⇒ no regression is even possible; per the standing ruling and state.md's own "do NOT invent deltas", this round is a pure hold: no code, no build, no relaunch.
+- Pre-round ruling check: spec.md mtime still 2026-10-17 22:50; grep re-confirms spec.md:145 — all-day ring icon (H) / segment 4th word Year / R134 tooltip y / A-B dim+shadow remain 待裁决. No ruling landed ⇒ nothing to resume.
+- Held items re-listed per-round as required: all-day band ring icon (H, ref 12×12 stroke 3 hole 6) · segment 4th word `Year` · R134 tooltip y-discrepancy · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).
+- state.md 最近已改 window trimmed to 8 (R247 entry moved to this archive; regression sweep #1 PASS, details in its own round entry above).
+- Verdict: HOLD — nothing fixed, nothing broken, nothing invented. Not DONE (ruling-blocked items remain). Next: hold again, or resume the moment a ruling lands on H / Year / R134 tooltip-y / A-B, taking it as the next atomic step.

@@ -5014,3 +5014,9 @@ Checked for new rulings/spec updates since R225: none (spec.md mtime 2026-10-17 
 - **R227 — hold (66th consecutive).** Checked for rulings/spec updates since R226: none (spec.md mtime 2026-10-17 04:56 unchanged; git head = R226 docs commit 84e34e2; git status/diff apps/ empty). No source, no build, no screenshot, no re-verify (idle hold per R161 note). Checkpoint stands: blocked on a user ruling. Archived R219 entry from the state window to rounds tail.
 ## R228 (2026-10-17) — HOLD (67th consecutive)
 Checked for new rulings/spec updates since R227: none (spec.md mtime 2026-10-17 04:56 unchanged; git head = R227 hold commit b403ac6; git status/git diff apps/ and spec.md empty; .loop/ROUND=228). Idle hold per R161 note — no source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, every closed item twin-covered.
+
+## R229 — HOLD (68th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R228: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R228 docs commit 32ec11c; `.loop/ROUND` = 229; `git status apps/` EMPTY, `git diff apps/` empty.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.

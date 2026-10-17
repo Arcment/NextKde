@@ -5356,3 +5356,9 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 
 ## R292 (2026-10-18) — PLAIN HOLD
 spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R293 (2026-10-18) — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep exhausted 10/10, R277). Nothing fixed, nothing broken, nothing invented. Regression sweep stays COMPLETE. Ruling-blocked items re-listed in state.md. Not DONE.
+
+## R294 — PLAIN HOLD
+spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 tooltip-y / A-B dim+shadow. No code change, no build, no spot-check (sweep 10/10 exhausted, R277). Ruling-blocked items re-listed in state.md. Not DONE.

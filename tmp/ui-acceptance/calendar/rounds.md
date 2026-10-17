@@ -4708,3 +4708,8 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Ruling check: `spec.md` mtime 2026-10-17 04:56 — unchanged since R162's check, still predates R161. `.loop/DEADLINE` 10-16 19:34 / `TASK.md` 10-16 20:40. Git head = R162 docs commit; only session artifacts (state.md/rounds.md/LEDGER.md/ROUND/health.state/pim-vm.log) touched. No ruling message anywhere.
 - 仍差 unchanged — all 7 real entries ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
 - Next: unchanged — hold; pick up the first unblocked item only if a ruling/spec update lands after R163.
+
+## R164 (2026-10-17) — HOLD (3rd consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R163: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R163's hold commit (9af24a6); tracked tree clean except `docs/ui-calendar/HEALTH.md` (outer-loop bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161/R162 note idle rounds = hold, not loop — nothing new to measure, and re-verify at most one item per session when truly idle).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.

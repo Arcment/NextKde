@@ -5283,3 +5283,18 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Spot-check skipped: all 6 rotation legs (R247–R251 + R272 week-collapsed-light) already swept clean; nothing suspicious since — per Next-round rule the check is optional.
 - Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
 - Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
+
+## R274 — HOLD round + regression spot-check #7: month dark expanded PASS
+- Pre-round: spec.md mtime still 2026-10-17 22:50 — no new ruling; H / Year / R134 tooltip-y / A-B dim+shadow re-confirmed 保持 hold (spec.md tail re-read).
+- No code change, no build (code untouched since R246).
+- Spot-check leg 7 (new combination, unswept): month view, DARK, sidebar EXPANDED, fixture date 2026-04-02. Launched via start-review-vm.sh dark (stale pid dead → fresh launch), drove resize 1280×800 + sidebar expanded:true + view month + date 2026-04-02; capture → r274-month-dark-expanded.png.
+- Eyeball verdict: PASS. Dark palette coherent across sidebar / toolbar / month grid / agenda panel; today (Apr 2) cell outlined with +13 badge; multi-day chips span Mon–Wed with +8/+11 truncation badges; chip stripes + truncation behave (no overflow into adjacent cells); agenda panel lists 2 all-day items (Design sync, Release notes) with 14 项 count. No mixed-theme artifacts, no layout breakage.
+- Ruling-blocked items re-listed in state.md 仍差 per standing requirement.
+- Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
+
+## R275 — HOLD + regression spot-check #8: month light collapsed PASS (2026-10-18)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items re-listed in state.md.
+- Fresh launch (old pid dead) → light → 1280×800, sidebar collapsed, view month, date 2026-04-02 → `r275-month-light-collapsed.png`.
+- Verdict **PASS**: light palette coherent; today cell 2 outlined + `+13`; multi-day chips Mon–Wed `+6/+6/+11` striped; Design sync / R087 sole / Morning planning chips striped; out-month days muted; agenda panel 14 项 with 2 all-day.
+- Anomaly: Apr 15 cell full-cell blue fill + bare `+`, no chips, no fixture data (grep: no 20260415 in profile/). `position` action rejected in month view ("No visible timeline") — pointer never moved, first re-test invalid. Re-drove with `pointer` kind `move` → tint + `+` gone from row 3 (`r275-crop-row3-hover.png`). **It is the hovered-cell highlight + quick-add button, follows the pointer** (R274's Apr-14 tint = same artifact). Benign, macOS-like.
+- No code change, no build. HOLD.

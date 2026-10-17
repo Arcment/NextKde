@@ -1,0 +1,8 @@
+
+## R138 — final full light+dark regression sweep: PASS. NOT `DONE`.
+- Live 969763 found DEAD; relaunched dark 986811, then light 1004321 (KOS_APPEARANCE verified off /proc each time).
+- **Harness re-learn:** `view` takes key `view`, `date` takes key `date` (`harness/Main.qml:217-223`); a wrong key sets `viewIndex = indexOf(undefined) = −1` ⇒ MONTH view silently. Re-issued; read the capture before measuring.
+- **DARK (1100×692, sidebar expanded, week 2026-04-02):** sidebar (40,40,40)✓ · field (30,30,30)✓ · seps 59✓ · rule155 39✓ · band sep 84✓ · grid 59✓ · weekend 37✓. Visual: band Mon–Wed merged + Thu Design sync/Release notes + `+2` no-fill + Fri R087 sole + Sun empty ✓; 11:00 double w/ green [R019 LONG TASK] ✓; stripes/radius/one-line titles ✓; mini month ✓; segment lens ✓.
+- **LIGHT:** 228 / 255 / 237 / 217 / 242 / 237 / 249 all ✓; fills sampled, see below.
+- **NEW: itemColor drifted (48,140,198) → (61,174,233) = #3DAEE9.** Dark timed fill (41,82,103) = 0.36·(61,174,233)+0.64·(30,30,30) EXACT; dark all-day (40,76,95) = 0.32·… EXACT; light timed (219,240,251) ≈ 0.19 blend (218,240,251); light all-day (222,241,251) = 0.17 blend EXACT; stripe (61,174,233) both legs. All blends solve ⇒ rendering math unchanged; ICS mtime Oct 17 01:55 / metadata Oct 17 04:50 = rewritten after R125/R128; metadata's 4 colours still match R126's sidebar dots. No source diff. ⇒ DATA change, provenance → Next round #1.
+- Verdict: sweep PASS both legs, every closed ID holds; E02 font clauses + ruling-blocked list keep `DONE` off. Figures: r138-dark-week.png, r138-light-week.png, r138-dark-crops.png.

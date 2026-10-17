@@ -1,50 +1,51 @@
-# R299 — R-DIM mid-anim attempt FAILED: 编辑 dialog stopped opening entirely (clicks delivered, no dialog). Checkpoint: relaunch needed. Next: R-DIM mid-frame via FRESH instance.
+# R300 — R-DIM mid-enter CONFIRMED (fresh instance; scrim 211 mid vs 204 settled). Exit completes (255) but mid-exit frame missed (120ms < poll). Next: R-TOOLTIP-Y ref-measure.
 
-## 本轮 (R299)
-Atomic step: **R-DIM mid-enter confirmation (state.md Next #1).** NOT achieved — blocked by environment, not by code.
-- Light instance was alive (day view 2026-04-02, popover open per R298 relay). r299-pre.png confirmed popover open, 编辑 pill at x665–705 / y389–411, center ≈(685,400).
-- **The 编辑日程 dialog stopped opening.** Every attempt delivered the pointer event (live-runtime-vm.log: `pointer click 670 396` etc.) but scrim stayed 255 and the popover persisted. Tried, in order: press/release gap 0.03 (capture too early — frame shows button still pressed, pre-dialog); press/release gap 0.06; single `click`; outside-click (950,120) reset; × close (695,289) + re-openItem; corrected openItem schema + R298's exact (670,388). All no dialog. R298 opened it with the identical recipe on this same build ⇒ instance stuck-state suspected (R298's nativeRecord session did dialog-close + popover-reopen interleaving), possibly an invisible revealProgress=0 dialog eating clicks (new R-DIM code makes scrim alpha 0 ⇒ invisible but Overlay may still grab input).
-- **New load-bearing finding: `openItem` schema is FLAT** — `{"action":"openItem","kind":"event","titleContains":"Morning"}` (harness/Main.qml:225-235). Nested `{"item":{…}}` silently no-ops. R298's shorthand was misleading.
-- Timing note for the recipe: harness polls 100ms; with gap 0.03 the capture can land BEFORE the click is processed (r299-enter.png = pre-click frame, button mid-press). Capture must be written ≥1 poll after the click ⇒ gap ≈0.08–0.12 between click and capture write.
-- Bash budget exhausted (23) before relaunch — no fresh-instance attempt this round.
+## 本轮 (R300)
+Atomic step: **R-DIM mid-anim via FRESH instance (state.md Next #1) — mid-ENTER achieved, mid-exit missed.**
+- Relaunched light (`start-review-vm.sh light` bg, pid 2428209). Drove resize 1280×800 / sidebar collapsed / view day / date 2026-04-02 → flat openItem opened popover (fresh instance works fine — R299's instance was NOT the problem).
+- **ROOT CAUSE of R298/R299 "dead dialog" found: `pointer` kind "click" is a NO-OP.** `ReviewInput.cpp:67-83` supports only press/release/move; any other kind (incl. "click") sends a bare MouseMove. The log line `pointer click undefined 763 491` = kind,target echo of a move. ALL dialog opens must use press→release.
+- **Enter mid-frame: r300-mid2.png** — press(763,491)→0.12→release→0.12→capture. Dialog 编辑日程 opening, scrim(950,120)=**211** strictly between 255 (pre) and 204 (settled); background day view visibly dimmed through the reveal. **R-DIM mid-enter PASS.**
+- Settled scrim at (950,120) = **204** over white (end frame r300-end2.png).
+- **Exit: 取消 at (647,650)** — attempt 1 (gap 0.05) FAILED: press+release written <100ms apart ⇒ release SKIPPED (command.json holds one command, 100ms poll) — button got focus ring but never clicked. Attempt 2 (gap 0.12): dialog closed cleanly, scrim back to 255 (r300-exit2.png) — exit completes fully, but capture landed after the 120ms anim ⇒ **mid-exit pixel not caught.** Stopped at 2 attempts per discipline.
+- **Second load-bearing finding: fast-command gap MUST be ≥0.12** (>100ms poll) or intermediate commands are silently skipped.
 
 ## 仍差 (top 8, visual-impact order)
-1. **R-DIM mid-anim confirmation — BLOCKED R299 by dead dialog. NEXT: relaunch light (`start-review-vm.sh light` in bg, seed AFTER pid), re-drive `date 2026-04-02` → `view day` → flat-schema openItem → click 编辑 (670,388) → capture in SAME fast-command call, gap 0.08–0.12 ⇒ capture ~1 poll after click = mid-220ms-enter; scrim must read strictly 204<val<255 at (950,120). Then 取消 (550,596) mid-exit (120ms; accept either side). If fresh instance ALSO refuses to open the dialog ⇒ suspect the R-DIM change itself (invisible no-alpha Overlay grabbing input) — read KosWorkspaceDialog.qml open/close logic and check `enabled`/`visible` of the Overlay during revealProgress=0.**
+1. **R-DIM mid-EXIT frame — 120ms InCubic too fast for 100ms poll + ~100ms capture latency. Needs either nativeRecord (but scrim layer invisible in native frames — known) or a way to shrink capture latency. LOW value: enter confirmed + exit-completes verified; consider accepting as-is and marking R-DIM PASS.**
 2. **R-YEAR: segmented control → 4 segments Day/Week/Month/Year + 12-month year view from mini-month. No dead segments. Big — several rounds.**
-3. R-TOOLTIP-Y: measure ref tooltip y, match, record measurement in LEDGER (self-resolved, no ruling needed).
+3. R-TOOLTIP-Y: measure ref tooltip y, match, record measurement in LEDGER (self-resolved, no ruling needed). **← NEXT #1**
 4. R-H dark-theme spot-check (fold into next regression leg).
 5. R-OVERFLOW dark spot-check (fold into next regression leg).
-6. *(reserved)*
+6. R-DIM dark spot-check (fold into next regression leg).
 7. *(reserved)*
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
-0. R299 — **no code change; mid-anim attempt blocked (dialog won't open); openItem flat-schema finding.**
-0. R298 — **R-DIM: scrim alpha × revealProgress (220 OutCubic / 120 InCubic, reduceMotion instant). Static verified; mid-frame pending.**
-0. R297 — **R-OVERFLOW: timed same-hour max 3 columns + plain `+N`; silent slice(0,2) cap removed. PASS light.**
-0. R296 — **R-H ring icon on all-day band chips (12×12/stroke 3/hole 6/inset 3, chipInk; text margin 19). PASS light.**
-0. R295 — plain hold. 0. R294 — plain hold. 0. R293 — plain hold. 0. R292 — plain hold.
-*(older: R291/R290/R277… archived in rounds.md tail)*
+0. R300 — **no code change; R-DIM mid-enter CONFIRMED (scrim 211 mid / 204 settled / 255 pre). pointer "click" is a no-op — press→release required; fast-command gap ≥0.12.**
+0. R299 — no code change; attempt blocked; openItem flat-schema finding.
+0. R298 — **R-DIM: scrim alpha × revealProgress (220 OutCubic / 120 InCubic, reduceMotion instant).**
+0. R297 — **R-OVERFLOW: timed same-hour max 3 columns + plain `+N`. PASS light.**
+0. R296 — **R-H ring icon on all-day band chips. PASS light.**
+0. R295 — plain hold. 0. R294 — plain hold. 0. R293 — plain hold.
+*(older: R292/R291/R290/R277… archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
-- **R299 BLOCKER (load-bearing): current light instance will NOT open the 编辑日程 dialog — pointer clicks deliver but nothing opens. Do NOT trust this instance for dialog work; relaunch first. If a fresh instance still fails, suspect R-DIM's Overlay: at revealProgress=0 the scrim is invisible (alpha 0) but may still intercept input, making the dialog unopenable-looking after any close. Check KosWorkspaceDialog enabled/visible vs revealProgress.**
-- **OPENITEM SCHEMA (R299, load-bearing): `{"action":"openItem","kind":"event","titleContains":"Morning"}` — keys FLAT on the command object (harness/Main.qml:225). Nested {"item":…} no-ops silently.**
-- **CAPTURE TIMING (R299): harness polls 100ms ⇒ fast-command gap 0.03 capture can precede the click's effect. Put ≥0.08–0.12 between the click and the capture command.**
-- **第二批裁决 (2026-10-18 01:18, load-bearing): R-H (all-day ring icon — DONE R296), R-YEAR (4-segment + mini-month year grid, no dead segments), R-OVERFLOW (same-hour ≤3 columns then +N — DONE R297), R-DIM (scrim follows KosDialog reveal 220ms OutCubic / 120ms InCubic, reduceMotion exempt, shadowAmbient/shadowKey — implemented R298, mid-frame confirm pending), R-TOOLTIP-Y (self-resolved: ref-measured y, record in ledger). 人工裁决事项清零.**
-- **第一批裁决 (2026-10-17 22:55, load-bearing): R-CHIP chip height round(hourHeight*0.96)=38 (DONE R240/R241); T01 side-by-side halves (DONE R242); R-GUTTER 12h two-tone (DONE R243/R244); R-MONTH stack 3 + +N (DONE R245); R-SCALE ref-measured beats spec estimates (stripe ≈3).**
-- **DIALOG DRIVE (R298, load-bearing): `openItem {kind:"event",titleContains:…}` (flat) opens the detail POPOVER, not the editor dialog; 编辑 at (670,388) opens 编辑日程; 取消 at (550,596); `escape` does NOT close it. nativeRecord captures contentItem only — Overlay.modal scrim INVISIBLE in its frames; scrim verification must use captureClient. `fast-command.py` = review-command.py without the 0.6s tail sleep; ONE command per invocation preferred, or fast-command.py with adequate gaps.**
-- **DRIVE KEYS (load-bearing): `date` action key is `date`; `sidebar` key is `expanded` (bool); `view` key is `view`. Wrong key silently no-ops.**
-- **Shared `AppTheme` has `text` (:153) / `mutedText` (:154) — NO labelPrimary/labelSecondary (Main.qml `tahoe`-only). QT6 delegates: declare `required property int index`. AppTheme motion tokens: motionNormal=220, motionFast=120, both 0 under reduceMotion (:179-180).**
-- **NEVER hand-write `harness/command.json`; re-seed `{"sequence":0,"action":"none"}` and drive via review-command.py/fast-command.py if clobbered. Capture = `captureClient` + ABSOLUTE path. `kill -0 $(cat live-app.pid)` FIRST; launcher resets command.json ⇒ re-issue resize/sidebar/view/date after relaunch. Theme fixed at launch (KOS_APPEARANCE). start-review-vm.sh never exits (exec+wait) — background it or it eats the 60s tool timeout; seed AFTER it prints pid.**
-- **ICS EDITING GOTCHA (R297): insert new VEVENTs AFTER a complete `END:VEVENT` and re-add `BEGIN:VEVENT\nUID:…` yourself — replacing a `UID:` anchor line orphans the next event's BEGIN and the parser silently drops blocks. `replaceExisting=true` ALSO wipes todos — re-create the todo trio after any replace-import.**
-- **MONTH-CELL HOVER ARTIFACT (R275):** full-cell light-blue fill + bare `+` top-right = hover highlight + quick-add. Move via `{"action":"pointer","kind":"move",…}`; `position` REJECTED in month view.
-- **THIS RUN'S GRID GEOMETRY (collapsed sidebar, day view): week starts MONDAY. App starts `--view week --date 2026-10-15` sidebar COLLAPSED; fixtures live on 2026-04-02 — drive `date` there. Light instance STALE (dialog won't open) — relaunch before dialog work.**
+- **POINTER KINDS (R300, load-bearing): only `press` / `release` / `move` exist (ReviewInput.cpp:74-83). `"click"` = bare MouseMove, SILENT NO-OP. Any button activation = press cmd then release cmd at same coords.**
+- **FAST-COMMAND GAP (R300, load-bearing): ≥0.12 strictly. Commands written <100ms apart get skipped (single command.json + 100ms poll). R299's gap-0.05-style recipes were doomed by this too.**
+- **DIALOG COORDS (current 1280×800 collapsed layout, R300): popover 编辑 pill center (763,491); 编辑日程 取消 (647,650); popover opened via flat openItem. 取消 closes BOTH dialog and popover → plain day view. escape does NOT close dialog.**
+- **R-DIM MEASURED (R300): scrim at (950,120) over white — pre 255, mid-enter 211, settled 204, after exit 255. Enter 220 OutCubic confirmed live; exit completes but 120ms mid-frame uncapturable with current poll+latency.**
+- **第二批裁决 (2026-10-18 01:18, load-bearing): R-H (DONE R296), R-YEAR (4-segment + mini-month year grid, no dead segments), R-OVERFLOW (DONE R297), R-DIM (implemented R298, mid-enter CONFIRMED R300), R-TOOLTIP-Y (self-resolved: ref-measure → ledger). 人工裁决事项清零.**
+- **第一批裁决 (2026-10-17 22:55, load-bearing): R-CHIP 38 (DONE R240/R241); T01 halves (DONE R242); R-GUTTER two-tone (DONE R243/R244); R-MONTH stack 3 + +N (DONE R245); R-SCALE ref-measured beats spec.**
+- **OPENITEM SCHEMA (R299, load-bearing): `{"action":"openItem","kind":"event","titleContains":"Morning"}` — FLAT keys (harness/Main.qml:225). Nested {"item":…} no-ops.**
+- **DRIVE KEYS (load-bearing): `date` key `date`; `sidebar` key `expanded`; `view` key `view`. Wrong key silently no-ops. Shared `AppTheme` has `text`/`mutedText`, NO labelPrimary/Secondary. QT6 delegates: `required property int index`. motionNormal=220, motionFast=120, 0 under reduceMotion.**
+- **NEVER hand-write `harness/command.json`; re-seed `{"sequence":0,"action":"none"}` if clobbered. Capture = `captureClient` + ABSOLUTE path. Launcher resets command.json ⇒ re-issue resize/sidebar/view/date after relaunch. Theme fixed at launch. start-review-vm.sh never exits — background it, seed AFTER pid.**
+- **ICS EDITING GOTCHA (R297): insert new VEVENTs AFTER a complete `END:VEVENT`; re-add `BEGIN:VEVENT\nUID:` yourself. `replaceExisting=true` wipes todos — re-create the trio.**
+- **THIS RUN'S GRID GEOMETRY (collapsed sidebar, day view): week MONDAY. App starts `--view week --date 2026-10-15` collapsed; fixtures on 2026-04-02 — drive `date` there.**
 - **OUR TOKENS. `CalendarScheduleView.qml:95-112`: gridLine (#EDEDED / white@0.13), gridLineMinor (#F4F4F4 / white@0.06), allDaySeparator (#D9D9D9 / white@0.24), sectionRule (#F2F2F2 / white@0.04). Schedule field WHITE light / (30,30,30) dark. Weekend 249/37. Sidebar plane (228,228,228).**
-- **`hourHeight` is THE pitch constant (`:53`). Chip height 38, half-hour line 20. Ref timed chip 1:1: pitch 27; fill (222,237,254); bar (59,134,247) 2.4px; ink (26,67,123); radius ≈2. Ref gutter: digit+AM/PM two-tone same baseline, red 9:41 pill replaces 10 AM. Ref all-day band: rows pitch 19; chip radius ≈6 alpha ≈0.16.**
-- **Fixtures (R297 state): each day 0329–0403 has Morning planning 08:00–08:45, Short appointment 10:15–10:30, Long review 11:00–13:00, Design review 14:30–15:30, Evening session 18:00–19:30; Thu 04-02 ALSO has Overflow one/two/three all starting 08:00. Todos: Review checklist 04-01 09:30 (personal), Prepare notes 04-01 14:30 (inbox), long-task-title 04-02 11:00 (personal). An event's itemColor is env-derived — never pin chip colour literals.**
-- **Crops: 1:1 + zoom in ONE read; `NEAREST` for structure, `LANCZOS` for smooth. No `numpy`. tmp/ gitignored; mirror `docs/ui-calendar/` with **`LEDGER.md` = byte copy of `state.md`**. `python3 -c` payload with backticks is mangled — use a heredoc. A static screenshot can never settle an animation.**
+- **`hourHeight` THE pitch (`:53`). Chip 38, half-hour 20. Ref timed chip: pitch 27; fill (222,237,254); bar (59,134,247) 2.4px; ink (26,67,123); radius ≈2. Ref gutter two-tone. Ref all-day: pitch 19; radius ≈6 alpha ≈0.16.**
+- **Fixtures (R297): days 0329–0403 Morning planning 08:00–08:45, Short appointment 10:15–10:30, Long review 11:00–13:00, Design review 14:30–15:30, Evening session 18:00–19:30; Thu 04-02 ALSO Overflow one/two/three @08:00. Todos: Review checklist 04-01 09:30 (personal), Prepare notes 04-01 14:30 (inbox), long-task-title 04-02 11:00 (personal). itemColor env-derived — never pin chip colours.**
+- **Crops: 1:1 + zoom in ONE read; `NEAREST` structure / `LANCZOS` smooth. No `numpy`. tmp/ gitignored; mirror `docs/ui-calendar/` with `LEDGER.md` = byte copy of `state.md`. Heredoc for `python3 -c` payloads. A static screenshot can never settle an animation.**
 
 ## Next round (pick ONLY #1)
-**#1 — R-DIM mid-anim via FRESH instance: kill stale instance; `start-review-vm.sh light` in background, seed AFTER pid; re-drive `date 2026-04-02` → `view day` → flat openItem → click 编辑 (670,388) + captureClient in ONE fast-command call with click→capture gap 0.08–0.12 ⇒ mid-220ms-enter frame; scrim at (950,120) must read strictly between 204 and 255, card mid-fade. Then 取消 (550,596) mid-exit. Record alphas in LEDGER. If fresh instance also refuses ⇒ debug KosWorkspaceDialog Overlay input grab at revealProgress=0 (R-DIM change suspect) before retrying.**
-**Then (later rounds): R-TOOLTIP-Y ref-measure → R-YEAR (multi-round) → dark spot-checks of R-H + R-OVERFLOW + R-DIM folded into the next regression leg.**
+**#1 — R-TOOLTIP-Y: measure the ref image's tooltip y-position (crop the relevant region of `.loop/refs/macos-calendar.png`, get pixel values), compare with our live tooltip placement (hover a timed chip via pointer `move`, capture), record the measurement in docs/ui-calendar/LEDGER.md per the self-resolved ruling. Adjust only if measurably off.**
+**Then (later rounds): R-YEAR (multi-round, big) → dark spot-checks of R-H + R-OVERFLOW + R-DIM folded into the next regression leg. Optional: R-DIM mid-exit via reduced capture latency, else mark R-DIM fully PASS.**
 **Not `DONE`.**

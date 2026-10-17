@@ -4558,3 +4558,21 @@ Atomic step: Next #1 of R134 — style the dark-leg ToolTip (Qt Basic leaking). 
 - 3x crop `r147-minimonth-crop-3x.png` visually confirms: heading 2026年4月, header 一二三四五六日, rows 30 31 1 **[2]** 3 4 5 … 27 28 29 30 1 2 3, muted 4-10 tail.
 - **PASS — byte-consistent with pinned; M-group band-top bookkeeping closed. No source change, no build.** code-writer still not registered (nothing to implement).
 - *(Archived from state.md 最近已改: R137 — released-rim under dialog scrim settled at REST both legs; item CLOSED.)*
+
+## R148 — re-verify CLOSED T-group (timed-chip y-map, 2026-04-02 Thu), light leg — PASS
+- Atomic step: Next #1 — the T-group chip y-map (pinned 08:00 317-332 · 09:00 357-372 · 10:00 397-412 · 11:00 437-452+455-470 · 12:00 477-492 · 14:00 557-572), light leg, single capture.
+- Light leg, fresh relaunch (pid 1133943). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r148-tchips-light.png`.
+- **Method lesson: the WTODO chips render their own hues (green 57,196,135 / gold 215,166,44), so a blue-only tone filter silently drops 09:00 and 12:00.** Colour-agnostic scan instead: stripe column x637 (avoids text), "non-white" threshold — fill tones sum ≥33 of 765, white 0, thr 25.
+- Measured fill runs at x637 thr25: **(317,332) (357,372) (397,412) (437,452) (454,470) (477,492) (557,572)** — all 7 pinned chips reproduce; only 11:00-second top reads 454 vs pinned 455 (1 px, AA). Pitch 40 exact.
+- Extra run **(637,652) = 16:00 `[UI] Red review` WTODO**, pitch-consistent (557+80); not a regression, absent from the pinned list because the pinned list predates… simply enumerates the anchor chips.
+- Stripe runs (thr 90) sit 2 px inside each fill (319..330 …) = the stripe's vertical inset within the 16-h chip; the stripe column x636..639 (R123) confirmed at (61,174,233) for the blue chips.
+- 2x crop `r148-tchips-crop-2x.png` visually confirms the stack: Morning planning / [UI] Green planning / Short appointment / Long review with a d… + [R019 LONG TASK] / [UI] Gold review / Design review (14:00) / [UI] Red review (16:00).
+- **PASS — T-group y-map closed byte-consistent with pinned. No source change, no build.** code-writer still not registered (nothing to implement).
+
+## R149 — re-verify CLOSED S-group (sidebar category list S02/S03), light leg — PASS
+- Atomic step: Next #1 — the S-group sidebar category list (S02/S03: Today row 44 tall + 1 px separator; heading font 11 / left 12; CategoryRow pitch 30, box 12×12 at x12..23 radius 3, label 13 at left 32), light leg, single capture.
+- Light leg, fresh relaunch (start script timed out at 120 s → backgrounded; app confirmed alive pid 1152756 before driving). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r149-sgroup-light.png`.
+- **Layout (3x crops `r149-todayrow-3x.png`, `r149-sidebar-3x.png`):** mini-month nav at top → **Today row** (blue disc 12×12 x40..51 y86..97 + 今天 ink x72..99 y86..98, 13 tall + muted 周六 right-aligned ink x167..196 y86..99) → **separator y117 = 1 px (200,200,200) spanning x0..219** → heading `Calendars` (ink x13..62 y141..148, 8 tall) → 日程 / 计划任务 (checked, blue/green) → indented 显示已完成 row (orange outline ~x36..49 y228..239 12×12, label ink x57..119 y228..239) → heading `Task lists` (ink x12..56 y269..276, 8 tall) → Inbox / Personal / UI Review Gold / UI Review Red.
+- **Pinned values all reproduce:** separator 1 px ✓; Today row 44 tall (73..116) ✓; both headings 8-tall ink = font 11, left 12-13 (AA of 12) ✓; **CategoryRow pitch 30 exact** (168→198; 296→326→356→386) ✓; **box 12×12 at x12..23** (rows 296..307 = 12 tall) ✓; **radius 3** — corner profile top row x14=243/x15=249/x16..21=255 AA ramp, 1 px inset at dy=1, matches the R141 timed-chip radius-3 signature ✓; **label 13 at left 32** — Inbox ink x33..65 y297..306 (ink left 33 = AA of nominal 32, gap 8 from box right 23) ✓. Group gap consistent: heading ink bottom → first box top = 20 in BOTH groups (148→168, 276→296).
+- Box colours (0,136,255)/(52,199,89) vs Task-list (79,140,255)/(57,196,135)/gold/red = fixture category hues, env-derived — not pinned per R139/R148.
+- **PASS — S02/S03 byte-consistent with pinned. No source change, no build.** code-writer still not registered (nothing to implement).

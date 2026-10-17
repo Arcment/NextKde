@@ -4919,3 +4919,11 @@ R202 — HOLD (41st consecutive). Checked for new rulings/spec updates since R20
 R195 archive — hold, nothing done (34th consecutive). Checked for rulings/spec updates: none since R194 (spec mtime 2026-10-17 04:56 unchanged; git head = R194 docs commit 011b092). Checkpoint stands: blocked on a user ruling.
 
 ## R203 (2026-10-17) — HOLD, 42nd consecutive. Checked for new rulings/spec updates since R202: NONE (spec.md mtime 2026-10-17 04:56 unchanged; git head = R202 docs commit c7301b6; .loop/ROUND = 203). R203 audit: Main.qml / CalendarScheduleView.qml carry post-04:56 mtimes (09:39 / 17:24) but `git diff apps/` is EMPTY — content byte-identical to HEAD, touch-only, not a change; last real source change remains R159 (8145412). Option (b) taken: checkpoint stands, blocked on a user ruling. No source, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — all ruling-blocked (E02's two font clauses + the 11-item list reported R140); sweep COMPLETE both legs, every closed item twin-covered. NOT DONE.
+
+## R204 (2026-10-17) — HOLD (43rd consecutive)
+- Audit: spec.md mtime unchanged (2026-10-17 04:56); git head = R203 hold commit 2c4b981; `.loop/ROUND` = 204; `git status`/`git diff apps/` EMPTY. No new rulings or spec updates since R203.
+- Atomic step: Next #1 option (b) — hold the checkpoint. No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — held, nothing new to measure).
+- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE both legs, every closed item twin-covered (R161).
+- Checkpoint stands: blocked on a user ruling. NOT `DONE`.
+- state.md window rotated to R204..R197; R196 entry archived below.
+- Archived from state.md: R196 — hold, nothing done (35th consecutive). Checked for rulings/spec updates: none since R195 (spec mtime 2026-10-17 04:56 unchanged; git head = R195 hold commit 045c190; no source changes under apps/). Checkpoint stands: blocked on a user ruling.

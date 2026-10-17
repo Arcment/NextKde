@@ -1,14 +1,17 @@
-# R247 — REGRESSION SWEEP #1 PASS (week expanded light+dark, R240-R246 areas all match pinned values; no code change). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
+# R248 — REGRESSION SWEEP #2 PASS (day view light + collapsed week dark, R240-R246 areas all match pinned values; no code change). **NOT `DONE`** — remaining open: H/Year/tooltip-y/A/B all ruling-blocked; next actionable work = regression sweeps only.
 
-## 本轮 (R247)
-Atomic step: Next #1 — regression sweep, week view 1100×692 expanded, date 2026-04-02, light+dark. NO code change.
-- **Light (r247-light.png + 2× crop _r247-light-chips2x.png, band crop _r247-light-band.png):**
-  - R240/R242 chips: height/title 11 top-aligned/stripe 3 all correct; 1-item full-width, 2-item halves with 2px gap (Wed 9AM "[UI] G…/Revie…", Wed 11AM "Long …/[R019…", Wed 2PM "Desig…/Prepa…" — each half keeps its own event tone).
-  - R241/R246 secondary: clock glyph ring+hands present, tone = chip ink, gap 5; "8 – 8:45AM" / "9AM" / "10:15 – 10:30AM" / "11AM – 1PM" / "3 – 4:15PM" — 12-hour with shared-period start-meridiem drop all correct.
-  - R243/R244 gutter: digit 11 + AM 8 two-tone, same baseline, ink centred on hour line.
-  - R106-R158 all-day band y-map: 全天 label, Multi-day span, Design sync/Release notes stack, R087 sole, "+2" overflow — all in place.
-  - Segment control 日/周/月 pill on 周; chrome/toolbar/mini-month normal.
-- **Dark (r247-dark.png + 3× Wed crop _r247-dark-wed3x.png):** glyph ring+hands render in light chipInk on dark fill; [R019] green and Prepa… purple halves keep own tones on dark fills; "3 – 4:15PM" correct; band/overflow fine.
+## 本轮 (R248)
+Atomic step: Next #1 — regression sweep #2, two surfaces different from R247: day view light @1100×692 expanded, then collapsed-sidebar week dark. NO code change.
+- **Day light (r248-day-light.png + 2× crop _r248-day-light-chips2x.png):**
+  - All-day band: 全天 label, Design sync/Release notes stack, `+2` overflow — correct y-map.
+  - Timed chips full-width: title top-aligned, secondary Row(glyph, gap 5) + Label 10; clock ring+hands in chipInk; 12-hour "8 – 8:45AM"/"10:15 – 10:30AM"/"11AM – 1PM"/"12PM"/"9AM" — shared-period meridiem drop correct.
+  - T01 side-by-side works in day view too: Thu 11:00 "Long review…" (blue) + "[R019 LONG TASK]…" (green) halves with 2px gap, each keeps own tone.
+  - Gutter two-tone: "7 AM"/"8 AM"… digit `AppTheme.text` + AM `mutedText`, same baseline, ink on hour line; pitch 40.
+  - Stripe 3, chip heights ≈38, per-event tones (blue/green/gold/red) correct.
+- **Week dark collapsed (r248-week-dark.png + crop _r248-week-dark-3x.png):**
+  - Sidebar collapsed (rim x0, gutter x1..51, separators pitch 150); segment pill on 周.
+  - Band: Multi-day span Mon–Wed, Design sync/Release notes Thu, R087 sole Fri, `+2`.
+  - Chip glyphs render light chipInk on dark fills; T01 halves Wed 9AM ("Revi…"/"9:3…") + Thu 11AM ("Long…"/"R019…"); Wed 2PM "Desig…/Prepa…"; secondaries correct.
 - Verdict: **PASS both legs, zero regressions found. Nothing fixed, nothing broken.**
 
 ## 仍差 (top 8, visual-impact order)
@@ -22,14 +25,14 @@ Atomic step: Next #1 — regression sweep, week view 1100×692 expanded, date 20
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
-0. R247 — **Regression sweep #1: week expanded light+dark vs R240-R246 pinned values — PASS, no code change.** Chip stack/secondary+glyph/gutter/band y-map/segment all match.
+0. R248 — **Regression sweep #2: day light + collapsed week dark vs R240-R246 pinned values — PASS, no code change.**
+0. R247 — **Regression sweep #1: week expanded light+dark — PASS, no code change.**
 0. R246 — **Timed-chip clock glyph + 12-hour secondary.** `CalendarScheduleView.qml:950-999` Row(glyph 11×11 ring stroke 1.5 + hands 12/3, gap 5) ; `Main.qml:1308-1338` `formatClock12` + itemSecondary AM/PM with shared-period start-meridiem drop. Light+dark verified. CLOSED.
-0. R245 — R-MONTH verified, NO code change. Month view already cap-3/`+N`/clip (`CalendarMonthView.qml:97/154/96/131`); verified 1/2/3-chip at 692/920/1000 h, dark. CLOSED.
-0. R244 — R-GUTTER ink-centre fix. `CalendarScheduleView.qml:718` topMargin +4 ⇒ digit ink centred on the hour line. Light+dark. CLOSED.
+0. R245 — R-MONTH verified, NO code change. Month view already cap-3/`+N`/clip. CLOSED.
+0. R244 — R-GUTTER ink-centre fix. `CalendarScheduleView.qml:718` topMargin +4 ⇒ digit ink centred on the hour line. CLOSED.
 0. R243 — R-GUTTER two-tone (ruling F). `CalendarScheduleView.qml:706-752` digit 11 `AppTheme.text` + AM/PM 8 `AppTheme.mutedText`, baseline-anchored, 12-hour.
 0. R242 — T01 side-by-side (R-CHIP clause 3). `CalendarScheduleView.qml:805-940` chipHost + half-width lanes; `required property int index` at `:826`.
 0. R241 — R-CHIP clause 2: secondary line. `Main.qml:1301-1314` (now shifted) itemSecondary; `CalendarScheduleView.qml:28` accessor; wired `Main.qml:2654/2686`.
-0. R240 — R-CHIP clause 1: chip height `Math.round(hourHeight*0.96)`=38; title 11 Medium; stripe 3 literal.
 *(older rounds archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
@@ -47,7 +50,7 @@ Atomic step: Next #1 — regression sweep, week view 1100×692 expanded, date 20
 - **MONTH VIEW (R245, dark, live evolved fixtures; ruling D closed).** `CalendarMonthView.qml` never modified this loop. `visibleItemCount = max(0, min(3, floor((dayHeight − 36) / 20)))` (`:97`), chips 18 h spacing 2, slice `:154`, `clip: true` `:96`, `+N` top-right `:131-135`. dayHeight = (gridH − 30 − 18)/6; at window 1100×692 ⇒ 1 chip + `+N`; 920 ⇒ 2; 1000 ⇒ 3. Grid: 7-col header 30 + 6 rows, cell padding 5/5, date-disc 24 radius 12, chip radius 5, stripe 3, font 9. Hover adds a 24×24 `+` KosToolButton. Bottom agenda panel ~172 tall.
 - **THE GUTTER HOUR LABELS (R066; two-tone R243, ink-centred R244 — CLOSED).** Two-tone 12-hour: digit font 11 `AppTheme.text`, meridiem font 8 `AppTheme.mutedText`, gap 3, SAME baseline; right anchor rightMargin 7 ⇒ ink right x264; pitch **40 exact**; topMargin = −round(digitText.implicitHeight/2) + 4 ⇒ digit ink CENTRE on the hour line. R159: label whose hour line IS the grid top rule is hidden — first visible band 07:00. Structure `CalendarScheduleView.qml:706-752`.
 - **TIMED CHIP POST-R242 (light): height 38 = `Math.round(hourHeight*0.96)`; top margin 3, text Column topMargin 2.** Title 11 Medium TOP-aligned; stripe 3 literal, stripeInset 3, capsule radius 1; radius 3, fill alpha 0.36 dark / 0.19 light, chipInk, opacity 0.5 completed.
-- **T01 SIDE-BY-SIDE (R242, light, expanded 1100x692): chipHost `Item { anchors.margins: 3 }` (`:814-940`), `visibleItems = cellItems.slice(0, 2)`.** Chip `width = (chipHost.width − (n−1)·2) / n`, `x = index·(width+2)`. Measured: 1 item ⇒ full 113; 2 ⇒ halves 55/56 with 2px gap. `>2` still capped at 2.
+- **T01 SIDE-BY-SIDE (R242, light, expanded 1100x692): chipHost `Item { anchors.margins: 3 }` (`:814-940`), `visibleItems = cellItems.slice(0, 2)`.** Chip `width = (chipHost.width − (n−1)·2) / n`, `x = index·(width+2)`. Measured: 1 item ⇒ full 113; 2 ⇒ halves 55/56 with 2px gap. `>2` still capped at 2. **R248: works in DAY view too (Thu 11AM blue+green halves).**
 - **OUR COLUMN MAP AT 1100x692.** Sidebar-collapsed: rim x0; gutter x1..51; separators 52/202/352/502/652/802, pitch 150. **Expanded: gutter 221..272, separators 272/391/510/629/748/867/986 (pitch 119), Thu = 629..747**, rim x220. Sidebar x0..219. **Chrome: top band y0..29, toolbar y30..69 (capsule y36..63 h28), heading y70..117 rule y118, title ink left 241, L07 group 970..1079.** Toolbar buttons box 28, gaps 8, left pair 12..39/48..75, right pair 1022..1049/1058..1085, icon 16.
 - **THE TOOLBAR BUTTON'S POINTER STATES (R131-R133).** `toolbarAdd` box x48..76 × y36..64, centre (62,50). `glassRim` white@0.90 light / 0.28 dark; `glassEdge` black@0.08 light / white@0.10 dark. DARK rest 0.2590 → hover 0.4228 (×1.632); LIGHT rest 0.857 → hover 0.962 (×1.12). `hoverLift` dark 89→106, light 227→229; `pressScale` 0.97. Dialog STEALS hover; `escape` restores. CLOSED.
 - **THE `toolbarAdd` TOOLTIP — THEMED (R135).** `Main.qml:17-27`; fill bbox x26..97 × y68..95 byte-equal both legs; top 68 = button bottom 64 + 4 ⇒ BELOW (R134 y-discrepancy stays OPEN). Sites `Main.qml:880/:953/:1023/:1965`; delays `KosWindowControls.qml:25`, `KosSidebarToggle.qml:13`, `LiquidNavBar.qml:278`; style `ApplicationRunner.cpp:133`.
@@ -69,6 +72,6 @@ Atomic step: Next #1 — regression sweep, week view 1100×692 expanded, date 20
 - **Fixtures on 2026-04-02** (`profile/pim/calendar.ics` under tmp/ui-acceptance/calendar/): VEVENTs 08:00/10:15/11:00/14:30/18:00 every day 2026-03-29…04-04 + `Multi-day review` all-day 0330→0403 + `R087 card C/D` (0402) + `R087 sole` (0403) + `Design sync`/`Release notes` all-day 0402; Wed also `Review checklist` 10:00 + 15:00 `Prepare notes` (purple) + `[R019 LONG EVENT]`. UID-ordered since R083. WTODOs: green 09:00, gold 12:00, red 16:00, long task 11:00, `[R019 LONGTASK]` 11:00. Week starts MONDAY. R139: fixture carries NO colour data. *(R246: live profile shows evolved fixtures — "Morning planning" 08:00–08:45, "Short appointme…" 10:15–10:30, "Long review with…" 11:00–13:00, gold 12:00, "Design review" 14:30–15:30, red 16:00; Wed-only 09:30 "Revie…" and 14:30 "Prepa…".)*
 
 ## Next round (pick ONLY #1)
-**#1 — Regression sweep #2 (different surfaces than R247): day view light @1100×692 expanded (timed chips + gutter + all-day band on the day layout), then collapsed-sidebar week dark spot-check of the same R240-R246 areas. Fix only an actual regression, else record PASS and hold. If both pass, subsequent rounds repeat sweeps on rotation (month view / mini-month / toolbar) or hold — do NOT invent new deltas; H/Year/tooltip-y/A/B stay ruling-blocked.**
+**#1 — Regression sweep #3 (rotation): month view light @1100×692 expanded (R-MONTH cap-3/+N/clip areas) + mini-month/toolbar chrome spot-check in the same pass; if it passes, hold — do NOT invent new deltas. H/Year/tooltip-y/A/B stay ruling-blocked.**
 **Held items to re-list each round (per the ruling): all-day band ring icon (H) · segment 4th word `Year` · R134 tooltip y · dim snap (`KosWorkspaceDialog.qml:24-27`) + shadow magnitude (D03).**
 **Not `DONE` — H/Year/tooltip-y/A/B still ruling-blocked.**

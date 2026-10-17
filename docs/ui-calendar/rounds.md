@@ -5133,3 +5133,8 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - All three = ruling D's exact text ("最多 3 条，超出 +N；格子不够高时按参考截断，不得溢出到相邻行"). R-MONTH CLOSED with zero diff. Note: no month-view ref image exists; ruling D text is the sole authority (R-SCALE consistent).
 - Ledgered: month-view pin added to state.md. Window restored to 1100×692.
 - Next: timed-chip secondary clock glyph (ref 2-hour chip "🕐 11AM – 1PM").
+
+## R248 — Regression sweep #2 (day light + collapsed week dark) — PASS, no code change
+- Day light @1100×692 expanded (r248-day-light.png, crop _r248-day-light-chips2x.png): band 全天/Design sync/Release notes/+2 correct; full-width chips title top-aligned + secondary Row(glyph,5)+Label 10 with ring+hands in chipInk; 12-hour shared-period drop ("8 – 8:45AM","11AM – 1PM","12PM"); T01 halves work in day view (Thu 11AM blue+green, 2px gap); gutter two-tone "7 AM" baseline-anchored ink-on-line; stripe 3, heights ≈38, per-event tones correct.
+- Week dark collapsed (r248-week-dark.png, crop _r248-week-dark-3x.png): rim x0/gutter 1..51/pitch 150; segment pill on 周; band Multi-day span + Thu stack + R087 sole + +2; glyphs light chipInk on dark fills; T01 Wed 9AM + Thu 11AM halves; Wed 2PM Desig…/Prepa…; secondaries correct.
+- Verdict: PASS both legs, zero regressions. Next: sweep #3 month view + mini-month/toolbar chrome.

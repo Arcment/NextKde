@@ -5147,3 +5147,31 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Dark (r247-dark.png; 3× Wed crop _r247-dark-wed3x.png): glyph light chipInk on dark fill ✓; green/purple halves keep tones ✓; band ✓.
 - Verdict: zero regressions. Held items unchanged (H ring icon · Year word · R134 tooltip y · A/B dim+shadow).
 - Next: regression sweep #2 — day view light + collapsed-sidebar week dark.
+
+## R249 — Regression sweep #3: month view light @1100×692 expanded — PASS, no code change
+- Next #1 taken verbatim. Relaunch wrinkle: first drive reused R248's dark instance (capture sampled (30,30,30) chrome); `start-review-vm.sh` refuses to start while an owned instance is alive ("Owned review instance still running", exit 1) — killed the pid, relaunched `light`, re-drove resize/sidebar/view/date. Lesson folded into state.md (theme is fixed at launch; no runtime theme action).
+- Artifacts: `r249-month-light.png` (1100×692, chrome (255,255,255)) + `r249-crops.png` (week-1 cells 2×, mini-month 2×, chrome 1:1).
+- **R-MONTH areas (ruling D, R245 pins):** every event cell = exactly 1 chip + `+N` top-right at this geometry (30→+8, 31→+8, 1→+11, 2→+13, 3→+8, 4→+7); chips clipped to cell, stripe 3, radius ≈5, single-line elide; today cell (2) bordered + tinted. No overflow, no truncation artifact.
+- **Mini-month:** heading `2026年4月` + two 28×28 nav buttons; MONDAY-first header; 6 rows (30/31/1…4/5/6/10); today+selected `2` grey disc (selected wins); adjacent-month muted. Matches R112/R115-R118/R144.
+- **Toolbar chrome:** segment pill on 月; heading + `< 今天 >`; search/more; window dots. Matches R097/R127/R143.
+- Cell 21 hover `+` + tint = cursor hover artifact (pinned R245 hover behaviour), not a delta.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** Next: sweep #4 — month dark collapsed + agenda panel spot-check.
+
+## R250 — Regression sweep #4 PASS (month view dark @1100×692 COLLAPSED sidebar + bottom agenda panel — zero regressions, no code change)
+- Relaunch: killed R249's light instance, `start-review-vm.sh dark`. **Drive-key gotcha: `sidebar` action reads `command.expanded` (bool), NOT `state`** — first drive with `"state":"collapsed"` silently no-opped (harness Main.qml:214); re-drove `{"action":"sidebar","expanded":false}`. resize 1100×692 / view month / date 2026-04-02.
+- Artifacts: `r250-month-dark-full.png` (collapsed, chrome topband (30,30,30), sidebar n/a collapsed, grid (30,30,30), agenda tint (31,37,44)) + crops (cell30 4×, cell31 4×, cells1-3 2×, today 3×, agenda 1:1).
+- **R-MONTH dark pins (R245) re-verified:** first-row counts EXACT — 30→+8, 31→+8 (4× crops settle the 1:1 misread "+6"), 1→+11, 2→+13, 3→+8, 4→+7; every cell exactly 1 chip, single-line elide, stripe 3 visible, clipped to cell; today cell 2 bordered + tinted + tinted chip (Design sync).
+- **Bottom agenda panel:** heading `2026年4月2日星期四 14 项` (bold + muted count); 添加 top-right; rows = blue vertical bar + 全天 blue tab, title Design sync / Release notes, subtitle 日历日程, blue 日程 link right; third row clipped by panel bottom. Panel bg tinted (31,37,44).
+- **Collapsed geometry:** mini-month absent (lives in sidebar) ✓; grid spans rim x0 → full width; toolbar chrome (segment pill on 月, heading 2026年4月, `< 今天 >`, search/more, dots) matches R097/R127/R143 dark pins.
+- Cell 22 hover `+` + tint = cursor hover artifact (pinned R245 hover behaviour), not a delta.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** Remaining uncovered rotation leg: day view dark.
+
+## R251 — Regression sweep #5 PASS (day view dark @1100×692 EXPANDED sidebar — zero regressions, no code change)
+- Relaunch: `live-app.pid` pointed at a dead proc → `start-review-vm.sh dark`. **Drive-key gotcha (NEW): `view` action reads `command.view` (harness Main.qml:218), NOT `value`** — first drive with `"value":"day"` silently no-opped (capture succeeded, still on month); re-drove `{"action":"view","view":"day"}`. Also resize 1100×692 / `{"action":"sidebar","expanded":true}` / date 2026-04-02.
+- Artifacts: `r251-day-dark-full.png` + crops `r251-c1-gutter.png` (2×), `r251-c2-chip.png` (2×), `r251-c3-allday.png` (1:1), `r251-c4-halves.png` (1:1).
+- **Gutter two-tone (R243/R244) re-verified in day dark:** digit bright + AM muted, same baseline, ink-centred on hour lines; 12-hour "7 AM"…"4 PM"; first visible 7 AM (R159); pitch 40.
+- **Timed chips + R246 secondary re-verified:** title 11 medium top-aligned + Row(clock glyph, spacing 5) + secondary 10 on every chip; formats EXACT — "8 – 8:45AM", "9AM", "10:15 – 10:30AM", "11AM – 1PM" (shared period drops start meridiem), "12PM", "2:30 – 3:30PM", "4PM". Stripe 3, dark fill alpha 0.36, radius 3.
+- **T01 side-by-side re-verified in day dark:** 11 AM slot = blue "Long review with a deliberately lengthy title 11AM – 1PM" + green "[R019 LONG TASK] 任务长标题与编辑表单检查 任…" halves with 2px gap, both with glyph+secondary, elided.
+- **All-day band:** 全天 label; Design sync / Release notes full-width blue-bar tab chips, single-line elide; `+2` overflow row. Matches R128/R150/R158 pins.
+- **Chrome:** day header `周四 2` + today disc on 2; segment pill on 日; heading `2026年4月2日星期四`; `< 今天 >`; search/more; dots; field (30,30,30). Matches R097/R126/R143.
+- Verdict: **PASS, zero regressions. Nothing fixed, nothing broken.** All five rotation legs (R247 week exp l+d / R248 day light + week dark collapsed / R249 month light expanded / R250 month dark collapsed + agenda / R251 day dark expanded) are now swept clean. Nothing actionable remains; H / Year / R134 tooltip-y / A-B dim+shadow stay ruling-blocked. Next: hold.

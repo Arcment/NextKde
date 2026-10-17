@@ -4808,3 +4808,8 @@ Atomic step: HOLD the checkpoint (17th consecutive hold).
 - **Checked for new rulings/spec updates since R179: NONE.** `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161); `.loop/DEADLINE` 10-16 19:34; `git log` head = R179 docs commit a0e5be0; `.loop/ROUND` = 180. Files newer than the R179 session: only `.loop/ROUND`, `.loop/health.state` (watchdog heartbeat), and this round's own state/rounds/ledger/log files — no ruling message anywhere.
 - No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: blocked on a user ruling (E02's two font clauses + the 11-item list reported R140).
 - **R181 (2026-10-17) — HOLD (20th consecutive).** Checked for new rulings/spec updates since R180: none (spec.md mtime 04:56 unchanged, predates R161; .loop/DEADLINE 10-16 19:34; git head = R180 docs commit 156a113). No source, no build, no screenshot, no re-verify — idle hold. 仍差 unchanged (all ruling-blocked); sweep complete, twin-covered. Checkpoint stands: blocked on a user ruling. NOT DONE (E02 font clauses FAIL, ruling-blocked).
+
+## R182 (2026-10-17) — HOLD (21st consecutive)
+- Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R181: NONE — spec.md mtime 2026-10-17 04:56 unchanged (predates R161); .loop/DEADLINE 10-16 19:34; git head = R181's hold commit 651043d; .loop/ROUND = 182; only ROUND counter, health heartbeat, R181's own state/rounds/LEDGER writes and pim-vm.log newer than the R181 session.
+- No source, no build, no screenshot, no re-verify (idle hold). Sweep COMPLETE both legs, every closed item twin-covered (R161). 仍差 all ruling-blocked: E02's two font clauses (chip text) + the 11-item ruling-blocked list (reported R140).
+- Checkpoint stands: blocked on a user ruling. NOT DONE.

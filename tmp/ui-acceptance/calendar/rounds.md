@@ -4752,3 +4752,5 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 
 ## R161 — VERIFICATION ONLY (dark leg), no source (archived from state.md window)
 - Mini-month heading re-verified DARK leg: PASS — title core rows 519..530 / cols x80..139 (1 px AA of the light pin), ink (242,242,242) = dark labelPrimary; chevrons left x23..27 r519..528 EXACT, right x191..196 r520..528 EXACT, cores ≈(157,157,157); plane (40,40,40). **Last uncovered twin closed — every closed item now measured on both legs.**
+- **R171 — HOLD (10th consecutive).** Next #1 option (b). Checked for new rulings/spec updates since R170: NONE (spec.md mtime 2026-10-17 04:56 unchanged; .loop control files PROMPT 20:18 / TASK 20:40 / NOTICE 19:57 all 10-16; git head = R170 docs commit 85cc5cb; only .loop/ROUND newer). No source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling. state.md window advanced to R171..R163 (R162 archived here).
+- **R162 — HOLD.** Checked for rulings/spec updates: none since R161 (spec mtime 04:56 predates it; .loop control files all 2026-10-16). Checkpoint stands. *(archived R171)*

@@ -5430,3 +5430,11 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - Verify (r307a.png): 四月 2 灰 disc+白字 ✓; 三月尾行 30/31 后空格无 disc (泄漏修复) ✓; dots 3/29–3/31、4/1–4/4 不回归, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓.
 - → R-YEAR step 1+2 全部闭环. Next: R-YEAR dark spot-check → dark spot-checks 合并 regression leg → light 最终回归 → DONE.
 - Screenshots: r307a.png (repo root, 应移入 tmp/). Bash ~13/25.
+
+## R308 (2026-10-18) — R-YEAR dark spot-check PASS
+- Atomic step: state.md Next #1 — dark 下复查 R-YEAR 全点.
+- Drive trap (load-bearing): `{"action":"press","target":…}` 不存在, 静默 no-op — 第一张截图仍是 week view. 正确: `{"action":"pointer","kind":"press","x":724,"y":50}` + release. 修正后进 year 成功.
+- Drive: kill → start-review-vm.sh dark → log 无旧 capture ✓ → resize 1280×800 → date 2026-04-02 → pointer press/release (724,50) → capture r308a.png.
+- Verify (r308a.png, dark): 四月 2 灰 disc+深字清晰 ✓; 三月尾行 30/31 无 disc (R307 守卫在 dark 同样成立) ✓; dots 3/29–31、4/1–4 可见, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓.
+- → R-YEAR 整体 PASS (light R304–R307 + dark R308). 无 dark 专属问题.
+- Screenshot: tmp/ui-acceptance/calendar/r308a.png. Bash ~12/25.

@@ -1,24 +1,24 @@
-# R307 — R-YEAR disc 泄漏修复 PASS. Year view 全绿; Next: R-YEAR step 3 (可选) / dark spot-check 合并回归.
+# R308 — R-YEAR dark spot-check PASS. Next: dark spot-checks 合并 regression leg (R-H/R-OVERFLOW/R-DIM) 或直接 light 最终回归 → DONE.
 
-## 本轮 (R307)
-Atomic step: **R-YEAR disc 泄漏占位格修复+验证一轮闭环 (state.md Next #1). Loop 1/2, PASS.**
-- code-writer: Main.qml `yearDayCell.isSelected` 加 `yearDayCell.inMonth &&` 守卫 (一行, :2820). diff 确认仅此一处. rebuild OK.
-- **新陷阱 (R307, load-bearing): `captureClient` 的 `path` 是 app CWD 相对路径 — app cwd=/home/amao/nextkde, 所以 r307a.png 落在仓库根, 不在 tmp/ui-acceptance/calendar/. 以后 capture path 直接写 `tmp/ui-acceptance/calendar/xxx.png` 即可.**
-- 驱动: kill (pgrep -x 无旧实例) → start-review-vm.sh light → log 无旧 capture ✓ → resize 1280×800 → date 2026-04-02 → press/release segmentButton3 (724,50) → capture.
-- **验证 (r307a.png, 2026, selectedDate=4/2)**: 四月 2 灰 disc+白字 ✓; 三月尾行 30/31 之后空格**无 disc** (泄漏已修) ✓; dots 不回归: 3/29、3/30、3/31、4/1、4/2、4/3、4/4 蓝点 ✓, 4/5 及其余月无假点 ✓; 十月 18 today 红 disc ✓. → **R-YEAR 全部闭环 (step 1+2).**
-- Loop 1/2. Bash ~13/25.
+## 本轮 (R308)
+Atomic step: **R-YEAR dark spot-check (state.md Next #1). Loop 1/2 (驱动写错一次不算 build 回路), PASS.**
+- 驱动: kill 旧实例 → start-review-vm.sh **dark** → log 无旧 capture ✓ → resize 1280×800 → date 2026-04-02 → **pointer press+release (724,50)** 进 year → capture `tmp/ui-acceptance/calendar/r308a.png`.
+- **新陷阱 (R308, load-bearing): harness 没有 `action:"press"/"release"` — 那种命令静默 no-op (截图仍是 week view). 正确写法 `{"action":"pointer","kind":"press","x":…,"y":…}`. R307 记录里的 "press/release segmentButton3" 实为 pointer.**
+- **验证 (r308a.png, dark, 2026, selectedDate=4/2)**: 四月 2 灰 disc + 深色字清晰可辨 ✓; 三月尾行 30/31 无 disc (R307 修复在 dark 下同样成立) ✓; dots 3/29、3/30、3/31、4/1–4/4 蓝点可见, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓. → **R-YEAR dark 全过, R-YEAR 整体 PASS.**
+- Bash ~12/25.
 
 ## 仍差 (top 8, visual-impact order)
-1. R-YEAR step 3 (可选): dot 样式/间距对齐 (ref 无 year 参考图, 外推待确认; 可直接接受现状).
-2. R-YEAR dark spot-check (fold into regression leg).
-3. R-H dark spot-check (fold into regression leg).
-4. R-OVERFLOW dark spot-check (fold into regression leg).
-5. R-DIM dark spot-check (fold into regression leg).
-6. R-DIM mid-EXIT frame — LOW value: consider accepting, mark R-DIM PASS.
-7. **回归 leg**: 全部 spec ID 收尾时跑一遍 light 主视图截图对照 (所有已改点一次复查) — 完成后写 `DONE`.
+1. **回归 leg**: 全部 spec ID 收尾时跑一遍 light 主视图截图对照 (所有已改点一次复查) — 完成后写 `DONE`.
+2. R-H dark spot-check (可并入回归 leg 顺带).
+3. R-OVERFLOW dark spot-check (可并入回归 leg 顺带).
+4. R-DIM dark spot-check (可并入回归 leg 顺带).
+5. R-DIM mid-EXIT frame — LOW value: consider accepting, mark R-DIM PASS.
+6. R-YEAR step 3 (可选): dot 样式/间距 — ref 无 year 参考图, 外推; **建议直接接受现状标 PASS**.
+7. *(reserved)*
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R308 — no code; **R-YEAR dark spot-check PASS** (disc/dots/today 全过).
 0. R307 — **R-YEAR disc 泄漏 PASS: yearDayCell.isSelected 加 inMonth 守卫; 三月尾行干净, dots/today disc 不回归.**
 0. R306 — **R-YEAR dots PASS: updateEventRange 补 year 分支 (全年 pim 窗口); 2026 dots 正确 + 2025 无点.**
 0. R305 — no code; R-YEAR dots 根因诊断: updateEventRange 缺 year 分支 (Main.qml:1473).
@@ -26,10 +26,10 @@ Atomic step: **R-YEAR disc 泄漏占位格修复+验证一轮闭环 (state.md Ne
 0. R302 — **R-YEAR step 1: 4th Year segment + yearPage 3×4 skeleton; viewIndex 3=year.**
 0. R301 — no code; R-TOOLTIP-Y closed.
 0. R300 — no code; R-DIM mid-enter CONFIRMED.
-0. R298 — **R-DIM: scrim alpha × revealProgress.**
-*(older: R297/R296/R294/… archived in rounds.md tail)*
+*(older: R298/R297/R296/… archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
+- **DRIVE ACTIONS (R308, load-bearing): 只有 `pointer` (kind press/release/move) / `resize` / `date` / `view` / `sidebar` / `captureClient` 等; `action:"press"` 不存在, 静默 no-op. 选中 segment 用 `{"action":"pointer","kind":"press","x":724,"y":50}` + release.**
 - **CAPTURE PATH (R307, load-bearing): captureClient path 相对 app cwd (=/home/amao/nextkde); 写 `tmp/ui-acceptance/calendar/xxx.png` 才落对地方.**
 - **PGREP TRAP (R306, load-bearing): 找 app 用 `pgrep -x kos-calendar`; `pgrep -f 'kos-calendar --watch-qml'` 会匹配 loop 监督进程自身.**
 - **RELAUNCH WINDOW SIZE (R306): 启动后 1100×692; 依赖 collapsed 坐标的驱动先发 `{"action":"resize","width":1280,"height":800}`.**
@@ -49,6 +49,6 @@ Atomic step: **R-YEAR disc 泄漏占位格修复+验证一轮闭环 (state.md Ne
 - **Crops: 1:1+zoom ONE read; NEAREST 结构/LANCZOS 平滑. 子像素彩边会伪造"蓝色像素" — 判色前 NEAREST 放大 + 纯色扫描. tmp/ gitignored; mirror `docs/ui-calendar/` `LEDGER.md`=byte copy of state.md. Heredoc for python3. 静态截图不能判动效.**
 
 ## Next round (pick ONLY #1)
-**#1 — R-YEAR dark spot-check (小步, 快): start-review-vm.sh **dark** 重启 → resize 1280×800 → date 2026-04-02 → press/release segmentButton3 → capture `tmp/ui-acceptance/calendar/r308a.png` → 目测: dark 下四月 2 选中 disc 可辨、三月尾行无 disc、dots 可见、today (十月 18) 红 disc. 记录 dark 专属问题 (若有) 入仍差.**
-**Then (later): R-H/R-OVERFLOW/R-DIM dark spot-checks 同一轮可顺带 (regression leg) → R-DIM mid-exit 或 mark PASS → 最终 light 回归 leg → 全部通过后 state.md 单独一行 `DONE`. R-YEAR step 3 (dot 样式) 视 ref 而定, 无参考图即接受现状标 PASS.**
+**#1 — 回归 leg (light 最终回归): start-review-vm.sh **light** 重启 → resize 1280×800 → date 2026-04-02 → pointer press/release (724,50) 进 year → capture `tmp/ui-acceptance/calendar/r309a.png` → 复查 R-YEAR 全点. 若时间允许同轮顺带 month/week/day 主视图各一张 (r309b/c/d.png) 复查 R-H/R-OVERFLOW/R-DIM/R-TOOLTIP 已改点 — 一次截图对照一条不漏, 然后单独一行写 `DONE`.**
+**Then: dark spot-checks R-H/R-OVERFLOW/R-DIM 若上轮未顺带 → 各一轮或接受现状. R-YEAR step 3 建议接受现状标 PASS.**
 **Not `DONE`.**

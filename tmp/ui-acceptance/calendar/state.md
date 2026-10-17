@@ -1,7 +1,7 @@
-# R259 — HOLD round (no code change, no screenshot). All 5 rotation legs swept clean in R247–R251; remaining open items are ALL ruling-blocked (H/Year/tooltip-y/A/B). Nothing actionable — re-listed held items and holding until a ruling lands.
+# R260 — HOLD round (no code change, no screenshot). All 5 rotation legs swept clean in R247–R251; remaining open items are ALL ruling-blocked (H/Year/tooltip-y/A/B). Nothing actionable — re-listed held items and holding until a ruling lands.
 
-## 本轮 (R259)
-Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build, NO screenshot (code untouched since R246; 5 clean sweeps R247–R251 + R252–R258 holds; nothing suspicious to spot-check; per state: do NOT invent deltas). Pre-round check: spec.md mtime 2026-10-17 22:50 — NO new ruling landed (grep re-confirms H / Year / R134 tooltip-y / A-B still 待裁决, spec.md:145).
+## 本轮 (R260)
+Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build, NO screenshot (code untouched since R246; 5 clean sweeps R247–R251 + R252–R259 holds; nothing suspicious to spot-check; per state: do NOT invent deltas). Pre-round check: spec.md mtime still 2026-10-17 22:50 — NO new ruling landed (grep re-confirms H / Year / R134 tooltip-y / A-B still 待裁决, spec.md:145).
 - Ruled-blocked items re-listed below in 仍差 (per the standing ruling's per-round re-list requirement).
 - Rotation legs coverage (all zero-regression): R247 week expanded light+dark · R248 day light + week dark collapsed · R249 month light expanded · R250 month dark collapsed + agenda panel · R251 day dark expanded.
 - Verdict: HOLD. Nothing fixed, nothing broken, nothing invented.
@@ -17,8 +17,8 @@ Atomic step: Next #1 taken verbatim — hold round. NO code change, NO build, NO
 8. *(reserved)*
 
 ## 最近已改 (most recent 8)
+0. R260 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R259 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
-0. R258 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R257 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R255 — **HOLD round (no new ruling on spec.md; ruling-blocked items re-listed) — no code change.**
 0. R254 — **HOLD round (all legs swept, ruling-blocked items re-listed) — no code change.**

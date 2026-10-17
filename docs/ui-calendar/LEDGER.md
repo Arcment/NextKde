@@ -1,8 +1,8 @@
-# R200 — HOLD. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists). **No non-blocked items remain; checkpoint = blocked on a user ruling.**
+# R201 — HOLD. **NOT `DONE`** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists). **No non-blocked items remain; checkpoint = blocked on a user ruling.**
 
-## 本轮 (R200)
-Atomic step: Next #1 option (b) — HOLD the checkpoint (39th consecutive hold).
-- **Checked for new rulings/spec updates since R199: NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R199 hold commit (46a9cfa); `.loop/ROUND` = 200; no source changes under apps/.
+## 本轮 (R201)
+Atomic step: Next #1 option (b) — HOLD the checkpoint (40th consecutive hold).
+- **Checked for new rulings/spec updates since R200: NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R200 docs commit (984ff1c); `.loop/ROUND` = 201; no source changes under apps/.
 - **No source, no build, no screenshot, no re-verify (idle hold; per R161 note: idle rounds = hold, not loop; re-verify at most one item per session — held this round, nothing new to measure).**
 - 仍差 unchanged: everything on it is ruling-blocked. Sweep COMPLETE, every closed item twin-covered (R161).
 
@@ -18,6 +18,7 @@ Atomic step: Next #1 option (b) — HOLD the checkpoint (39th consecutive hold).
 - **ALL CLOSED (re-swept R138, and now EVERY item has both legs):** every plane/rule/separator token · A01/A02/A04 · L03 · L05 · A03 · T01/T02/T03 · M01-M04 · S02/S03/S05 · C01-C04/C06 · C05 · E01 4/4 · E02 column gap · N02 · the segment control (dark R156) · the timed chip's radius · the two reds · the month title's ink · the month chevrons · the itemColor base (blessed R139) · the mini-month band tops (R147 light / R160 dark) · the mini discs (dark R157) · the T-group timed-chip y-map (R148) · the S-group sidebar list (R149) · the all-day band chip envelope (light R150, dark R158) · the band y-map (dark R158) · the mini-month heading (**R151 light / R161 dark — now both legs**) · the gutter label right-anchor (R152) · the gutter 06:00 sliver (fixed R159) · window dots (R153 light / R155 dark) · search field (R129/R130 dark / R154 light). Full text: `rounds.md` tail.
 
 ## 最近已改 (most recent 8)
+0. R201 — **hold, nothing done (40th consecutive).** Checked for rulings/spec updates: none since R200 (spec mtime 2026-10-17 04:56 unchanged; git head = R200 docs commit 984ff1c; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
 0. R200 — **hold, nothing done (39th consecutive).** Checked for rulings/spec updates: none since R199 (spec mtime 2026-10-17 04:56 unchanged; git head = R199 hold commit 46a9cfa; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
 0. R199 — **hold, nothing done (38th consecutive).** Checked for rulings/spec updates: none since R198 (spec mtime 2026-10-17 04:56 unchanged; git head = R198 docs commit 529db14; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
 0. R198 — **hold, nothing done (37th consecutive).** Checked for rulings/spec updates: none since R197 (spec mtime 2026-10-17 04:56 unchanged; git head = R197 hold commit 00b1efc; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
@@ -25,9 +26,7 @@ Atomic step: Next #1 option (b) — HOLD the checkpoint (39th consecutive hold).
 0. R196 — **hold, nothing done (35th consecutive).** Checked for rulings/spec updates: none since R195 (spec mtime 2026-10-17 04:56 unchanged; git head = R195 hold commit 045c190; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
 0. R195 — **hold, nothing done (34th consecutive).** Checked for rulings/spec updates: none since R194 (spec mtime 2026-10-17 04:56 unchanged; git head = R194 docs commit 011b092). Checkpoint stands: blocked on a user ruling.
 0. R194 — **hold, nothing done (33rd consecutive).** Checked for rulings/spec updates: none since R193 (spec mtime unchanged; git head = R193 hold commit f0a0bf0). Checkpoint stands: blocked on a user ruling.
-0. R193 — **hold, nothing done (32nd consecutive).** Checked for rulings/spec updates: none since R192 (spec mtime 04:56 unchanged; git head = R192 docs commit 6498d5f). Checkpoint stands: blocked on a user ruling.
-0. R192 — **hold, nothing done (31st consecutive).** Checked for rulings/spec updates: none since R191 (spec mtime 04:56 unchanged; git head = R191 hold commit b81321f). Checkpoint stands: blocked on a user ruling.
-*(R191 and earlier archived to rounds.md tail — already recorded; window = R199..R192.)*
+*(R193 and earlier archived to rounds.md tail — already recorded; window = R201..R194.)*
 
 ## 外推待确认 (live only)
 - **NEVER HAND-WRITE `harness/command.json` (R142/R143, load-bearing).** A bare list breaks review-command.py (`list indices must be integers`); the app reads ONE object with a `sequence` field. If clobbered, re-seed `{"sequence":0,"action":"none"}` and drive via `python3 review-command.py '<JSON list of objects>'`. Wrong keys: `view` action takes key **`view`** (not `name`), `date` takes **`date`** (not `value`) — a wrong key silently sets `viewIndex = −1` (MONTH).

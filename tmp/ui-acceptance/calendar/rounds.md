@@ -5411,3 +5411,13 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - 发现：点击后 pill 出 2px 蓝焦点环 —— Qt focus 可视化，ref 静态图无点击态，非缺陷（3 段时代既有行为）。
 - 预算：回路 2/2 用满（纪律停手）。Loop count 本轮恰好 2 次，第 2 次即达标。
 - Next: R-YEAR step 2（day-cell 选择 + 事件 dot + 年导航 live 验证）。
+
+## R305 (2026-10-18) — R-YEAR dots 根因诊断 (no code)
+- Step: state.md Next#1 = event dots 不渲染根因. 复用 R304 实例 (无 stale).
+- Gotcha: capture 动作名 = `captureClient`; `capture` 落 timeline 分支报 "No visible timeline" 且静默无图.
+- 月视图确认数据在: 4/1–4/4 Morning planning chips (+7/+8/+4/+4), 4/2 底栏 9 项 → 排除 ICS 播种问题.
+- Year view (r305b): 实点 (0,136,255) 3×3 只在 3/30、3/31、4/1、4/2 = Multi-day review (0330→0403 exclusive) 覆盖日; 4/3、4/4 (各 5 timed 事件) 无点. R304"无点"结论修正: 4/1/2 有点, 4/3 无.
+- 根因: `Main.qml:1473 updateEventRange()` 无 year 分支 → else (selectedDate..selectedDate) 单日 pim 窗口. 服务只回该日 occurrences; Multi-day review 在 4/2 的 occurrences 被 addDayRange 展开回 0330–0402 → 恰好是有点的 4 天. R304 selectedDate=10-15 → 全年无点. 触发器 (onViewIndexChanged/onSelectedDateChanged) 齐全, 唯缺 year 分支.
+- 修法 (交下轮): updateEventRange 插 `else if (activeView === "year")`: first=1/1, last=12/31 of selectedDate.getFullYear(). rebuild + 重启 + 驱动验证 (4/1–4/4 全点, 2025 无点).
+- 诊断技巧入册: 判"点"须纯色扫描 ((0,136,255) accent vs 数字 fringe (64,138,213)); selectedItems=itemsForDate(selectedDate) 是现成的探针.
+- Budget: bash 25/25, loop 0/2 (纯诊断). screenshots: r305a-month-apr / r305b-year / r305c-dots-mar / r305c-dots-apr / r305d-apr34 / r305e-apr2.

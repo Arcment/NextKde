@@ -5373,3 +5373,14 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - Verdict: PASS. Mon (start day) and Tue–Fri (continuing) chips all show the ring; `+2` overflow row has none (correct — not a chip). Geometry matches ref crop (outer 12 / stroke 3 / hole 6, centred, ink-coloured). First crop x221.. falsely suggested an iconless Monday — collapsed-sidebar grid starts x≈62; re-crop x60.. settled it. Geometry note for the ledger: ref ring is 12/18 of row height, ours 12/24 — ruling literal wins (7.5 直译优先); "承认够不到".
 - Dark leg not exercised this round (chipInk is theme-aware); fold into the next regression spot-check.
 - state.md Next: R-OVERFLOW (drop the silent slice(0,2) cap; 3 columns + `+N`).
+
+## R297 (2026-10-18) — R-OVERFLOW PASS (light)
+- Atomic step: timed same-hour items — max 3 side-by-side columns then plain `+N`; removed the pre-existing silent `slice(0, 2)` cap. Code via code-writer in `CalendarScheduleView.qml`: `slice(0,3)` (:858) + hasOverflow/overflowCount/overflowReserve(20px) (:859-862), width formula minus reserve (:871-874), plain-ink `+N` Label (:1030-1042, ink = chipInk of first hidden item, no fill — R089 all-day overflow form).
+- Fixture: +3 events all starting 2026-04-02 08:00 (Overflow one 0800-0830 / Overflow two with a longer title for elision 0800-0900 / Overflow three 0800-0815). First import was malformed (UID-anchor insert ate 4-10's BEGIN; 3 events silently dropped, imported 36/39) — repaired, re-imported replaceExisting=true.
+- Verdict: PASS (light). Thu 04-02 8AM = 3 narrow chips + `+1`, nothing silently dropped; all other rows unchanged.
+- Incident: replace-import wiped the 3 seed todos; recreated via createTodo.
+- State: R296 entry archived here; next round R-DIM.
+
+## R296 (2026-10-18) — R-H PASS (light) [archived from state.md]
+- All-day band chip ring icon: 12×12, radius 6, border 3, transparent fill, colour chipInk, x=3 (+jointOverlap when continuesLeft), vertically centred (CalendarScheduleView.qml:599); label leftMargin 5→19 (+jointOverlap) (:612).
+- PASS light: every band chip shows the ring; `+N` overflow row correctly has none. Geometry 12/3/6 matches ref crop.

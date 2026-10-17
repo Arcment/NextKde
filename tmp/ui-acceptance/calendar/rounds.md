@@ -5298,3 +5298,10 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Verdict **PASS**: light palette coherent; today cell 2 outlined + `+13`; multi-day chips Mon–Wed `+6/+6/+11` striped; Design sync / R087 sole / Morning planning chips striped; out-month days muted; agenda panel 14 项 with 2 all-day.
 - Anomaly: Apr 15 cell full-cell blue fill + bare `+`, no chips, no fixture data (grep: no 20260415 in profile/). `position` action rejected in month view ("No visible timeline") — pointer never moved, first re-test invalid. Re-drove with `pointer` kind `move` → tint + `+` gone from row 3 (`r275-crop-row3-hover.png`). **It is the hovered-cell highlight + quick-add button, follows the pointer** (R274's Apr-14 tint = same artifact). Benign, macOS-like.
 - No code change, no build. HOLD.
+
+## R276 — HOLD + regression spot-check #9: day light collapsed PASS (2026-10-18)
+- spec.md mtime unchanged (2026-10-17 22:50) — no new ruling; ruling-blocked items re-listed in state.md.
+- Fresh launch (stale pid dead) → light → 1280×800, sidebar collapsed, view day, date 2026-04-02 → `r276-day-light-collapsed.png`.
+- Verdict **PASS**: title 2026年4月2日星期四; all-day band Design sync / Release notes / `+2`; timed chips Morning planning 8–8:45AM, Green planning 9AM, Short appointment 10:15–10:30, Long review + [R019 LONG TASK] side-by-side halves at 11AM (T01), Gold review 12PM, Design review 2:30–3:30PM, Red review 4PM, Evening session 6–7:30PM — every secondary carries the clock glyph (R246); gutter digit+AM two-tone same baseline (R243); 12-hour shared-meridiem `8 – 8:45AM` (R246). No hover-tint artifact this launch; no mixed theme; no layout breakage.
+- Crop check `/tmp/r276-crop-gutter.png` (2×): glyph ring+hands left of secondary, gap ~4, baseline-aligned; gutter two-tone intact.
+- No code change, no build. HOLD. Regression sweep now 9/11 legs; remaining unswept: day dark collapsed.

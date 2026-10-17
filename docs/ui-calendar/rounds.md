@@ -4526,3 +4526,111 @@ Atomic step: Next #1 of R134 — style the dark-leg ToolTip (Qt Basic leaking). 
 - Rows 229..239 at x=400/640/1000/1090: grid top rule y=234 (237,237,237) on ALL columns; weekend Sun (x1000/1090) plane 249 on both sides of the rules — matches pinned.
 - 3-row interior 156..231 = 76 = 1+25N (N=3). Crop `r142-band-2x.png` shows rule/chips/+2 layout.
 - **PASS — R128 light leg byte-consistent with pinned (242 / 217 / 237 / weekend 249). No source change, no build.** Archived from state.md: R131 line (see R132 entry context).
+
+## R143 — RE-VERIFIED CLOSED ID R097/R127 (segment control, light leg) — PASS, byte-consistent
+- Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the segment control, light leg** (R124 done R141, R128 done R142).
+- Detour: `harness/command.json` had been hand-clobbered with a bare list (again) ⇒ review-command.py crashed (`list indices must be integers`); re-seeded `{"sequence":0,"action":"none"}` then drove via argv. **Rule: NEVER hand-write command.json — only review-command.py argv.**
+- Light leg, fresh relaunch. Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r143-segment-light.png`.
+- Measurements (y=50 scan + x=660 vertical):
+  - Track **x562..757** exact (pinned 562..757); band **y36..63** (edges 224/223) exact.
+  - Track tone **250** ✓; track rim **222** (x562/x757 = 222,224,227) ✓; lens **232** ✓; lens rim **233** (vertical y40; horizontal lens column x630..689 = 60 w, rims x630/x689) ✓.
+  - Label ink cores **8 / 0 / 12** (day 8 @599,54 · week 0 @656,51 · month 12 @727,51) — pinned 8/0/12 exact ✓.
+  - Ink centres ~595.5 / 659.5 / 723 ✓. Lens sits on 周 (week) ✓.
+- 4x crop `r143-segment-4x.png` visually confirms track pill + lens + rims.
+- **PASS — R097/R127 light leg byte-consistent with pinned. No source change, no build.**
+- *(Archived from state.md R143: R135 — verified the crashed round's edit. `Main.qml:23-27` window palette: `toolTipBase` #3C3C3C dark / #F2F2F2 light, `toolTipText` = `tahoe.labelPrimary`. Both legs byte-equal geometry x26..97 × y68..95.)*
+
+## R144 — re-verify CLOSED M-group (mini month selected disc), light leg — PASS, byte-consistent
+- Light leg, fresh relaunch (start script >180 s → backgrounded; app confirmed alive before driving). resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r144-minidisc-light.png`.
+- Disc: **x101..118 × y556..573 = 18×18 exact**, centre (109.5, 564.5), centred in the Thu column (cells 96..124). Row profile 8/12/14/16/16/18×8/16/16/14/12/8 = true circle, radius 9. Face **(142,142,147) = #8E8E93 exact** (pinned `selectionDisc`). White digit inside; row 1 = Mar30–Apr5, disc on Apr 2. 4x crop `r144-minirow-4x.png` visually confirms header 一二三四五六日 + 30 31 1 **[2]** 3 4 5.
+- **PASS — byte-consistent with pinned R115/R117. No source change, no build.**
+- Observation (no action): disc centre y 564.5 does not reconcile with the pinned date-band tops (545 then 561/582…); flagged in state.md for a future band-top re-verify. Not opened as an item.
+
+## R147 — re-verify CLOSED M-group (mini month date-band tops), light leg — PASS, pinned reconciled; R144's flagged conflict RESOLVED
+- Rounds R145/R146 errored out before any output (`.loop/iter-145/146.err` = unrecognized_model, status 0) — no results were recorded; this round = 147. Tree audited (`git status` on apps/ clean) before proceeding; measurement-only round, no edits to audit.
+- Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the mini month's date-band tops (pinned 545 then 561/582/603/624/645/666/688), light leg** — the exact item R144 flagged as irreconcilable with the disc centre.
+- Light leg, fresh relaunch (>60 s; backgrounded, confirmed alive pid 1113069). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r147-minimonth-light.png`.
+- Measurement (dark-ink row profile, x12..208; thr180 run list): (519,531) heading · **(541,548) weekday header** · (556,573) = the selected disc (18 tall) + row-1 digits · **(582,589) (603,610) (624,631) (645,652) (666,673) (686,691)** = rows 2-7 ink.
+- **Date-row digit-ink tops = 561, 582, 603, 624, 645, 666, 686/687 — pitch 21 exact.** Pinned 561/582/603/624/645/666 reproduce EXACTLY; the 7th (pinned 688) reads 686-687 within AA and is clipped by the 692-tall window.
+- **The pinned "545" is the weekday-header ink CENTRE (541..548 → 544.5), NOT a date-row top.** ⇒ the pinned list is internally consistent as [weekday-header centre; seven digit-ink tops].
+- **R144's conflict RESOLVED — bookkeeping units, not geometry:** "date-band tops" are digit-ink tops, not cell tops. Row-1 cell top ≈ 554.5 (ink top 561 − (21−8)/2); the 18×18 disc (556..573) is centred on row-1's ink — disc centre 564.5 = ink centre (561+568)/2 = 564.5. No discrepancy remains.
+- Side observation (no action): the grid renders **7 date rows** (Mar 30 … May 17); the 7th (May 11-17, all adjacent-month muted) is clipped at the window bottom — visible only as a sliver. The pinned 7-top list is therefore complete, not spurious.
+- 3x crop `r147-minimonth-crop-3x.png` visually confirms: heading 2026年4月, header 一二三四五六日, rows 30 31 1 **[2]** 3 4 5 … 27 28 29 30 1 2 3, muted 4-10 tail.
+- **PASS — byte-consistent with pinned; M-group band-top bookkeeping closed. No source change, no build.** code-writer still not registered (nothing to implement).
+- *(Archived from state.md 最近已改: R137 — released-rim under dialog scrim settled at REST both legs; item CLOSED.)*
+
+## R148 — re-verify CLOSED T-group (timed-chip y-map, 2026-04-02 Thu), light leg — PASS
+- Atomic step: Next #1 — the T-group chip y-map (pinned 08:00 317-332 · 09:00 357-372 · 10:00 397-412 · 11:00 437-452+455-470 · 12:00 477-492 · 14:00 557-572), light leg, single capture.
+- Light leg, fresh relaunch (pid 1133943). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r148-tchips-light.png`.
+- **Method lesson: the WTODO chips render their own hues (green 57,196,135 / gold 215,166,44), so a blue-only tone filter silently drops 09:00 and 12:00.** Colour-agnostic scan instead: stripe column x637 (avoids text), "non-white" threshold — fill tones sum ≥33 of 765, white 0, thr 25.
+- Measured fill runs at x637 thr25: **(317,332) (357,372) (397,412) (437,452) (454,470) (477,492) (557,572)** — all 7 pinned chips reproduce; only 11:00-second top reads 454 vs pinned 455 (1 px, AA). Pitch 40 exact.
+- Extra run **(637,652) = 16:00 `[UI] Red review` WTODO**, pitch-consistent (557+80); not a regression, absent from the pinned list because the pinned list predates… simply enumerates the anchor chips.
+- Stripe runs (thr 90) sit 2 px inside each fill (319..330 …) = the stripe's vertical inset within the 16-h chip; the stripe column x636..639 (R123) confirmed at (61,174,233) for the blue chips.
+- 2x crop `r148-tchips-crop-2x.png` visually confirms the stack: Morning planning / [UI] Green planning / Short appointment / Long review with a d… + [R019 LONG TASK] / [UI] Gold review / Design review (14:00) / [UI] Red review (16:00).
+- **PASS — T-group y-map closed byte-consistent with pinned. No source change, no build.** code-writer still not registered (nothing to implement).
+
+## R149 — re-verify CLOSED S-group (sidebar category list S02/S03), light leg — PASS
+- Atomic step: Next #1 — the S-group sidebar category list (S02/S03: Today row 44 tall + 1 px separator; heading font 11 / left 12; CategoryRow pitch 30, box 12×12 at x12..23 radius 3, label 13 at left 32), light leg, single capture.
+- Light leg, fresh relaunch (start script timed out at 120 s → backgrounded; app confirmed alive pid 1152756 before driving). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r149-sgroup-light.png`.
+- **Layout (3x crops `r149-todayrow-3x.png`, `r149-sidebar-3x.png`):** mini-month nav at top → **Today row** (blue disc 12×12 x40..51 y86..97 + 今天 ink x72..99 y86..98, 13 tall + muted 周六 right-aligned ink x167..196 y86..99) → **separator y117 = 1 px (200,200,200) spanning x0..219** → heading `Calendars` (ink x13..62 y141..148, 8 tall) → 日程 / 计划任务 (checked, blue/green) → indented 显示已完成 row (orange outline ~x36..49 y228..239 12×12, label ink x57..119 y228..239) → heading `Task lists` (ink x12..56 y269..276, 8 tall) → Inbox / Personal / UI Review Gold / UI Review Red.
+- **Pinned values all reproduce:** separator 1 px ✓; Today row 44 tall (73..116) ✓; both headings 8-tall ink = font 11, left 12-13 (AA of 12) ✓; **CategoryRow pitch 30 exact** (168→198; 296→326→356→386) ✓; **box 12×12 at x12..23** (rows 296..307 = 12 tall) ✓; **radius 3** — corner profile top row x14=243/x15=249/x16..21=255 AA ramp, 1 px inset at dy=1, matches the R141 timed-chip radius-3 signature ✓; **label 13 at left 32** — Inbox ink x33..65 y297..306 (ink left 33 = AA of nominal 32, gap 8 from box right 23) ✓. Group gap consistent: heading ink bottom → first box top = 20 in BOTH groups (148→168, 276→296).
+- Box colours (0,136,255)/(52,199,89) vs Task-list (79,140,255)/(57,196,135)/gold/red = fixture category hues, env-derived — not pinned per R139/R148.
+- **PASS — S02/S03 byte-consistent with pinned. No source change, no build.** code-writer still not registered (nothing to implement).
+
+## R150 — re-verify CLOSED all-day BAND chip envelope, light leg — PASS, byte-consistent
+- Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the all-day band chip envelope (pinned merged Mon–Wed 274..625 · Thu `Design sync` 631..744 · Fri `R087 sole` 750..863 · Sun empty · chip 116 px in 119 inset 1 · fill light (222,241,251)), light leg**.
+- Light leg, fresh relaunch (start script hit its 120 s timeout as known; confirmed alive pid 1178813). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r150-band-light.png`.
+- Measurement, colour-agnostic first (non-white coverage ≥4 rows over y156..181) then EXACT fill tone (222,241,251) per row: at the clean row **y=175 the exact-fill runs are (274,625) / (631,744) / (750,863) — ALL THREE pinned envelopes reproduce byte-consistently.** Edge pixels: x272/x629/x748 = (237,237,237) AA shoulder, fill starts next px; fill ends 625/744/863, x627/746/865 pure white ⇒ inset 1 from the 272/629/748 separators holds. Fill tone (222,241,251) exact at y158/160/168/175.
+- Row-1-only confirmation at clean columns: x400 (merged) and x800 (Fri) fill 157..180 only (24 tall), white 181..231; band rules present at x700: sectionRule y155 (242,242,242) · allDaySeparator y232 (217,217,217) · grid top rule y234 (237,237,237) — all three pinned tones in place.
+- NOTE (not a conflict): at x700 (Thu) a SECOND fill row 182..205 exists = `Release notes` (all-day 20260402) on band row 2; the pinned envelope list describes row 1 (y156..181). Sat 867..984 / Sun 986..1099 carry no chip (only the 249 weekend field) ⇒ Sun EMPTY holds.
+- **PASS — envelope closed byte-consistent. No source change, no build.** Figures `docs/ui-calendar/round-150.png`, `round-150-band-2x.png`.
+
+## R151 — re-verify CLOSED M-group (mini-month heading: title ink + chevrons), light leg — PASS
+- Atomic step: Next #1 — re-verify ONE closed id on one leg, single screenshot: **the mini-month heading — title `2026年4月` ink + the two chevron buttons (pinned: title font 13 DemiBold / ink 0/255; buttons 28×28 at centres 26/194; arrow ink 5×9–10 at x23..27 / x191..196 tone (156,156,156)), light leg**.
+- Light leg, fresh relaunch (pid 1198313? — recorded 1198312; launcher wrapper exited 124 at its 150 s timeout = the known behaviour, app confirmed alive before driving). Commands: resize 1100x692 / sidebar expand / view week / date 2026-04-02 / capture `r151-minimonth-light.png`.
+- **Title: dark-ink row profile (x12..208, thr180) gives the title band (519,531) = 13 tall — font 13 DemiBold ✓ — and the weekday header (541,548) reproduced as context.** Title ink columns (thr<100) = **x79..138**, darkest tone **(0,0,0) pure black on the 255 field — pinned ink 0/255 ✓**.
+- **Chevrons (ASCII map + tight-tone scan, y510..540 to exclude the muted weekday row):** left `<` ink core **x23..27** (x28 = AA shoulder `.`), rows **519..528 = 10 tall**; right `>` ink **x190..195** (core x191..195), rows **520..528 = 9 tall** — pinned 5×9–10 at x23..27 / x191..196 reproduced **within 1 px AA**. Ink centres (25.5, 523.5) / (192.5, 524) vs pinned button centres 26/194 — AA-level.
+- Tone NOTE (not a conflict): the arrows are a 1-px AA stroke — core 114..131, shoulder 150..175. The pinned (156,156,156) sits in the shoulder band = an AA-sampled reading of the same stroke; geometry is what this round pinned, and it holds.
+- 4x crop `r151-heading-4x.png` visually confirms: bold black title centred between the two muted chevrons, muted weekday row below.
+- **PASS — mini-month heading closed byte-consistent. No source change, no build.** code-writer still not registered (nothing to implement).
+
+## R152 — gutter hour labels right-anchor (R066), light leg — PASS (verification only, no source)
+Atomic step: Next #1 — re-verify the gutter hour labels, light leg, single capture.
+- Fresh relaunch (light). **Harness change: `timeout 150 ./start-review-vm.sh light` killed the app child with the launcher's process group (pid died; log truncated at QML load). Fix: background-launch the bare script, poll `kill -0 $(cat live-app.pid)` — app stayed alive.** Drive: resize 1100x692 / sidebar expand / view week / date 2026-04-02 → `r152-gutter-light.png`.
+- Scan window **x221..270 strictly inside the gutter** (first lesson: chips' ink crosses x272 into column 1 — a wider window pollutes the census with 20-tall blobs).
+- **11 labels, ink y270..277 / 310..317 / 350..357 / 390..397 / 430..437 / 470..477 / 510..517 / 550..557 / 590..597 / 630..637 / 670..677.**
+- **Right anchor: all 11 ink right edges = x263 byte-consistent** (left 237/238 uniform — zero-padded 24-hour strings equal width). Text rect right = 272 − rightMargin 7 = 265; digit sidebearing insets ink to 263 — consistent.
+- **Font 11 ⇒ ink 8 tall ✓; pitch 40 EXACT ✓; tone darkest (113,117,130) = AppTheme.mutedText ✓.**
+- Source `CalendarScheduleView.qml:714-720` re-read: `anchors.right: parent.right` (parent.right IS the grid line), `rightMargin: 7`, `font.pixelSize: 11`, zero-padded text, `color: AppTheme.mutedText`. N02 intact: today-less week ⇒ no now-pill ⇒ all labels visible (18:00 clipped off-window).
+- 5x crop `r152-gutter-5x.png`: 07:00/08:00 right edges aligned, muted gray single tone.
+- **PASS — R066 closed byte-consistent. Next: window dots (R122) light leg.**
+
+## R153 — window dots (R122), light leg — PASS (verification only, no source)
+Atomic step: Next #1 — re-verify the three window dots, light leg, single capture (dots are chrome — visible at any view).
+- Fresh relaunch (light), **background-launched bare script per the R152 harness note; pid alive after 1 s; drove immediately.** Commands: resize 1100x692 / capture `r153-dots-light.png` (no sidebar/view/date needed).
+- **Colour census (top band y0..29, saturation >30): exactly three dots — green x1015..1029, yellow x1043..1057, red x1071..1085; halo rows y10..24. Cores (≥full-sat pixels): green (72,208,93) n129, yellow (254,198,77) n129, red (255,119,112) n129.**
+- **Opacity math byte-consistent with the pinned literals @0.85 over a (252,252,252) band: #28c840 → (72,208,93) EXACT; #febc2e → (254,198,77) EXACT; #ff5f57 → (255,119,112) EXACT.** The dots are transmissive (opacity 0.85), so the measured tone is literal×0.85 + band×0.15 — all three land on the measured cores to the last bit.
+- **Centres: green 1022 / yellow 1050 / red 1078 (halo midpoints) = pinned 1022.5/1050.5/1078.5 within AA; pitch 28, gaps 28−14 = 14 ✓. Right edge: red halo ends x1085 = 1100 − rightMargin 14.5 ✓. Circle profile symmetric (row widths 3/9/11/15/15/15/17/17/17/15/15/15/11/9/3) = disc 14 + AA ✓.**
+- **y-centre CLARIFICATION: measured 17 (halo 10..24). The R122 derivation (topMargin 10.5 + radius 7) gives 17.5 — matches. The R153 task line's "y-centre ≈15" was imprecise; the authoritative pinned figure is topMargin 10.5 ⇒ centre ≈17.5.** No conflict.
+- Source re-read `Main.qml:1637-1685`: Row anchored right/top, `rightMargin 14.5`, `topMargin 10.5`, `spacing 14`, model `#28c840`/`#febc2e`/`#ff5f57`, 14×14 radius 7, `opacity: 0.85`. Order green/yellow/red left→right (settings-app order, per R122 not the macOS ref's authority) ✓.
+- 6x crop `r153-dots-6x.png` visually confirms: three round dots green/yellow/red on the light band, window corner radius top-right.
+- **PASS — R122 window dots closed byte-consistent. Next: toolbar search field (R129/R130) LIGHT leg (only ever measured dark).**
+
+## R154 — toolbar search field, LIGHT leg (R129/R130 re-verify) — PASS
+- Atomic step: Next #1. Fresh relaunch (light, background-launch bare, pid alive). Drive: resize 1100x692 / sidebar expand / pointer press+release (1035,50) / capture `r154-search-open.png`.
+- **HARNESS GOTCHA (new): the `pointer` action's `kind` only implements `press`/`release`/`move` (`ReviewInput.cpp:74-83`) — `kind:"click"` is a SILENT NO-OP.** Two false starts (captures `r154-search-light.png` / `-b.png` byte-identical toolbar crops, field never opened; log prints `pointer click undefined … hover n/a`) before reading the driver. Correct sequence: press → one `none` → release.
+- False-start 1 also produced a red herring: a dark-outlined box x1009..1062 y67..140 = the themed tooltip (fill 242,242,242) under the hovered toggle — expected, R135.
+- **GEOMETRY byte-consistent:** field rect x736..1015 = **280 w** × y36..63 = **28 h**; right border inner edge **1016 = pinned right edge** ✓; left border x736 ✓; **capsule radius 14** — corner profile (y36→x746, y37→744, y38→742, y39→741, y40→740, y41→739, y42→738, y44→737) fits an r=14 circle centred (750,50) ✓ (`radius: height/2`); input content ink from **x748 ⇒ leftMargin 12** ✓, right content 1004 ✓.
+- **LIGHT tones (first measurement — the field had only ever been measured dark):** face **(210,210,210) = `searchFill` "#D2D2D2" EXACT**; focused border **1 px (0,136,255) = `accent` "#0088FF" EXACT** (`border.width: input.activeFocus ? 1 : 0`); placeholder "Search" ink x748..788 y45..54, tone labelSecondary.
+- Source re-read `Main.qml:1817-1925` (toolbarSearch: maxWidth cap 280, anchored right = searchToggle.left − 6, radius height/2, insets 12, focus border accent, deferred-focus timer) + `Main.qml:141-149` (accent #0088FF; searchFill #D2D2D2 light / #3A3A3A dark).
+- Crops: `r154-c1.png`, `r154-field-3x.png`, `r154-c4.png`.
+- **PASS — R129/R130 search field closed, light leg byte-consistent. No source change, no build.**
+- Next: window dots DARK leg (R126 last measured; R153 covered light only).
+
+## R155 — window dots re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1272871). Drive: resize 1100x692 → capture `r155-dots-dark.png`. Crop `r155-dots-dark-5x.png` (1:1 strip + 5x NEAREST).
+- **Cores byte-EXACT: green (38,174,59) / yellow (220,164,44) / red (221,85,78) = #28c840/#febc2e/#ff5f57 @0.85 over band plane (30,30,30) — plane (30,30,30) EXACT.** Matches R126 pinned dark cores exactly.
+- **Geometry: row y=17 core runs 1016..1028 / 1044..1056 / 1072..1084 (13 px core, AA shoulder each side ⇒ disc 14); centres x 1022.5 / 1050.5 / 1078.5, pitch 28, gaps 14 ✓. Column core y11..23, shoulders y10/y24 ⇒ y-centre 17.5 — R153's light leg read 17; 1 px AA, not a conflict (R153 itself noted derivation 17.5).**
+- Verdict: R122/R126 window dots CLOSED both legs.
+- Archived from state.md: R147 entry — "M-group band tops re-verified light leg: PASS; pinned tops 561/582/603/624/645/666/688 reproduced (pitch 21); '545' = weekday-header centre; R144's conflict RESOLVED (units mislabel)."
+- Next: segment control DARK leg (R143 covered light only).

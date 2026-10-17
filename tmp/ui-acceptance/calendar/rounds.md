@@ -4897,3 +4897,6 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, twin-covered.
 - state.md window rolled to R196..R189 (R187 line archived; already recorded here).
 - Checkpoint stands: blocked on a user ruling.
+
+## R197 (2026-10-17) — HOLD (36th consecutive)
+Atomic step: Next #1 option (b). Checked for new rulings/spec updates since R196: NONE — `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R196 docs commit 5d3ac50; `.loop/ROUND` = 197; no source changes under apps/. No source, no build, no screenshot, no re-verify (idle hold; nothing new to measure). 仍差 unchanged — everything on it is ruling-blocked. Checkpoint stands: blocked on a user ruling. Window trimmed: R189 entry archived here.

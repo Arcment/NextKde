@@ -4743,3 +4743,12 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
 - Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
 - state.md rolling window trimmed: R160 archived to rounds.md tail (already recorded); 最近已改 now R169..R161.
+
+## R170 — HOLD (9th consecutive), no source, no build, no screenshot
+- Next #1 option (b). Checked for rulings/spec updates since R169: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `.loop` control files (PROMPT/TASK/NOTICE/health) all 10-16, `git log` head = R169's hold commit (4e4872f); tracked tree clean except `.loop/ROUND` + state/rounds (this round's bookkeeping). No ruling message anywhere.
+- No re-verify this round (idle hold; per R161 note idle rounds = hold, not loop).
+- Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+- state.md rolling window trimmed: R161 archived to rounds.md tail (already recorded); 最近已改 now R170..R162; duplicate "1." numbering fixed.
+
+## R161 — VERIFICATION ONLY (dark leg), no source (archived from state.md window)
+- Mini-month heading re-verified DARK leg: PASS — title core rows 519..530 / cols x80..139 (1 px AA of the light pin), ink (242,242,242) = dark labelPrimary; chevrons left x23..27 r519..528 EXACT, right x191..196 r520..528 EXACT, cores ≈(157,157,157); plane (40,40,40). **Last uncovered twin closed — every closed item now measured on both legs.**

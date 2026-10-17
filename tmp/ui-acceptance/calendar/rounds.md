@@ -4889,3 +4889,11 @@ Next #1 option (b). Checked for new rulings/spec updates since R193: NONE — sp
 
 ## R195 (2026-10-17) — HOLD (34th consecutive)
 Next #1 option (b). Checked for new rulings/spec updates since R194: NONE — spec.md mtime still 2026-10-17 04:56 (predates R161); git head = R194 docs commit 011b092; .loop/ROUND = 195; .loop/DEADLINE 1792236870 (10-17, rolling, not a ruling). No source, no build, no screenshot, no re-verify (idle hold). Checkpoint stands: sweep COMPLETE both legs, twin-covered (R161); all remaining items (E02's two font clauses + the 11-item list) ruling-blocked. Not DONE.
+
+## R196 (2026-10-17) — HOLD (35th consecutive)
+Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R195: **NONE**. `spec.md` mtime unchanged (2026-10-17 04:56); git head = R195 hold commit 045c190; `.loop/ROUND` = 196; no source changes under apps/; `.loop/DEADLINE` rolling (not a ruling).
+- No source edit, no build, no screenshot, no re-verify (idle hold; per R161 note).
+- 仍差 unchanged: all 7 entries ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists). Sweep COMPLETE, twin-covered.
+- state.md window rolled to R196..R189 (R187 line archived; already recorded here).
+- Checkpoint stands: blocked on a user ruling.

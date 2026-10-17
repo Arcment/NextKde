@@ -5026,3 +5026,9 @@ Checked for new rulings/spec updates since R227: none (spec.md mtime 2026-10-17 
 - Checked for new rulings/spec updates since R229: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R229 hold commit 5e782f8; `.loop/ROUND` = 230; `git status apps/` EMPTY.
 - No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
 - Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.
+
+## R231 — HOLD (70th consecutive)
+- Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R230: **NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates all rounds); git head = R230 docs commit f75f23d; `.loop/ROUND` = 231; `git status apps/` EMPTY.
+- No source edit, no build, no screenshot, no re-verify (idle hold per the R161 note). 仍差 unchanged — every item ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- Checkpoint stands: **NOT `DONE`**, blocked on a user ruling.

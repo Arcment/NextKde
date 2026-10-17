@@ -5395,3 +5395,19 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - **R-DIM mid-enter PASS**: press(763,491)→0.12→release→0.12→captureClient ⇒ r300-mid2.png shows 编辑日程 dialog mid-reveal with scrim(950,120)=**211**, strictly between pre 255 and settled 204 (r300-end2.png); background visibly dimmed through the scrim.
 - Exit: 取消 (647,650) with gap 0.12 → dialog closed cleanly, scrim back to 255 (r300-exit2.png). Mid-exit pixel NOT caught — 120ms InCubic shorter than poll+capture latency; 2 attempts spent, stopped per discipline.
 - Verdict: R-DIM mid-enter confirmed live; exit completes fully. R-DIM effectively verified (mid-exit frame optional). Next: R-TOOLTIP-Y ref-measure.
+
+## R301 — R-TOOLTIP-Y CLOSED: ref has no tooltip; live = below +4, byte-equal R135 (2026-10-18)
+- Atomic step: R-TOOLTIP-Y (state.md Next #1) — ref-measure per 第二批裁决, self-resolved.
+- Ref re-check (full image + 2× toolbar crop): **NO tooltip anywhere in `.loop/refs/macos-calendar.png`** — matches R063/R135's documented absence. 裁决的「测出来是多少就改成多少」无参考目标 ⇒ 7.5 直译 fallback = macOS 平台惯例（tooltip 在控件下方）。
+- **Driver gotcha (load-bearing): `review-command.py` parses ONLY `sys.argv[1]` — I passed 6 separate argv JSON objects, only the first (park) executed (log stuck at seq22). Batches MUST go as ONE JSON array argument.**
+- Live re-measure (light 1280×800, reused R300 instance 2428209; hover `toolbarAdd` via pointerObject move; capture `r301-tooltip.png`): button bottom rim y63 → tooltip border top **y67** (53,54,55), fill top **y68** (242,242,242), ink y79..87, bottom border y96. Panel y67..96 / fill y68..95 — **BYTE-EQUAL to R135's record.** Gap 3px border / 4px fill ⇒ BELOW, +4. Placement already matches the platform convention ⇒ **no code change.**
+- Records: `tmp/.../harness/LEDGER.md` new "R-TOOLTIP-Y CLOSED (R301)" entry after the R135 tooltip line; figure `docs/ui-calendar/r301-tooltip-4x.png`. 第二批裁决最后一项闭环（R-H R296 / R-OVERFLOW R297 / R-DIM R298+R300 / R-TOOLTIP-Y R301 / R-YEAR pending）。
+- Verdict: PASS (measurement + closure, zero regressions — no source touched). Not DONE (R-YEAR remains). Next: **R-YEAR step 1** — 4th `Year` segment in the toolbar control (widen + re-centre, pill follows view), no dead segments.
+
+## R302 (2026-10-18) — R-YEAR step 1: 4th Year segment + non-dead year skeleton
+- 派 code-writer 改 `apps/calendar/qml/Main.qml`：`segmentWidth` 196→224；`activeView` 加 "year"（viewIndex 3；段映射 i≤2 ? 2-i : 3）；`headerTitle` 年分支；`shiftView` 年分支（±1 年，early return）；labels 加 `qsTr("Year")`；KosPageCache pages + 新 `yearPage` Component（~:2735-2848）：3×4 GridLayout × 12 月格（MMMM 标签 + 7×6 迷你日格，`localeFirstDayOfWeek` 偏移，today 用 `selectionDisc` 圆盘 + 白 DemiBold；日 9px / 月标签 12px），月格 `onClicked` → selectedDate/visibleMonth=monthStart 且 viewIndex=0（跳月视图 ⇒ 无死段）。
+- Loop 1 (224 build, light 1280×800 collapsed)：4 段渲染 ✓、点击 (727,50) press→release 切年视图 ✓（标题 2026、12 网格、today 圆点）。实测槽距 **55** ≠ ref 56.0（组件公式 (width-4)/n ⇒ 内容区 220）。
+- Loop 2 (228 build)：内容区 224 ⇒ **槽距 56 = ref**；capsule 居中 (≈639.5)；pill W52/h24 = ref 51–52.4/24；r≈11.5 目测 ✓。证据 `r302b-year.png`、`r302b-capsule-4x.png`（另 r302-base/`r302-year` 为 loop1）。
+- 发现：点击后 pill 出 2px 蓝焦点环 —— Qt focus 可视化，ref 静态图无点击态，非缺陷（3 段时代既有行为）。
+- 预算：回路 2/2 用满（纪律停手）。Loop count 本轮恰好 2 次，第 2 次即达标。
+- Next: R-YEAR step 2（day-cell 选择 + 事件 dot + 年导航 live 验证）。

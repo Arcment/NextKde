@@ -4713,3 +4713,9 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Next #1 option (b). Checked for rulings/spec updates since R163: NONE — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, `git log` head = R163's hold commit (9af24a6); tracked tree clean except `docs/ui-calendar/HEALTH.md` (outer-loop bookkeeping). No ruling message anywhere.
 - No re-verify this round (idle hold; per R161/R162 note idle rounds = hold, not loop — nothing new to measure, and re-verify at most one item per session when truly idle).
 - Checkpoint stands: sweep COMPLETE, every closed item twin-covered (R161); 仍差 entirely ruling-blocked (E02 two font clauses + 11-item list reported R140, no channel). NOT `DONE`.
+
+## R165 — HOLD (4th consecutive)
+Atomic step: Next #1 option (b) — hold the checkpoint.
+- Checked for new rulings/spec updates since R164: **NONE** — `spec.md` mtime 2026-10-17 04:56 (unchanged, predates R161), `.loop/DEADLINE` 10-16 19:34, git head = R164's docs commit, tracked tree clean except `.loop/ROUND` (outer-loop bookkeeping).
+- No source, no build, no screenshot, no re-verify (idle hold per the R161 note). Checkpoint stands: sweep COMPLETE both legs, twin-covered; everything in 仍差 is ruling-blocked (E02's two font clauses + the 11-item list reported R140; no channel exists).
+- State.md rolling window trimmed: R157 archived to rounds.md tail; 最近已改 now R165..R158.

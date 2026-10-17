@@ -5047,3 +5047,9 @@ Atomic step: Next #1 option (b) — hold the checkpoint.
 - Checked for new rulings/spec updates since R233: NONE. `spec.md` mtime unchanged (2026-10-17 04:56, predates all recent rounds); git head = R233 hold commit (8248faf); `.loop/ROUND` = 234; `git status apps/` empty.
 - No source, no build, no screenshot, no re-verify (idle hold; re-verify at most one item per session — held, nothing new to measure).
 - 仍差 unchanged: everything on it is ruling-blocked (E02 font clauses + 11-item list, reported R140; no channel). Sweep COMPLETE, twin-covered (R161). Not `DONE`.
+
+## R235 — HOLD (74th consecutive)
+- **Checked for new rulings/spec updates since R234: NONE.** `spec.md` mtime unchanged (2026-10-17 04:56, predates the rounds); git head = R234 docs commit (30be550); `.loop/ROUND` = 235; `git status apps/` EMPTY.
+- No source, no build, no screenshot, no re-verify (idle hold; per R161 note). Checkpoint stands: **blocked on a user ruling** — E02's two font clauses + the 11-item ruling-blocked list (reported R140; no channel exists).
+- 仍差 unchanged; sweep COMPLETE, every closed item twin-covered (R161). NOT DONE.
+- *(R224 archived from state.md window at R235: hold, nothing done (63rd consecutive); checked for rulings/spec updates — none since R222 (spec mtime unchanged; git head = R222 docs commit 6f06ade; git status apps/ empty). Checkpoint stood: blocked on a user ruling.)*

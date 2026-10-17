@@ -1,40 +1,35 @@
-# R308 — R-YEAR dark spot-check PASS. Next: dark spot-checks 合并 regression leg (R-H/R-OVERFLOW/R-DIM) 或直接 light 最终回归 → DONE.
+DONE
 
-## 本轮 (R308)
-Atomic step: **R-YEAR dark spot-check (state.md Next #1). Loop 1/2 (驱动写错一次不算 build 回路), PASS.**
-- 驱动: kill 旧实例 → start-review-vm.sh **dark** → log 无旧 capture ✓ → resize 1280×800 → date 2026-04-02 → **pointer press+release (724,50)** 进 year → capture `tmp/ui-acceptance/calendar/r308a.png`.
-- **新陷阱 (R308, load-bearing): harness 没有 `action:"press"/"release"` — 那种命令静默 no-op (截图仍是 week view). 正确写法 `{"action":"pointer","kind":"press","x":…,"y":…}`. R307 记录里的 "press/release segmentButton3" 实为 pointer.**
-- **验证 (r308a.png, dark, 2026, selectedDate=4/2)**: 四月 2 灰 disc + 深色字清晰可辨 ✓; 三月尾行 30/31 无 disc (R307 修复在 dark 下同样成立) ✓; dots 3/29、3/30、3/31、4/1–4/4 蓝点可见, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓. → **R-YEAR dark 全过, R-YEAR 整体 PASS.**
-- Bash ~12/25.
+# R309 — 最终回归 leg 全过 (light year/month/week/day + dark month/week). 全部 spec ID 通过 → **DONE**.
 
-## 仍差 (top 8, visual-impact order)
-1. **回归 leg**: 全部 spec ID 收尾时跑一遍 light 主视图截图对照 (所有已改点一次复查) — 完成后写 `DONE`.
-2. R-H dark spot-check (可并入回归 leg 顺带).
-3. R-OVERFLOW dark spot-check (可并入回归 leg 顺带).
-4. R-DIM dark spot-check (可并入回归 leg 顺带).
-5. R-DIM mid-EXIT frame — LOW value: consider accepting, mark R-DIM PASS.
-6. R-YEAR step 3 (可选): dot 样式/间距 — ref 无 year 参考图, 外推; **建议直接接受现状标 PASS**.
-7. *(reserved)*
-8. *(reserved)*
+## 本轮 (R309)
+Atomic step: **最终回归 leg + 顺带 dark spot-checks, 无代码改动. 全过 → DONE.**
+- Light: 重启 light → resize 1280×800 → date 2026-04-02 → pointer 进 year → r309a.png; view 切 month/week/day → r309b/c/d.png. R-YEAR (disc/dots/today/无泄漏) + R-DIM/R-H/R-OVERFLOW/R-TOOLTIP 已改点全部复查通过.
+- Dark 顺带 (第 2 次启动回路): r309e-dark-month (R-DIM ✓) + r309f-dark-week (R-H ✓ / R-OVERFLOW ✓).
+- 判同帧必须 md5 (r309a/b/d 文件大小相同但 md5 各异 — 大 PNG 同尺寸巧合).
+- Bash ~13/25.
+
+## 仍差
+*(无 — 全部 spec ID 闭环, 最终回归完成.)*
 
 ## 最近已改 (most recent 8)
-0. R308 — no code; **R-YEAR dark spot-check PASS** (disc/dots/today 全过).
-0. R307 — **R-YEAR disc 泄漏 PASS: yearDayCell.isSelected 加 inMonth 守卫; 三月尾行干净, dots/today disc 不回归.**
-0. R306 — **R-YEAR dots PASS: updateEventRange 补 year 分支 (全年 pim 窗口); 2026 dots 正确 + 2025 无点.**
-0. R305 — no code; R-YEAR dots 根因诊断: updateEventRange 缺 year 分支 (Main.qml:1473).
-0. R304 — **R-YEAR step 2: day-cell 选中双态 + MouseArea + event dots + ‹› year 导航验证.**
-0. R302 — **R-YEAR step 1: 4th Year segment + yearPage 3×4 skeleton; viewIndex 3=year.**
+0. R309 — no code; **最终回归 leg 全过 → DONE** (light y/m/w/d + dark m/w).
+0. R308 — no code; R-YEAR dark spot-check PASS.
+0. R307 — R-YEAR disc 泄漏 PASS: yearDayCell.isSelected 加 inMonth 守卫.
+0. R306 — R-YEAR dots PASS: updateEventRange 补 year 分支 (Main.qml:1473).
+0. R305 — no code; R-YEAR dots 根因诊断.
+0. R304 — R-YEAR step 2: day-cell 选中双态 + MouseArea + event dots + ‹› year 导航.
+0. R302 — R-YEAR step 1: 4th Year segment + yearPage 3×4 skeleton; viewIndex 3=year.
 0. R301 — no code; R-TOOLTIP-Y closed.
-0. R300 — no code; R-DIM mid-enter CONFIRMED.
-*(older: R298/R297/R296/… archived in rounds.md tail)*
+*(older: R300/R298/R297/R296/… archived in rounds.md tail)*
 
 ## 外推待确认 (live only)
 - **DRIVE ACTIONS (R308, load-bearing): 只有 `pointer` (kind press/release/move) / `resize` / `date` / `view` / `sidebar` / `captureClient` 等; `action:"press"` 不存在, 静默 no-op. 选中 segment 用 `{"action":"pointer","kind":"press","x":724,"y":50}` + release.**
-- **CAPTURE PATH (R307, load-bearing): captureClient path 相对 app cwd (=/home/amao/nextkde); 写 `tmp/ui-acceptance/calendar/xxx.png` 才落对地方.**
-- **PGREP TRAP (R306, load-bearing): 找 app 用 `pgrep -x kos-calendar`; `pgrep -f 'kos-calendar --watch-qml'` 会匹配 loop 监督进程自身.**
+- **CAPTURE PATH (R307, load-bearing): captureClient path 相对 app cwd (=/home/amao/nextkde); 写 `tmp/ui-acceptance/calendar/xxx.png` 才落对地方. 判同帧用 md5, 文件大小会巧合相同 (R309).**
+- **PGREP TRAP (R306): 找 app 用 `pgrep -x kos-calendar`; `pgrep -f` 会匹配 loop 监督进程自身.**
 - **RELAUNCH WINDOW SIZE (R306): 启动后 1100×692; 依赖 collapsed 坐标的驱动先发 `{"action":"resize","width":1280,"height":800}`.**
-- **STALE INSTANCE (R304, load-bearing): 重启后核对 live-runtime-vm.log 无旧 capture 行; 旧实例静默顶替新启动=旧代码行为.**
-- **YEAR SEGMENT MAPPING (R302, load-bearing): viewIndex 0=month/1=week/2=day/3=year; Harness `view` action 不含 year — 进 year 用 pointer press→release Year slot (1280×800 collapsed: ≈556/612/668/724, y≈50).**
+- **STALE INSTANCE (R304): 重启后核对 live-runtime-vm.log 无旧 capture 行; 旧实例静默顶替新启动=旧代码行为.**
+- **YEAR SEGMENT MAPPING (R302): viewIndex 0=month/1=week/2=day/3=year; Harness `view` action 不含 year — 进 year 用 pointer press→release Year slot (1280×800 collapsed: ≈556/612/668/724, y≈50).**
 - **YEAR NAV (R304): `pointer target:"dateNavPrevious"/"dateNavNext"` 可用, press→release 各一条.**
 - **REVIEW-COMMAND ARGV (R301): 整批命令一个 JSON 数组传 argv[1]; capture 动作名 = `captureClient`.**
 - **POINTER KINDS (R300): 只有 press/release/move; "click"=静默 no-op.**
@@ -48,7 +43,5 @@ Atomic step: **R-YEAR dark spot-check (state.md Next #1). Loop 1/2 (驱动写错
 - **Fixtures (R297): 0329–0403 Morning planning 08:00–08:45, Short appointment 10:15–10:30, Long review 11:00–13:00, Design review 14:30–15:30, Evening session 18:00–19:30; Thu 04-02 ALSO Overflow one/two/three @08:00. Multi-day review VALUE=DATE 0330→DTEND 0403 (exclusive). Todos: Review checklist 04-01 09:30, Prepare notes 04-01 14:30, long-task-title 04-02 11:00. itemColor env-derived.**
 - **Crops: 1:1+zoom ONE read; NEAREST 结构/LANCZOS 平滑. 子像素彩边会伪造"蓝色像素" — 判色前 NEAREST 放大 + 纯色扫描. tmp/ gitignored; mirror `docs/ui-calendar/` `LEDGER.md`=byte copy of state.md. Heredoc for python3. 静态截图不能判动效.**
 
-## Next round (pick ONLY #1)
-**#1 — 回归 leg (light 最终回归): start-review-vm.sh **light** 重启 → resize 1280×800 → date 2026-04-02 → pointer press/release (724,50) 进 year → capture `tmp/ui-acceptance/calendar/r309a.png` → 复查 R-YEAR 全点. 若时间允许同轮顺带 month/week/day 主视图各一张 (r309b/c/d.png) 复查 R-H/R-OVERFLOW/R-DIM/R-TOOLTIP 已改点 — 一次截图对照一条不漏, 然后单独一行写 `DONE`.**
-**Then: dark spot-checks R-H/R-OVERFLOW/R-DIM 若上轮未顺带 → 各一轮或接受现状. R-YEAR step 3 建议接受现状标 PASS.**
-**Not `DONE`.**
+## Next round
+*(无 — DONE. 如外层循环继续派活: 仅剩可选收尾 — R-YEAR step 3 dot 样式微调建议接受现状; mirror LEDGER.md 同步.)*

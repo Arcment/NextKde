@@ -5438,3 +5438,12 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - Verify (r308a.png, dark): 四月 2 灰 disc+深字清晰 ✓; 三月尾行 30/31 无 disc (R307 守卫在 dark 同样成立) ✓; dots 3/29–31、4/1–4 可见, 4/5+ 无假点 ✓; 十月 18 today 红 disc ✓.
 - → R-YEAR 整体 PASS (light R304–R307 + dark R308). 无 dark 专属问题.
 - Screenshot: tmp/ui-acceptance/calendar/r308a.png. Bash ~12/25.
+
+## R309 (2026-10-18) — 最终回归 leg 全过 → DONE
+- Atomic step: state.md Next #1 — light 最终回归 + 顺带 dark spot-checks (R-H/R-OVERFLOW/R-DIM), 无代码改动.
+- Drive: kill → start-review-vm.sh **light** → log 无旧 capture ✓ → resize 1280×800 → date 2026-04-02 → pointer press/release (724,50) 进 year → capture r309a.png. 同轮 `view` action 切 month/week/day → r309b/c/d.png (md5 各异, 非同帧).
+- Light verify: **r309a (year)**: Year segment 选中蓝框 ✓; 四月 2 灰 disc ✓; 三月尾行 30/31 无 disc 泄漏 ✓; dots 3/29–31、4/1–4 ✓ 4/5+ 无 ✓; 十月 18 today 红 disc ✓. **r309b (month)**: 选中日蓝框、multi-day 跨日、+N 徽标、非本月压暗 ✓. **r309c (week)**: 标题 "3月30 – 4月5"、all-day multi-day 带 knob、Thu 8AM 三 chip 收窄 + "+1" 徽标、todo 绿 chip、左侧色条 ✓. **r309d (day)**: 标题/elision ("Overflow two with a longer title for elision")/+1 徽标/todo elision ✓.
+- Dark 顺带 (第 2 次启动回路, 预算内): 重启 dark → resize/date/view month → r309e-dark-month.png → view week → r309f-dark-week.png. **R-DIM**: 非本月日期明显压暗、本月全亮 ✓. **R-H**: all-day multi-day chip dark 下填充/边框/文字可读 ✓. **R-OVERFLOW**: +1 徽标 + chip 收窄 dark 下成立 ✓.
+- 注: r309b/d 与 a 文件大小相同但 md5 不同 — 大 PNG 同尺寸巧合, 判同帧必须 md5.
+- → **全部 spec ID 通过, 最终版本回归 (light year/month/week/day + dark month/week) 完成 → DONE.**
+- Screenshots: tmp/ui-acceptance/calendar/r309{a,b,c,d}.png, r309{e,f}-dark-{month,week}.png. Bash ~13/25.

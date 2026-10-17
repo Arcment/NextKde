@@ -4644,3 +4644,24 @@ Atomic step: Next #1 — re-verify the three window dots, light leg, single capt
 - Archived from state.md: R154 entry — "Toolbar search field re-verified LIGHT leg: PASS — rect x736..1015 (280 w) × y36..63 (28 h), capsule r14, insets 12, face #D2D2D2 exact, focused border #0088FF exact, placeholder labelSecondary; gotcha: pointer kind:'click' is a silent no-op — use press+release."
 - Next: nothing non-blocked remains open; pick the next closed id for re-verification from the R156 state.md list or move to wrap-up.
 - Archived from state.md (R156 windowing): R148 entry — "T-group timed-chip y-map re-verified light leg: PASS — all 7 pinned chips reproduce (11:00b 454 vs 455, 1 px AA); extra 16:00 WTODO chip pitch-consistent; per-event colours ⇒ colour-agnostic scan required."
+
+## R157 — mini-month selected disc re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1290546, environ KOS_APPEARANCE=dark). Drive: resize 1100x692 / sidebar expanded → capture `r157-minidisc-dark.png`. Ledger figure `docs/ui-calendar/r157-minidisc-dark-4x.png` (1:1 strip + 4x NEAREST).
+- **Selected disc (Oct 15, Thu col): bbox x101..118 × y598..615 = 18×18 — x-range BYTE-EQUAL to light R144 (x101..118). Face interior (142,142,147) = `selectionDisc` #8E8E93 EXACT (clean samples at (110,613); (103,600)/(116,601) are outside-disc AA).**
+- **Circle profile symmetric: row widths 2/8/10/12/14 → 16 core (x102..117, full 18 with AA at rows 606-607) → 14/12/10/8/2 — consistent with the light pinned profile.**
+- **Disc centred on digit ink: "15" ink x106..114 y603..610, centre 606.5 = disc centre 606.5 ✓ (disc top 598 = ink top 603 − 5, matching the R144 model). White digits (255) both discs.**
+- **Today disc (Oct 17, Sat col): bbox x157..174 × y598..615 = 18×18, face (229,72,77) = `todayRed` EXACT, white digit ink.**
+- Verdict: R116/R117 mini discs CLOSED both legs (light R144, dark R157).
+- Next: nothing non-blocked remains open; continue re-verifying closed ids on the uncovered leg or wrap up.
+- Archived from state.md (R157 windowing): R149 entry — "S-group sidebar list re-verified light leg: PASS — separator/Today row/pitch 30/box 12×12/radius 3/label left 32 all byte-consistent."
+
+## R158 — all-day band y-map + envelope re-verified, DARK leg — PASS (verification only, no source, no build)
+- Fresh relaunch dark (background-launch bare; pid 1304330, environ KOS_APPEARANCE=dark). Drive: resize 1100x692 / sidebar expanded / date 2026-04-02 → capture `r158-band-dark.png`. Ledger figures `docs/ui-calendar/r158-band-dark-1x.png` + `r158-band-dark-thu-4x.png`.
+- Scroll-state control: Thu timed fills at x700 = 08:00 317-332 / 10:00 397-412 / 11:00 437-452 / 14:00 557-572 — byte-consistent with the R148 y-map ⇒ same contentY as every pinned measurement.
+- **Rules: `sectionRule` y155 = (39,39,39) EXACT; 3-row interior 156..231 (row1 fill 157..180, gap 181, row2 182..205, row3 207..230); `allDaySeparator` 232-233 = (84,84,84) EXACT; grid top rule 234 = (59,59,59) weekday / (65,65,65) weekend EXACT.**
+- **Envelope (R128/R150 model) at y175, exact-fill scan (40,76,95): (274,625) / (631,744) / (750,863) — BYTE-EXACT to pinned. Thu row 2 `Release notes` fill 631..744 (y200). Sun AND Sat carry no fill in 156..231; weekend plane (37,37,37).**
+- **Thu chip fill (40,76,95) = `:589` dark mix for itemColor (61,174,233) EXACT. Overflow `+2` ink bbox x635..645 y215..222 (n=58, subpixel-AA cores), centre y218.5 ≈ pinned 218 — x-range byte-equal.**
+- **NEW OBSERVATION (not a regression, previously unrecorded): a clipped "06:00" gutter-label sliver at y234..237, x~230..269 — the 06:00 label (ink 230..237 centred on the top rule 234, `CalendarScheduleView.qml:711-725` text `"0"+rowIndex+":00"`) is mostly covered by the all-day band; its bottom 4 ink rows peek out below the separator. The ref's topmost gutter label (8 AM) sits fully below the band. Never flagged by R066/R152 censuses. Non-blocked; candidate for a future atomic fix.**
+- Verdict: R106/R107/R128 band y-map + R128/R150 envelope CLOSED both legs (dark R142 y-map / R142+R158 envelope; light R142+R150).
+- Next: the 06:00 gutter sliver is the only non-blocked open item — either fix it (clip/offset the topmost label) or re-verify another closed id.
+- Archived from state.md (R158 windowing): R150 entry — "All-day band chip envelope re-verified light leg: PASS — exact-fill runs 274..625 / 631..744 / 750..863 byte-consistent, fill (222,241,251) exact, Sun empty; Thu row 2 = `Release notes`."

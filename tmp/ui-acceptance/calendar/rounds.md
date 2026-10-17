@@ -4927,3 +4927,9 @@ R195 archive — hold, nothing done (34th consecutive). Checked for rulings/spec
 - Checkpoint stands: blocked on a user ruling. NOT `DONE`.
 - state.md window rotated to R204..R197; R196 entry archived below.
 - Archived from state.md: R196 — hold, nothing done (35th consecutive). Checked for rulings/spec updates: none since R195 (spec mtime 2026-10-17 04:56 unchanged; git head = R195 hold commit 045c190; no source changes under apps/). Checkpoint stands: blocked on a user ruling.
+
+## R205 (2026-10-17) — HOLD (44th consecutive)
+- Checked for new rulings/spec updates since R204: NONE. spec.md mtime unchanged (2026-10-17 04:56); git head = R204 docs commit 079469a; `git status`/`git diff apps/` empty.
+- No source, no build, no screenshot, no re-verify. Checkpoint stands: blocked on a user ruling (E02 font clauses + 11-item list).
+- Archived R197 hold entry from state.md window (now R205..R198).
+- Next: unchanged — hold unless a ruling lands.

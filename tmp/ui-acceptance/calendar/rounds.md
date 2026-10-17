@@ -5269,3 +5269,11 @@ Next #1 option (b). Checked for new rulings/spec updates since R237: NONE — sp
 - Spot-check of the R247 leg: PASS — clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9 AM, 11 AM, 2 PM pairs), all-day band with "+2" overflow, two-tone gutter, chip height/mass all match. No regression, no delta invented.
 - Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
 - Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.
+
+## R272 (2026-10-18) — HOLD + regression spot-check week collapsed light PASS
+- Pre-round check: spec.md mtime unchanged (2026-10-17 22:50) — no new ruling. sed re-confirmed spec.md:145-146: H (all-day ring icon) / Year / R134 tooltip-y / A-B dim+shadow all still 保持 hold.
+- No code change, no build. Stale pid found dead → relaunched via start-review-vm.sh light, drove resize/sidebar-collapsed/view week/date 2026-04-02, captured r272-week-collapsed-light.png.
+- Spot-check leg chosen: week collapsed light — the only leg not covered by the R247–R251 rotation (R247 week expanded light+dark, R248 day light + collapsed week dark, R249 month light expanded, R250 month dark collapsed + agenda, R251 day dark expanded).
+- Spot-check verdict: PASS — clock glyph + 12-hour two-tone secondary ("8 – 8:45AM" / "11AM - 1PM" / "12PM" shared period), same-hour side-by-side halves (Wed 9:30 / 11 AM / 2:30 pairs), all-day band "Multi-day review" span + Thu "+2" overflow + Fri "R087 sole", two-tone gutter, weekend column tint, 周 pill selected, Thu-2 today ring, collapsed sidebar renders full-width content. No regression, no delta invented.
+- Ruling-blocked items re-listed in state.md 仍差 (per the standing ruling's per-round requirement).
+- Verdict: HOLD. Not DONE — H/Year/tooltip-y/A-B still ruling-blocked.

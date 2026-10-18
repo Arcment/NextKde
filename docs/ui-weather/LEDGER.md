@@ -4,10 +4,14 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **WIND/月相卡头 glyph 统一卡头蓝墨 #90cbff（本轮，前端，零 Go/C++/shared/翻译改动，收口"卡头小 caps 专用色 knob"条残差 b）**：参考实测——tile-cards（538 原生）WIND 头部 glyph 区 (36,294,60,314) 峰值 (86,159,239)、月相头部 glyph 区 (286,294,308,314) 峰值 (108,179,255)，与同排头部文字峰值 (117,188,255)/(113,183,255) 同浅蓝墨族（小字形 AA 峰值低估、真值 ≥ 峰值，判据同 SUNSET/UV glyph 轮的 #90cbff 精确命中）。改动两处：`apps/weather/qml/Main.qml:1927` WIND 卡头 "≋" Label `root.skyTextMuted` → `root.cardHeaderText`；`apps/weather/qml/Main.qml:2150` moonGlyphCanvas（卡头 mini 12×12 盘）亮面 `#a1c0e4` → `#90cbff`（暗面 rgba(255,255,255,0.14)、moonCanvas 大盘 :2204 `#a1c0e4`、AQ 卡头点阵 glyph 独立对角渐隐校准均不动）。
+  **实测**（本轮二进制截图 tmp/shots/glyphcol2-1792337630.png 过体检闸 ✅ 1180×727，全套 dev env + KOS_SCREENSHOT_DELAY_MS=2500）：月相 glyph 区峰值 **(144,203,255)=#90cbff 精确命中**；≋ glyph 峰值 (128,194,248) 与同排"风速"文字峰值 (136,198,245) 同 AA 族（11px 小字形同低估方向）；6x 目检 /tmp/z-windhdr6x.png /tmp/z-moonhdr6x.png：两头部 glyph 与标签同排同浅蓝墨、无发灰无硬边，整窗侧栏/hero/双列/10 天条无破版。
+  **回归**（vs glyphcol-1792336793，2px 步进 diff>24 共 286 点）：glyph 本体区像素级确认（≋ 区 23px 灰 (130,163,186)→蓝 (106,166,218)；月相 mini 盘区 38px (150,180,215)→(136,190,238)）；其余落 y472-476 温度曲线白描边与 y568 10 天渐变条，系两截图相隔 14 分钟的数据刷新已知噪声族——零结构位移。测试 Qt `Totals: 6 passed, 0 failed, 0 skipped`；go test ok（cached，零 Go 改动）。静态色值无动效改动，无帧差义务。
+  **残差（外推待确认）**：a) 月相 mini 盘暗面仍 rgba(255,255,255,0.14)——参考头部 glyph（waning gibbous 近全亮）暗面不可辨无法直测，暗面占比大的相位（first quarter 等）下暗面是否也入蓝墨族未验证；b) 日景亮蓝卡面复测仍缺（同 hdrcol 条 a）。
 - **卡头小 caps 专用色 knob：六卡头标签 skyTextMuted 白@0.66 → #90cbff（本轮，前端，零 Go/C++/shared/翻译改动，收口上轮"卡头 glyph 色"条残差 a）**：上轮证得参考里卡头 glyph 与头部小 caps 同浅蓝墨（对卡面反解白@α 三通道矛盾），但标签仍走全 app 共用 `skyTextMuted`（Main.qml:28），夜景下标签偏白、glyph 偏蓝同排微不齐。本轮 Pillow 复测 tile-cards（538 原生）各头部峰值：SUNSET (146,205,255)/UV INDEX (147,206,255)（卡面 75,138,199）、WIND (117,188,255)（卡面 32,111,192）、WANING GIBBOUS (113,183,255)（卡面 27,108,192）、AIR QUALITY (104,169,248)（卡面 29,98,175）——白@α 反解仍三通道矛盾（AQ: R 0.33/B 0.91），且峰值随卡面照片明暗浮动（Δ 墨-面 ≈(75,70,60) 同族），固定"墨+透明度"模型亦不可解（两卡联立 I_R→891 荒解，系照片纹理噪声），取最亮的 SUNSET/UV 原生实测 (146,205,255)=#90cbff 锚（与上轮 glyph 同值）。`apps/weather/qml/Main.qml:31` 新增 `readonly property color cardHeaderText: "#90cbff"`（:29-30 注释载实测依据）；六处卡头 Label 换用：:1735 AQ、:1935 WIND、:2157 月相、:2352 SUNSET、:2441 UV、:3168 10 天（仅 color，字号/字重/字距零改动）。"My Location"(:1578)、"Conditions" 大标题（:2552，已是纯白 skyText）及其余 skyTextMuted 用点不动。
   **实测**（本轮二进制截图 tmp/shots/hdrcol-1792337229.png 过体检闸 ✅ 1180×727，全套 dev env + KOS_SCREENSHOT_DELAY_MS=2500）：六头部区域 Pillow 峰值——AQ (144,203,255) 精确、10 天 (144,203,255) 精确、SUNSET 文字 (139,199,250)/UV (134,203,249)/风速 (FIRST QUARTER 同排) 均 #90cbff±AA；4x 放大目检 z-aqhdr/z-windhdr3："AIR QUALITY"/"风速"/"FIRST QUARTER" 浅蓝墨清晰、与卡头 glyph 同墨、无发灰无硬边；侧栏/hero/双列 masonry/10 天条无破版。
   **回归**（vs glyphcol-1792336793，2px 步进 diff>24 共 387 点）：变化集中落六头部行；其余系两截图相隔 26 分钟的已知噪声族（侧栏时钟分钟、AQ 数据 40→50 刷新、星空）。测试 Qt `Totals: 6 passed, 0 failed, 0 skipped`；go test ok（cached，零 Go 改动）。静态色值无动效改动，无帧差义务。
-  **残差（外推待确认）**：a) 参考只有日景，#90cbff 在夜景深蓝卡面上的观感系本轮实拍判读（清晰可读），日景亮蓝卡面复测仍缺（与 glyph 条 b 同）；b) WIND 卡头 glyph（≋ 卷流）与月相卡头 glyph（圆盘）仍是 skyTextMuted 白@0.66（上轮只改了 SUNSET/UV 两 glyph）——参考里全族 glyph 同墨，未来轮可把其余卡头 glyph 一并统一到 #90cbff；c) tile-cards 各头部峰值离散（104-147 R）系照片纹理噪声，若未来拿到无纹理原生参考可再校真值。
+  **残差（外推待确认）**：a) 参考只有日景，#90cbff 在夜景深蓝卡面上的观感系本轮实拍判读（清晰可读），日景亮蓝卡面复测仍缺（与 glyph 条 b 同）；b) ~~WIND 卡头 glyph（≋ 卷流）与月相卡头 glyph（圆盘）仍是 skyTextMuted 白@0.66~~（**已做**，见已改首条"WIND/月相卡头 glyph 统一卡头蓝墨 #90cbff"——≈ 与 mini 盘亮面均已 #90cbff，截图 glyphcol2-1792337630 峰值实测）；c) tile-cards 各头部峰值离散（104-147 R）系照片纹理噪声，若未来拿到无纹理原生参考可再校真值。
 - **SUNSET/UV INDEX 卡头 mini glyph 墨色 #e7f5ff → #90cbff（含 glyph 内白色描边统一，本轮，前端，零 Go/C++/shared/翻译改动，收口外推待确认"卡头 glyph 稀释折中值"条——方向反转：真值不是更白，是更蓝）**：旧 #e7f5ff 依据（峰值 (224,240,255)/(239,251,255)）系误采样（采样区混入卡内白色大数字墨）。本轮正确坐标重测：ref-main (814) SUNSET glyph (277,457,291,471) 峰值 **(144,203,255)=#90cbff**、UV glyph (400,457,414,471) 峰值 (142,202,255)；tile-cards 原生切片佐证 (154,214,255)/(151,210,255)，且同图头部文字峰值 (146,205,255) 与 glyph 同族——参考 glyph 与头部小 caps 文字同浅蓝墨（对卡面 (78,140,199) 反解白@α 两通道矛盾 R 0.37/B 1.0，证独立浅蓝墨，与 #b3f4ff 副标题同判据）。`apps/weather/qml/Main.qml` SUNSET glyph onPaint：:2315 地平线描边 rgba(255,255,255,0.85)→#90cbff、:2329 太阳盘填充 #e7f5ff→#90cbff、:2331/:2332 箭头杆/头白@0.92→#90cbff、:2324-2328 注释改写实测依据；UV glyph onPaint：:2418 射线描边→#90cbff、:2431 盘填充→#90cbff、:2430 注释更新。几何/线宽/半径/Label/skyTextMuted 零改动。
   **实测**（本轮二进制截图 tmp/shots/glyphcol-1792336793.png 过体检闸 ✅ 1180×727，全套 dev env + KOS_SCREENSHOT_DELAY_MS=2500）：SUNSET glyph 区 (340,686,360,706) 峰值 **(144,203,255)=#90cbff 精确命中**、UV glyph 区 (552,686,572,706) 峰值 (144,203,255) 同；目检两 glyph 与 "SUNSET"/"UV INDEX" 标签同排、无发灰无硬边，整窗侧栏/hero/双列/10 天无破版。
   **回归**（vs pinfix-1792335211，2px 步进 diff>24）：两 glyph 区 74/92 px 变化（本体）；其余 19.8k 点全落侧栏城市卡时钟分钟/云纹理与 hero/Conditions 数据刷新噪声（两截图相隔 26 分钟，场景逐点抽查 (600,80)/(900,60)/(400,700)/(150,400) 全同）——零结构位移。测试 Qt `Totals: 6 passed, 0 failed, 0 skipped`；go test ok（cached，零 Go 改动）。静态色值无动效改动，无帧差义务。
@@ -549,3 +553,9 @@
 
 ## 遗留物
 - 无（CARDGEO console.log 已确认不在当前代码中，上轮 LEDGER 记载过时）。
+
+
+DONE
+
+（用户 2026-10-18 23:35 指示收工。收尾要求：① 核实 masonry 0 号条步 b 剩余部分——若确已收尾则改"全部完成"，
+ 若未收尾则如实标注剩余差；② 本轮正常走完 编译/测试/截图/台账 即停，无需再做新改动。）

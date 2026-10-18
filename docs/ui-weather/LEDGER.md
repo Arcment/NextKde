@@ -4,6 +4,10 @@
 参考实测色（814×498 主图采样）：天空 `#2961a7→#1469bc→#538ec9`（上→下，含云照片）；Conditions 卡 `#0057b2`；hero 文本 `#ffffff`；10天条渐变 青→黄→橙。
 
 ## 已改
+- **AQ 卡空态假数据门控（本轮，前端，零 Go/C++/shared 改动，仍差 14a 收口）**：空态取证环境（`KOS_WEATHER_DISABLE_SERVICE_AUTOSTART=1` + `KOS_DATA_SOCKET=/nonexistent` + 全新空 `XDG_STATE_HOME=/tmp/kos-weather-empty-aq` + KOS_SCREENSHOT_DELAY_MS=2500）复拍实证仍差 14a——空态下 AQ 卡渲染假 "0"（22px DemiBold）、全宽 EPA 渐变条+白点、说明文字 "Air quality index is 0, which is similar to yesterday..."，全部门控缺失。数据形态：快照无 `airQuality` 时 `backend.airQuality` 是空 QVariantMap（WeatherClient.cpp:437 `toObject().toVariantMap()`），`root.value(backend.airQuality, "usAqi", null)`（Main.qml:325-330）返回 null——usAqi=0 是合法 AQI 值故用 null 比较而非真值判断。`apps/weather/qml/Main.qml:1565-1566` airQualityCard 新增 `readonly property bool hasAqi: root.value(backend.airQuality, "usAqi", null) !== null`；数字 Label（:1624）/渐变条 Item（:1640，白点为子项随之隐藏）/说明文字 Label（:1683）各加 `visible: airQualityCard.hasAqi`；category Label 既有 `visible: text.length > 0` 不动（同源共现，空态 text 已空串）；头部行（点阵 Canvas+"AIR QUALITY" caps）永远可见。
+  **实测**（本轮二进制截图 tmp/shots/empty-aq-1792315252.png 过体检闸 ✅ 1180×727，空态 env）：AQ 卡塌缩为仅头部一行（卡描边 y~228-289，"AIR QUALITY"+点阵 glyph 在场），假 "0"/渐变条/白点/说明文字零墨迹（/tmp/z-empty-aq.png 2x 目视）；下方 KosEmptyState 与错误横幅不受影响。
+  **回归**（数据在场态 tmp/shots/aqgate-1792315288.png 过体检闸 ✅，dev env vs 上轮终态 windneedle-1792314980）：AQ 卡 bbox(250,200)-(697,360) 变化采样 **0**、MAE 0.38（低于同二进制噪声基线 0.86）——数字 59/rating/渐变条/白点/说明逐像素不变；全窗其余差异仅逐小时曲线 draw-on 抓帧时相带（x912-1140 y366-374，已知动画时序噪声族）。qmllint 未跑（纯 visible 属性 4 处）。测试 Qt 6/6 绿（env -u KOS_DATA_SOCKET）、go test ok。本轮无动效改动，无帧差义务。
+  **注**：说明文字 "similar to yesterday" 模板文案在**有数据时**仍显示（外推待确认既有条目，待用户裁定，不在本轮范围）；空态卡只剩头部后的留白观感无参考形态，Apple 空态无对照。
 - **风卡罗盘指针改两段式留空（本轮，前端，零 Go/C++/shared 改动，风卡轮残差 c 收口）**：巡检截图（tmp/shots/patrol-1792314722.png 过体检闸 ✅ 1180×727，dev env + KOS_SCREENSHOT_DELAY_MS=2500）放大风卡实证风卡轮残差 c——指针单段式 `moveTo(0,-12)→lineTo(0,-40)`+尖端三角从 r12 起笔，风向朝下时白针正好从环心单位文字"千米/时"中间划过（/tmp/z-wind-now.png 针穿"米/时"）。ref-main（814×498）WIND 卡放大实测（/tmp/z-ref-wind.png）：Apple 指针**两段式、中心留空**——箭头段在流向一侧近外圈、来向侧（N）另有平头短尾针，中间完全让位给 "5 mph"，从不穿字。`apps/weather/qml/Main.qml:1866-1881` onPaint 指针 rotate 块：主段 `moveTo(0,-12)→moveTo(0,-30)`（中心留空 r<30，避开单位文字竖向半径 ~27+余量）、尖端三角 (0,-46)/(-3,-41)/(3,-41) 原样、新增来向侧短尾针 `moveTo(0,30)→lineTo(0,38)`（平头无箭头，止于刻度环内缘 r38，镜像 ref N 侧尾针形态）；lineWidth 1.6/strokeStyle/fillStyle/rotate(flowAngle) 一律未动，注释标明 ref 实测依据。
   **实测**（本轮二进制截图 tmp/shots/windneedle-1792314980.png 过体检闸 ✅ 1180×727，同 env）：单位"千米/时"零穿字、箭头段自文字下方起笔、来向侧短尾针在场（/tmp/z-wind-fixed.png 3x）；目视与 ref 两段式同构。
   **回归**（vs 巡检改前帧 patrol-1792314722，2px 步进 diff>24）：变化仅 15 采样 bbox(356,436)-(380,498) **全部**落罗盘指针本体，全窗其余（含单位文字/罗盘环/Gusts 行/hero/侧栏）零变化。qmllint 0 error（改动区无警告）。测试 Qt 6/6 绿（env -u KOS_DATA_SOCKET）、go test ok。本轮无动效改动，无帧差义务。
@@ -300,7 +304,7 @@
 11. ~~"7 天"区头仍是裸标签~~（**已做**，见已改"10 天卡头部移入卡内"——旧条目"ref-main (515,325) 起"依据被本轮复测推翻，实以 ref-ipad-small 为准；残差：头部 inset −7px / 头部→Today +4px / 字距总宽 +28px，均系既有 padding 与字体族差异，视觉冲击低）。
 12. 瓦片 glyph 与头部文字的排布残差（视觉冲击低，见已改“glyph 去白方块底”条注）：ref 卡 glyph 与头部行内联（同基线、小尺寸），我方 glyph 垂直居中于左侧 32×32 区、头部/值在右列——瓦片化适配布局，去盒后已进一步贴近 ref，但排布形态仍未对齐；是否把 glyph 改为头部行内联待裁定（会动 6 瓦布局，非原子）。
 13. ~~**瓦片圆角偏小**~~（**已做**，见已改首条——weather 内 `tileRadius: 16` 显式覆盖 4 瓦站点，shared 未动；实测校准半径 ≈15±1 vs ref 15.3）。
-14. **空态残差（视觉冲击低，仅在无数据场景可见，见已改"空态文字可读性修复"条残差）**：a) 空态下 AQ 卡仍显示 "0"+全宽渐变条+白点+"similar to yesterday" 静态文案（无数据门控，有误导性）；b) Conditions 卡空态卡体全空（逐小时区无空态提示）；c) 空态 glyph 保持 accent 淡蓝。参考图无空态形态，是否处理待用户裁定；文字可读性本体已修。
+14. **空态残差（视觉冲击低，仅在无数据场景可见，见已改"空态文字可读性修复"条残差）**：a) ~~空态下 AQ 卡仍显示 "0"+全宽渐变条+白点+"similar to yesterday" 静态文案~~（**已做**，见已改"AQ 卡空态假数据门控"——hasAqi 门控数字/渐变条/白点/说明，空态卡只剩头部；"similar to yesterday" 有数据时仍显示，见外推待确认）；b) Conditions 卡空态卡体全空（逐小时区无空态提示）；c) 空态 glyph 保持 accent 淡蓝。参考图无空态形态，b)/c) 是否处理待用户裁定；a) 与文字可读性本体已修。
 15. ~~**分段胶囊水滴 glyph 偏小**~~（**已做**，见已改首条——canvas 12×16→15×20 坐标 ×1.25，墨 8×11→9×15、相对比 0.306→0.417 vs ref 0.386；残差：宽 −1/高 +1 反向各 1px，AA 级不再动。**注意**：同族"云+日偏小"不成立（勿动）；风 glyph 邻域吻合（✓），两条防误改裁定继续有效）。
 
 ## 外推待确认

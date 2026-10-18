@@ -8,7 +8,7 @@
 ## 队列（一轮一条；✅=已改）
 - [x] P2-3a 月视图 today 文字 → `"white"`
 - [x] P1-A6b 窗口圆点：命中区 22×22、Accessible.role/name、键盘可达（视觉几何不动）
-- [ ] VERIFY-1 议程徽标 10px 补拍
+- [x] VERIFY-1 议程徽标 10px 补拍
 - [ ] VERIFY-2 新建任务编辑器空占位符补拍
 
 ## 仍差

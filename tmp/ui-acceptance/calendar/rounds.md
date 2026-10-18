@@ -5447,3 +5447,219 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - 注: r309b/d 与 a 文件大小相同但 md5 不同 — 大 PNG 同尺寸巧合, 判同帧必须 md5.
 - → **全部 spec ID 通过, 最终版本回归 (light year/month/week/day + dark month/week) 完成 → DONE.**
 - Screenshots: tmp/ui-acceptance/calendar/r309{a,b,c,d}.png, r309{e,f}-dark-{month,week}.png. Bash ~13/25.
+
+## R351 (2026-10-18) — P1-1 locale 感知 12/24h 时间 helper
+- AppTheme singleton 新增 `localeUses24hClock` / `meridiemText` / `formatClock`；
+  Main.qml 删硬编码 `formatClock12`，itemSecondary 走 helper（suffix 按小时取，
+  24h 输出 "HH:MM – HH:MM"）；ScheduleView gutter meridiem 仅 12h 显示，
+  24h 数字改锚 parent.right。
+- Light week 冒烟: r351-p11-smoke-week2.png + r351-weektop2.png — zh-CN 24h
+  gutter 裸数字无 AM/PM ✓，无 QML 报错，pim 无 parse error ✓。12h 分支未实机
+  （locale 限制），逻辑推演与 E02 契约一致，已记 state.md。
+- 插曲: 误用 timeout 杀前台启动脚本截断 fixture ics（缺 END:VCALENDAR）→
+  补行修复；截图目录是任务平铺目录，shots/ 不存在。
+
+## R356 (2026-10-18) — P1-2 时间 helper 推广完成 + nowPill 裁切修复
+- 接手 iter-355 中断轮：P1-2 源码已提交（d32ec19）但未验证。本轮核对四处
+  消费点（itemTime/详情串/议程行 58px 自适应/nowLabel）齐全后进入验证。
+- 12h locale 实机（LC_ALL=en_US.UTF-8, light）：gutter "8 AM"–"7 PM"、
+  chips "8 – 8:45AM"/"11AM – 1PM" 均正确 → r356-12h-day-apr.png。
+- 发现：nowPill 12h 宽 ~57px 超出 52px gutter，越出窗口裁成 "1:06AM"
+  （r356-12h-week-today.png）。修复 dea3aeb：clamp 到 gutterWidth-4 +
+  rightMargin 2 → 复拍完整 "11:08AM"（r356-pill-fixed-zoom.png）。24h 仍
+  42px 不变。zh-CN 24h 输出逐字符同旧值，零视觉变化。
+- 驱动陷阱记录：`{"action":"view"}` 参数键是 `view` 不是 `value`（键错静默
+  no-op）；week 视图要看到 nowPill 必须把视图日期驱到含今天的周。
+- 未竟：dayAgenda 行（:2646）未实机驱到，滚动没找到入口，预算尽；同 helper
+  风险低，记 state「仍差」。Bash ~30/25（超支，下轮注意）。
+
+## Round 357 (2026-10-18) — P1-3 ✅
+- 改：`CalendarTaskEditorDialog.qml:18` 标题补 `editingId.length > 0` 分支，
+  新建任务显示 "New task"，编辑保持 "Edit task"。
+- 构建 ✓；light 启动冒烟 ✓（无 QML 报错）。无常规视图视觉变化。
+- 未竟：弹窗标题实拍两次未成（第 1 次启动 Wayland 会话崩溃；第 2 次
+  `toolbarMore` click 只出 tooltip 菜单未弹），按 2 次上限停手，记入 state。
+
+## Round 358 (2026-10-18) — P1-4 ✅
+- 改：`EventEditorDialog.qml` 保存校验——严格 parseDateText/parseTimeText
+  （Date 往返拒滚动、0-23:0-59）+ `validationProblem()`（空标题/起止非法/
+  end<start/同日 end<=start）+ `accept()` 覆写：非法阻止 accept、弹窗不关、
+  顶部行内红字 + 对应字段红描边，编辑即清错，reopen 重置。
+- 对比度（WCAG 复算）：错误文案浅色 #d23636 on #F7F7F7 = 4.54:1（最小
+  偏离，全局 destructive #d83b3b 仅 4.25:1 不达标）；深色 #ff6961 on
+  #262626 = 5.37:1 保持 token。
+- 构建 ✓；light 实机驱动：空标题点 保存 → 弹窗不关、"Title is required."
+  红字 + 标题框红描边（r-p14-editor-error3.png），日志无 QML 报错。
+- 驱动突破：`click` kind 在 ReviewInput.cpp 未处理（fallthrough 成 move，
+  只 hover）→ 必须 press+release；弹窗在 overlay，名称搜不到，按钮按坐标
+  点（保存 = 554,614）。kill 上一轮残留实例 3360485 后正常启动。
+
+## Round — P1-5 任务编辑器保存校验 (2026-10-18)
+- `CalendarTaskEditorDialog.qml`：parseDateText/parseTimeText（与 event 编辑器
+  同实现）、validationProblem（空标题；due 空允许但 linked 任务必填；非
+  allDay 时 HH:MM 严格解析）、accept() 覆写（非法不关窗）、行内错误 Label +
+  title/dueDate/dueTime 红描边、openForTodo 重置错误态。errorColor 沿用
+  P1-4 复算值（浅 #d23636=4.54:1 / 深 destructive 5.37:1）。
+- 构建 ✓；light 起动 ✓，日志无 QML 报错。主界面无视觉变化，无对照图。
+- 驱动受阻塞：New task 入口在 toolbarMore 原生 popup 菜单，主窗口合成
+  事件打不进（截图只见 tooltip "日历操作"）；校验分支未实拍，模式与 P1-4
+  实证同构。
+- 新陷阱：pgrep -f "kos-calendar" 匹配到自己 bash（自杀一次）→ 用
+  pgrep -x + /proc/<pid>/cmdline 验身份；typeText 无功能键，菜单键盘导航
+  也不可驱动。
+
+## Round 359 (2026-10-18) — P1-6 删除二次确认
+- EventEditorDialog / CalendarTaskEditorDialog：Delete 改两步——先切
+  confirmingDelete 态（footer 换成 alert 形态：粗体标题+不可恢复说明+Cancel
+  高亮默认+destructive Delete），确认态内才 emit deleteRequested；open 重置。
+- 构建 ✓；实拍失败：已打开弹窗不热载（--watch-qml 只影响新开组件），旧组件
+  走旧 onClicked 误删 fixture 事件一条（已恢复 fixture）。
+- 截图：shot-p16-editor.png（旧代码编辑器）；确认层待下轮重启后实拍。
+
+## Round 361 (2026-10-18) — P1-6 实拍收尾（三分支全验证）
+- 重启实例（新二进制）后整流程：编辑日程弹窗 → 点「删除日程」(550,637) →
+  **确认层出现**：粗体 "Delete this event?" + muted 不可恢复说明 + 取消
+  （高亮默认）+ 删除日程（destructive），形态与 alert-macos.png 一致
+  （shot-p16-confirm.png）。
+- 点穿保护实证：press+release 走 Qt 隐式 grab，release 归原 Delete 按钮，
+  第一次点击不误删；点穿需第二次显式点击。
+- Cancel 分支 ✓（回三键态不删，shot-p16-cancel.png）；Delete 分支 ✓
+  （弹窗关、状态条「日程已删除」、事件移除，shot-p16-deleted.png）。
+- 收尾：实例正常退出（ics 完整），fixture 从备份恢复 39 条。
+- 本轮无代码 diff；新陷阱：pointerObject 参数键是 `target`（发 `object`
+  静默不动）。
+
+## Round 362 (2026-10-18) — P1-7 ScheduleView 四处裸 handler 无障碍/键盘
+- CalendarScheduleView.qml 四处补齐（A1）：
+  - 日头 cell（DayHeaderCell）：activeFocusOnTab + Return/Space 选中该日；
+    Accessible.role=ColumnHeader，name=星期+日期（新 accessibleText 属性）；
+    onPressAction=选中；焦点环（accent 1px，仅 activeFocus 可见）。
+  - 全天 chip：activeFocusOnTab + Return/Space itemActivated；role=ListItem，
+    name=标题+" — All-day"（全天无时间）；onPressAction；焦点环（inkColor，
+    仅 focus；静止态仍遵守 R078 fill-only）。
+  - 小时格（hourCell delegate）：columnIndex>0 才 interactive/focus；方向键
+    四向移动（moveFocus，列 0 gutter 不可达/不可停留）；Space=dateSelected
+    （对应单击）、Return=createRequested（对应双击）；role=Cell，
+    name=日期+"，"+小时；onPressAction=新建；gutter 列 role=NoRole、name=""。
+    焦点环加在原有透明格线上（仅 focus）。
+  - timed chip：同全天 chip，name=标题+itemSecondary（时间）。
+- 构建 ✓；light 起 ✓，日志无 QML 报错；截图 shot-p17-smoke.png：静止态
+  与改动前无差异（焦点环只在 activeFocus 出现）——本轮无静止视觉变化。
+  键盘路径为代码层补齐，未做实机逐键驱动（harness typeText 无功能键）。
+- 收尾：kill -TERM 正常退出，ics 完整 39 条，fixture 从备份恢复。
+
+## Round 363 (2026-10-18) — P1-8 MonthView chip 无障碍 + "+" focus/hover 双触发
+- CalendarMonthView.qml itemChip（:188 原 TapHandler 处）：补
+  activeFocusOnTab、Return/Space（dateSelected+itemActivated，同 TapHandler
+  语义）、Accessible.role=ListItem、name=itemTitle（月视图 chip 无时间列）、
+  onPressAction；焦点环 itemColor 1px 仅 focus（静止态仍 fill-only，
+  遵守 R078）。
+- "+"（KosToolButton）visible 改 `(hovered || activeFocus) && inVisibleMonth`：
+  键盘 Tab 进日格后 "+" 可见可激活（原纯 hover 入口）。
+- 构建 ✓；light 起 ✓ 月视图渲染正常、无 QML 报错（shot-p18-month.png）。
+  本轮无静止视觉变化（焦点环/“+”仅在 focus/hover 出现），无对照图。
+- 收尾：kill -TERM 正常退出，ics 与备份一致（fixture 未动）。
+
+## Round — P1-9 年视图日格（2026-10-18）
+- Main.qml yearDayCell：preferredHeight 18→20、日号 font 9→10（finding 量化达标）；
+  键盘 activeFocusOnTab（仅 inMonth）+ Return/Space=selectedDate=cellDate；
+  Accessible role=ListItem（inMonth）+ name=LongFormat 日期+"%1; %2 items" +
+  focusable + onPressAction；焦点环 accent 1px 仅 activeFocus。
+- 构建 ✓；light 起 ✓，分段点 Year：12 月 3×4 网格完整、日号清晰、
+  today/selected 圆盘与事件点不变，无 QML 报错（shot-p19-year.png、
+  crop shot-p19-crop-oct.png）。年视图本无参考图（Extrapolated），
+  高度/字号增量未破坏密度，无对照图可较。
+- 收尾：kill -TERM 正常退出。
+
+## Round 365 — P1-10 ✅ Accessible.checked（CategoryRow / SidebarRow）
+- SidebarRow（Main.qml:281）：补 `Accessible.role`（showSwitch→Switch，
+  否则 ListItem）+ `Accessible.checked: row.checked`；CategoryRow（:409）
+  role 已有，补 `Accessible.checked: row.checked`（swatchOnly 恒 false 无害）。
+- 非视觉改动：构建 ✓；dark 起 ✓ resize+captureClient 冒烟
+  （shot-p110-smoke.png），日志 0 条 QML error/warning。无对照图。
+- 踩坑记录：captureClient path 需绝对路径。
+- 收尾：kill -TERM 正常退出。
+
+## Round — P1-11 (2026-10-18)
+搜索框两处（SidebarSearch TextInput、toolbarSearchInput）+
+任务编辑器 listBox/priorityBox/notesField 补 `Accessible.name`（A3+A4）。
+非视觉改动：构建 ✓、dark 启动冒烟 ✓（shot-p111-smoke.png）、
+日志 0 条 QML error/warning、kill -TERM 干净退出。无视觉变化，无对照图。
+
+## Round P1-12 (2026-10-18) — labelSecondary 浅色 alpha 0.60→0.79 ✅
+- WCAG 复算（python3 二分）：约束平面是侧栏 #E4E4E4 而非白；0.79 →
+  vs #E4E4E4 4.56:1、vs 白 5.80:1（0.78 只有 4.43:1，不达标）。
+  与参考偏差：#3C3C43 保色相，仅 alpha 0.60→0.79（最小偏离满足 4.5:1）。
+- 构建 ✓；light 启动 ✓；侧栏默认收起，press+release(38,42) 于
+  toolbarSidebarToggle 展开后实拍 shot-p12-light3.png；"Calendars" 标题
+  最暗像素 (105,103,109) 与预期合成 (101,101,106) 一致。
+- 驱动新坑：pointerObject 只悬停不点击（tooltip 出现但未触发）。
+- state.md / 队列已更新；next: P1-13。
+
+## Round — P1-13 状态条 positive/warning 浅色对比度（C2）
+- 状态条实际用 AppTheme token（#16875f/#b96800），实测 4.50/4.16:1——
+  warning 不达标；REVIEW 所记 #34C759/#FF8D28 是 tahoe token（2.22/2.31）。
+- 修复：tahoe 块新增 statusPositive/statusWarning，浅色腿同色相最小加深
+  （python3 逐级乘系数）：#24883D = 4.50:1、#B2621C = 4.51:1；深色腿
+  保持参考原色（#1E1E1E 上 7.51/7.22:1）。与参考偏差：浅色状态条文字
+  加深，色相不变。
+- 构建 ✓；light 启动 ✓ 冒烟（sidebar action 展开实拍，日志 0 QML 错误），
+  kill -TERM 干净退出。
+- 状态条实拍未成：fixture 事件在 2026-03，本周网格空，openItem 无匹配。
+  驱动路径已写进 state.md 仍差（date 2026-03-29 → openItem → Save →
+  3.5s 内 capture）。
+- 新坑：harness 有 {"action":"sidebar","expanded":bool}；captureClient
+  path 落 repo 根（app cwd）。
+- state.md / 队列已更新；next: P1-14。
+
+## R369 (2026-10-18) — P1-14 nowPill DemiBold ✅
+
+- 修复：`apps/calendar/qml/CalendarScheduleView.qml` nowPillLabel（:912 起）
+  加 `font.weight: Font.DemiBold`（+2 行注释）。REVIEW C3：白 on
+  todayRed #E5484D = 3.91:1 常规体不达标；同条 finding 给出 DemiBold
+  或加深底色两案，取 DemiBold（贴 ref 加粗胶囊字，不动 token）。
+- 构建 ✓（ninja kos-calendar kos-pim-service，7/7）。
+- 实拍对照：light 启动 → resize 1100x692 → sidebar 展开 →
+  captureClient `_p14-light-full.png`（1100x720）。nowPill "12:20" 于
+  gutter 可见；2× NEAREST 裁块 `_p14-pill-zoom.png` vs 参考
+  `_p14-ref-pill-zoom.png`（ref 9:41 胶囊）：笔画粗细一致，加粗成立。
+- WCAG 说明：DemiBold 11px 严格按 WCAG 大字号阈值（≥18.66px bold）
+  不算 large text；本修复系按 REVIEW.md 建议执行（与日头部 12px
+  DemiBold 同等待遇），数值对比 3.91:1 未变，形式贴合参考。
+- 驱动坑（本轮新证）：`review-command.py` 只收 **argv[1]** JSON，
+  stdin/heredoc 静默无效（sequence 不动）。
+- P1-13 状态条顺带实拍未做（预算收尾线）：openItem 依赖
+  selectedItems，需先 pointer 选中 chip，链路长；路径已记仍差。
+- state.md 已更新；next: P1-15。
+
+## Round 370 (2026-10-18) — P1-15 ✅
+- `CalendarMonthView.qml:122` today 字色 `"white"` → `AppTheme.accentText`（C4）。
+- WCAG：accent `#3478f6` vs blackSeed **5.16:1** ✓（white 仅 4.07，
+  accentText 自动取高侧）。两腿同值。
+- 实拍：light `_p15-month.png` 今天格 "18" 黑字 on accent 蓝（像素采样
+  RGB(15,9,4)）；dark `_p15-month-dark.png` 同样黑字 ✓。
+- 与参考偏差：参考 today 圆点白字；改 accentText 为 REVIEW finding 指定动作。
+- 驱动补充：截图 action 是 **captureClient**（无 "screenshot"）；stop-live.py
+  失效时 `kill -TERM $(cat live-app.pid)`。
+- state.md 已更新；next: P1-16。
+
+## Round 371 (2026-10-18) — P1-16 代码 ✅ / 警告分支实拍未遂
+- `EventEditorDialog.qml` unlink 警告浅色腿 `AppTheme.warning`(#b96800,
+  3.89:1) → `#a85c00`（**4.67:1** on #F7F7F7，python3 复算，最小加深）；
+  dark 腿与共享 token 不动（weather/todo/music 共用）。
+- 构建 ✓；light 启动冒烟 ✓ 无 QML 错误。
+- 实拍链路走到：chip(1040,283) → openItem → 编辑(675,439) → 编辑器开 ✓ →
+  勾选(402,347) → 保存(555,563)；之后重开编辑器失败（popover 在、编辑
+  钮无响应），警告分支未显示，2 次回路用完按纪律停手 → 记入仍差。
+- 驱动更正：app cwd = 任务目录，captureClient 用裸文件名（带前缀路径
+  写嵌套不存在目录 → 静默 false）。
+- state.md 已更新；next: P1-16 补拍（+顺带 P1-13），然后 P1-17。
+## Round 371 (2026-10-18) — P1-16 补拍 ✓ / P1-13 状态条实拍 ✓（无代码改动）
+- 根因：fixture 无 VTODO → 警告分支不可达。注入关联对
+  (ui-review-todo-0 ↔ ui-review-0-8, 2026-03-29 Morning planning) +
+  清 profile/pim 重启。
+- `_p16-warning.png`：取消勾选后琥珀警告出现；采样 #ac6106（AA 下界）
+  on #F7F7F7 4.39:1，源码 #a85c00 = 4.67:1 ✓。
+- `_p13-sb-final.png`：保存后「日程已更新」绿字；采样 4.09:1（AA 下界），
+  P1-17 轮核对代码值。
+- 截图：_p16-linked-editor.png / _p16-warning.png / _p13-sb-final.png

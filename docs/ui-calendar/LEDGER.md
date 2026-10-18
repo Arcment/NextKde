@@ -1,21 +1,28 @@
 # R0 — 第三轮：按 REVIEW.md 修复
 
-## 本轮 (2026-10-18) — P1-9 ✅ 年视图日格 高度/字号/无障碍/键盘
-Main.qml yearDayCell（:2806 起）：
-- `Layout.preferredHeight` 18 → **20**（≥20 达标）。
-- 日号 Label `font.pixelSize` 9 → **10**（≥10 达标）。
-- 键盘：`activeFocusOnTab: inMonth`；Return/Space = `activate()`
-  （inMonth 时 selectedDate = cellDate，同 MouseArea 点击语义）。
-- 无障碍：role=ListItem（inMonth 才有，非本月 NoRole）、
-  name=qsTr("%1; %2 items")（LongFormat 日期+事件数，复用月视图
-  ":134" 措辞）、focusable、onPressAction=activate()。
-- 焦点环：accent 1px 仅 activeFocus（静止态不变）。
-构建 ✓；light 起 ✓，点分段切 Year：年视图正常渲染、日号清晰、
-today/selected 圆盘不变、事件点可见、无 QML 报错
-（shot-p19-year.png + crop shot-p19-crop-oct.png）。
-年视图无参考图（原注释即"Extrapolated"），无对照图可较；
-高度+2/字号+1 使月块略增高，12 个月 3×4 网格仍完整容纳（十月块实拍核过）。
-本轮日志确认无 QML error/warning。
+## 本轮 (2026-10-18) — P1-11 ✅ 搜索框 + 任务编辑器 Accessible.name（A3+A4）
+5 处补 `Accessible.name`（非视觉）：
+- Main.qml SidebarSearch 组件内 TextInput（:531）：`Accessible.name: field.placeholder`
+  （跟随组件 placeholder，qsTr("Search")）。
+- Main.qml 工具栏搜索 TextInput（:1968，objectName toolbarSearchInput）：
+  `Accessible.name: qsTr("Search")`。
+- CalendarTaskEditorDialog.qml：listBox → `qsTr("Task list")`、
+  priorityBox → `qsTr("Task priority")`、notesField（TextArea.flickable 内
+  KosTextArea）→ `qsTr("Task notes")`，措辞对齐本文件已有
+  "Task title"/"Task due date" 风格。
+构建 ✓；dark 启动 ✓，resize 1100x692 + captureClient 冒烟
+（shot-p111-smoke.png，周视图渲染正常），日志 0 条 QML error/warning，
+kill -TERM 干净退出。
+**本轮无视觉变化，故无对照图。**
+注：REVIEW.md 原行号 :527-560/:1995-2013 偏移（现 :530/:1967），
+grep "TextInput\|searchField" 定位；无独立 searchField id，搜索框是
+SidebarSearch 组件内 TextInput + 工具栏匿名 TextInput。
+
+## 上一轮 (2026-10-18) — P1-10 ✅ Accessible.checked（CategoryRow / SidebarRow）
+Main.qml 组件声明处补两行（非视觉）：SidebarRow 补 role(Switch/ListItem)+checked；
+CategoryRow 补 checked。构建 ✓ 冒烟 ✓ 无视觉变化。
+captureClient 的 path 必须绝对路径。
+
 
 ## 修复队列（按序，一轮一条；✅=已改）
 - [x] P0-1 全天条 "+N" 差一
@@ -28,8 +35,8 @@ today/selected 圆盘不变、事件点可见、无 QML 报错
 - [x] P1-7 ScheduleView 四处裸 handler 无障碍/键盘
 - [x] P1-8 MonthView chip 无障碍 + "+" focus/hover
 - [x] P1-9 年视图日格（高度≥20/字号≥10/Accessible/键盘）
-- [ ] P1-10 Accessible.checked（CategoryRow / SidebarRow）
-- [ ] P1-11 搜索框 + 任务编辑器 Accessible.name
+- [x] P1-10 Accessible.checked（CategoryRow / SidebarRow）
+- [x] P1-11 搜索框 + 任务编辑器 Accessible.name
 - [ ] P1-12 labelSecondary 浅色对比度
 - [ ] P1-13 状态条 positive/warning 浅色对比度
 - [ ] P1-14 nowPill DemiBold
@@ -56,11 +63,13 @@ today/selected 圆盘不变、事件点可见、无 QML 报错
   （只处理第 1 条），逐条发；一行 Bash 链多个 review-command.py 可行。
 
 ## Next round
-P1-10 — Accessible.checked（A2）：`Main.qml:421-423`（CategoryRow）与
-`:281-407`（SidebarRow）补 `Accessible.checked` / role。非视觉类：构建 +
-启动冒烟（日志无 QML 报错），写明"无视觉变化，无对照图"。行号以现文件
-为准，先 grep 定位。注意 :421-423 附近是 swatchOnly 分支（ListItem/CheckBox
-role 已有），checked 只对 CheckBox 形态有意义。
+P1-12 — C1 浅色对比度：`Main.qml:120-123`（行号以现文件为准，grep
+"labelSecondary" 的浅色腿 readonly property）alpha 0.60 → ≈0.78，
+需按 WCAG 公式 python3 复算 ≥4.5:1 并把数值写进 state.md；若与参考
+实测色冲突，取满足 4.5:1 的最小偏离并记「与参考的偏差」。视觉类：
+light 启动 + 截图对照（侧栏次级文字区域）。
+
+
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。

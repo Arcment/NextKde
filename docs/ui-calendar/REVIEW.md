@@ -198,3 +198,99 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
 - 议程行（2590，KosItemDelegate）是标准 ItemDelegate：可键盘聚焦、有
   activeFocus 描边（KosItemDelegate.qml:11-12），不写 finding。
 - 线索 20（CalendarMonthView.qml:97 魔数）不在本行段 → 留给 R5。
+
+## R4 — `CalendarScheduleView.qml` 全文（周/日网格、chip、全天条、gutter）
+
+复核日期 2026-10-18。全文 1088 行通读完毕。线索 1/2/3/14 逐条核实如下，
+另含新发现。对比度均用 WCAG 相对亮度公式实测（python3，算式见各项）。
+
+### 线索复核
+
+- [P1] `CalendarScheduleView.qml:856-857,880-881` — 线索 1 成立。chipHost
+  `anchors.margins: 3` → 内高 `40-6=34`；timedChip 高
+  `Math.round(40*0.96)=38` → chip 在宿主内 y=3..41，**超出宿主 4px、
+  超出 40px 小时格 1px**，侵入下一小时行。下一行 delegate 在 Repeater 中
+  靠后、z 序更高：周末列的 weekendField 色块（713-718）与下一行顶部
+  1px gridLine（808-814）会盖在 chip 最后 1px 上。同时宣告的 3px 底部
+  inset 实际不成立。建议：chip 高改 `hourHeight-2*3-2`（=32）或 margins
+  改 1，二者取一并保持与 ref 0.96 占比论证一致。
+- [P2] `CalendarScheduleView.qml:982` — 线索 1 尾成立：`timedChip.height
+  >= 34` 中 height 恒为 38，条件恒真，是死守卫。若意图是"矮 chip 隐藏
+  副行"，该意图从未生效。建议：删掉或改为 `>= hourHeight-8` 之类的
+  真实阈值。
+- [P1] `CalendarScheduleView.qml:173-175` vs `:757-771` — 线索 2 成立。
+  nowPill 文案 `nowLabel` 恒 24 小时零填充（"09:05"），同一屏幕 gutter
+  刻度是 12 小时 + AM/PM（"9 AM"）。同视图两套时间格式。建议：二者
+  统一走同一 helper（并见线索 3 的 locale 问题）。
+- [P1] `CalendarScheduleView.qml:757` — 线索 3 成立且比原线索更重：
+  `text: hourCell.rowIndex < 12 ? "AM" : "PM"` 硬编码英文；`:766-769`
+  数字部分 `(h === 0 ? 12 : h)` 把 12 小时制写死——**24 小时制 locale
+  （如 zh-CN）的 gutter 也只会显示 12 AM/PM**。与 `Main.qml:1315
+  formatClock12` 同病。建议：按 `Qt.locale().timeFormat` 长度判定 12/24h，
+  24h locale 直接显示 `rowIndex` 且去 meridiem。
+- [P1] `CalendarScheduleView.qml:457,620,647,1042` — 线索 14 本文件部分
+  成立：四处 `font.pixelSize: 9`（"all-day" 标签、全天 chip 标题、两个
+  "+N"），低于 macOS 最小 10pt。**新发现同族：`:759` meridiem 文字
+  `font.pixelSize: 8`，更小**。9px 在 24px 全天行内尚可排版，但 8px
+  AM/PM 与 11px 数字同屏阅读吃力。建议：全部提到 ≥10，meridiem ≥9
+  且考虑 24h locale 下直接消失（见上条）。
+
+### 新发现
+
+- [P0] `CalendarScheduleView.qml:525-528,550` — 全天条 "+N" 溢出判据
+  差一：`allDayOverflow = max(0, columnItems.length - allDayMaxRows + 1)`
+  在 `length == allDayMaxRows == 3` 时 = 1，于是该列**只渲染
+  `slice(0, bandRows-1)` = 2 个 chip + 一行 "+1"**——而 band 此刻有
+  3 个槽、3 个 item 全放得下，"+1" 是不存在的隐藏数的假计数，第 3 个
+  事件被无端藏起。算式：3−3+1=1>0 ⇒ allDayVisible=3−1=2。当内容行数
+  ≤3（band 未触顶）时必然误报。建议：`allDayOverflow = max(0,
+  columnItems.length - allDayBandRows)`，仅当真的放不下时才让 "+N"
+  占用最后一槽。
+- [P1] `CalendarScheduleView.qml:792-797` — nowPill 文案白字
+  `#FFFFFF` on `todayRed #E5484D` = **3.91:1**（实测），而该 Label
+  `font.pixelSize: 11` 且**未设字重（常规体）**——适用 4.5:1 阈值，
+  不达标。R3 的"白 on todayRed 已排除"只覆盖日头部 12px **DemiBold**
+  数字（粗体 3:1 过线），不适用此处。建议：pill 文字加
+  `Font.DemiBold`（一并更贴 ref 的加粗胶囊字），或加深 todayRed 在
+  pill 这一处的底色。
+- [P1] `CalendarScheduleView.qml:414,625,838,1024` — 键盘与 VoiceOver
+  双阻断：日头部 cell 用裸 `TapHandler`、全天 chip（551 起）与 timed
+  chip（867 起）用裸 `TapHandler`、小时格用裸 `MouseArea`（840 单击
+  选中、841-844 双击建事件）。四者均不可聚焦、无
+  `Accessible.name`/`Accessible.role`。影响：Full Keyboard Access 下
+  无法选中任何日期/时段/事件，也无法发起"双击空白建事件"；VoiceOver
+  读不出任何 chip。建议：chip 换 `Accessible.role: ListItem` +
+  name = 标题+时间，网格 cell 给 `TapHandler` 之外补键盘路径（如
+  空格/回车激活、方向键移动选中格）。
+- [P2] `CalendarScheduleView.qml:278-286,682-692` — 网格 24×
+  (dayCount+1) 格，每格 `cellItems` 绑定调一次 `hourItems`（内部再调
+  `itemsForDate` 拷贝全日数组过滤）。周视图 = 192 次/轮，且
+  itemsByDate 任一变更触发整片重算。日历数据量小、可接受，但建议把
+  per-date/per-hour 过滤结果在 C++ 侧或 root 缓存一次（与 R3 年视图
+  504 次同类，合并处理）。
+- [P2] `CalendarScheduleView.qml:580-581,599-608` — 多日全天条左延
+  `allDayJointOverlap=4` 是不透明覆盖：若相邻两列同一行有**两个不同**
+  的多日 item，右侧 chip 的左延会盖掉左 chip 右端 4px（含可能的省略
+  号）。单日与多日混排时可复现。需人工判定：实机看两个重叠多日事件
+  的并排显示是否可接受；不可接受则把左延改为只画到本列左缘
+  （`clip` 或减窄）。
+- 需人工判定：`CalendarScheduleView.qml:745-751` hourLabel 避让
+  nowPill 的 `nowLabelClearance: 14` —— 数值上 pill 半高 10 + 数字墨
+  半高 ~4.5 ≈ 14.5，14 略紧但量级正确；是否真有 1px 碰撞需实机确认。
+
+### 已排除（本轮实测，免下轮重疑）
+
+- chip 墨色对比度全部达标：timedChip 墨（色相对半取极，`:270-276`）
+  on 填充（浅 `alpha 0.19` / 深 `alpha 0.36`）——accent：7.80 / 5.37，
+  红 (235,76,70)：7.98 / 5.35；全天 chip（mix 0.17/0.32）：8.0 / 5.36
+  与 8.19 / 5.33。两腿、两种代表色均 > 4.5:1。R089/R079 的半值墨规
+  在对比度上站得住。
+- "+N" 墨 on 场地：浅 9.83–10.17、深 8.59–8.90，达标。
+- `allDayContentRows`/`allDayBandRows` 的槽位记账（除上述 P0 差一外）
+  自洽：cap 3、min 1、overflow 行占 1 槽，总数恒等于 bandRows。
+- `lastCoveredDay` 的"end 独占 −1 天"用本地日期分量回滚，跨月/跨年
+  正确；`isoDay` 字符串比较格式固定 4-2-2，字典序安全。
+- `usefulStartHour`（288-310）：含今日时 `max(0, now-2)`，边界 6..21
+  之外回落最早事件−2 或 7，逻辑无死区。
+- nowLine/nowDot 只在 `rowIndex === nowRow` 渲染，`columnIndex-1 ===
+  todayColumn` 判定与 gutter 不画的声明（1051 注释）一致，无越界。

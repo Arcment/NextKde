@@ -294,3 +294,57 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
   之外回落最早事件−2 或 7，逻辑无死区。
 - nowLine/nowDot 只在 `rowIndex === nowRow` 渲染，`columnIndex-1 ===
   todayColumn` 判定与 gutter 不画的声明（1051 注释）一致，无越界。
+
+## R5 — `CalendarMonthView.qml` + `EventDetailsPopover.qml`（2026-10-18）
+
+### 线索复核（TASK.md 4/5/6/14/15/20）
+- 线索 4 成立 — `CalendarMonthView.qml:117` 月格 today 圆片用 `AppTheme.accent`；
+  `Main.qml:2374` 迷你月、`:2834` 年视图用 `AppTheme.todayRed`；`:2127` 侧栏 Today 又用 accent。
+  同一语义（"今天"）在四个位置分裂成两种色。且 `AppTheme.qml` M04 注释自述
+  "the mini month's today disc all read this (todayRed)" —— 月视图的实现与 token 自身的文档矛盾。
+  建议：月格 today 圆片改用 `AppTheme.todayRed`。
+- 线索 5 成立 — `CalendarMonthView.qml:141` `visible: dayButton.hovered && inVisibleMonth`。
+  纯悬停入口：hovered 不会被键盘聚焦置位，Tab 进入日格后"+"按钮不可见也不可激活。
+  建议：补 `dayButton.activeFocus` 条件，或改为 focus/hover 双触发。
+- 线索 6 成立 — `CalendarMonthView.qml:188` chip 仅裸 `TapHandler`：不可聚焦、无
+  Accessible.role/name；且 chip 高 18px（:161）低于 macOS 20×20 最小命中区。事件条
+  是月视图除日格与"+"外唯一的条目入口，键盘与 VoiceOver 双阻断。
+- 线索 14 成立 — `CalendarMonthView.qml:133`（"+N"）与 `:182`（chip 标题）均
+  `font.pixelSize: 9`，低于 macOS 10pt 最小值。chip 标题是正文信息不是 caption。
+- 线索 15 成立 — `CalendarMonthView.qml:102` `opacity: 0.42` 作用于整格。
+  alpha 合成实测：浅色 (23,32,51)@0.42 over card(251,253,255) → (155,160,169)，
+  CR=2.57:1；深色 (244,247,251)@0.42 over card(33,42,58) → (121,128,139)，CR=3.63:1。
+  11px 文本两模式均 < 4.5:1。副效应：out-month 格里的 chip 底 alpha 0.16×0.42≈0.067，
+  事件条几乎不可见。
+- 线索 20 成立 — `CalendarMonthView.qml:97` `Math.floor((height-5-5-26)/20)` 的
+  26/20 是魔数：26=日期圆片 24+spacing 2，20=chip 18+spacing 2，与 :61-66 的 30、
+  :161 的 18 隐式耦合，改任一处会静默错位。建议提为具名常量或由布局推导。
+
+### 新发现
+- [P1] `CalendarMonthView.qml:122` — today 圆片文字硬编码 `"white"` 于 accent 底上。
+  实测 WCAG：白 on 蓝 #3478f6 = 4.07:1、on 紫 #8b5cf6 = 4.23:1、on 橙 #d66a20 = 3.53:1
+  （accent 可被用户切换，11px DemiBold 需 4.5:1，全部不达标；on 绿 #16875f = 4.50 临界）。
+  黑字 on 蓝 = 5.16:1。影响：四种 accent 三种不达标。建议：改用现成的
+  `AppTheme.accentText`（AppTheme.qml:157 已按对比度自动选黑/白）。
+- [P2] `CalendarMonthView.qml:134` — "+N" 的 Accessible.name 写在非交互 Label 上
+  （"select this date to view all"），交互载体是外层 dayButton。VoiceOver 用户聚焦
+  日格时听不到溢出信息。建议：把条目数并入 dayButton 的 Accessible.name。
+- [P2] `CalendarMonthView.qml:51` — `height - 30 - 6*rowSpacing` 的 30 与 :64-66
+  表头固定高重复硬编码，同线索 20 一类魔数。建议：引用表头常量。
+- [P2] `EventDetailsPopover.qml:127-128,207` — closeButton 22×22、editButton 高 26：
+  ≥20 最小值合法但低于 macOS 28×28 默认命中区，且两者是弹窗内仅有的操作目标。
+- [P2] `EventDetailsPopover.qml:20-25` — 中性灰硬编码（#262626/#F5F5F5/
+  rgba(0,0,0,0.55) 等）绕过 AppTheme 语义色，不随 accent/系统调色板适配，也没有
+  Increase Contrast 变体；与 HIG"语义色三套都要成立"存在张力（注释声明是刻意选择）。
+- 需人工判定：`EventDetailsPopover.qml:262-282` `openAt(point)` 把弹窗左上角直接放在
+  点击点并 clamp 进窗口，无箭头、无"附着并指向源"的锚定形态（与线索 10 同源）。
+  当前注释表明是刻意的 app-owned 设计，是否需补 macOS 原生 popover 形态留人工判断。
+- 需人工判定：`CalendarMonthView.qml:188` chip TapHandler 默认 DragThreshold 被动
+  抓取，点击 chip 是否会同时触发外层 dayButton.onClicked（dateSelected 双发）？
+  需运行时确认。
+- 已排除：popover 次要文本对比度达标 — secondaryColor 实测浅色 (110,110,110) on
+  #F5F5F5 = 4.66:1、深色 (164,164,164) on #262626 = 6.06:1，12px 需 4.5:1，两模式通过。
+- 已排除：chip 墨色达标 — `AppTheme.text` on 半透明 accent 底实测浅色 13.11:1、
+  深色 9.35:1（与 R4 对 ScheduleView chip 的结论一致，跨视图可复用）。
+- 已排除：`EventDetailsPopover.qml` 标题 15px/20px 行高、时间/位置/备注 12px 均在
+  HIG 内置档位（Title3 15、Callout 12）内，无字号违规。

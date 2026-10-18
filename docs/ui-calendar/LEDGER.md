@@ -1,24 +1,17 @@
 # R0 — 第三轮：按 REVIEW.md 修复
 
-## 本轮 (2026-10-18) — P1-6 ✅ 实拍收尾（三分支全验证）
-重启实例（新二进制/新 QML）后整流程实拍，**无代码改动**：
-- light 起 ✓ → resize 1100x692 → date 2026-04-03 → openItem(event,…) →
-  详情弹层 → `pointerObject{"target":"detailsEdit","kind":"press/release"}`
-  → 编辑日程弹窗 ✓（shot-p16-editor3.png）。
-- 点「删除日程」(550,637) press+release → **确认层出现**：粗体
-  "Delete this event?" + muted 说明（"…cannot be undone."）+ 取消（高亮
-  默认）+ 删除日程（destructive），形态对照 alert-macos.png 一致（粗体标题+
-  说明+纵向按钮，默认在上）（shot-p16-confirm.png）。
-- **点穿保护实证**：第一次 press+release 未误删（Qt 隐式 grab，release 归
-  原 Delete 按钮）；点穿只在第二次显式点击发生。
-- Cancel 分支 ✓：点取消 (550,599) → footer 回三键态，不删
-  （shot-p16-cancel.png）。
-- Delete 分支 ✓：再点删除日程 → 确认层 → 再点 (550,637) → 弹窗关、
-  状态条「日程已删除」、事件移除（shot-p16-deleted.png）。
-- 收尾：kill 实例（正常退出，ics 完整 38 条）→ fixture 从备份恢复
-  （39 条，END:VCALENDAR 完好）。本轮无代码 diff，commit 为 docs。
-- 驱动陷阱（新）：`pointerObject` 的参数键是 **`target`** 不是 `object`
-  （harness 读 command.target）；发 object 键静默不动（found:false）。
+## 本轮 (2026-10-18) — P1-7 ✅ ScheduleView 四处裸 handler
+CalendarScheduleView.qml（A1 四处）补齐：
+- 日头 cell：activeFocusOnTab + Return/Space 选中；role=ColumnHeader，
+  name=星期+日期（新 accessibleText）；焦点环 accent 1px 仅 focus 可见。
+- 全天 chip：Return/Space itemActivated；role=ListItem，name=标题+" — All-day"；
+  焦点环 inkColor 仅 focus（静止态仍 R078 fill-only）。
+- 小时格（hourCell delegate）：columnIndex>0 才 focus；↑↓←→ moveFocus
+  （gutter 列不可达）；Space=dateSelected、Return=createRequested；
+  role=Cell，name=日期+小时；gutter role=NoRole。
+- timed chip：同全天 chip，name=标题+itemSecondary（时间）。
+构建 ✓；light 起 ✓ 无 QML 报错；shot-p17-smoke.png 静止态无视觉变化。
+键盘路径代码层补齐（typeText 无功能键，未实机逐键）。
 
 ## 修复队列（按序，一轮一条；✅=已改）
 - [x] P0-1 全天条 "+N" 差一
@@ -28,7 +21,7 @@
 - [x] P1-4 事件编辑器保存校验
 - [x] P1-5 任务编辑器保存校验
 - [x] P1-6 删除二次确认（代码+确认层实拍三分支 ✓）
-- [ ] P1-7 ScheduleView 四处裸 handler 无障碍/键盘
+- [x] P1-7 ScheduleView 四处裸 handler 无障碍/键盘
 - [ ] P1-8 MonthView chip 无障碍 + "+" focus/hover
 - [ ] P1-9 年视图日格（命中区/字号/Accessible/键盘）
 - [ ] P1-10 Accessible.checked（CategoryRow / SidebarRow）
@@ -51,6 +44,8 @@
 - [ ] P2-9 单点清理（窗口圆点顺序**不动**）
 
 ## 仍差
+- P1-7 键盘路径未实机逐键驱动（typeText 无功能键）；方向键 moveFocus 依赖
+  GridLayout children 顺序（Repeater 插入序），未实机验证。
 - P1-5 弹窗内校验分支未实拍（toolbarMore 原生 popup 坐标点不进）；行内错误
   UI 与 P1-4 已实证模式同构。
 - P1-4 仅实机证到"空标题"分支；其余非法分支同一代码路径，未逐个实拍。
@@ -69,9 +64,11 @@
   一行 Bash 里链多个 `python3 review-command.py '{...}'` 可行。
 
 ## Next round
-P1-7 — ScheduleView 四处裸 handler（`CalendarScheduleView.qml:414,625,838,1024`）：
-chip 加 `Accessible.role` + name（标题+时间），日头/小时格补键盘路径。
-非视觉/无障碍类：构建 + 启动冒烟，写明"无视觉变化"。
+P1-8 — MonthView（A1+A8）：`CalendarMonthView.qml:188` chip 补
+Accessible.role/name + 键盘（参照本轮 ScheduleView chip 模式）；`:141` "+"
+改 focus/hover 双触发（补 dayButton.activeFocus 条件）。
+非视觉/无障碍类：构建 + 启动冒烟，写明"无视觉变化"。（行号以现文件为准，
+先 grep TapHandler 定位。）
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。

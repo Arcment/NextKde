@@ -1,28 +1,21 @@
 # R0 — 第三轮：按 REVIEW.md 修复
 
-## 本轮 (2026-10-18) — P1-14 ✅ nowPill DemiBold（C3）
-`CalendarScheduleView.qml` nowPillLabel 加 `font.weight: Font.DemiBold`。
-- REVIEW C3：白 on todayRed #E5484D = 3.91:1 常规体；finding 给 DemiBold
-  或加深底色两案，取 DemiBold（贴 ref 加粗胶囊字，不动 todayRed token）。
-- 构建 ✓；light 启动 ✓ → resize 1100x692 → sidebar action 展开 →
-  captureClient `_p14-light-full.png`（1100x720），nowPill "12:20" 可见。
-- 实拍对照：2× NEAREST 裁块 `_p14-pill-zoom.png` vs 参考
-  `_p14-ref-pill-zoom.png`（ref 9:41 胶囊）：笔画粗细一致，加粗成立。
-- WCAG 说明：11px DemiBold 严格 WCAG 不算 large text（需 ≥18.66px
-  bold）；按 REVIEW 建议执行，与日头 12px DemiBold 同待遇，数值 3.91:1
-  未变，形式贴参考。
-- 新坑：`review-command.py` 只收 **argv[1]** JSON（stdin/heredoc 静默
-  无效，sequence 不动）。
-- P1-13 状态条顺带实拍放弃（预算线）：openItem 依赖 selectedItems，
-  需先 pointer 选中 chip（press+release），链路长，路径记仍差。
+## 本轮 (2026-10-18) — P1-15 ✅ 月视图 today 字色 accentText（C4）
+`CalendarMonthView.qml:122` today 分支 `"white"` → `AppTheme.accentText`。
+- C4：白 on accent 3.53-4.23:1；accentText 自动选黑白中对比高的一侧。
+  accent `#3478f6`：vs black **5.16:1** ✓（vs white 4.07）。两腿同 token。
+- 构建 ✓。light 启动 → resize 1100x692 → view month → captureClient
+  `_p15-month.png`：今天格 "18" 黑字 on accent 蓝（像素采样 RGB(15,9,4)≈blackSeed）。
+- dark 启动重拍 `_p15-month-dark.png`：同样黑字 on accent ✓（第 2 次回路用完）。
+- 与参考偏差：参考（macOS）today 圆点为白字；按 REVIEW 建议改 accentText，
+  取 4.5:1 达标侧（黑），属 finding 指定动作非自由发挥。
+- 驱动词典补充：截图命令 action 是 **captureClient**（`"screenshot"` 不存在，
+  静默无输出）；`stop-live.py` 未杀掉实例时用 `kill -TERM $(cat live-app.pid)`。
 
-## 上一轮 (2026-10-18) — P1-13 ⚠️ 状态条 positive/warning 浅色对比度（C2）
-`Main.qml` tahoe 块新增 `statusPositive`/`statusWarning`；状态条文本
-改用这两个 token。浅色腿取 tahoe 同色相最小加深（python3 逐级乘系数）：
-positive `#34C759`×0.686=**#24883D = 4.50:1**；warning `#FF8D28`×0.699=
-**#B2621C = 4.51:1**。深色腿保持参考原色（#1E1E1E 上 7.51/7.22:1）。
-与参考偏差：浅色状态条文字比参考深，色相不变。构建+冒烟 ✓。
-**视觉实证未完成**（触发状态消息两次失败，见仍差）。
+## 上一轮 (2026-10-18) — P1-14 ✅ nowPill DemiBold（C3）
+`CalendarScheduleView.qml` nowPillLabel 加 `font.weight: Font.DemiBold`。
+实拍对照 ref 胶囊笔画粗细一致。WCAG 说明：11px DemiBold 严格不算 large text，
+按 REVIEW 建议执行（同日头 12px DemiBold 待遇），数值 3.91:1 未变。
 
 ## 修复队列（按序，一轮一条；✅=已改）
 - [x] P0-1 全天条 "+N" 差一
@@ -40,7 +33,8 @@ positive `#34C759`×0.686=**#24883D = 4.50:1**；warning `#FF8D28`×0.699=
 - [x] P1-12 labelSecondary 浅色对比度
 - [x] P1-13 状态条 positive/warning 浅色对比度（⚠️ 无实拍，见仍差）
 - [x] P1-14 nowPill DemiBold（实拍对照 ✓）
-- [ ] P1-15 月视图 today 字色 → accentText
+- [x] P1-15 月视图 today 字色 → accentText（实拍 light+dark ✓）
+- [ ] P1-16 取消关联警告浅色加深或 DemiBold（EventEditorDialog.qml:433-444）
 
 ## 仍差
 - **P1-13 状态条无实拍**：需驱动一条状态消息。可行路径：
@@ -66,9 +60,10 @@ positive `#34C759`×0.686=**#24883D = 4.50:1**；warning `#FF8D28`×0.699=
 - fixture 事件在 2026-03-29 起（每日循环？），本周（2026-10）周视图为空。
 
 ## Next round
-P1-15 — C4 `CalendarMonthView.qml:122` 白字 → `AppTheme.accentText`。
-改动小、视觉类：构建 → light 启动 → view month → capture → 裁今天格
-对照（今天数字色变 accentText）。注意行号可能偏移，先 grep 确认。
+P1-16 — C5 `EventEditorDialog.qml:433-444` 取消关联警告浅色 3.89:1 →
+加深或 DemiBold（建议先 python3 复算目标色，取最小偏离）。视觉类：
+构建 → light 启动 → 驱动弹窗（注意"已打开弹窗不热载"，先重启再驱）→
+实拍对照。P1-13 状态条实拍也可搭本轮弹窗链路顺带（如预算允许）。
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。
@@ -80,5 +75,5 @@ P1-15 — C4 `CalendarMonthView.qml:122` 白字 → `AppTheme.accentText`。
 - 启动脚本把 `harness/command.json` 重置为 sequence 0；重起后先 resize
   1100x692。启动默认 `--view week --date 2026-10-15`。
 - Wayland 嵌套会话偶发 "connection broke" 崩溃：重启一次即可，不无限重试。
-- 截图存任务目录平铺（本轮 _p14-*.png 为过程图）。
+- 截图存任务目录平铺（本轮 _p15-*.png 为过程图）。
 - 全部完成后在下面单独一行写 `DONE`。

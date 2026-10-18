@@ -1,28 +1,26 @@
 # R0 — 第三轮：按 REVIEW.md 修复
 
-## 本轮 (2026-10-18) — P1-1 ✅
-locale 感知 12/24h helper 落地：
-- `shared/qml/foundation/AppTheme.qml`（singleton，两处调用方都已 import）：新增
-  `localeUses24hClock()`（locale 短时间格式无小写 `h` ⇒ 24h）、
-  `meridiemText(hour)`（`uiLocale.amText/pmText`，空则回退 AM/PM）、
-  `formatClock(hhmm)`（24h ⇒ 原样 "HH:MM"；12h ⇒ 既有紧凑式，分钟非零才显示，
-  meridiem 取自 locale）。
-- `Main.qml`：删 `formatClock12`（硬编码 AM/PM），`itemSecondary` 改走
-  `AppTheme.formatClock`；同周期合并的 suffix 判断改为按小时取 `meridiemText`
-  （旧式 `slice(-2)` 在非 ASCII/空 meridiem 下会切错）；24h locale 输出
-  "HH:MM – HH:MM"。R246 12h 紧凑契约保留在注释中。
-- `CalendarScheduleView.qml` gutter：meridiem 标签仅 12h locale 可见，文字取
-  `AppTheme.meridiemText`；24h 时数字改锚 `parent.right`（原锚不可见的
-  meridiem 标签会留右空隙），无 padding 直显小时。
-- 验证（light, week）：构建过（qmlcachegen 三文件无错）；启动日志无 QML 报错；
-  pim 日志无 parse error。zh-CN（24h）locale 实测 gutter 为裸数字
-  9/10/12/13…，**无 AM/PM**（旧代码必显示 "9 AM"）→
-  r351-p11-smoke-week2.png、放大 r351-weektop2.png。
-- **12h 分支未实机渲染**：环境 locale 为 zh-CN 24h；逻辑为纯委托 +
-  数值推演（"11:00"→"11AM"、"13:30"→"1:30PM"、"12:00–14:00"→"12 – 2PM"
-  与 E02 契约一致）。i18n 类按 TASK.md 只需启动冒烟，无对照图。
-- 本轮无与参考图冲突项（24h locale 下参考图的 "9 AM" gutter 本就不适用，
-  属 REVIEW 要求的 locale 分流）。
+## 本轮 (2026-10-18) — P1-2 ✅
+接手 iter-355 半成品（该轮因模型错误中断：已提交 P1-2 源码 d32ec19，但未构建
+验证、未更新 state）。本轮完成验证并修掉验证中发现的裁切缺陷：
+- 既有 d32ec19 内容核对：`itemTime` 走 `AppTheme.formatClock` ✓、
+  `itemDetailsRange` 同日 end 时钟同 helper ✓、议程行时间列
+  `Math.max(58, implicitWidth)` 自适应 ✓、`nowLabel` 走 helper ✓、
+  nowPill 宽度 `Math.max(42, implicitWidth+12)`（本轮回收，见下）✓。
+- 构建 ✓（iter-355 后无待编，本轮 pill 修复后重编过）。
+- **12h locale 实机验证**（LC_ALL=en_US.UTF-8 起 light）：week gutter
+  "8 AM"–"7 PM" ✓；chips "8 – 8:45AM"/"11AM – 1PM" ✓；nowPill 实拍
+  "11:08AM" ✓（r356-pill-fixed-zoom.png）。
+- **发现并修复**：nowPill 12h 时宽 ~57px > 52px gutter，右锚+6margin 导致
+  左侧越出窗口，"11:08AM" 被裁成 "1:06AM"（r356-12h-week-today.png 可复现）。
+  修法（dea3aeb）：宽度 clamp 到 `gutterWidth-4`、rightMargin 6→2；11px 字的
+  "11:08AM" ≈45px < 48px 可完整放下；24h "09:05" 仍走 42px 下限不变。
+  复拍确认完整显示（r356-pill-fixed-zoom.png）。
+- zh-CN 24h 路径：输出与改前逐字符相同（"HH:MM"），本轮改动在该 locale 下
+  零视觉变化；24h gutter 冒烟 R351 已覆盖。
+- 议程行（:2646）未实机驱到（day 视图下方 dayAgenda 面板滚动未达，预算尽）；
+  其文本与已验证的 chip/gutter/pill 走同一 `formatClock`，宽度自适应下限 58px
+  对 "8AM" 等 12h 短串无截断风险。记入「仍差」。
 
 ## 插曲（环境修复，非 finding）
 - 首次启动用 `timeout 90` 包前台脚本误杀，且把 `profile/pim/calendar.ics`
@@ -35,7 +33,7 @@ locale 感知 12/24h helper 落地：
 ## 修复队列（按序，一轮一条；✅=已改）
 - [x] P0-1 全天条 "+N" 差一（`CalendarScheduleView.qml:525-528,550`）
 - [x] P1-1 时间 helper（locale 12/24h）+ formatClock12 + gutter
-- [ ] P1-2 时间 helper 推广：itemTime/议程/详情/nowLabel（含 58px 列宽）
+- [x] P1-2 时间 helper 推广：itemTime/议程/详情/nowLabel（含 58px 列宽）
 - [ ] P1-3 任务编辑器 New/Edit 标题
 - [ ] P1-4 事件编辑器保存校验
 - [ ] P1-5 任务编辑器保存校验
@@ -63,16 +61,15 @@ locale 感知 12/24h helper 落地：
 - [ ] P2-9 单点清理（窗口圆点顺序**不动**）
 
 ## 仍差
-- P1-1 的 12h 分支未实机渲染（zh 环境）；若后续轮次恰好需要 12h 验证
-  （如 P1-2 改 itemTime），可顺带截图复核。
+- P1-2 议程行（Main.qml:2646 dayAgenda 行）12h 形态未实机驱到（面板在 day
+  视图时间轴下方，本轮滚动未达）；文本走与已验证三处相同的 `formatClock`，
+  风险低。
+- P1-1/P1-2 12h 验证均依赖 `LC_ALL=en_US.UTF-8` 启动，非默认环境 locale。
 
 ## Next round
-P1-2 — 同一 helper（`AppTheme.formatClock`/`localeUses24hClock`）推广到
-`Main.qml:1353` 附近的 `itemTime`（现走正则取 ISO "HH:MM" 恒 24h）、
-`:2646` 议程行时间、`:1393-1398` 详情串、`CalendarScheduleView.qml:173`
-nowLabel；同步核 `Main.qml:2645` 时间列 `preferredWidth: 58` 在 locale 化后
-的截断风险（REVIEW 建议改 implicitWidth 自适应）。先读 `.loop/TASK.md` P1-2
-与 `docs/ui-calendar/REVIEW.md` 对应条目（"P2 2646/2645" 两条 + R4 线索 2）。
+P1-3 — `CalendarTaskEditorDialog.qml:18` 新建任务标题也是 "Edit task"，
+补 `editingId.length > 0` 分支。先读 `.loop/TASK.md` P1-3 与 REVIEW.md 对应
+条目。非视觉/低风险改动：构建 + 启动冒烟即可，写明"无视觉变化"。
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。

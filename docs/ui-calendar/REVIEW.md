@@ -430,3 +430,140 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
   且 footer 显式提供 Cancel 按钮与 Esc reject 通道，符合 HIG 弹框规则。
 - 备注（R7 横切）：隐藏 DialogButtonBox 偷文案的模式在
   `apps/todo/qml/TodoEditorDialog.qml` 同样存在，跨 app 修复时一并处理。
+
+## R7 — 横切汇总（2026-10-18）
+
+### 横切 grep 实测
+
+- **裸 TapHandler/MouseArea 全量清单**（合并为全局 finding A1）：
+  `CalendarScheduleView.qml:414,625,838,1024`（日头 cell、全天 chip、小时格、timed chip）、
+  `CalendarMonthView.qml:188`（chip）、`Main.qml:1728`（窗口圆点，R2 F 已单列）、
+  `Main.qml:2864`（年视图日格，R3 已单列）。共 8 处，全部不可键盘聚焦、无 role/name。
+- **Accessible 覆盖率**：`CalendarScheduleView.qml` 全文 1088 行 **0 处 Accessible 属性**
+  ——整个周/日网格视图对 VoiceOver 是空树，是覆盖率最差的文件。其余文件均有
+  部分覆盖（Main 12 处 name、EventEditor 11、MonthView/TaskEditor/Popover 各 2-3），
+  缺口已逐条列于各轮（A2/A3/A4）。
+- **动效守卫（判据 = 是否走 motionFast/motionNormal，R2 修正）**：全 app 动画点
+  grep 完毕，唯一不经过守卫链的是 `Main.qml:248` 的 `pressDuration: 150`
+  （消费点 :675-677、:802-803）；`Main.qml:1955`、`:2104` 的宽度动画走
+  `AppTheme.motionFast/motionNormal`（reduceMotion 时归 0），**已排除**。
+- **字号 <10pt 全量清单**（合并为一条）：`CalendarMonthView.qml:133,182`、
+  `CalendarScheduleView.qml:457,620,647,759(8px),1042`、`Main.qml:2673,2859`
+  —— 共 9 处 8-9px。
+- **时间格式分裂全量清单**：12h 硬编码腿 = `Main.qml:1309-1336 formatClock12`
+  （含 `:1336` "AM"/"PM" 判断）、`CalendarScheduleView.qml:757-769` gutter；
+  24h 腿 = `Main.qml:1353 itemTime`（消费点 :2646、:1393-1398 详情串）、
+  `CalendarScheduleView.qml:173 nowLabel`。同一 app 三个视图两套制式、
+  两处硬编码英文 meridiem。
+- **"今天"色分裂全量清单**：`CalendarMonthView.qml:117`（accent）、
+  `Main.qml:2127`（accent）、`Main.qml:2374`（todayRed）、`Main.qml:2834`
+  （todayRed）、`CalendarScheduleView.qml:398/790/1059`（todayRed，一致）。
+  4 个月历形态里月视图是唯一偏离 token 自述（todayRed）的实现。
+- **硬编码 "white" on accent/todayRed**：`CalendarMonthView.qml:122`（on accent，
+  R5 已判）、`CalendarScheduleView.qml:405,795`、`Main.qml:2384,2857`（on todayRed，
+  R3 已按 DemiBold 3:1 阈值排除）。前者待修（accentText），后者达标不动。
+
+### 本轮新发现
+
+- [P2] `CalendarScheduleView.qml:135,143` — 中性腿 `#1E1E1E`/`#FFFFFF` 直接硬编码，
+  绕过 AppTheme 语义 token；与 R5 的 `EventDetailsPopover.qml:20-25` 同病，
+  合并为一项修复（浅/深腿色值散落多文件，改主题时必漏）。
+- 已排除：R6 备注"同模式在 `apps/todo/qml/TodoEditorDialog.qml`"**不成立**——
+  该文件只有 `standardButtons: Dialog.Save | Dialog.Cancel`（:26）、无自定义
+  footer、无隐藏 DialogButtonBox，且标题有 `editing ?` 区分（:20，恰是日历任务
+  编辑器缺的东西）。跨 app 修复清单删除该条。
+- 已排除：`EventEditorDialog.qml:282,571`、`CalendarTaskEditorDialog.qml:218,393`
+  四处 MouseArea 均 `acceptedButtons: Qt.NoButton`（纯滚轮转发），不构成
+  交互阻断，不并入 A1。
+
+### 三组合并清单（R1-R6 去重）
+
+**组 1：无障碍 / 键盘（VoiceOver + Full Keyboard Access）**
+- A1 [P1] 裸 handler 全局清单（8 处，见上）——事件/日期/时段全不可键盘触达，
+  ScheduleView 整文件无 Accessible。修法：chip 换 Accessible.role+name，网格补键盘路径。
+- A2 [P1] `Accessible.checked` 全仓 0 处（`Main.qml:421-423` CheckBox 无 checked、
+  `:281-407` 开关行无 role/checked）。
+- A3 [P1] 搜索输入框无 Accessible.name（`Main.qml:527-560`、`:1995-2013` 两处同病）。
+- A4 [P1] 任务编辑器 listBox/priorityBox/notesField 无 Accessible.name
+  （`CalendarTaskEditorDialog.qml:271-284,374-382`）。
+- A5 [P1] 状态条 3.5s 定时消失 + 无播报（`Main.qml:1582-1586`）。
+- A6 [P1] 删除零确认零撤销（`EventEditorDialog.qml:240-250`、
+  `CalendarTaskEditorDialog.qml:98-108` → `Main.qml:1639-1658`）。
+- A7 [P1→需实机确认] 编辑器无默认按钮，Return 无法提交
+  （`EventEditorDialog.qml:203-252`、`CalendarTaskEditorDialog.qml:61-110`）。
+- A8 [P1] 月视图 "+" 纯 hover 暴露（`CalendarMonthView.qml:141`）。
+- A9 [P1] 年视图日格 18px + 9pt + 无障碍黑洞（`Main.qml:2864,2859`）。
+
+**组 2：i18n / locale / 数据正确性**
+- I1 [P1] formatClock12 + gutter 硬编码 12h/AM/PM，24h locale 全错
+  （`Main.qml:1309-1336`、`CalendarScheduleView.qml:757-769`）。
+- I2 [P1] 两套时间制式并存（itemTime 24h vs chip 12h，`Main.qml:1353,2646`、
+  `CalendarScheduleView.qml:173`）——修 I1 时一并统一。
+- I3 [P1] 任务编辑器新建也显示 "Edit task"（`CalendarTaskEditorDialog.qml:18`）。
+- I4 [P1] 保存零校验（自由文本直拼 ISO、空标题、end<start 放行；
+  `EventEditorDialog.qml:149-171`、`CalendarTaskEditorDialog.qml:157-172`）。
+- I5 [P2] headerTitle 拼死英文语序（`Main.qml:1524-1538`）。
+- I6 [P2] 隐藏 DialogButtonBox 偷文案（i18n 一次性拷贝 + 实例化顺序脆弱；
+  `EventEditorDialog.qml:191-214`、`CalendarTaskEditorDialog.qml:43-72`）。
+- I7 [P2] 日期/时间占位符 ISO 硬编码不 qsTr（`EventEditorDialog.qml:359-394`、
+  `CalendarTaskEditorDialog.qml:296,304`）。
+
+**组 3：对比度 / 色 token / 动效 / 性能**
+- C1 [P1] `labelSecondary` 浅色腿 2.91-3.44:1（`Main.qml:120-123`）。
+- C2 [P1] 状态条 positive/warning 浅色 2.22/2.31:1（`Main.qml:2506`）。
+- C3 [P1] nowPill 白 on todayRed 3.91:1 常规体（`CalendarScheduleView.qml:792-797`）。
+- C4 [P1] 月视图 today "white" on accent 3.53-4.23:1（`CalendarMonthView.qml:122`，
+  建议 accentText）。
+- C5 [P1] 取消关联警告浅色 3.89:1（`EventEditorDialog.qml:433-444`）。
+- C6 [P2] 非本月 opacity 0.42 → 2.57/3.63:1（`CalendarMonthView.qml:102`、
+  `Main.qml:2350`）。
+- C7 [P2] 硬编码中性灰绕过 AppTheme（`CalendarScheduleView.qml:135,143`、
+  `EventDetailsPopover.qml:20-25`）。
+- C8 [P2] "今天"色分裂 accent/todayRed（`CalendarMonthView.qml:117` vs
+  `Main.qml:2374,2834`）。
+- M1 [P2] `pressDuration:150` 不走 reduceMotion（`Main.qml:248,675-677,802-803`）。
+- S1 [P2] 9 处 8-9px 字号（清单见上）。
+- F1 [P2] 年视图 504 次 `itemsForDate` / 周 192 次 `hourItems` 绑定重算
+  （`Main.qml:2821-2824`、`CalendarScheduleView.qml:278-286,682-692`）——
+  R3/R4 均判当前量级可接受，降级保留。
+
+## 建议修复顺序
+
+**P0（正确性，先于一切）**
+1. `CalendarScheduleView.qml:525-528,550` — 全天条 "+N" 差一：3/3 满列时隐藏
+   真实第 3 个事件并显示假 "+1"。一行公式修复。
+
+**P1（同一优先级内按影响面排序：影响全部用户 > 影响无障碍/键盘用户 > 影响浅色模式）**
+1. I1+I2 — 时间格式统一走 locale（12/24 偏好 + locale meridiem）。影响
+   所有 24h 制 locale 用户的正确性，且是 C3 之外唯一"肉眼即错"的文案问题。
+2. I3 — 任务编辑器 New/Edit 标题（一行修复，新建弹窗标题肉眼错误）。
+3. I4 — 编辑器保存校验（防坏数据落库，与 I7 占位符 locale 化联动）。
+4. A6 — 删除加确认或 Undo（破坏性操作，HIG 弹框规则）。
+5. A1 — 裸 handler 无障碍/键盘改造（8 处、覆盖全部四个视图的交互主体，
+   是工作量最大的一条，建议按视图分批：ScheduleView 四处 → MonthView →
+   年视图 A9 合并处理）。
+6. A9 — 年视图日格（与 A1 同批，命中区+字号+Accessible 一起修）。
+7. A2 — Accessible.checked（两处，几行修复）。
+8. A3+A4 — Accessible.name 补齐（搜索框两处 + 任务编辑器三控件）。
+9. A8 — "+" 按钮 hover→focus/hover 双触发（一行）。
+10. C1 — labelSecondary 浅色 alpha 0.60→~0.78（一处 token，点亮全部浅色
+    secondary 文本）。
+11. C2 — 状态条 positive/warning 浅色加深一档。
+12. C3 — nowPill 文字加 DemiBold（顺带贴 ref 的加粗胶囊）。
+13. C4 — MonthView today 文字改 accentText。
+14. C5 — 取消关联警告浅色加深或加粗。
+15. A7 — 编辑器默认按钮/Return 提交（实机确认后修）。
+
+**P2（打磨，可攒一批做）**
+1. S1 — 9 处字号提到 ≥10（与 A9 的 18px 格高联动）。
+2. C6 — 非本月 opacity 0.42 提到 ≥0.5 或改 labelSecondary。
+3. C8 — "今天"色统一到 todayRed（月视图一处改动）。
+4. C7 — 硬编码中性灰收敛进 AppTheme。
+5. I5 — headerTitle 周区间 locale 模板。
+6. I6 — DialogButtonBox 偷文案改绑定（防 locale 热切换/实例化顺序回归）。
+7. I7 — 占位符 locale 化（随 I4 一并）。
+8. M1 — pressDuration 纳入 motion token 守卫链。
+9. 其余单点：Ctrl+4 快捷键、`--view year`、窗口圆点顺序（需人工判定）、
+   迷你月 todayDisc 白字、议程勾选钮 28px、魔数提常量（MonthView:97,51、
+   ScheduleView:982 死守卫、`Main.qml:2515` 过期注释、`listColor` 恒等
+   darker）、F1 绑定重算缓存。

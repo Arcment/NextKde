@@ -1,36 +1,48 @@
 # R0 — 第三轮：按 REVIEW.md 修复
 
-## 本轮 (2026-10-18) — P2-2 ✅（C6：非本月 opacity 0.42 → 0.5；视觉验证）
-- **实改 2 处**（清单口径「≥0.5 或 labelSecondary」，取最小偏离 0.5）：
-  - `CalendarMonthView.qml:102`（月视图整格）0.42→0.5
-  - `Main.qml:2363`（迷你月整格，REVIEW 写 2350 系行号漂移）0.42→0.5
-- 构建 ✓（ninja kos-calendar kos-pim-service）；light/dark 各启动 ✓、无 QML error。
-- 视觉对照（月视图 2026-03）：月视图 + 迷你月的非本月日期（23–28 / 1–5）明显
-  更淡但仍清晰可读、层次保持。浅 `_p2-2-month-light.png`（repo 根 shots/）、
-  深 `_p2-2-month-dark.png`（tmp/ui-acceptance/calendar/shots/ —— captureClient
-  落盘目录随实例 cwd 不同，两处都要找）。
-- WCAG 复算（0.5 合成，改前→改后）：深色 3.63→**4.49:1**；浅色月格 2.58→**3.22:1**；
-  迷你月浅色 2.57→**3.78:1**（#000@0.5 over #E4E4E4）。
-- **与 4.5:1 的偏差**：浅色两处 0.5 仍未到 4.5:1（深色 ≈达标）。REVIEW 对 C6 的
-  建议线即 ≥0.5（非本月视为次要信息），按清单执行；严格 4.5:1 需 opacity ≈0.62+
-  或改 labelSecondary，留「仍差」供裁定。
+## 本轮 (2026-10-18) — P2-4 ✅（C7：硬编码中性灰收敛进 AppTheme）
+- **AppTheme.qml 新增 M05 组**（紧跟 todayRed）：`neutralPlane`（#1E1E1E/#FFFFFF）、
+  `popoverSurface`（#262626/#F5F5F5）、`popoverBorder`（rgba 0.12 白/黑）、
+  `popoverInk`（#F2F2F2/#1A1A1A）、`popoverInkSecondary`（rgba 0.58/0.55）。
+- **消费点 4 处**：`CalendarScheduleView.qml` scheduleField→`AppTheme.neutralPlane`、
+  allDayBackdrop 的 "#FFFFFF" mix→`AppTheme.whiteSeed`；`EventDetailsPopover.qml`
+  四个局部 token 全部改读 M05（属性名不变，下游零改动）；
+  `Main.qml:59` tahoe.contentPlane→`AppTheme.neutralPlane`（同一字面量对，
+  scheduleField 注释明确要求与其相等，一并收敛否则会漂移——超出 finding
+  文件清单的 1 行，见「与 finding 的偏差」）。
+- 构建 ✓；light/dark 双冒烟 ✓、runtime log 0 error；dark 周视图截图
+  `_p24-dark.png`：内容面仍为中性炭底、周末列淡分层、无 slate 色偏（同值收敛，
+  无视觉变化；light 亦起过并截图 `_p24-light.png`）。
+- **与 finding 的偏差**：finding 文件清单只有 ScheduleView/Popover 两个文件，
+  但 R7 原文判「色值散落多文件，改主题时必漏」，故把 Main.qml:59 的同字面量
+  一并收敛到 token（值不变，纯读侧替换）。Main.qml:43 注释「值是 Sketch 导出
+  原值、不走 theme roles」仍然成立——neutralPlane 是中性 token，不是 theme role。
 
-## 上一轮 (2026-10-18) — P2-1 ✅（S1：8–9px 字号提至 ≥10，8 处实改）
-议程徽标 Main.qml:2708 未实拍（下轮议程面板可达时顺带核对）。
+## 上一轮 (2026-10-18) — P2-3 ✅（C8：月视图今天圆标 accent → AppTheme.todayRed）
+- **实改 1 处**：`CalendarMonthView.qml:117` 今天圆标 `AppTheme.accent` →
+  `AppTheme.todayRed`（#E5484D），与周头/now-pill/迷你月统一为同一 M04 字面量。
+- 构建 ✓；light/dark 各启动 ✓、无 QML error。
+- 视觉对照（月视图 2026-10，今天=18）：浅/深圆标均实测 RGB(229,68,60)≈#E5484D，
+  与迷你月同色（`_p2-3-month-light.png` / `_p2-3-month-dark.png`，repo 根 + 裁块）。
+- WCAG：圆标文字仍为 P1-15 的 accentText（当前 accent 下=黑），
+  黑 on #E5484D = **5.37:1**（白 = 3.91:1），均 ≥3:1。
+- **与参考的偏差**：参考图 today 圆标文字为白，本实现解析为黑 —— 对比度达标，
+  是否随 C8 一并改 #FFFFFF 留人工裁定。
+
+## 上一轮 (2026-10-18) — P2-2 ✅（C6：非本月 opacity 0.42→0.5，浅色两处未到 4.5:1，留裁定）
+议程徽标 Main.qml:2708 10px 未实拍（议程面板滚动未及），待顺带核对。
 
 ## 修复队列（按序，一轮一条；✅=已改）
-- [x] P0-1 … [x] P2-2（P0/P1 批次 + P2-1/P2-2 完成，见 git log）
+- [x] P0-1 … [x] P2-4（P0/P1 批次 + P2-1/P2-2/P2-3/P2-4 完成，见 git log）
 
 ## 仍差（top 8）
-- P2-3 今天色 → AppTheme.todayRed（`CalendarMonthView.qml:117`）。
-- P2-4 硬编码中性灰收敛进 AppTheme（`CalendarScheduleView.qml:135,143`、
-  `EventDetailsPopover.qml:20-25`）。
 - P2-5 headerTitle 周区间 locale 模板（`Main.qml:1524-1538`）。
 - P2-6 隐藏 DialogButtonBox 偷文案改绑定/契约注释（两个编辑器）。
 - P2-7 日期/时间占位符 locale 化。
 - P2-8 pressDuration 纳入 reduceMotion 守卫（`Main.qml:248,675-677,802-803`）。
 - P2-9 单点清理一批（见 TASK.md #29；窗口圆点顺序不动）。
 - 可选：P2-2 浅色若裁定要 4.5:1 → opacity ≈0.62 或 labelSecondary；
+  P2-3 today 圆标文字是否改 #FFFFFF（参考为白、现 accentText=黑，5.37:1）；
   议程徽标 10px 实拍补证。
 - **驱动陷阱**：`pointer click` 无效，必须 `press`+`release`（但切视图用
   `{"action":"view","view":"month|week|day"}` 更可靠）；review-command.py 接受
@@ -41,8 +53,8 @@
   用 find 找。日视图 `wheel`/`position` 只滚时间格，议程面板未滚到。
 
 ## Next round
-**P2-3**（C8：`CalendarMonthView.qml:117` 今天色 → `AppTheme.todayRed`；视觉类，
-浅/深各拍月视图核对今天圆标颜色）。
+**P2-5**（I5：`Main.qml:1524-1538` headerTitle 周区间走 locale 模板；
+非视觉/低视觉风险，启动冒烟即可）。
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。每轮必须构建通过 + 应用能起。

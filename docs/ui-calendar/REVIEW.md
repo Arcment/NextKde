@@ -132,3 +132,69 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
 - `SidebarRow`/`CategoryRow` 内部（:280-340）本轮已看过 Accessible 结构，
   CategoryRow 可勾选态、nested 的 "Show completed" 有显式 Accessible.name，
   不重复 R1 的 finding。
+
+## R3 — Main.qml:2500-2884（内容带、页面装配、年视图）
+
+覆盖：状态条渲染端、KosPageCache 装配、月页议程卡（2552-2680）、
+周/日页装配（2684-2746）、年视图（2748-2878）。
+
+### Findings
+
+- [P1] `Main.qml:2506` — 状态条文本色浅色模式不达标：positive `#34C759` 在
+  contentPlane `#FFFFFF` 上 **2.22:1**，warning `#FF8D28` 上 **2.31:1**
+  （13pt 文本需 4.5:1；python3 WCAG 计算）。深色平面 `#1E1E1E` 上 7.51:1 /
+  7.22:1 达标——**仅浅色模式失败**。这是"保存成功/出错"反馈，越重要越不能看不清。
+  建议：浅色腿用加深变体（systemGreen 浅色腿 Apple 用 #248A3D 档），或提供
+  Increase Contrast 变体。
+- [P1] `Main.qml:2864-2869` + `:2826` — 年视图日格是无障碍/键盘黑洞：
+  纯 `MouseArea`（无 focus、无 `Accessible.name`/role、无键操作），
+  `Layout.preferredHeight: 18` 低于 20×20 最小命中区。键盘用户在年视图只能
+  整月跳转（2777-2781 的月格 ItemDelegate），**无法选中具体某天**；事件点
+  （2840-2849）也不进无障碍树，VoiceOver 读不出"这天有几个事件"。
+  建议：日格改 ItemDelegate 或给 MouseArea 配 `Accessible.name`（日期+事件数）、
+  支持键盘聚焦，格高 ≥20。
+- [P1] `Main.qml:2673`、`:2859` — 9pt 字号低于 macOS 最小 10pt（线索 14 成立）。
+  2859 是年视图日期数字（9pt，白/黑 DemiBold），2673 是议程行 TASK/EVENT 标签。
+  建议：统一 ≥10pt；年视图日格改 10 后需同步核 18px 格高是否容纳。
+- [P2] `Main.qml:2646` — 议程行时间恒为 24 小时（线索 16 成立）：
+  `itemTime()`（1353-1358）用正则直接取存储 ISO 的 `HH:MM`，不走 Locale；
+  而 chip（12h `formatClock12`）同一屏另一侧是 12 小时——两套格式并存。
+  建议：itemTime 走 Locale.ShortFormat；注意与下一条联动。
+- [P2] `Main.qml:2645` — 时间列固定 `preferredWidth: 58`。若 itemTime 按
+  上一条改 locale 化，"10:30 AM"（11pt）约需 55-62px，临界截断。
+  建议：改格式时同步改该宽度或改 `implicitWidth` 自适应。
+- [P2] `Main.qml:2821-2824` — 年视图 12×42=504 个 `itemsForDate` 绑定
+  （线索 19 成立但**降级**）：实测 `itemsForDate`（1281-1283）是字典查找
+  而非全量扫描，单次调用廉价；真实成本是 `itemsByDate` 任何变更触发 ~504 个
+  绑定重算，每次重建 2 个 `Date` + `dateKey` 字符串拼接。当前量级可接受，
+  但月视图新增条目时年视图白算。建议：eventCount 按月聚合一次（每格查月级
+  预汇总），或至少缓存 dateKey。
+- [P2] `Main.qml:2599-2604` — 议程行完成勾选钮 24×24，低于 macOS 默认命中区
+  28×28（≥20 达最低线不违规）。有 `Accessible.name`（2607-2608，随 checked
+  切换文案，好）。建议放大到 28 或留注释说明取舍。
+- [P2] `Main.qml:2672` — kind 标签（TASK/EVENT，2668-2671）颜色取
+  `itemColor`（数据驱动的分类色）：非交互文本用分类色，对比度不受控
+  （色值来自 PIM 数据，无法静态测量）。**需人工判定**：抽样真实分类色的
+  浅/深两腿对比度。同色也用于左条纹 2642 与勾选圆 2617，语义一致（都表示
+  分类），不算"一色两义"。
+- [P2] `Main.qml:2515-2517` — 注释 "Retaining all three would only defer"
+  与现实不符：pages 有 **4** 个（2518）。过期注释易误导后续维护。
+  建议顺手改掉。
+- [P2] `Main.qml:2501` — `pim.errorMessage` 仅在 `pim.ready` 时才显示
+  （`&& pim.ready`）。连接失败期的错误被静默吞掉。需人工判定：是否为
+  有意设计（连接期错误确实无意义）还是遗漏。
+- （并入 R2）`Main.qml:2503-2508` — R2 发现的状态条 3.5s 自动消失 + 无播报，
+  本轮确认渲染端 Label 也无 `Accessible.name`/announcement 属性，两条合并为
+  一项修复。
+
+### 本轮已排除
+- 周页/日页 viewport 同步（2705-2712、2737-2744）：`onVisibleChanged` 与
+  `Component.onCompleted` 双守卫 + 同一性检查（`root.scheduleViewport === ...`）
+  正确处理了页缓存销毁/重建与切换竞态，不写 finding。
+- 白字 on todayRed 圆盘（2856-2857）**3.91:1**：DemiBold 适用 3:1 粗体阈值，
+  达标；不单独成 finding（字号问题已由 2673/2859 的 9pt finding 覆盖）。
+- 白字 on selectionDisc `#8E8E93`（2856）**3.26:1**：同样过粗体阈值，
+  仅在 9pt 修复后复核常规字重场景。
+- 议程行（2590，KosItemDelegate）是标准 ItemDelegate：可键盘聚焦、有
+  activeFocus 描边（KosItemDelegate.qml:11-12），不写 finding。
+- 线索 20（CalendarMonthView.qml:97 魔数）不在本行段 → 留给 R5。

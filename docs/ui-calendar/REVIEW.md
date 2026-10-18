@@ -348,3 +348,85 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
   深色 9.35:1（与 R4 对 ScheduleView chip 的结论一致，跨视图可复用）。
 - 已排除：`EventDetailsPopover.qml` 标题 15px/20px 行高、时间/位置/备注 12px 均在
   HIG 内置档位（Title3 15、Callout 12）内，无字号违规。
+
+## R6 — `EventEditorDialog.qml`（590 行）+ `CalendarTaskEditorDialog.qml`（411 行）
+
+线索复核：
+
+- [P1] `EventEditorDialog.qml:240-250`、`CalendarTaskEditorDialog.qml:98-108` —
+  线索 11 **成立**。Delete 按钮 onClicked 直接 emit `deleteRequested`，调用方
+  `Main.qml:1649/1657` 直接 `pim.removeEvent(uid)` / `pim.removeTodo(uid)`，随后
+  `root.close()`。全链路无确认弹层、无撤销（仅 `Main.qml:1572-1573` 一条
+  "Event removed" 状态文本，3.5s 自动消失且无无障碍播报，见 R2）。删除不可恢复
+  却零摩擦、零告知后果。建议：删除改为二次确认（macOS 惯例为附着的 alert，
+  说明不可恢复 + Cancel 为默认按钮），或提供有限时间的 Undo 通道。
+- [P2] `EventEditorDialog.qml:191-201/208-214`、`CalendarTaskEditorDialog.qml:43-53/66-72`
+  — 线索 12 **成立，判为脆弱但当前可用**。隐藏 `DialogButtonBox` 当"文案源"，
+  在 `Component.onCompleted` 里拷贝 `standardButton(Dialog.Save).text`。风险点：
+  ① 文案是**一次性拷贝的普通字符串**，运行时切换系统语言/locale 不会更新；
+  ② 依赖 footer 在 onCompleted 前已完成实例化——若创建顺序变化（footer 懒加载
+  等），`save`/`cancel` 为 null，静默回落到硬编码英文 `qsTr("Save")/qsTr("Cancel")`；
+  ③ 同一弹框两套 i18n 来源：其余全部走 qsTr，这两个按钮走 Qt 平台主题串，
+  翻译可能互相不一致。注释自己也承认是非标接线。建议：直接用 qsTr + 平台
+  主题对齐（或 QPlatformTheme::standardButtonText 语义封装成绑定而非拷贝），
+  至少把回落文案与拷贝时机写进契约。
+
+新问题：
+
+- [P1] `CalendarTaskEditorDialog.qml:18` — 标题硬编码 `qsTr("Edit task")`，无
+  New/Edit 区分（对照 event 编辑器 `EventEditorDialog.qml:24` 有 `editing ?`
+  三元）。而 `Main.qml:2066` `taskEditor.openForTodo(null)` 是**新建任务**入口，
+  新建时弹窗标题仍显示 "Edit task"，文案错误肉眼可见。建议：加
+  `editingId.length > 0` 分支，新建显示 "New task"。
+- [P1] `EventEditorDialog.qml:149-171`、`CalendarTaskEditorDialog.qml:157-172` —
+  保存前零校验：日期/时间是自由文本（`startDateField.text.trim()` 等直接拼进
+  ISO 串），输入 "abc" 或 "25:99" 会原样存成 `"2026-10-18T25:99:00"` 损坏记录；
+  空 Title 静默保存；end 可早于 start（`endDateField` < `startDateField`、
+  `endTimeField` <= `startTimeField` 均无检查，allDay 切换只处理 end==start 的
+  情形，`EventEditorDialog.qml:332-338`）。HIG：可能丢输入/产生坏数据时必须
+  阻止并说清后果。建议：onAccepted 前解析校验（Date parse + 区间比较），非法
+  字段描边 + 行内错误文案，阻止 accept。
+- [P1] `EventEditorDialog.qml:433-444` — "取消关联任务"警告标签 `AppTheme.warning`
+  浅色模式实测 **3.89:1**（#b96800 on 弹窗面 #F7F7F7，11px 非粗体需 4.5:1），
+  不达标；深色 #ffb340 on #262626 = 8.48:1 通过。浅色模式要么提亮前景
+  （如 #a05c00 不够，需 ≤ #8f5300 一档），要么加深底色/加粗（粗体 3:1 档
+  可过）。建议：浅色 token 换深一档或对该标签用 `font.weight: Font.DemiBold`。
+- [P1] `CalendarTaskEditorDialog.qml:271-284`、`374-382` — VoiceOver 名称缺失：
+  `listBox`、`priorityBox` 两个下拉与 `notesField` 备注区均无 `Accessible.name`，
+  旁边的 "List"/"Priority"/"Notes" 是普通 Label，未与控件关联；而 event 编辑器
+  的同类控件全部有名（`EventEditorDialog.qml:452-459/461-468/559`）。同一 app
+  两编辑器无障碍水平不一致。建议：补 `Accessible.name`（Task list / Task
+  priority / Task notes）。
+- [P1] `EventEditorDialog.qml:203-252`、`CalendarTaskEditorDialog.qml:61-110` —
+  自定义 footer 后无默认按钮：`defaultButton` 未设置，且 Dialog 自带
+  buttonBox（会把 Save 标准钮标记为 default 并接 Return）被 footer 覆盖后
+  永不创建；`shared/qml/foundation/KosDialog.qml`/`KosWorkspaceDialog.qml`
+  全文无 Keys/Enter 处理。聚焦在 Title 输入框按 Return 无动作，键盘用户必须
+  Tab 到 Save。需人工判定：实机确认 Return 行为（理论推断 QQC2 Dialog 不
+  自行处理 Return）。建议：Save 按钮设 `default: true` 并在弹框层接
+  `Keys.onReturnPressed`。
+- [P2] `EventEditorDialog.qml:359/366/387/394`、`CalendarTaskEditorDialog.qml:296/304` —
+  日期/时间 placeholder 硬编码 ISO `"YYYY-MM-DD"`/`"HH:MM"` 且未 qsTr：格式
+  本身 locale 无关尚可，但配合零校验（上条），DD/MM 地区用户没有任何关于
+  输入顺序的提示或纠错。建议：至少在占位符层走 locale（`Qt.locale().dateFormat`
+  / `timeFormat`），并在校验失败时给出格式说明。
+- [P2] `EventEditorDialog.qml:269-280`、`CalendarTaskEditorDialog.qml:201-213` —
+  表单滚动条 thumb `blackSeed` α=0.30/0.40 合成后对比度实测：浅色 #ADADAD on
+  #F7F7F7 = **2.09:1**、深色 #171717 on #262626 = **1.18:1**，低于非文本 UI
+  组件 3:1 一档（macOS overlay 滚动条本身偏含蓄，判打磨项而非违规）。
+  建议：dark 模式至少 α 0.55+（合成 ≈ #1f1f1f 仍不够，需向中性灰走，
+  如 #8a8a8a 系）。
+
+已排除 / 需人工判定：
+
+- 已排除：两编辑器正文标签 11px/10px 字号 — HIG 最小 10pt，`font.pixelSize: 10`
+  （`CalendarTaskEditorDialog.qml:321`）与 11px（多处）均达标；10px 处于下限，
+  仅在 `mutedText` 对比度不足时会放大影响。
+- 需人工判定：`AppTheme.mutedText` 标签 on 弹窗自绘面（#F7F7F7/#262626）——
+  token 是动态混色（`AppTheme.qml:154`，依赖 paletteText/window），R5 在近似
+  中性面实测 4.66/6.06 通过，但弹窗面亮度略有差异，建议随 Increase Contrast
+  一并实机复测。
+- 已排除：Save 必配 Cancel — `standardButtons: Dialog.Save | Dialog.Cancel`
+  且 footer 显式提供 Cancel 按钮与 Esc reject 通道，符合 HIG 弹框规则。
+- 备注（R7 横切）：隐藏 DialogButtonBox 偷文案的模式在
+  `apps/todo/qml/TodoEditorDialog.qml` 同样存在，跨 app 修复时一并处理。

@@ -5391,3 +5391,12 @@ spec.md mtime unchanged (2026-10-17 22:50) — no new ruling on H / Year / R134 
 - 新 bug 入册: year view 选中 disc 泄漏到月尾占位格 (implicit date=selectedDate, 三月 26 下方空格画灰 disc 无数字; 2025 同现). 修法: disc 判定加 getMonth 守卫. → R307 Next #1.
 - 陷阱: `pgrep -f 'kos-calendar --watch-qml'` 匹配 loop 监督进程自身, 用 `pgrep -x kos-calendar`; relaunch 后窗口 1100×692, 须先 resize 1280×800 再驱动.
 - Loop 1/2, Bash 21/25.
+
+## R-P0-1 (2026-10-18) — 全天条 "+N" 差一修复 PASS
+- Atomic step: state.md Next #1 — REVIEW.md P0: `CalendarScheduleView.qml:525-528,550`.
+- Fix: `allDayOverflow` 改为 `length > allDayBandRows ? length - allDayBandRows + 1 : 0`
+  （真溢出才报；N = 真实隐藏数）。旧式 `length - allDayMaxRows + 1` 在 3/3 时误报 "+1" 藏第 3 条。
+  偏差说明: REVIEW 建议 `max(0, length - bandRows)` 在 4/3 时少计 1，取自洽式，已记 state.md。
+- 验证 leg 1 (3/3): ICS 播 3 条 all-day @2026-10-15 → 三 chip 全渲染、无 "+1" (r350-p01-leg1-3of3.png).
+- 验证 leg 2 (4/3): 加第 4 条 → 2 chip + "+2" (r350-p01-leg2-4of3.png, 放大 r350-leg2-thu4x.png).
+- 构建 OK、启动 OK。Bash ~20/25.

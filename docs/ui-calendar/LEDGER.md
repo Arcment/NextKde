@@ -1,24 +1,32 @@
 # R0 — 收尾轮：人工裁定后执行
 
 ## 本轮
-- P1-A6b 完成：`Main.qml` 窗口圆点 delegate — MouseArea 14×14 fill → **22×22 居中**（中心距 28 不重叠，Row/视觉几何一律未动）；`Accessible.role: Button` + name Minimize/Zoom/Close（qsTr）；`activeFocusOnTab` + Return/Enter/Space 触发同一 `activate()`；焦点反馈 = opacity 0.85→1.0 + 1px `AppTheme.text` 边，仅键盘聚焦时出现。
-- 截图核验：`shots/p1a6b-light-full.png` + 4x 裁块 `shots/p1a6b-dots-4x.png`。数值：圆心 1022/1050/1078、间距 28、disc 14（核心 13+AA）、上缘 10.5、无焦点边框 —— 与 R126 改前记录**逐项一致**，常态外观零变化。
-- 构建✅ light 启动✅ runtime log 无 error。
+- VERIFY-2 完成：新建任务编辑器空字段占位符补拍。
+  驱动路径：taskEditor 实例补 `objectName: "taskEditorDialog"`（Main.qml，唯一源码改动，
+  零视觉）；harness 侧 PointerDriver 加 `objectNamed`（QObject findChild）+ harness Main.qml
+  加通用 `invoke` 动作（tmp/，不入库）→ `openForTodo(null)` 直开弹窗（绕开 toolbarMore
+  原生 popup 菜单不可合成的老阻塞）。
+  实拍 `shots/verify2-newtask-light.png`（1100×720）+ 3x 裁块
+  `shots/verify2-title-3x.png` / `verify2-datetime-3x.png` / `verify2-notes-3x.png`。
+  确认：标题占位「任务标题」、截止日期占位 `YYYY/MM/DD`（I7 locale 化后的 datePattern）、
+  备注占位「备注（可选）」均以 labelSecondary 浅墨呈现，字段空态清晰。
+  观察：时间字段新建态预填默认值 `18:00`（深墨，非占位符）——timePattern 占位符
+  在新建态不露出，属应用既有行为，非缺陷。
+  构建✅ light 启动✅ runtime log 0 error 0 warning。
 
 ## 队列（一轮一条；✅=已改）
 - [x] P2-3a 月视图 today 文字 → `"white"`
 - [x] P1-A6b 窗口圆点：命中区 22×22、Accessible.role/name、键盘可达（视觉几何不动）
 - [x] VERIFY-1 议程徽标 10px 补拍
-- [ ] VERIFY-2 新建任务编辑器空占位符补拍
+- [x] VERIFY-2 新建任务编辑器空占位符补拍
 
 ## 仍差
 *(无)*
 
 ## Next round
-VERIFY-1 — 补拍议程面板徽标 10px（P2-1 遗留）：启动 light，打开议程/日程面板，
-截含徽标的整图，Pillow 裁徽标小块（绝对路径），确认 10px 呈现。拍不到写欠账，最多 2 次回路。
-之后 VERIFY-2 — 新建任务编辑器空字段占位符补拍（打开"新建任务"弹窗截图）。
-两条都完成 → state.md 单独一行 `DONE`。
+*(无 — 队列已清空)*
+
+DONE
 
 ## 注意
 - 只改 finding 涉及的文件/行，不顺手重构。

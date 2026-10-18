@@ -70,3 +70,65 @@ finding 格式：`- [P0|P1|P2] file:line — 事实（含实测数值）。影�
 - `buildItemsByDate`（:246, 1160+）的全量重建是注释写明的意图（一次失效一次
   扫描，格子只查 key），不判为性能问题；年视图 504 次 `itemsForDate`（线索 19）
   留待 R3 按实际调用形态判定。
+
+## R2 — `Main.qml:1400-2500`：工具栏、搜索、侧栏、迷你月（2026-10-18）
+
+### Findings
+- [P1] `Main.qml:1724-1751` — 自绘窗口圆点 delegate 是 14×14px `Rectangle` +
+  裸 `MouseArea`：命中区 14×14 < HIG 最小 20×20；无 `Accessible.name`/role，
+  `MouseArea` 不可键盘聚焦。影响：VoiceOver 与 Full Keyboard Access 均无法关闭/
+  最小化窗口。建议：包一层 ≥20×20 的 `AbstractButton`，补 Accessible.name
+  （"Close"/"Minimize"/"Zoom"），给 hover 提亮反馈。
+- [P1] `Main.qml:1582-1586` + `:1570-1591` — 状态条由 `statusTimer` 3500ms 定时
+  清空（HIG：尽量少用定时自动消失的界面元素），且 `showStatus` 无任何
+  Accessible 播报（无 `Accessible.announcement`/live region）。影响："Event
+  removed" 等破坏性操作的确认信息 3.5s 后无声消失，屏幕阅读器用户既听不到也
+  看不到结果。建议：至少对状态文本挂 `Accessible.announcement`（或 role=Alert）；
+  消失时长可配或 hover 时暂停。
+- [P1] `Main.qml:1995-2013`（toolbarSearch 内 `TextInput`）— 搜索输入框无
+  `Accessible.name`；占位符是独立 `Label`，VoiceOver 聚焦时读不出"Search"用途。
+  影响：线索 18 成立。建议：`Accessible.name: qsTr("Search")`，或把占位符文本
+  也设为 input 的 name。
+- [P2] `Main.qml:1724-1751` — 圆点排列左→右为 green(max)/yellow(min)/red(close)，
+  与 macOS 红黄绿惯例（close 在左）相反，close 落在最右。需人工判定：是否刻意
+  按 Linux 摆位；作为 macOS 复刻与肌肉记忆冲突。建议：若保持右侧摆位，至少
+  恢复 红/黄/绿 顺序。
+- [P2] `Main.qml:2350` — 迷你月非本月日期整格 `opacity: 0.42`。实测合成
+  （alpha 0.42 over 平面色）后数字对比度：浅色 `#000`→rgb(132) on `#E4E4E4` =
+  **2.93:1**，深色 `#F2F2F2`→rgb(125) on `#282828` = 3.57:1；11px 文本 <4.5，
+  浅色腿连 3:1 都不到。相邻月变暗是日历惯例，但建议浅色腿 alpha ≥0.5 或改用
+  显式 `labelSecondary` 色而非透明度。
+- [P2] `Main.qml:2374-2383` — 迷你月 todayRed `#E5484D` 圆盘上的 11px DemiBold
+  白字对比 3.91:1，selectionDisc `#8E8E93` 白字 3.26:1，均 < 4.5（小号文本）。
+  形状通道（实心圆盘）已传达状态，故降为打磨：加深盘色或提高字重/字号。
+- [P2] `Main.qml:2127` vs `:2374` — "今天"色不一致（线索 4 的 R2 部分）：侧栏
+  Today 行 marker 用 `tahoe.accent`，迷你月 today 圆盘用 `AppTheme.todayRed`，
+  年视图/月视图还有第三套（R3/R5 复核）。同一语义三种颜色，违反"别用同一个
+  颜色表达两件事"的对称律。建议：统一收敛到 todayRed。
+- [P2] `Main.qml:1524-1538` — `headerTitle()` 周区间拼装 `"MMM d" + " – " +
+  "d, yyyy"` 的**元素顺序与分隔符硬编码**（线索 17 成立，但比线索更细）：
+  `AppTheme.formatDate` 本身走 `uiLocale`（AppTheme.qml:10-13），但 zh 等语序
+  不同的 locale 会得到 "10月12 – 18, 2026" 这类非本地结构。建议：周区间整体
+  走 locale 模板（如 `I18n.trPattern`），或至少对 zh 腿给出专案格式。
+- [P2] `Main.qml:1668-1670` — 快捷键只有 Ctrl+1..3（线索 8 成立）；第 4 段
+  Year（viewIndex=3，:1830 注释自认）无快捷键。建议：补 Ctrl+4，并在菜单/
+  tooltip 中可见。
+- [P2] `Main.qml:675-677, 802` + `:248` — GlassSurface hover/press/镜片提亮动画
+  时长来自 `tahoe.pressDuration = 150`（硬编码常量），不在
+  `AppTheme.motionFast/motionNormal`（AppTheme.qml:179-181，reduceMotion 时归 0）
+  守卫链内。影响：Reduce Motion 开启时这三处仍做 150ms 动画（opacity 类，HIG
+  允许淡入淡出，故降为 P2）。建议：`pressDuration` 也随 reduceMotion 归 0。
+- [P2] `Main.qml:1424-1432` — `listColor()` 内 `Qt.darker(color, 1.0)` 是恒等
+  变换（factor 1.0 = 原色），疑似残留的死操作；且 id 未命中时回落 `accent`，
+  未知列表会与强调色同色。建议：删掉 darker 包装；回落色改为按 id 哈希的
+  稳定色板。
+
+### 本轮已排除
+- 线索 13 的 1955/2104 两处（搜索框、侧栏宽度动画）：**不成立为违规** —
+  时长走 `AppTheme.motionFast/motionNormal`，`AppTheme.qml:179-181` 在
+  reduceMotion 时将两 token 归 0，动画被隐式禁用。守卫缺口只在上表
+  `pressDuration` 一条。
+- 迷你月单元命中区 21×21 ≥ 20 最小值，达标不写 finding；月标题/箭头 28×28 达标。
+- `SidebarRow`/`CategoryRow` 内部（:280-340）本轮已看过 Accessible 结构，
+  CategoryRow 可勾选态、nested 的 "Show completed" 有显式 Accessible.name，
+  不重复 R1 的 finding。

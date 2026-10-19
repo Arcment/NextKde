@@ -7,6 +7,32 @@
 3. 极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
+G11e — 极端边界：象限交界、黑白点、最亮黄区，逐格重判（dark/light）。
+
+截图（`tmp/glass/`）：`g11e-overview-{dark,light}`、`g11e-popover-{dark,light}`；
+局部放大图 `tmp/gallery/g11e-{dark,light}-{junction,nav,param,yellow,trio,paramtop,navtop}-zoom.png`。
+
+- nav ✅：红/青象限交界在玻璃内为 y 390→406 的 16px 单调渐变（逐行取样），
+  无 1px 硬边；40 个黑白点被采样成连续软斑，白点落在 “G1 骨架” 行下方时
+  次级字仍可辨认。dark 暗红/暗青、light 浅粉/浅青，均与板色明显不同。
+- param panel ✅：黄/品红交界同样为 16px 渐变。最亮黄区 dark 压成暗橄榄
+  (90,80,33)、light 提为浅黄 (244,222,126)，与板面 #fdd835 (253,216,53)
+  明显不同；密文主次行可读。黑白点落在 slider 行时，文字仍可读。
+- overview 16 卡 ✅：四象限内分别压成暗红/暗青/暗橄榄/暗酒红（light 为
+  浅粉/浅青/浅黄/浅粉）；位于 (640,400) 四色交界的 GlassNotification 卡
+  内部从上到下连续过渡，无硬边；主次字可读。
+- surfaces clear/regular/thick **外推**：三档是 `useKwinEffect: true` 的
+  KWin 路径演示，QML 不采样。dark 下 thick 卡与说明行在亮黄区为白字压
+  亮黄，**无 KWin 时不可读**；light 下深字可读，但玻璃内外颜色几乎一致，
+  没有 QML scrim 压缩。该格只作 KWin 演示外推，不算 QML 兜底 ✅。
+- popover **仍差**：卡片只采样、未启 scrim（`GlassPopup.scrimEnabled`
+  默认 false，`GlassPopover` 未 opt in）。dark/light 卡内均约
+  (228,63,60)，与板红 (229,57,53) 几乎一致，不满足硬标准 1；标题/正文
+  可读（dark 白字压亮红对比偏低，light 深字可读）。留待 G11f 开 scrim
+  （readable preset）或加深 tint 后重拍。
+- 运行：6 次起应用均成功，run.log 仅有与玻璃无关的 wallpaper 采样 WARN。
+
+## 上一轮（G11d）
 G11d — 复核 decision 三条 lane + motion 页 toast + tooltip 页内基准（dark/light）。
 
 截图（`tmp/glass/`）：`g11d-decision-{toast,tooltip,session}-{dark,light}`、
@@ -86,7 +112,7 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 - [x] G11b 复核 nav + param panel（dark/light）
 - [x] G11c 复核 toast + tooltip + dialog + notification + menu（dark/light）
 - [x] G11d 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light）
-- [ ] G11e 极端边界：象限交界、黑白点、最亮黄区
+- [x] G11e 极端边界：象限交界、黑白点、最亮黄区
 - [ ] G11f 修正仍差项（只调 preset / tint / ink）
 - [ ] G11g 文档回填 + 最终截图 + DONE
 
@@ -95,9 +121,9 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 | 表面 | dark | light |
 | --- | --- | --- |
 | 左栏 nav | ✅ 暗红/暗青，主次字可读 | ✅ 浅粉/浅青，深字可读 |
-| overview 16 卡 | | |
-| surfaces clear/regular/thick | | |
-| popover | | |
+| overview 16 卡 | ✅ 暗红/暗青/暗橄榄/暗酒红，交界卡连续；主次字可读 | ✅ 浅粉/浅青/浅黄/浅粉，交界连续；深字可读 |
+| surfaces clear/regular/thick | 外推（KWin 路径）：thick 黄区白字压亮黄，无 KWin 时不可读 | 外推（KWin 路径）：深字可读，但玻璃内外一致，无 scrim 压缩 |
+| popover | 仍差：未启 scrim，卡内 ≈ 板红；白字可读但对比偏低 | 仍差：未启 scrim，卡内外红色几乎一致；深字可读 |
 | menu | ✅ 暗酒红，白字/禁用灰字可读 | ✅ 浅粉，深字/禁用灰字可读 |
 | tooltip | ✅ 暗红，白字可读 | ✅ 浅粉，深字可读 |
 | toast | ✅ 暗酒红/暗青，白字可读（两枚均采样） | ✅ 浅粉/浅青，深字可读 |
@@ -107,7 +133,7 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 | tooltip 页内基准 | ✅ 暗酒红药丸，白/灰次级字可读 | ✅ 浅粉药丸，深字可读 |
 | decision 三条 lane | ✅ ①暗酒红药丸白字，②暗红药丸白字，③近黑菜单白字；读数可读 | ✅ ①浅粉药丸，②浅粉药丸，③近白菜单深字；读数可读 |
 | param panel（文字最密） | ✅ 暗橄榄/暗酒红，密文可读 | ✅ 浅黄/浅粉，密文可读 |
-| 象限交界 / 黑白点最坏情况 | | |
+| 象限交界 / 黑白点最坏情况 | ✅ 16px 单调渐变；黑白点采样为软斑；nav 次级行可辨认 | ✅ 16px 单调渐变；圆点软斑；主次字可读 |
 
 ## 判 ✅ 的硬标准
 
@@ -127,7 +153,8 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 
 ## Next round
 
-G11e — 极端边界：象限交界、黑白点、最亮黄区，逐格重判。
+G11f — 修正仍差项：dialog（preset 升 readable / 加深 tint）与 popover
+（启用 scrim），只调 preset / tint / ink，不改曲线。
 
 ## 注意
 

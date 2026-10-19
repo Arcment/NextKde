@@ -1,73 +1,67 @@
-# 液态玻璃 Gallery — G6（G5 收尾修补 + SPEC §7 三项 A/B）
+# 液态玻璃 Gallery — G7（SPEC §7 三项裁定落地 + 裁定页收口）
 
 ## 本轮
-G6e 已交付：12 张截图（motion 6 + decision 6）逐张核对完毕。motion 侧与
-decision ②③ 的代码在 G6d 后未变，沿用成片；Toast 两张因 G6d 改过
-`DecisionsPage.qml`，按钩子重拍 `g6-{dark,light}-decision-toast`。
-params off 显示 `effective 150/140 · expansion on · ambient 2600ms`；
-reduce 四段均 effective 0 / expansion 0 / ambient skipped / remaining 0ms；
-裁定页三段 A/B 读数与后果行齐全、无推荐。ledger 三项写「A/B 已呈现，
-待人工裁定」。实测 dark Toast B lane 读数对比度约 2.2:1、后果行约 2.1:1，
-记入仍差。run.log 无 QML 报错，重拍后无残留 gallery 进程。队列全部勾选。
+G7b 已交付：
+- `StatusTooltip.qml`：`margins` 四处 -6 → +4。具体：
+  `top`（dockHosted && edge==bottom）→ 4；`bottom`（!dockHosted）→ 4；
+  `left`（dockHosted && edge==right）→ 4；`right`（dockHosted && edge==left）→ 4。
+  其余 0 分支未动。
+- `DockAppNameTooltip.qml`：`margins.top/left/right` 三处 -6 → +4，
+  命中条件（bottom/right/left）不变，其余 0 未动。
+- 验证：两文件 `grep -n -- '-6'` 无命中；`qmllint` 仅报环境导入解析
+  警告（Quickshell/qs 模块路径），无语法错误。`qs -p shell/gallery.qml`
+  启动正常，`run.log` 无 QML 报错（仅既有 wallpaper colorquantizer 警告）。
+- 本轮无截图要求（G7b 的 6 张裁定图归 G7d）；两组件 gallery 不加载，
+  已做代码级核对。
 
 ## 队列（✅=已交付）
-- [x] G6a 修补 params reduceMotion 标签（on/off 分支）+ 重拍 params
-- [x] G6b reduceMotion 其余四段截图（press / ambient / tooltip / toast）
-- [x] G6c 裁定页骨架 + Toast A/B（页序 6、钩子、两栏交互、读数、后果行）
-- [x] G6d Tooltip A/B + SessionMenu A/B（两段各两栏、可交互、读数、后果行）
-- [x] G6e 12 张截图补齐 + ledger 收口
+- [x] G7a Toast 2600ms + 悬停暂停（生产）+ gallery 文案同步
+- [x] G7b Tooltip +4px（StatusTooltip + DockAppNameTooltip）
+- [ ] G7c SPEC / INVENTORY / DEMO 三项裁定回填
+- [ ] G7d 裁定页「已裁定」标记 + 两主题对比度修复 + 6 张截图
+- [ ] G7e ledger 收口（含生产侧人工验证项）+ `DONE`
 
-## 必须做
-1. params 卡 reduceMotion 行：off 时显示 effective 150/140、expansion on、
-   ambient 2600ms；on 时显示 effective 0、expansion 0、ambient skipped。
-2. 四段 reduce 截图：每段 effective 0、expansion 0、环境光跳过、toast 存留 0。
-3. 裁定页三段（Toast / Tooltip / SessionMenu）A/B 并排、可交互、有读数、
-   有后果行；**不写推荐、不做裁定**。
-4. ledger 三项写「A/B 已呈现，待人工裁定」。
+## 必须做（人工已裁定，不要再论证）
+1. Toast → B：`timeout` 默认 2600ms；悬停暂停、离开按剩余继续；
+   不响应点击、不抢焦点。
+2. Tooltip → B：两个组件的 -6 全部改 +4 正间隙，其余 0 不动。
+3. SessionMenu → A：接受固定 Footnote 10，生产代码不动。
+4. SPEC / INVENTORY / DEMO 回填三项裁定，清掉冲突旧值。
+5. 裁定页保留 A/B 两栏，加「已裁定」标记；dark/light 读数与后果行
+   对比度 ≥ 4.5:1；重拍 6 张。
 
 ## 已定案（不要再论证）
-- 页面 `shell/gallery/DecisionsPage.qml`，页序 6，导航名「裁定 G6」。
-- 截图钩子：`GALLERY_PAGE=decisions`、`GALLERY_DECISION=toast|tooltip|session`。
-- 现有 motion 钩子照旧：`GALLERY_MOTION_DEMO`、`GALLERY_MOTION_REDUCE=1`。
-- 静态截图不能判动效；只核对 token 标注、终态与读数。
-- 裁定页统一用 `DecisionLane` 做 A/B 单栏；两栏等宽，后果行固定在栏底。
-  两栏衬底：dark 黑 0.22 / light 白 0.34（G6c 实测加入）。
-- Tooltip 两栏共用 `DecisionTooltipLane`，仅 gap 不同；SessionMenu 两栏
-  共用 `DecisionSessionLane`，仅 mode 不同（G6d 定案）。
+- 生产文件只允许改 `ActionFeedbackToast.qml`、`StatusTooltip.qml`、
+  `DockAppNameTooltip.qml`。
+- 截图钩子照旧：`GALLERY_PAGE=decisions`、`GALLERY_DECISION=toast|tooltip|session`。
+- 静态截图不能判动效；只核对标注、终态与读数。
+- StatusTooltip / DockAppNameTooltip 不被 gallery 加载：代码核对即可，
+  ledger 写「需人工在真实 bar/dock 上悬停验证」。
 
-## Ledger（G6e 收口）
-- 已改：params reduceMotion 标签 on/off 分支；reduce 四段截图；裁定页
-  ①②③ 三段 A/B；`DecisionsPage.qml` 页序 6 与三个 `GALLERY_DECISION`
-  钩子；G6d 新增 `DecisionTooltipLane.qml`、`DecisionSessionLane.qml`；
-  G6e 重拍 Toast 两张、逐张核对 12 张；`DEMO.md` 增 G6c/G6d/G6e 段。
-- 仍差：见下「仍差」小节。
-- 外推：三项均为人工裁定项；本页只提供并排交互与读数，不预设结论。
-- ① Toast 存留 1600ms：A/B 已呈现，待人工裁定。
-- ② Tooltip 贴边 -6px：A/B 已呈现，待人工裁定。
-- ③ SessionMenu 极端高度：A/B 已呈现，待人工裁定。
+## Ledger（G7 进行中）
+- 已改：`shell/desktop/modules/common/ActionFeedbackToast.qml`
+  （timeout 2600、dismissAt、HoverHandler 剩余时间续计、enabled: shown）；
+  `shell/gallery/PopupsPage.qml` 的 1600 文案/非演示值同步 2600。
+- ① Toast B 的固有代价：toast 可见期间其 36px 药丸区域会接收悬停
+  （点击不再穿透），以换取悬停暂停；区域小且短暂。
+- 悬停续计语义：暂停期间 deadline 不变，离开时按 `deadline - now`
+  重启；若剩余为 0 则按 1ms 尽快收起。
+- ② Tooltip +4px 已落地：`StatusTooltip.qml` 4 处、`DockAppNameTooltip.qml`
+  3 处 -6 → +4，余 0 分支不动；③ SessionMenu A 无需改代码（接受固定
+  Footnote 10），文档回填归 G7c。
+- 待办（G7e 收口）：StatusTooltip / DockAppNameTooltip 改 +4px 后
+  需人工在真实 bar/dock 上悬停验证手感（gallery 不加载两者）。
 
-## 仍差
-- dark 主题 Toast B lane 落在黄色象限时，9px 读数白字实测最大对比度约
-  2.2:1、后果行约 2.1:1（衬底约 rgb 197,168,49，字约 255,251,229），
-  低于 3:1；若后续加深 lane 衬底需连带重拍 3 张 dark decision 截图。
-- Session B 栏两列 clamp 后高度 44 / 56 不同，两列注释行不在同一 y
-  （相差约 33px）；读数仍逐列可对应。
-- Tooltip stage 的「屏幕边缘」标签为 8px，仅作位置提示；数值以读数为准。
+## 上一批（G6 已交付，勿重做）
+- 裁定页三段 A/B 已交付；本次只加标记、修对比度、重拍。
+- G5 动效页、G4 控件、G3 弹层不要改。
 
 ## Next round
-无（G6 队列全部完成）。若继续：先由人工对 SPEC §7 三项做裁定，再另开
-队列。可选的视觉修补是把 dark 裁定页 lane 衬底加深到白字 ≥4.5:1，需重拍
-3 张 dark decision 截图；本轮未做，属裁定后的调整项。
-
-## 上一批（G5 已交付，勿重做）
-- 动效页五段 + ParamPanel 完备已交付；本次只修补 reduceMotion 标签行，
-  其余 G5 内容不要重做。
-- G4 控件、G3 弹层不要改。
+G7c — 读 `.loop/TASK.md` 第四节，回填 SPEC / INVENTORY / DEMO：
+toast 存留 2600ms（悬停暂停）、tooltip -6px 全改 +4px 正间隙、
+§7 三项标已裁定，并 grep 清掉冲突旧值。
 
 ## 注意
-- 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
-- 不改现役组件、不改 `shell/shell.qml`、不改 CMake、不改 KWin。
+- 不改 `shell/shell.qml`、不改 CMake、不改 KWin。
 - 每轮结束前：截图 + state.md + commit。
 - 全部队列项勾完，在下面单独一行写 `DONE`。
-
-DONE

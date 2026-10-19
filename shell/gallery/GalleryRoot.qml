@@ -12,7 +12,9 @@ Item {
     signal toggleBackgroundBoard()
 
     property bool backgroundBoardVisible: true
-    property int currentIndex: 0
+    // G1b: open on the surface page so this round's screenshots show it; the
+    // overview becomes the landing page in G1c.
+    property int currentIndex: 1
 
     readonly property var pages: [
         { title: "总览", note: "G1c" },
@@ -33,8 +35,10 @@ Item {
         y: 24
         width: 220
         height: parent.height - 48
-        radius: AppearanceTokens.shape.large
-        cornerExponent: AppearanceTokens.shape.cornerExponent
+        // SPEC 2.2: glass surfaces are circular (exponent 2.0); the 3.0 shape
+        // token belongs to the non-glass shape system.
+        radius: 24
+        cornerExponent: 2.0
         useKwinEffect: false
 
         Column {
@@ -166,7 +170,7 @@ Item {
     }
     Component {
         id: surfacesPage
-        PlaceholderPage { title: "表面"; note: "G1b 交付：Panel / Surface / ControlCenterGlass / KosFloatPanel" }
+        SurfacesPage {}
     }
     Component {
         id: popupsPage

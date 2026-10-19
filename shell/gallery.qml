@@ -18,10 +18,32 @@ Item {
 
 
     // Apply the theme requested by run.sh (GALLERY_THEME=light|dark, default dark).
-    Component.onCompleted: {
+    // Glass keeps its dark presentation unless "follows appearance" is on, so a
+    // light run has to flip both switches; dark is already the glass default.
+    // AppearanceConfigService loads its persisted file asynchronously, which
+    // lands after Component.onCompleted and would overwrite this, so apply it
+    // once immediately and again after the load settles.
+    function applyTheme() {
         const theme = Quickshell.env("GALLERY_THEME")
-        if (theme === "light" || theme === "dark")
-            AppearanceConfigService.updateThemeMode(theme)
+        if (theme === "light") {
+            AppearanceConfigService.updateThemeMode("light")
+            AppearanceConfigService.updateGlassFollowsAppearanceMode(true)
+        } else if (theme === "dark") {
+            AppearanceConfigService.updateThemeMode("dark")
+            AppearanceConfigService.updateGlassFollowsAppearanceMode(false)
+        }
+    }
+
+    Component.onCompleted: {
+        applyTheme()
+        themeSettle.restart()
+    }
+
+    Timer {
+        id: themeSettle
+        interval: 800
+        repeat: false
+        onTriggered: root.applyTheme()
     }
 
     // ── controlled background board ──────────────────────────────────

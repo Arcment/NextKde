@@ -3,8 +3,9 @@ import Quickshell
 import qs.desktop.modules.common
 
 // G5 — motion page. G5a ships the page skeleton and the Popup open/close
-// comparison; G5b/G5c add the remaining demo slots and G5d wires reduceMotion
-// through every readout.
+// comparison; G5b adds liquid press expansion and the 2600ms ambient
+// transition; G5c/G5d add tooltip, toast and the full parameter panel
+// wiring.
 //
 // Screenshot hooks (must be set on the same command line as shot.sh):
 //   GALLERY_PAGE=motion            selects this page
@@ -29,6 +30,10 @@ Item {
 
     readonly property string filter: Quickshell.env("GALLERY_MOTION_DEMO") || ""
     readonly property bool popupVisible: filter === "" || filter === "popup"
+    readonly property bool pressVisible: filter === "" || filter === "press"
+    readonly property bool ambientVisible: filter === "" || filter === "ambient"
+    readonly property bool builtVisible: popupVisible || pressVisible
+        || ambientVisible
 
     Text {
         x: 0
@@ -114,13 +119,57 @@ Item {
                     }
                 }
             }
+
+            MotionCard {
+                id: pressCard
+                visible: page.pressVisible
+                width: column.width
+                height: 300
+                title: "液态按压 expansion"
+                badge: "SPEC §2.7"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "idle 0 · hovered 0.3 · pressed 1.0 · press 200ms OutBack"
+                    + " / release 360ms OutQuint（G4 GlassButton 同源）"
+                    + " · reduceMotion 下时长 0、expansion 关闭"
+
+                PressDemo {
+                    anchors.fill: parent
+                    reduceMotion: page.reduceMotionOn
+                    ink: page.ink
+                    inkDim: page.inkDim
+                    hairline: page.hairline
+                }
+            }
+
+            MotionCard {
+                id: ambientCard
+                visible: page.ambientVisible
+                width: column.width
+                height: 330
+                title: "环境光过渡"
+                badge: "2600ms"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "起止色样 A/B，点击切换"
+                    + " · LiquidGlassSurface.ambientTransitionDuration 2600ms"
+                    + " · InOutSine · reduceMotion 下跳过（effective 0）"
+
+                AmbientDemo {
+                    anchors.fill: parent
+                    reduceMotion: page.reduceMotionOn
+                    ink: page.ink
+                    inkDim: page.inkDim
+                    hairline: page.hairline
+                }
+            }
         }
     }
 
     Text {
-        visible: !page.popupVisible
+        visible: !page.builtVisible && page.filter !== ""
         anchors.centerIn: parent
-        text: "演示位「" + page.filter + "」将在 G5b–G5d 补齐"
+        text: "演示位「" + page.filter + "」将在 G5c–G5d 补齐"
         color: page.inkDim
         font.pixelSize: 13
     }

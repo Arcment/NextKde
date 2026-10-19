@@ -242,3 +242,24 @@ G4e 已交付：GlassScrollBar 的 3 材质 × 6 状态矩阵与十档字阶对�
 - 截图钩子新增 `GALLERY_CONTROLS_FILTER=scrollbar|type`。
 - 验收截图：`g4-dark-scrollbar.png`、`g4-dark-type.png`
   （形态 liquid，offset 0）。
+
+G4f 收口：全量截图重拍与逐张目检。
+
+- 截图（`tmp/glass/`，除注明外 form=liquid、offset 0）：
+  `g4-dark-top` / `g4-light-top`（整页顶部）、`g4-dark-button` /
+  `g4-light-button` / `g4-light-material-button`、`g4-dark-textfield`、
+  `g4-dark-checkbox`、`g4-dark-combobox`、`g4-dark-segmented`、
+  `g4-dark-slider` / `g4-light-slider`、`g4-dark-switch` / `g4-light-switch`、
+  `g4-dark-scrollbar`、`g4-dark-type`。light 组同图可见标题与正文 ink
+  切换，确认 `GALLERY_THEME` 生效。
+- 逐张核对：八个控件矩阵均完整 3 材质 × 6 卡；focus 用「描边 + 外环」双形状，
+  error 为红描边 + 圆形图标，checkbox 勾选为 √ 路径，均不靠颜色；
+  slider / switch 的 live 读数区在矩阵下方静态可见。
+- G4c 遗留核对：ComboBox `open` 卡的弹层完整落在卡内，与下一材质行留约
+  20px 间距，不遮挡后续 section；Segmented 矩阵仍为 compact 样本（72×40
+  实尺寸见演示行）；clear 档卡片透出的白点是测试背板，不是控件缺陷。
+- 整页高度：Flickable 含 9 个 section，offset 0 实拍只露出 Button 与
+  TextField 标题，内容远高于早期草图估计的约 2000px；各段用 filter 截图
+  均可从顶部到达，滚动可达。
+- `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图结束无
+  残留 gallery 进程。

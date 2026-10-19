@@ -1,60 +1,80 @@
-# 液态玻璃 Gallery — G3（Dialog + scrim）
+# 液态玻璃 Gallery — G4（控件矩阵）
 
 ## 本轮
-G3c 已交付：6 张验收截图（dark/light × compositor/qml/both）全部拍完并逐张核对，
-G3 队列收口。
-
-- 截图按 `.loop/TASK.md` 第五节执行，`GALLERY_PAGE` / `GALLERY_POPUP` /
-  `GALLERY_SCRIM` 均与 `shot.sh` 同行前置；6 次启动各自独立。
-- 截图：`tmp/glass/g3-{dark,light}-{compositor,qml,both}.png`；
-  副本入库 `docs/design/liquid-glass/g3-*.png`。
-- `tmp/gallery/run.log` 6 次启动均只有 wallpaper colorquantizer WARN，
-  无 QML 报错。
-
-## 逐张核对
-- **compositor（dark/light）**：整窗不变暗（与 G3b 结论一致：本 gallery
-  页内窗口里 compositor scrim 不作用于整窗）；卡片为厚玻璃；
-  三模式按钮 compositor 选中，说明行「compositor scrim 单一来源…QML 无背板」。
-- **qml（dark/light）**：整窗黑 0.32 背板清晰可见（参数面板亮度明显下降）；
-  卡片走 QML 液态回退，无红边；qml 按钮选中。
-- **both（dark/light）**：整窗变暗 + 卡片 2px 红边 +
-  「违规：compositor scrim × QML 背板双重变暗」；卡面亮度低于周围背板
-  （双重变暗肉眼可辨）；both 按钮选中。
-- **token（六张一致）**：标题 22/26 SemiBold、正文 13/16、按钮高 28、
-  卡片 padding 20、surface radius 24、按钮右对齐 gap 8、宽 360（外推）。
-- 静态截图不能判动效；150/140ms 与 scale 0.96→1 仍以代码与动效页为准。
-
-## 环境
-- 上一轮浮在背景板中央的 KWin「调试控制台」已关闭：本轮用 KWin DBus
-  脚本对匹配标题的窗口调用 `closeWindow()`，只做窗口管理，未改 KWin
-  配置/源码。六张截图无遮挡。
+G4b 已交付（2026-10-19）：GlassTextField + GlassCheckbox，
+各自 3 材质 × 6 状态矩阵，随 `ControlForm.materialForm` 双形态切换。
 
 ## 队列（✅=已交付）
-- [x] G3a GlassDialog 基准组件（四态 + SPEC §3.2 token）
-- [x] G3b scrim 三模式（compositor / qml / both）
-- [x] G3c 6 张验收截图 + ledger 收口
+- [x] G4a 控件页骨架 + ControlStateCard + GlassButton + 双形态切换
+- [x] G4b GlassTextField + GlassCheckbox
+- [ ] G4c GlassComboBox + GlassSegmentedControl
+- [ ] G4d GlassSlider + GlassSwitch（行为契约演示）
+- [ ] G4e GlassScrollBar + 字阶对照区
+- [ ] G4f 全部截图补齐 + ledger 收口
 
-DONE
+## 本轮已改
+- `shell/gallery/components/controls/GlassTextField.qml`：高 28、Body 13/16。
+  liquid = pill 玻璃体；material = M3 filled、radius 10。focus = 2px accent
+  描边 + 外移 3px 的 2px 外环 + 1px ink 发丝 + tint 加深；error = 2px 红描边
+  + 右侧圆形「!」徽标。live 模式是真实 TextInput（可输入、可 Tab 聚焦）。
+- `shell/gallery/components/controls/GlassCheckbox.qml`：框 20×20、radius 5、
+  label Body 13/16；勾选为 QtQuick.Shapes 两段折线 √；focusVisible = 外环 +
+  ink 发丝；hover/pressed 状态层 + pressed 0.90 缩放；点击切换并 `toggled`。
+- `shell/gallery/ControlsPage.qml`：新增 TextField / Checkbox 两段 3×6 矩阵；
+  `GALLERY_CONTROLS_FILTER` 接受 textfield / checkbox；unknownFilter 列表更新。
+- `docs/design/liquid-glass/g4-{dark-textfield,dark-checkbox}.png`；
+  DEMO.md 追加 G4b 进度。
 
 ## 仍差
-- compositor scrim 在 gallery 页内窗口**不可见**：`useKwinEffect` 下 scrim
-  只加深卡片自身表面，不调暗整窗；两次尝试（balanced / readable）结论一致。
-  正确实现应为独立 scrim 表面或 KWin 侧 dialog scrim，属组件/KWin 变更，
-  不在 gallery 轮范围。按纪律未改 KWin、未用 QML 背板伪造。
-- 静态截图不能判开合动效，动效验收仍差一次 live 观察。
+- Checkbox 的 focusVisible 外环与 checked 的 accent 填充同色，20px 框上环距
+  仅 1px（外环 -3px / ink 发丝 -1px），远看近似一圈；形状仍在、非纯色，
+  但若要求更醒目需加大环距（本轮未再改，按小步纪律停手）。
+- 背景板 36px 黑白圆点仍会透过 clear 档卡片（既有问题，未为本轮改动）。
+- 静态图不能判 hover/pressed 动效，也不能判 TextInput 光标闪烁。
+- 字段在窄卡（约 95px 内容宽）内 placeholder 与值都被裁剪；矩阵用途只看
+  形态与状态，live 演示需等整页截图轮（G4f）再核对宽度。
 
-## 外推（SPEC 未定，记 ledger）
-- 对话框宽 360；按钮水平内边距 14、按钮 radius 8、内容 spacing 12、
-  标题→正文 12；点击背板关闭。
-- scrim 按钮行：高 30、radius 9、gap 8、标签 12 / 说明 11 —— gallery 自定。
-- compositor 全窗变暗需独立 scrim 表面（或 KWin 侧 dialog scrim），
-  不在 gallery 轮范围。
+## 外推（已写进代码注释）
+- SPEC §3.10 只列 normal/focused/error/disabled；矩阵补 hovered 与 filled
+  （带值外观）两卡，均非新增状态。
+- SPEC 未给 TextField 圆角：liquid 取 pill（height/2），material 取 Button
+  同款 small 10。
+- Checkbox 的 material 勾选框保留 SPEC 的 radius 5（不改成 M3 的 2）。
+- focus 卡统一采用「描边 + 外环」双形状，满足 HIG §2.6 不只靠颜色。
+
+## 环境
+- 两次截图 `run.log` 均只有 wallpaper colorquantizer WARN，无 QML 报错。
+- 截图均与 `shot.sh` 同行前置 `GALLERY_PAGE` / `GALLERY_CONTROLS_FILTER` /
+  `GALLERY_CONTROLS_OFFSET` / `GALLERY_CONTROL_FORM`。
+- 桌面未再停留在 KWin Overview；无需 DBus 干预。
+
+## 必须做（来自 DEMO.md / SPEC §3.8–§3.15）
+1. 每控件 3 材质 × 6 状态矩阵；卡片标注「材质 · 状态」。
+2. 双形态读 `ControlForm.materialForm`；顶部可切 liquid / material。
+3. focus 环、error 图标、checkbox √ 均不得只靠颜色。
+4. Slider：preview/commit/canceled、Ctrl+滚轮 0.01、180ms 去抖、
+   400ms 屏蔽 x 动画；Switch：toggled 宿主确认，不本地翻转。
+5. 字阶十档：26/22/17/15/13/13/12/11/10/10（行高 32/26/22/20/16/16/15/14/13/13）。
 
 ## 已定案（不要再论证）
-- gallery 页内模态覆盖层，不新开窗口；不改现役组件、不碰 KWin。
-- compositor scrim 走 `LiquidGlassPanel.useKwinEffect + scrimEnabled`；
-  QML 背板 = 全窗 Rectangle 黑 0.32。
-- 环境变量：`GALLERY_PAGE=popups`、`GALLERY_POPUP=dialog`、
-  `GALLERY_SCRIM=compositor|qml|both`，必须与 shot.sh 同行前置。
-- 截图名：`g3-{dark,light}-{compositor,qml,both}`。
-- 上一批 S3（scene/tonal ink）已交付，勿重做。
+- 控件基线放 `shell/gallery/components/controls/`，不改生产组件。
+- 页面是 Flickable；截图钩子：`GALLERY_CONTROLS_OFFSET`、
+  `GALLERY_CONTROLS_FILTER`、`GALLERY_CONTROL_FORM`，与 shot.sh 同行前置。
+- 静态截图不能判动效；只核对终态与读数。
+
+## 上一批（G4a / G3 已交付，勿重做）
+- G4a：ControlsPage 骨架 + ControlStateCard + GlassButton 3×6 矩阵 +
+  顶部 liquid/material 切换；gallery 本地 ControlTokens。
+- G3：GlassDialog + scrim 三模式；compositor 全窗变暗不可见已记「仍差」。
+
+## Next round
+G4c — GlassComboBox + GlassSegmentedControl：弹层按 §3.12（radius 16、
+高 min(360, 内容+12)、偏移 5、padding 8、sheetColor 深 #262b31 / 浅 #f6f8fb）；
+Segmented pill 形态 height/2、card 形态 height×0.38、cell 72×40、outerPadding 2。
+截图 `g4-dark-combobox`、`g4-dark-segmented`。
+
+## 注意
+- 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
+- 不改现役组件、不改 `shell/shell.qml`、不改 CMake、不改 KWin。
+- 每轮结束前：截图 + state.md + commit。
+- 全部队列项勾完，在下面单独一行写 `DONE`。

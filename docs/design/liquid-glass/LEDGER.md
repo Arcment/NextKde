@@ -1,36 +1,40 @@
 # 液态玻璃 Gallery — G7（SPEC §7 三项裁定落地 + 裁定页收口）
 
 ## 本轮
-G7d 已交付（裁定页收口 + 6 张重拍）：
-- `MotionCard.qml`：新增可选 `decision` 属性与右上「已裁定」药丸
-  （`#1E7A4B` 底 + `#FFFFFF` 字，对比 5.3:1）；`decision` 为空时不渲染，
-  MotionPage 的卡片不受影响。
-- `DecisionsPage.qml`：三卡标记 ①B 2600ms+悬停暂停、②B +4px、
-  ③A 固定 Footnote 10；A/B 两栏全部保留、未选项不删、不写推荐。
-  页头改「裁定 G7 · 已裁定 G7」，标题/说明/卡文案同步现行值
-  （A = 原 1600ms / 原 -6px，B = 现行）。页头下新增近不透明条带，
-  修掉注释行横跨黄色饱和区时白字不可读的问题。
-- 对比度（固定 ink，不再用 glassInk(0.62)）：
-  dark ink `#FFFFFF`、dim `#FFFFFF @0.82`；light ink `#14161A`、
-  dim `#14161A @0.86`。
-- `DecisionLane.qml` 衬底由 0.22/0.34 透明度改为近不透明
-  （dark `rgba(0.045,0.05,0.06,0.95)`、light `rgba(0.965,0.97,0.98,0.95)`）。
-  截图实测 lane 复合色：dark 黄区 `#171613` / 红区 `#161013`，
-  light 黄区 `#F7F6F0` / 红区 `#F6EFF0`。
-  WCAG 对比（按最差样本）：dark ink 18.1:1、dim 12.3:1；
-  light ink 16.7:1、dim 11.3:1，均 ≥ 4.5:1。
-- 三个演示 lane 的浅色控件同步：按钮/chip/hover 由白色 over 近白改为
-  深色 0.07/0.08/0.14（否则浅色主题下不可见）。
-- 6 张重拍完成：`g7-{dark,light}-decision-{toast,tooltip,session}.png`，
-  每张 `run.log` 仅既有 wallpaper colorquantizer WARN，无 QML 报错；
-  pkill 锚定，无残留。静态图不判动效，只核对标记、终态与读数。
+G7e 已交付（ledger 收口 + DONE）：
+- 生产侧核对：
+  - `ActionFeedbackToast.qml`：`timeout` 默认 2600ms（line 10）；
+    `show()` 重置 `dismissAt = now + timeout` 与 `hold.interval`；
+    `HoverHandler` 进入时 `hold.stop()`，离开时 `left = max(1, dismissAt - now)`、
+    把 interval 设为 left 后重启，按剩余时间继续（不重置 2600ms）；
+    `enabled: shown`，仅 HoverHandler 被动观察，无点击处理器、无 focus 抢占。
+  - `StatusTooltip.qml`：4 处贴边 -6 → +4（commit 567c7be1）；其余 0 分支未动。
+  - `DockAppNameTooltip.qml`：3 处 -6 → +4（同 commit）；其余 0 分支未动。
+  - SessionMenu：裁定 A，生产代码未动；G7 全部提交（de00ba56 / 567c7be1 /
+    c70ea780 / b77cae10）均未触碰任何生产 session 文件；仅 gallery
+    `DecisionSessionLane.qml` 在 G7d 更新。
+- 截图：6 张 `g7-{dark,light}-decision-{toast,tooltip,session}.png` 同时在
+  `tmp/gallery/` 与 `tmp/glass/`，逐对 `cmp` 一致，1280×800 RGBA。
+- 起应用回归：`tmp/gallery/run.sh dark` 启动 13s，`run.log` 无
+  ERROR / TypeError / Non-existent；仅既有 wallpaper colorquantizer 加载 WARN
+  与 ProxyFloatingWindow 两条 deprecation WARN。`pkill` 锚定
+  `^qs -p shell/gallery.qml`，无残留 gallery 进程。
+- **生产侧人工验证项（gallery 无法覆盖，需真机确认）**：
+  1. Toast：真实桌面触发一条 action toast；悬停 ≥1s 不消失，离开后按剩余
+     时间消失（不是重新 2600ms）；悬停期间在 36px 药丸内点击不触发该区域
+     下方内容（悬停暂停的已知代价），toast 不抢焦点。
+  2. Tooltip：真实 bar（bottom/left/right 三种 dockEdge）与 dock 图标悬停，
+     确认 +4px 正间隙、不重叠、不脱离锚点。
+- 已知残留（非 G7 队列项）：G5 演示页 `ToastDemo.qml` / `MotionPage.qml`
+  仍以 1600ms 标注历史 token 并写「待裁定」；G7c 只回填 SPEC / INVENTORY /
+  DEMO，未纳入改动清单，现行统一口径以裁定页与 SPEC §7 为准。
 
 ## 队列（✅=已交付）
 - [x] G7a Toast 2600ms + 悬停暂停（生产）+ gallery 文案同步
 - [x] G7b Tooltip +4px（StatusTooltip + DockAppNameTooltip）
 - [x] G7c SPEC / INVENTORY / DEMO 三项裁定回填
 - [x] G7d 裁定页「已裁定」标记 + 两主题对比度修复 + 6 张截图
-- [ ] G7e ledger 收口（含生产侧人工验证项）+ `DONE`
+- [x] G7e ledger 收口（含生产侧人工验证项）+ `DONE`
 
 ## 必须做（人工已裁定，不要再论证）
 1. Toast → B：`timeout` 默认 2600ms；悬停暂停、离开按剩余继续；
@@ -49,7 +53,7 @@ G7d 已交付（裁定页收口 + 6 张重拍）：
 - StatusTooltip / DockAppNameTooltip 不被 gallery 加载：代码核对即可，
   ledger 写「需人工在真实 bar/dock 上悬停验证」。
 
-## Ledger（G7 进行中）
+## Ledger（G7 已收口）
 - 已改：`shell/desktop/modules/common/ActionFeedbackToast.qml`
   （timeout 2600、dismissAt、HoverHandler 剩余时间续计、enabled: shown）；
   `shell/gallery/PopupsPage.qml` 的 1600 文案/非演示值同步 2600。
@@ -71,23 +75,22 @@ G7d 已交付（裁定页收口 + 6 张重拍）：
   修黄区白字；浅色 lane 的按钮/chip/hover 改深色填充。6 张
   `g7-{dark,light}-decision-{toast,tooltip,session}` 已重拍（tmp/gallery
   与 tmp/glass 各一份），run.log 无 QML 报错。
-- 待办（G7e 收口）：StatusTooltip / DockAppNameTooltip 改 +4px 后
-  需人工在真实 bar/dock 上悬停验证手感（gallery 不加载两者）。
-- 待办（G7e 收口）：ActionFeedbackToast 悬停暂停需人工在真实桌面点一条
-  通知后悬停验证「暂停 → 离开按剩余继续」；gallery 的 PopupsPage 只覆盖语法。
+- G7e 收口：生产三文件按裁定复核通过（2600 / 悬停续计 / +4×7 / 0 分支不动）；
+  SessionMenu 生产代码未动；6 张截图两目录逐对一致；应用启动 run.log 无
+  QML 报错（仅既有 wallpaper WARN 与 ProxyFloatingWindow deprecation WARN）；
+  生产侧人工验证项已写入「本轮」。G7 队列全部勾完。
 
 ## 上一批（G6 已交付，勿重做）
 - 裁定页三段 A/B 已交付；本次只加标记、修对比度、重拍。
 - G5 动效页、G4 控件、G3 弹层不要改。
 
 ## Next round
-G7e — ledger 收口：核对 `ActionFeedbackToast.qml`（2600ms 默认值、悬停暂停
-按剩余续计、不抢焦点）、`StatusTooltip.qml` / `DockAppNameTooltip.qml`
-（-6 已全改 +4、其余 0 未动）、SessionMenu 生产代码未动；确认 6 张
-g7 截图在 `tmp/gallery` 与 `tmp/glass`；把生产侧人工验证项写清楚；
-全部完成后在 state.md 单独一行写 `DONE` 并提交。
+无 — G7 队列全部交付。后续如继续：仅剩 G5 演示页 `ToastDemo.qml` /
+`MotionPage.qml` 的 1600ms 历史标注可选同步，以及上面两项真机人工验证。
 
 ## 注意
 - 不改 `shell/shell.qml`、不改 CMake、不改 KWin。
 - 每轮结束前：截图 + state.md + commit。
 - 全部队列项勾完，在下面单独一行写 `DONE`。
+
+DONE

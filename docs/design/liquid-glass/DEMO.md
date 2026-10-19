@@ -334,3 +334,34 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
   加大 lane 衬底；light 主题两栏黑字可读。
 - `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图后无残留
   gallery 进程。
+
+## G6d — Tooltip A/B + SessionMenu A/B（SPEC §7-② / §7-③）
+
+- 新增 `DecisionTooltipLane.qml`：stage 内画「屏幕边缘」hairline、贴边锚点
+  chip（10:42）与锚点下缘 hairline，tooltip 右缘同样贴边。
+  A 栏 `gap -6px`（tooltip top 34 / anchor bottom 40，压进锚点 6px）；
+  B 栏 `gap +4px`（tip top 44，留正间隙）。两栏读数并列 `gap` /
+  `anchorB · tipTop` / `state`；悬停 chip 显示、离开隐藏，chip 点击与
+  「显示/隐藏」按钮切换。静态截图 seed 为 shown。
+- 新增 `DecisionSessionLane.qml`：同一三行动作菜单（锁屏 / 注销 / 关机），
+  两列极端 itemHeight 并排，label 固定 Footnote 10。
+  A 栏 `mode raw`：24 / 72 原值，24 注「拥挤」、72 注「空旷」；
+  B 栏 `mode clamp`：请求 24 → 44、72 → 56，注 `req → clamp`。
+  读数写 `itemHeight 24 · 72 / 44 · 56 ← req` 与 `font 10px`；
+  行 hover 高亮、点击选中。浅色主题下 danger 墨改为深红
+  （现役 SessionMenu 为锁屏深色专用，浅红在 gallery 浅底上不可读）。
+- `DecisionsPage.qml` ②③ 两段替换占位，卡高 360 / 484；两栏等宽、
+  后果行固定栏底，仍无推荐、无裁定。
+- 截图（`tmp/glass/`）：`g6-dark-decision-tooltip` /
+  `g6-light-decision-tooltip` / `g6-dark-decision-session` /
+  `g6-light-decision-session`。
+- dark tooltip：A `gap -6px · anchorB 40 · tipTop 34`，B `gap +4px ·
+  anchorB 40 · tipTop 44`，两栏 state shown · last seed。
+- dark session：A `itemHeight 24 · 72 · font 10px`；B `itemHeight 44 · 56
+  ← req 24 · 72 · font 10px`；selected —（seed）。
+- light 两张同读数；两个主题的读数与菜单文字均可读。
+- 仍差：B 栏两列 clamp 后高度 44 / 56 不同，两列注释行不在同一 y
+  （相差约 33px），读数仍逐列可对应；dark tooltip 的 `屏幕边缘` 标签为
+  8px，仅作位置提示。
+- `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图后无残留
+  gallery 进程。三项均「A/B 已呈现，待人工裁定」。

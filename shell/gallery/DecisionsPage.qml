@@ -2,11 +2,10 @@ import QtQuick
 import Quickshell
 import qs.desktop.modules.common
 
-// G6c — SPEC §7 decision page. Three A/B pairs that are visually equivalent
-// but product-semantically different. The page presents both options with
-// interaction, readings and consequence lines; it never ranks them.
-// G6c delivers the skeleton and the Toast pair; G6d adds Tooltip and
-// SessionMenu.
+// G6c/G6d — SPEC §7 decision page. Three A/B pairs that are visually
+// equivalent but product-semantically different. The page presents both
+// options with interaction, readings and consequence lines; it never ranks
+// them and never writes a recommendation.
 //
 // Screenshot hooks (must be set on the same command line as shot.sh):
 //   GALLERY_PAGE=decisions
@@ -144,41 +143,132 @@ Item {
                 }
             }
 
-            // ── ② Tooltip edge gap (G6d) ───────────────────────────
-            Rectangle {
-                visible: page.tooltipVisible && page.filter === "tooltip"
+            // ── ② Tooltip edge gap ──────────────────────────────────
+            MotionCard {
+                id: tooltipCard
+                visible: page.tooltipVisible
                 width: column.width
-                height: 120
-                radius: 12
-                color: AppearanceTokens.isDarkTheme
-                    ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.04)
-                border.width: 1
-                border.color: page.hairline
+                radius: page.effectiveRadius
+                tintStrength: page.tintStrength
+                surfaceOpacity: page.previewOpacity
+                blurOverrideEnabled: true
+                blurStrength: page.blurAmount
+                height: 360
+                title: "② Tooltip 贴边"
+                badge: "SPEC §7-②"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "A = -6px 负 margin（StatusTooltip.qml:40-43；"
+                    + "DockAppNameTooltip.qml:67-69）；B = +4px 正间隙。两栏均呈现交互、读数与后果，不写推荐，待人工裁定。"
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "② Tooltip 贴边 A/B：G6d 交付"
-                    color: page.inkDim
-                    font.pixelSize: 12
+                Row {
+                    anchors.fill: parent
+                    spacing: 12
+
+                    DecisionLane {
+                        width: (parent.width - 12) / 2
+                        height: parent.height
+                        title: "A · 保留 -6px 重叠"
+                        tag: "gap -6px"
+                        consequence: "贴边手感：浮层压进锚点 6px，贴边更紧、视觉连续；"
+                            + "锚点下缘的 6px 被覆盖。"
+                        ink: page.ink
+                        inkDim: page.inkDim
+                        hairline: page.hairline
+
+                        DecisionTooltipLane {
+                            anchors.fill: parent
+                            gap: -6
+                            ink: page.ink
+                            inkDim: page.inkDim
+                            hairline: page.hairline
+                        }
+                    }
+
+                    DecisionLane {
+                        width: (parent.width - 12) / 2
+                        height: parent.height
+                        title: "B · 改正偏移"
+                        tag: "gap +4px"
+                        consequence: "贴边手感：浮层不压锚点，边界清楚；"
+                            + "多出一道 4px 正间隙，贴合感略松。"
+                        ink: page.ink
+                        inkDim: page.inkDim
+                        hairline: page.hairline
+
+                        DecisionTooltipLane {
+                            anchors.fill: parent
+                            gap: 4
+                            ink: page.ink
+                            inkDim: page.inkDim
+                            hairline: page.hairline
+                        }
+                    }
                 }
             }
 
-            // ── ③ SessionMenu extreme height (G6d) ─────────────────
-            Rectangle {
-                visible: page.sessionVisible && page.filter === "session"
+            // ── ③ SessionMenu extreme height ────────────────────────
+            MotionCard {
+                id: sessionCard
+                visible: page.sessionVisible
                 width: column.width
-                height: 120
-                radius: 12
-                color: AppearanceTokens.isDarkTheme
-                    ? Qt.rgba(1, 1, 1, 0.05) : Qt.rgba(0, 0, 0, 0.04)
-                border.width: 1
-                border.color: page.hairline
+                radius: page.effectiveRadius
+                tintStrength: page.tintStrength
+                surfaceOpacity: page.previewOpacity
+                blurOverrideEnabled: true
+                blurStrength: page.blurAmount
+                height: 484
+                title: "③ SessionMenu 极端高度"
+                badge: "SPEC §7-③"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "A = 接受固定 Footnote 10，不随 itemHeight 变；"
+                    + "B = 对 SessionMenu 单独设定 itemHeight 范围 44–56。两栏并排 24 / 72 两种极端，"
+                    + "读数写 itemHeight 与实际字号；不写推荐，待人工裁定。"
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "③ SessionMenu 极端高度 A/B：G6d 交付"
-                    color: page.inkDim
-                    font.pixelSize: 12
+                Row {
+                    anchors.fill: parent
+                    spacing: 12
+
+                    DecisionLane {
+                        width: (parent.width - 12) / 2
+                        height: parent.height
+                        title: "A · 固定 Footnote 10"
+                        tag: "raw 24 / 72"
+                        consequence: "可读性：24 行高下 10px 字拥挤；72 行高下同一字号显空旷，"
+                            + "但字本身始终可读。"
+                        ink: page.ink
+                        inkDim: page.inkDim
+                        hairline: page.hairline
+
+                        DecisionSessionLane {
+                            anchors.fill: parent
+                            mode: "raw"
+                            ink: page.ink
+                            inkDim: page.inkDim
+                            hairline: page.hairline
+                        }
+                    }
+
+                    DecisionLane {
+                        width: (parent.width - 12) / 2
+                        height: parent.height
+                        title: "B · itemHeight clamp 44–56"
+                        tag: "clamp"
+                        consequence: "可读性：极端请求被 clamp 到 44–56，Footnote 10 保持可读；"
+                            + "代价是菜单行高不再随请求自由伸缩。"
+                        ink: page.ink
+                        inkDim: page.inkDim
+                        hairline: page.hairline
+
+                        DecisionSessionLane {
+                            anchors.fill: parent
+                            mode: "clamp"
+                            ink: page.ink
+                            inkDim: page.inkDim
+                            hairline: page.hairline
+                        }
+                    }
                 }
             }
 

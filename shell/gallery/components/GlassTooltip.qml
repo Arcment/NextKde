@@ -31,6 +31,20 @@ AnimatedPopupWindow {
 
     PopupAnchorBinding { popupAnchor: root.anchor; sourceItem: root.anchorItem }
 
+    // G10e — screen-aligned hidden copy of the backdrop board for this surface.
+    // The tooltip lives in its own window, so it samples its own copy rather
+    // than the main window's; hideSource on the card's capture keeps it out of
+    // the painted scene.
+    GalleryBackdropSample {
+        id: backdropSample
+        anchors.fill: parent
+        visible: root.shown && GlassBackdrop.sourceItem !== null
+        screenX: root.anchor.rect.x
+        screenY: root.anchor.rect.y
+        screenWidth: root.screen ? root.screen.width : 0
+        screenHeight: root.screen ? root.screen.height : 0
+    }
+
     anchor {
         edges: Edges.Bottom
         gravity: Edges.Bottom
@@ -44,6 +58,7 @@ AnimatedPopupWindow {
         cornerExponent: 2.0
         material: "thick"
         useKwinEffect: false
+        backdropItem: GlassBackdrop.sourceItem !== null ? backdropSample : null
 
         Column {
             id: tooltipColumn

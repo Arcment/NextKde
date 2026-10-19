@@ -50,6 +50,22 @@ AnimatedPopupWindow {
 
     PopupAnchorBinding { popupAnchor: root.anchor; sourceItem: root.anchorItem }
 
+    // G10e — screen-aligned hidden copy of the backdrop board. The popup is a
+    // separate surface, so the card cannot sample the main window's copy; this
+    // one is translated by the popup's screen position instead. It stays
+    // visible so the card's ShaderEffectSource can grab it (hideSource keeps
+    // it out of the painted scene); gating on the board switch keeps the old
+    // KWin path pixel-identical when the board is off.
+    GalleryBackdropSample {
+        id: backdropSample
+        anchors.fill: parent
+        visible: root.shown && GlassBackdrop.sourceItem !== null
+        screenX: root.anchor.rect.x
+        screenY: root.anchor.rect.y
+        screenWidth: root.screen ? root.screen.width : 0
+        screenHeight: root.screen ? root.screen.height : 0
+    }
+
     anchor {
         edges: Edges.Bottom
         gravity: Edges.Bottom
@@ -84,6 +100,7 @@ AnimatedPopupWindow {
         cornerExponent: 2.0
         material: root.material
         useKwinEffect: false
+        backdropItem: GlassBackdrop.sourceItem !== null ? backdropSample : null
 
         Column {
             id: body

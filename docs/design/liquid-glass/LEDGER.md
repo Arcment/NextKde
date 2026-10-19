@@ -7,22 +7,22 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10c 已完成：`LiquidGlassSurface` 增加 `backdropItem`（默认指向
-`GlassBackdrop.sourceItem`）、`scrimEnabled/scrimCap/scrimDecay/scrimTint/
-scrimOpacity`、`sceneSampling` / `sceneSourceRect` 与 1/6 捕获 +
-`scene_liquid.frag.qsb` 的 `ShaderEffect`；场景采样时根 Rectangle 变
-transparent、旧的自适应 scrim 关闭；`backdropItem == null` 时所有新分支
-不生效，保持旧行为。`LiquidGlassPanel` 把 preset 解析后的 cap/decay 与
-tint 转发给 bodySurface（仅 `!useKwinEffect` 时开 scrim）。起应用后
-`run.log` 只有 wallpaper colorquantizer 警告与 ProxyFloatingWindow 旧警告，
-无 QML/shader 报错；nav 等 QML 兜底表面已走采样路径。
+G10e 已完成：新建 `shell/gallery/components/GalleryBackdropSample.qml`，
+按 `anchor.rect.x/y` 与屏幕尺寸平移隐藏背景板副本；`GlassPopup` /
+`GlassTooltip` 各自持有一份，卡片 `LiquidGlassPanel` 新增 `backdropItem`
+并转发给 bodySurface。副本只在背景板开启且弹窗 shown 时可见，由卡片捕获的
+`hideSource` 隐藏；背景板关闭时 `backdropItem` 为 null，弹窗与改动前完全
+一致。G10d（主窗口表面 scrim）截图 `g10-dark-sampled.png` /
+`g10-light-sampled.png` 与 G10e 的 `g10-popover-dark.png` /
+`g10-menu-light.png` / `g10-tooltip-dark.png` 均已在 gallery 运行后目视：
+采样与本地点阵连续、文字可读，`run.log` 无 QML/shader 报错。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
 - [x] G10b `scene_liquid.frag` + `compile.sh` + 烘焙
 - [x] G10c `LiquidGlassSurface` 场景采样 + `LiquidGlassPanel` 转发
-- [ ] G10d 主窗口表面启用 scrim + 首轮截图
-- [ ] G10e 弹窗窗口局部采样（`GlassPopup` / `GlassTooltip`）
+- [x] G10d 主窗口表面启用 scrim + 首轮截图
+- [x] G10e 弹窗窗口局部采样（`GlassPopup` / `GlassTooltip`）
 - [ ] G10f Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim
 - [ ] G10g 深色主题可读性矩阵（上半）
 - [ ] G10h 浅色主题可读性矩阵（下半）
@@ -64,11 +64,9 @@ tint 转发给 bodySurface（仅 `!useKwinEffect` 时开 scrim）。起应用后
 
 ## Next round
 
-G10d — 主窗口表面启用 scrim：`GalleryRoot.qml` nav（balanced）、
-`OverviewPage.qml` 16 张占位卡与 `SurfacesPage.qml` 直接使用的
-`LiquidGlassSurface`（cap 0.47 / decay 0.75 / tint 跟随主题）、
-`ParamPanel.qml`（readable）、`ToastDemo.qml` / `TooltipDemo.qml` 页内面板；
-截图 `g10-dark-sampled.png`、`g10-light-sampled.png` 并目视。
+G10f — Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim：`ToastDemo.qml`
+（toast readable）、`TooltipDemo.qml`（tooltip balanced）页内面板，以及通知、
+菜单、对话框页的玻璃面加 `scrimEnabled` 并截图目视。
 
 ## 注意
 

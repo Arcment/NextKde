@@ -7,7 +7,31 @@
 3. 极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G11b ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬标准重判。
+G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）。
+
+截图（`tmp/glass/`）：`g11c-toast-{dark,light}`、`g11c-tooltip-{dark,light}`、
+`g11c-menu-{dark,light}`、`g11c-notification-{dark,light}`、
+`g11c-dialog-{dark,light}`；局部放大图在 `tmp/gallery/g11c-*zoom.png`。
+
+- toast ✅：dark 玻璃压成暗酒红/暗青、白字可读；light 提亮为浅粉/浅青、
+  深字可读。ActionFeedbackToast 与基准 GlassToast 两枚都出现采样压缩；
+  跨青/品红边界的内部颜色为连续渐变，无硬边。
+- tooltip ✅：dark 暗红玻璃 + 白字；light 浅粉玻璃 + 深字，均与玻璃外
+  亮红明显不同，主/次行可读。
+- menu ✅：dark 暗酒红玻璃、白字与禁用灰字可读；light 浅粉玻璃、深字与
+  禁用灰字可读；均无旧兜底平涂。
+- notification ✅：dark 暗红→暗橄榄跨红/黄边界连续，白字与灰字可读；
+  light 浅粉→浅黄连续，深字可读。底部 “+2 条” 分组 pill 跨象限仍连续。
+- dialog **仍差**：卡片内部确有采样（dark 暗暖、light 浅暖，均与亮背景
+  明显不同），但 balanced scrim 压不住背后的页内文字：dark 下页内白字
+  透过玻璃与次级正文（浅灰）连成一片；light 下页内深字与次级正文混在
+  一起。主标题可读，次级正文读起来浑浊，不满足硬标准 2。留待 G11f
+  按允许范围把该表面 preset 升到 readable 或加深 tint 后重拍。
+
+运行：10 次起应用均成功，run.log 仅有与玻璃无关的 wallpaper 采样 WARN。
+
+## 上一轮（G11b）
+✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬标准重判。
 
 - dark `tmp/glass/g11b-overview-dark.png`：nav 红区压成暗红、青区压成暗青，
   与玻璃外的亮红/亮青明显不同；param panel 黄区压成暗橄榄、品红区压成
@@ -38,7 +62,7 @@ G11b ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬�
 ## 队列（✅=已交付）
 - [x] G11a `LiquidGlassPanel.backdropItem` 默认接 `GlassBackdrop.sourceItem`
 - [x] G11b 复核 nav + param panel（dark/light）
-- [ ] G11c 复核 toast + tooltip + dialog + notification + menu（dark/light）
+- [x] G11c 复核 toast + tooltip + dialog + notification + menu（dark/light）
 - [ ] G11d 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light）
 - [ ] G11e 极端边界：象限交界、黑白点、最亮黄区
 - [ ] G11f 修正仍差项（只调 preset / tint / ink）
@@ -52,11 +76,11 @@ G11b ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬�
 | overview 16 卡 | | |
 | surfaces clear/regular/thick | | |
 | popover | | |
-| menu | | |
-| tooltip | | |
-| toast | | |
-| notification | | |
-| dialog | | |
+| menu | ✅ 暗酒红，白字/禁用灰字可读 | ✅ 浅粉，深字/禁用灰字可读 |
+| tooltip | ✅ 暗红，白字可读 | ✅ 浅粉，深字可读 |
+| toast | ✅ 暗酒红/暗青，白字可读（两枚均采样） | ✅ 浅粉/浅青，深字可读 |
+| notification | ✅ 暗红→暗橄榄，白/灰字可读 | ✅ 浅粉→浅黄，深字可读 |
+| dialog | 仍差：balanced scrim 压不住页内白字，次级正文浑浊 | 仍差：页内深字与次级正文混在一起 |
 | motion 页 toast | | |
 | tooltip 页内基准 | | |
 | decision 三条 lane | | |
@@ -81,10 +105,15 @@ G11b ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬�
 
 ## Next round
 
-G11c — 复核 toast + tooltip + dialog + notification + menu（dark/light），
+G11d — 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light），
 逐格按新硬标准重判。
 
 ## 注意
 
+- `GALLERY_POPUP` 的值必须小写（`popover|menu|tooltip|toast|notification|dialog`）；
+  PopupsPage 的 demo timer 用全小写比较，传 `Tooltip`/`Toast` 等大写值不会弹层
+  （本轮首次截图因此是空页，已重拍）。
+- G11c 遗留：dialog 两主题均判「仍差」，G11f 修（允许 preset 升 readable /
+  调 tint，不许改曲线）。
 - 只改任务书第六节列出的路径。
 - 全部队列项勾完、矩阵无「仍差」后，在下面单独一行写 `DONE`。

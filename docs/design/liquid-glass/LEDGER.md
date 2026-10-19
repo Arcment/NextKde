@@ -1,63 +1,39 @@
-# 液态玻璃 Gallery — S2（scene 收口）
+# 液态玻璃 Gallery — S3（ink 判定收口）
 
-## 本轮（S2 已交付）
-### 已改
-1. **首帧采样** — `shell/gallery/ScenePage.qml:204-211` 把 `sourceRect` 从
-   `mapToItem` 改成纯算术 rect（`scenePill.x/y - viewport.x/y - flick.x/y +
-   contentX/contentY`，并读 `rowsColumn.height`/`flick.contentHeight` 注册依赖）：
-   原实现在构造期求值后，`contentY=0` 不再触发重算，胶囊一直采到自己上方的条带。
-   另加 `ScenePage.qml:257-272` 首帧 260ms Timer + `contentHeight` 变化 +
-   `moving` 变 false 三处 `refresh()`，`SceneGlassPill.qml:45` 调
-   `ShaderEffectSource.scheduleUpdate()`。证据：`s2-dark-a` 胶囊内可见 6 个模糊
-   圆点和两侧条带。
-2. **tonal ink** — `ScenePage.qml:247` 改用 `tonalPill.foregroundColor`，不再写死主题 ink。
-3. **declared tone** — `ScenePage.qml:45-57` 缺省 `declared`，`GALLERY_SCENE_INK=fixed`
-   切回固定 ink；`pillRow`（`:50`）减去 `stage.y`，修正原先行号偏一行的问题。
-   证据：`s2-light-b`（declared 深字）vs `s2-light-fixed`（fixed 白字），
-   白字在浅色胶囊上明显发虚。
-4. **dark tint** — `ScenePage.qml:213` 0.30 → 0.18（浅色保持 0.32）。
-5. **纹理高度下限** — `SceneGlassPill.qml:40` 高度改为 `max(12, round(height/6))`。
-6. **折射判据** — `ScenePage.qml:147-161` 每行两条 48px 宽、6px 亮/6px 暗的竖条带，
-   分别跨过胶囊左右边缘；条带只压在边缘，不把胶囊中心的底色平均掉。
-   `crop-s2-refract.png` 中左缘条带在玻璃内被压缩/错位，右缘圆点被抹开。
-7. **版面** — `ScenePage.qml:193-233` 两枚胶囊移到 dot 列上方上下排列
-   （x+330，row 0 / row 1），行标题不再被压；caption 收进 stage 下方图例（`:275+`）。
+## 本轮
+- `shell/gallery/ScenePage.qml:60-99` — ink 判定改为
+  `effectiveLum = mix(rowLum, tintLum, tintStrength)`（深 0.18 / 浅 0.32），
+  阈值实测取 0.34；scene 与 tonal 共用 `inkFor()`。
+- `shell/gallery/ScenePage.qml:292` — tonal 胶囊文字直接设 `page.tonalInk`，
+  不再依赖 `tonalPill.foregroundColor`。
+- `shell/gallery/ScenePage.qml:425-437` — 只读读数
+  `rowLum / effectiveLum / ink`，scene 与 tonal 各一组。
+- `docs/design/liquid-glass/DEMO.md` — 记录公式、阈值依据与外推。
 
-### 仍差
-- tonal 胶囊（无采样）在浅行上仍是面板给的主题白字，对比度偏低：面板按自身材质
-  给前景色，并不知道下面压着浅行。未改现役组件。
-- 暗色胶囊已不接近纯黑，但采样 50/50 条带后的平均值仍是中灰，细节主要靠圆点/条带读。
-- 折射是定性证据（边缘条带可见压缩/错位），静帧量不出 3.5px 位移。
+## 验证（4 张，tmp/glass/）
+- s3-light-a（offset 0）：scene 0.058→0.359，tonal 0.917→0.944，两枚均 `#16181c` 深字。
+- s3-light-b（offset 600）：scene 0.917→0.944，tonal 0.058→0.359，两枚均深字。
+- s3-dark-a（offset 0）：scene 0.058→0.048 浅字，tonal 0.917→0.752 深字。
+- s3-dark-b（offset 600）：scene 0.917→0.752 深字，tonal 0.058→0.048 浅字。
+- `run.log` 无 QML 报错；仅 wallpaper colorquantizer WARN。
 
-### 外推
-- 要让 tonal 也随背景行切 ink，需要面板暴露"背景 tone"输入或由页面按行覆写
-  foregroundColor；属于组件 API 变更，不在本轮范围。
+## 仍差
+- 4 张截图内容区背后残留一块 KWin 调试控制台窗口（本轮排查环境时打开；
+  KWin 内部窗口，Alt+F4 / KWin 脚本 / 快捷键均无法关闭）。它位于 gallery
+  内容之下、背景板之上，未遮挡两枚胶囊与读数，不是 QML 渲染问题。
+  下轮若需要干净底图，需重启 KWin 或注销；本轮按纪律不碰 KWin。
+- 阈值 0.34 依赖当前行色与 tintStrength；任一改动后需重测。
+  0.45 不可用：浅色 + 深行的 0.359 会被误判为浅字。
 
-### 截图（`tmp/glass/`，逐张已读）
-- `s2-dark-a.png` offset 0 dark declared：首帧胶囊内有圆点+条带。
-- `s2-dark-b.png` offset 600 dark declared；`s2-light-a.png` offset 0 light declared。
-- `s2-light-b.png` offset 600 light declared（浅行深字）vs
-  `s2-light-fixed.png` 同位置 fixed（白字对比明显更低）。
-- 辅助裁图在 `tmp/gallery/`：`crop-s2-dark-a.png`、`crop-s2-ink-compare.png`、
-  `crop-s2-refract.png`。
-- `run.log` 无 QML 报错，仅有 wallpaper colorquantizer 警告。
+## 外推
+- 真正的修法是组件 API 增加「背景 tone」输入（组件变更，不在 gallery 轮范围），
+  让面板接收下层亮度而不是 gallery 侧代算。
+- 反例已关闭：浅色主题 + 深色行不再出现浅字，且两枚胶囊用同一规则。
 
 ## 队列（✅=已交付）
-- [x] S2 首帧采样 / ink 可读性 / dark tint / 纹理下限 / 折射判据 + 5 张截图
+- [x] S3 ink 判定统一到材质实际亮度 + 4 张验收截图
 
-## 已定案（不要再论证）
-- 纯 QML：`ShaderEffectSource` + `ShaderEffect`（qsb），`useKwinEffect: false`，不碰 KWin。
-- sampler 属性名 `source`；shader 照 `squircle.frag` 模板，`qsb --qt6` 烘焙。
-- 截图：offset 0/600 × light/dark + 一张 fixed，共 5 张。
-- 环境变量：`GALLERY_PAGE=scene`、`GALLERY_SCENE_OFFSET`、`GALLERY_SCENE_INK`。
-
-## 上一批（S1 已交付，勿重做）
-- `ScenePage.qml` + `SceneGlassPill.qml` + `scene_glass.frag(.qsb)`；
-  同窗口采样已在 offset 600 的截图里成立。
-
-## 注意
-- 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
-- 不改现役组件、不改 `shell/shell.qml`、不改 CMake、不改 KWin。
-- 每轮结束前：截图 + state.md + commit。
+## Next round
+待定 — 队列已清空，等下一批任务书。
 
 DONE

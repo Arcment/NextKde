@@ -3,9 +3,9 @@ import qs.desktop.modules.common
 
 // G6c — interactive toast lane for the SPEC §7-① A/B presentation.
 //
-// A: holdToken 1600ms, auto-dismiss, no hover pause (the shipped behaviour).
+// A: holdToken 1600ms, auto-dismiss, no hover pause (the original behaviour).
 // B: holdToken 2600ms, auto-dismiss, hover pauses the retention clock and
-//    leaving resumes it (the alternative under review).
+//    leaving resumes it (shipped by the G7 decision ①B; kept here as record).
 //
 // Seeded shown + stopped so a static screenshot carries both surfaces and
 // both readings without synthesising a click. 发一条 starts the real clock;
@@ -19,6 +19,11 @@ Item {
     property color ink: AppearanceTokens.content.glassInk()
     property color inkDim: AppearanceTokens.content.glassInk(0.62)
     property color hairline: Qt.rgba(1, 1, 1, 0.16)
+    // G7d — near-white lane in light theme: white-on-white controls vanish.
+    readonly property color controlFill: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.07)
+    readonly property color controlFillPressed: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(0, 0, 0, 0.14)
 
     // Seeded shown for the static frame; the retention clock starts on 发一条.
     property bool shown: true
@@ -226,7 +231,7 @@ Item {
                 height: 24
                 radius: 8
                 color: sendMouse.pressed
-                    ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.12)
+                    ? root.controlFillPressed : root.controlFill
                 border.width: 1
                 border.color: root.hairline
 
@@ -249,7 +254,7 @@ Item {
                 height: 24
                 radius: 8
                 color: closeMouse.pressed
-                    ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.12)
+                    ? root.controlFillPressed : root.controlFill
                 border.width: 1
                 border.color: root.hairline
 

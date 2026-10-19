@@ -3,10 +3,10 @@ import qs.desktop.modules.common
 
 // G6d — SPEC §7-② tooltip edge-gap lane.
 //
-// A lane: gap -6px. The side facing the anchor overlaps it by 6px, the same
-// negative margin the shipped StatusTooltip (margins.bottom -6) and
-// DockAppNameTooltip (margins.top -6) use.
-// B lane: gap +4px, a positive gap that never covers the anchor.
+// A lane: gap -6px. The side facing the anchor overlaps it by 6px, the
+// original negative margin (margins.bottom -6 / margins.top -6).
+// B lane: gap +4px, a positive gap that never covers the anchor; shipped by
+// the G7 decision ②B and kept here as record.
 //
 // The stage draws a hairline for the screen edge, the anchor chip flush to
 // it, and the anchor's bottom hairline. The tooltip is seeded shown so a
@@ -19,6 +19,13 @@ Item {
     property color ink: AppearanceTokens.content.glassInk()
     property color inkDim: AppearanceTokens.content.glassInk(0.62)
     property color hairline: Qt.rgba(1, 1, 1, 0.16)
+    // G7d — light theme uses a near-white lane; white chips/buttons vanish.
+    readonly property color controlFill: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.12) : Qt.rgba(0, 0, 0, 0.07)
+    readonly property color controlFillPressed: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(0, 0, 0, 0.14)
+    readonly property color chipFill: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(0, 0, 0, 0.08)
 
     property bool shown: true
     property bool hovered: false
@@ -86,7 +93,7 @@ Item {
                 width: 96
                 height: root.anchorHeight
                 radius: height / 2
-                color: Qt.rgba(1, 1, 1, 0.14)
+                color: root.chipFill
                 border.width: 1
                 border.color: root.hairline
 
@@ -208,7 +215,7 @@ Item {
             height: 24
             radius: 8
             color: toggleMouse.pressed
-                ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(1, 1, 1, 0.12)
+                ? root.controlFillPressed : root.controlFill
             border.width: 1
             border.color: root.hairline
 

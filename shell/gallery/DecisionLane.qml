@@ -17,12 +17,15 @@ Rectangle {
     default property alias body: host.data
 
     radius: 12
-    // The gallery's controlled background board is saturated on purpose, so
-    // the lane needs its own backing: a dark scrim under white ink in dark
-    // theme, a light scrim under dark ink in light theme. Without it the B
-    // lane (over the yellow quadrant) loses its readouts.
+    // G7d — the gallery's controlled background board is saturated on purpose
+    // (red / yellow / cyan / magenta quadrants). The earlier 0.22 / 0.34 scrim
+    // left the lane mid-tone over the yellow and red quadrants, so the 9–12px
+    // readouts fell below 4.5:1. The backing is now near-opaque: deep charcoal
+    // in dark theme, near-white in light theme. Worst-case composite (95% lane
+    // over #FFEB3C yellow) is #1D1D14 dark and #F5EDF0 light; the strongest
+    // dim ink (#FFFFFF @ 0.82 / #14161A @ 0.86) measures ≈12:1 and ≈10:1.
     color: AppearanceTokens.isDarkTheme
-        ? Qt.rgba(0, 0, 0, 0.22) : Qt.rgba(1, 1, 1, 0.34)
+        ? Qt.rgba(0.045, 0.05, 0.06, 0.95) : Qt.rgba(0.965, 0.97, 0.98, 0.95)
     border.width: 1
     border.color: root.hairline
 

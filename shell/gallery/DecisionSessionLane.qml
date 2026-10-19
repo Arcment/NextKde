@@ -9,8 +9,10 @@ import qs.desktop.modules.common
 //
 //   mode "raw"   (A): itemHeight stays as requested (24 / 72); the label is
 //                     fixed Footnote 10, so 24 is crowded and 72 is roomy.
+//                     Shipped by the G7 decision ③A.
 //   mode "clamp" (B): itemHeight is clamped to 44–56 for SessionMenu only;
 //                     the label stays Footnote 10 and remains readable.
+//                     Not adopted; kept here as record.
 //
 // Both columns render the same three-action menu. Hover highlights a row and
 // clicking selects it; the readout prints itemHeight and the actual font size.
@@ -29,6 +31,9 @@ Item {
     // disappears on the gallery's light lane. Darken it for light theme.
     readonly property color dangerInk: AppearanceTokens.isDarkTheme
         ? Qt.rgba(1, 0.66, 0.66, 0.96) : Qt.rgba(0.70, 0.12, 0.14, 0.96)
+    // G7d — near-white lane in light theme: white hover would be invisible.
+    readonly property color rowHoverFill: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.10) : Qt.rgba(0, 0, 0, 0.06)
 
     property string selectedLabel: ""
 
@@ -95,7 +100,7 @@ Item {
                                     height: col.itemH
                                     radius: 7
                                     color: rowArea.containsMouse || root.selectedLabel === modelData
-                                        ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
+                                        ? root.rowHoverFill : "transparent"
 
                                     Behavior on color {
                                         ColorAnimation { duration: 120 }

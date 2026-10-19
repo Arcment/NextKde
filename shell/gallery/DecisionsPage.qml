@@ -7,6 +7,13 @@ import qs.desktop.modules.common
 // options with interaction, readings and consequence lines; it never ranks
 // them and never writes a recommendation.
 //
+// G7d — the three decisions are closed: each card carries a fixed "已裁定"
+// marker (①B 2600ms + hover pause, ②B +4px, ③A fixed Footnote 10) while
+// both A/B lanes remain on the page as the written record. Lane backing is
+// near-opaque so readings stay ≥ 4.5:1 over the saturated background board
+// in both themes; ink is pinned per theme rather than derived from the glass
+// tint.
+//
 // Screenshot hooks (must be set on the same command line as shot.sh):
 //   GALLERY_PAGE=decisions
 //   GALLERY_DECISION=toast|tooltip|session   show one segment only
@@ -21,8 +28,14 @@ Item {
     property bool reduceMotionOn: false
 
     readonly property real effectiveRadius: radiusPill ? 999 : previewRadius
-    readonly property color ink: AppearanceTokens.content.glassInk()
-    readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
+    // G7d — fixed theme ink for the near-opaque lane backing. glassInk() at
+    // 0.62 composited to ~4.6:1 over the light lane and much worse over the
+    // saturated quadrants; these values measure ≈12:1 (dark) / ≈10:1 (light)
+    // against the worst-case lane composite.
+    readonly property color ink: AppearanceTokens.isDarkTheme
+        ? "#FFFFFF" : "#14161A"
+    readonly property color inkDim: AppearanceTokens.isDarkTheme
+        ? Qt.rgba(1, 1, 1, 0.82) : Qt.rgba(0.078, 0.086, 0.102, 0.86)
     readonly property color hairline: AppearanceTokens.isDarkTheme
         ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(0, 0, 0, 0.14)
 
@@ -31,10 +44,26 @@ Item {
     readonly property bool tooltipVisible: filter === "" || filter === "tooltip"
     readonly property bool sessionVisible: filter === "" || filter === "session"
 
+    // G7d — the page header sits on the raw saturated board, so the subtitle
+    // and the DECISION readout lost contrast over the yellow quadrant. A
+    // near-opaque band reuses the lane backing so every header line keeps the
+    // same ≥ 4.5:1 floor as the lane text.
+    Rectangle {
+        x: -8
+        y: -10
+        width: parent.width + 16
+        height: 56
+        radius: 12
+        color: AppearanceTokens.isDarkTheme
+            ? Qt.rgba(0.045, 0.05, 0.06, 0.95) : Qt.rgba(0.965, 0.97, 0.98, 0.95)
+        border.width: 1
+        border.color: page.hairline
+    }
+
     Text {
         x: 0
         y: 0
-        text: "裁定 G6"
+        text: "裁定 G7"
         color: page.ink
         font.pixelSize: 22
         font.weight: Font.DemiBold
@@ -43,7 +72,7 @@ Item {
         x: 0
         y: 32
         width: parent.width - 220
-        text: "SPEC §7 三项 A/B：视觉等价、产品语义不同 · 只呈现交互与后果，不写推荐"
+        text: "SPEC §7 三项已裁定 · A/B 两栏保留为记录，只呈现交互与后果，不写推荐"
         color: page.inkDim
         font.pixelSize: 12
         elide: Text.ElideRight
@@ -53,7 +82,7 @@ Item {
         anchors.top: parent.top
         anchors.topMargin: 4
         text: "DECISION=" + (page.filter === "" ? "all" : page.filter)
-            + " · 待人工裁定"
+            + " · 已裁定 G7"
         color: page.inkDim
         font.pixelSize: 10
         font.family: "monospace"
@@ -90,10 +119,11 @@ Item {
                 height: 356
                 title: "① Toast 存留"
                 badge: "SPEC §7-①"
+                decision: "B · 2600ms + 悬停暂停"
                 ink: page.ink
                 inkDim: page.inkDim
-                caption: "A = 现行 1600ms（ActionFeedbackToast.qml:10）；"
-                    + "B = 2600ms + 悬停暂停。两栏均呈现交互、读数与后果，不写推荐，待人工裁定。"
+                caption: "A = 原 1600ms 定时消失（不可暂停）；"
+                    + "B = 现行 2600ms + 悬停暂停。两栏保留为裁定记录，不写推荐。"
 
                 Row {
                     anchors.fill: parent
@@ -102,7 +132,7 @@ Item {
                     DecisionLane {
                         width: (parent.width - 12) / 2
                         height: parent.height
-                        title: "A · 保留 1600ms"
+                        title: "A · 原 1600ms"
                         tag: "1600ms"
                         consequence: "HIG 符合程度：1600ms 快速反馈与「立即确认」一致；"
                             + "定时消失、不可暂停，与 HIG「少用定时消失」仍有距离。"
@@ -124,7 +154,7 @@ Item {
                         width: (parent.width - 12) / 2
                         height: parent.height
                         title: "B · 延长 + 悬停暂停"
-                        tag: "2600ms"
+                        tag: "2600ms · 现行"
                         consequence: "HIG 符合程度：2600ms 更长且悬停暂停，更贴近"
                             + " HIG「少用定时消失、可暂停」；代价是反馈占用更久。"
                         ink: page.ink
@@ -156,10 +186,11 @@ Item {
                 height: 360
                 title: "② Tooltip 贴边"
                 badge: "SPEC §7-②"
+                decision: "B · +4px 正间隙"
                 ink: page.ink
                 inkDim: page.inkDim
-                caption: "A = -6px 负 margin（StatusTooltip.qml:40-43；"
-                    + "DockAppNameTooltip.qml:67-69）；B = +4px 正间隙。两栏均呈现交互、读数与后果，不写推荐，待人工裁定。"
+                caption: "A = 原 -6px 负 margin（StatusTooltip / DockAppNameTooltip 贴边重叠）；"
+                    + "B = 现行 +4px 正间隙。两栏保留为裁定记录，不写推荐。"
 
                 Row {
                     anchors.fill: parent
@@ -168,7 +199,7 @@ Item {
                     DecisionLane {
                         width: (parent.width - 12) / 2
                         height: parent.height
-                        title: "A · 保留 -6px 重叠"
+                        title: "A · 原 -6px 重叠"
                         tag: "gap -6px"
                         consequence: "贴边手感：浮层压进锚点 6px，贴边更紧、视觉连续；"
                             + "锚点下缘的 6px 被覆盖。"
@@ -188,8 +219,8 @@ Item {
                     DecisionLane {
                         width: (parent.width - 12) / 2
                         height: parent.height
-                        title: "B · 改正偏移"
-                        tag: "gap +4px"
+                        title: "B · +4px 正间隙"
+                        tag: "gap +4px · 现行"
                         consequence: "贴边手感：浮层不压锚点，边界清楚；"
                             + "多出一道 4px 正间隙，贴合感略松。"
                         ink: page.ink
@@ -220,11 +251,11 @@ Item {
                 height: 484
                 title: "③ SessionMenu 极端高度"
                 badge: "SPEC §7-③"
+                decision: "A · 固定 Footnote 10"
                 ink: page.ink
                 inkDim: page.inkDim
-                caption: "A = 接受固定 Footnote 10，不随 itemHeight 变；"
-                    + "B = 对 SessionMenu 单独设定 itemHeight 范围 44–56。两栏并排 24 / 72 两种极端，"
-                    + "读数写 itemHeight 与实际字号；不写推荐，待人工裁定。"
+                caption: "A = 现行固定 Footnote 10，不随 itemHeight 变；"
+                    + "B = itemHeight clamp 44–56。两栏并排 24 / 72，读数写高度与字号，保留为记录。"
 
                 Row {
                     anchors.fill: parent
@@ -234,7 +265,7 @@ Item {
                         width: (parent.width - 12) / 2
                         height: parent.height
                         title: "A · 固定 Footnote 10"
-                        tag: "raw 24 / 72"
+                        tag: "raw 24 / 72 · 现行"
                         consequence: "可读性：24 行高下 10px 字拥挤；72 行高下同一字号显空旷，"
                             + "但字本身始终可读。"
                         ink: page.ink
@@ -274,7 +305,7 @@ Item {
 
             Text {
                 width: column.width
-                text: "后果行只描述各自代价；三项均待人工裁定。"
+                text: "后果行只描述各自代价；三项已于 G7 裁定（标记见各卡右上），A/B 保留为记录。"
                 color: page.inkDim
                 font.pixelSize: 10
             }

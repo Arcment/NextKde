@@ -9,6 +9,8 @@ LiquidGlassPanel {
 
     property string title: ""
     property string badge: ""
+    // G7d — decision record pill. Empty means no pill (motion page cards).
+    property string decision: ""
     property string caption: ""
     property color ink: AppearanceTokens.content.glassInk()
     property color inkDim: AppearanceTokens.content.glassInk(0.62)
@@ -53,6 +55,31 @@ LiquidGlassPanel {
             text: root.badge
             color: root.inkDim
             font.pixelSize: 10
+        }
+    }
+
+    // G7d — "已裁定" marker. A fixed record of the human decision, not a
+    // recommendation: both A/B lanes stay on the card as the written record.
+    Rectangle {
+        visible: root.decision !== ""
+        anchors.right: parent.right
+        anchors.rightMargin: 14
+        anchors.top: parent.top
+        anchors.topMargin: 11
+        width: decisionLabel.implicitWidth + 16
+        height: 20
+        radius: 10
+        color: "#1E7A4B"
+        border.width: 1
+        border.color: Qt.rgba(1, 1, 1, 0.28)
+
+        Text {
+            id: decisionLabel
+            anchors.centerIn: parent
+            text: "已裁定 · " + root.decision
+            color: "#FFFFFF"
+            font.pixelSize: 10
+            font.weight: Font.DemiBold
         }
     }
 

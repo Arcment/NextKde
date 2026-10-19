@@ -12,9 +12,9 @@ G10i 已完成。**采样错位已定位并修复**：`sceneSourceRect` 的绑�
 早期（坐标 0/12/24/36）完成首次求值，之后 delegate 移到真实格位时被 anchors
 布局的卡面没有触发重算，`mapToItem` 结果一直停在顶左红区——因此 16 卡同色。
 定时日志证明：3 秒后 delegate 的 parent 坐标已是正确格位（0/169/338/507），
-而缓存 rect 仍是每列仅差 gap 的旧值。修复：让 `sceneSourceRect` 绑定显式读
-`parent.x` / `parent.y` 与背景板宽高，建立真实依赖
-（`LiquidGlassSurface.qml`）。重截后 16 卡按象限正确取色。截图：
+而缓存 rect 仍是每列仅差 gap 的旧值，`_sceneRevision` 停在 4。修复：让
+`sceneSourceRect` 绑定显式读 `parent.x` / `parent.y` 与背景板宽高，建立真实
+依赖（`LiquidGlassSurface.qml`）。重截后 16 卡按象限正确取色。截图：
 `g10i-overview-dark.png`、`g10i-overview-light.png`（overview 16 卡 + nav +
 param panel，覆盖象限交界与黑白点）。`run.log` 无 QML/shader 报错（仅
 wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
@@ -70,8 +70,8 @@ wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
 G10j — 与 KWin 预设强度对齐：对照
 `LiquidGlassPanel._presetCap/_presetDecay`（readable 0.72/1.0、balanced
 0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45），逐表面核对 QML 路径实际传入的
-`scrimCap` / `scrimDecay` / tint，把 G10d/G10f 里手写的 cap 统一到 preset 来源，
-并在 ledger 记录每个表面最终 preset 与截图。
+`scrimCap` / `scrimDecay` / tint，把 G10d/G10f 里手写的 cap（如 16 卡的 0.47/0.75）
+统一到 preset 来源，并在 ledger 记录每个表面最终 preset 与截图。
 
 ## 注意
 

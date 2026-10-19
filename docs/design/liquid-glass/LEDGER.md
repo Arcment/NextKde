@@ -7,18 +7,17 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10i 已完成。**采样错位已定位并修复**：`sceneSourceRect` 的绑定此前只依赖
-`_sceneRevision`（在 x/y/width/height 变化时自增），但 Grid 是在 delegate 创建
-早期（坐标 0/12/24/36）完成首次求值，之后 delegate 移到真实格位时被 anchors
-布局的卡面没有触发重算，`mapToItem` 结果一直停在顶左红区——因此 16 卡同色。
-定时日志证明：3 秒后 delegate 的 parent 坐标已是正确格位（0/169/338/507），
-而缓存 rect 仍是每列仅差 gap 的旧值，`_sceneRevision` 停在 4。修复：让
-`sceneSourceRect` 绑定显式读 `parent.x` / `parent.y` 与背景板宽高，建立真实
-依赖（`LiquidGlassSurface.qml`）。重截后 16 卡按象限正确取色。截图：
-`g10i-overview-dark.png`、`g10i-overview-light.png`（overview 16 卡 + nav +
-param panel，覆盖象限交界与黑白点）。`run.log` 无 QML/shader 报错（仅
-wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
-红/青、黄/品红交界处玻璃连续渐变，文字可读；黑白点透过玻璃明暗正确。
+G10j 已完成。**QML 兜底与合成器路径现在共用同一张 preset 表**：
+`GlassBackdrop` 新增 `scrimCap(level)` / `scrimDecay(level)` /
+`defaultScrimTint`（readable 0.72/1.0、balanced 0.47/0.75、transparent 0.22/0.5、
+subtle 0.15/0.45；tint 随 `glassFollowsAppearanceMode`，关时黑）。
+`LiquidGlassPanel` 的 `_presetCap/_presetDecay/scrimTint` 改从该表取值；
+`LiquidGlassSurface` 新增 `scrimLevel`（默认 `"custom"`，旧调用零变化），
+shader 用解析后的有效值；`OverviewPage` 16 卡与 `SurfacesPage` QML 卡删除手写
+`0.47/0.75` 与 tint 三元式，改为 `scrimLevel: "balanced"`。
+逐表面 preset 见下节。截图：`g10j-overview-dark.png`、
+`g10j-surfaces-light.png`；`run.log` 无 QML/shader 报错（仅 wallpaper
+colorquantizer 警告）。视觉与对齐前一致（本次只统一来源，不改强度）。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
@@ -30,7 +29,7 @@ wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
 - [x] G10g 深色主题可读性矩阵（上半）
 - [x] G10h 浅色主题可读性矩阵（下半）
 - [x] G10i 极端边界复检（象限交界 / 黑白点 / 最亮黄区）
-- [ ] G10j 与 KWin 预设强度对齐
+- [x] G10j 与 KWin 预设强度对齐（cap/decay/tint 统一到 `GlassBackdrop`）
 - [ ] G10k 文档回填 + 最终截图 + DONE
 
 ## 可读性矩阵（G10g 起每轮至少填一格）
@@ -52,6 +51,42 @@ wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
 | param panel（文字最密） | ✅ 跨黄/品红交界玻璃连续渐变，白字与滑杆读数可读；文字最密区无不可辨项 | ✅ 浅黄→浅粉连续渐变，深色文字/读数清晰 |
 | 象限交界 / 黑白点最坏情况 | ✅ 16 卡与 nav、param panel 跨交界处采样连续；黑白点透过玻璃明暗正确，未见色块断裂 | ✅ 同上；白点处玻璃提亮但深色文字仍可读，黑点处仍清晰 |
 
+## G10j 预设对齐（已交付）
+
+QML 兜底与合成器路径现在共用同一张表，不再各自写字面量：
+
+- `GlassBackdrop.scrimCap(level)` / `scrimDecay(level)`：readable 0.72/1.0、
+  balanced 0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45。
+- `GlassBackdrop.defaultScrimTint`：随外观开关（开：深色黑 / 浅色白；关：黑）。
+  `LiquidGlassPanel.scrimTint` 与 `LiquidGlassSurface` 的默认 tint 都取它。
+- `LiquidGlassSurface` 新增 `scrimLevel`，默认 `"custom"`（原样取
+  `scrimCap`/`scrimDecay`，旧调用零变化）。面板转发语义不变。
+- `OverviewPage` 16 卡与 `SurfacesPage` 的 QML 卡删除手写 `0.47/0.75` 与
+  tint 三元式，改为 `scrimLevel: "balanced"` + 共享 tint。
+
+每个表面最终取值（QML 路径）：
+
+| 表面 | preset | cap / decay | tint |
+| --- | --- | --- | --- |
+| 左栏 nav（`GalleryRoot`） | balanced | 0.47 / 0.75 | 共享规则 |
+| overview 16 卡 | balanced | 0.47 / 0.75 | 共享规则 |
+| surfaces 页 QML 卡 | balanced | 0.47 / 0.75 | 共享规则 |
+| param panel | readable | 0.72 / 1.0 | 共享规则 |
+| toast 页内基准 | readable | 0.72 / 1.0 | 共享规则 |
+| tooltip 页内基准 | balanced | 0.47 / 0.75 | 共享规则 |
+| `GlassToast` / notification | readable | 0.72 / 1.0 | 共享规则 |
+| menu / dialog | balanced | 0.47 / 0.75 | 共享规则 |
+| decision toast / tooltip lane | readable | 0.72 / 1.0 | 共享规则 |
+| popover | —（未启用，旧行为） | — | — |
+
+surfaces 页 clear/regular/thick 三档是 KWin 路径演示（`useKwinEffect: true`），
+不在本次 QML 对齐范围，保持原样。
+
+截图：`g10j-overview-dark.png`（16 卡按象限、nav/参数面板可读）、
+`g10j-surfaces-light.png`（QML 卡 balanced 白 tint，深色文字清晰）。`run.log`
+无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。视觉与对齐前的字面量
+取值一致——本次是来源统一，不是强度变更。
+
 ## 已确认的架构（不要重开）
 
 - 可见背景板窗口保留（KWin 路径需要它）。
@@ -67,11 +102,10 @@ wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
 
 ## Next round
 
-G10j — 与 KWin 预设强度对齐：对照
-`LiquidGlassPanel._presetCap/_presetDecay`（readable 0.72/1.0、balanced
-0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45），逐表面核对 QML 路径实际传入的
-`scrimCap` / `scrimDecay` / tint，把 G10d/G10f 里手写的 cap（如 16 卡的 0.47/0.75）
-统一到 preset 来源，并在 ledger 记录每个表面最终 preset 与截图。
+G10k — 文档回填 + 最终截图 + DONE。先补齐矩阵中仍空着的格子（notification、
+dialog、motion 页 toast、tooltip 页内基准、decision 三条 lane），各取 dark/light
+截图并写结论；随后回填 SPEC / INVENTORY / DEMO / LEDGER，更新最终 dark/light
+截图。矩阵无「仍差」后才在 `tmp/glass/state.md` 单独一行写 `DONE`。
 
 ## 注意
 

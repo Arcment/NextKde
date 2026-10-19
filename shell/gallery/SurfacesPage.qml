@@ -173,9 +173,7 @@ Item {
             surfaceOpacity: page.previewOpacity
             blurStrength: page.blurAmount
             scrimEnabled: true
-            scrimCap: 0.47
-            scrimDecay: 0.75
-            scrimTint: AppearanceTokens.isDarkTheme ? 0 : 1
+            scrimLevel: "balanced"
 
             Column {
                 anchors.centerIn: parent

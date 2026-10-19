@@ -336,7 +336,7 @@ Item {
             font.weight: Font.DemiBold
         }
         Text {
-            text: "regular · scrim readable · h 36 / radius 18 · Callout 12 Medium · 显 150 / 隐 180 · 存留 1600ms"
+            text: "regular · scrim readable · h 36 / radius 18 · Callout 12 Medium · 显 150 / 隐 180 · 存留 2600ms（悬停暂停）"
             color: page.inkDim
             font.pixelSize: 12
         }
@@ -411,8 +411,9 @@ Item {
                     // Gallery window paints in QML, not through the KWin effect.
                     useKwinEffect: false
                     fallbackEnabled: true
-                    // Demo mode holds it on screen; the real timeout is 1600ms.
-                    timeout: page.demo === "toast" ? 600000 : 1600
+                    // Demo mode holds it on screen; the real timeout is 2600ms
+                    // with hover pause (SPEC §7-① ruling B).
+                    timeout: page.demo === "toast" ? 600000 : 2600
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -428,8 +429,8 @@ Item {
                 GlassToast {
                     id: glassToast
                     anchors.horizontalCenter: parent.horizontalCenter
-                    // timeout 0 = demo hold (SPEC §7-① pending).
-                    timeout: page.demo === "toast" ? 0 : 1600
+                    // timeout 0 = demo hold (SPEC §7-① ruled B: 2600ms).
+                    timeout: page.demo === "toast" ? 0 : 2600
                 }
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -443,7 +444,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: page.demo === "toast"
-            text: "演示模式常显；实际存留 1600ms（SPEC §7-① 待裁定）"
+            text: "演示模式常显；实际存留 2600ms，悬停暂停（SPEC §7-① 已裁定 B）"
             color: page.inkDim
             font.pixelSize: 11
         }

@@ -15,6 +15,9 @@ Item {
     // GALLERY_POPUP in front of the call and it is inherited here.
     readonly property string demo: Quickshell.env("GALLERY_POPUP") || ""
     readonly property var demoNames: ["Popover", "Menu", "Tooltip", "Toast", "Notification"]
+    // The 360px card needs the summary column's space; the two are shown
+    // one at a time so the in-page card never overlaps the token list.
+    property bool notificationShown: false
 
     function showPopover() {
         popover.open(anchorRepeater.itemAt(0))
@@ -31,12 +34,16 @@ Item {
         feedbackToast.show("已保存到相册", "check")
         glassToast.show("已保存到相册", "check")
     }
+    function showNotification() {
+        notificationShown = true
+    }
     function closeActive() {
         popover.close()
         menu.close()
         tooltip.close()
         feedbackToast.dismiss()
         glassToast.dismiss()
+        notificationShown = false
     }
     function openDemo(index) {
         page.closeActive()
@@ -48,6 +55,8 @@ Item {
             page.showTooltip()
         else if (index === 3)
             page.showToasts()
+        else if (index === 4)
+            page.showNotification()
     }
     // Tooltip hover contract: 700ms dwell opens, leaving closes at once.
     // 700ms is extrapolated (SPEC does not fix a dwell time).
@@ -75,8 +84,10 @@ Item {
         interval: 300
         running: page.demo === "popover" || page.demo === "menu"
             || page.demo === "tooltip" || page.demo === "toast"
+            || page.demo === "notification"
         repeat: false
-        onTriggered: page.openDemo(page.demo === "toast" ? 3
+        onTriggered: page.openDemo(page.demo === "notification" ? 4
+            : page.demo === "toast" ? 3
             : page.demo === "tooltip" ? 2
             : page.demo === "menu" ? 1 : 0)
     }
@@ -168,6 +179,7 @@ Item {
         y: 294
         width: page.width
         spacing: 5
+        visible: !page.notificationShown
 
         Text {
             text: "GlassPopover（gallery 基准）"
@@ -324,6 +336,32 @@ Item {
             text: "演示模式常显；实际存留 1600ms（SPEC §7-① 待裁定）"
             color: page.inkDim
             font.pixelSize: 11
+        }
+    }
+
+    // ── notification card (G2e) ─────────────────────────────────────────
+    Item {
+        id: notificationHost
+        visible: page.notificationShown
+        x: (page.width - width) / 2
+        y: 100
+        width: 360
+        height: notificationCard.height + 8 + caption.implicitHeight
+
+        GlassNotificationCard {
+            id: notificationCard
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
+        Text {
+            id: caption
+            anchors.top: notificationCard.bottom
+            anchors.topMargin: 8
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: "G2e 基准 · 容器 radius 24 · entry / 分组 pill radius 16 · 17 / 13 / 11 / 10 · hover 描边 + 提亮"
+            color: page.inkDim
+            font.pixelSize: 11
+            wrapMode: Text.WordWrap
         }
     }
 

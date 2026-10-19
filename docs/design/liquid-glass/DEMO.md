@@ -295,3 +295,21 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
   reduceMotion off。参数卡与右侧面板逐项同值；light 组为深色墨。
 - `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；每轮截图后
   pkill 锚定 `^qs -p shell/gallery.qml`，无残留 gallery 进程。
+
+## G6b — reduceMotion 四段截图（dark）
+
+- 截图（`tmp/glass/`）：`g6-dark-reduce-press` / `g6-dark-reduce-ambient` /
+  `g6-dark-reduce-tooltip` / `g6-dark-reduce-toast`。
+- press：三态 token 保留 idle 0.000 / hovered 0.300 / pressed 1.000；
+  live expansion 0.000；effective press 0ms OutBack · release 0ms OutQuint
+  （reduceMotion）；state idle。
+- ambient：2600ms InOutSine 徽标保留；progress 0.000、mix 0%、
+  effective 0ms（reduceMotion · 跳过）、state skipped · target A。
+- tooltip：progress 1.000、scale 1.000；effective open 0ms OutCubic /
+  close 0ms InCubic（reduceMotion）；state shown · last seed；6px 重叠标注保留。
+- toast：hold 1600ms → effective 0ms（§7-① 待裁定）；effective show / hide
+  0ms OutCubic；state shown · remaining 0ms · last reduceMotion · 时长 0。
+  `ToastDemo.onReduceMotionChanged` 改为直接读开关值写 remaining，
+  避免 `holdEffective` 绑定尚未重算时残留 1600ms。
+- 四张顶栏均读 reduceMotion=on；`run.log` 无 QML 报错（仅 wallpaper
+  colorquantizer WARN）。首次重拍 toast 时 quickshell 崩溃一次，重拍成功。

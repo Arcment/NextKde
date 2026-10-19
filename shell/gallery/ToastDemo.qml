@@ -72,7 +72,10 @@ Item {
         hold.stop()
         tick.stop()
         root.holding = false
-        root.remaining = root.holdEffective
+        // Read the switch directly: holdEffective's binding may not have
+        // re-evaluated yet when this handler runs, which would leave the
+        // readout on the 1600ms token value.
+        root.remaining = root.reduceMotion ? 0 : root.holdToken
         if (root.reduceMotion)
             root.lastEvent = "reduceMotion · 时长 0"
     }

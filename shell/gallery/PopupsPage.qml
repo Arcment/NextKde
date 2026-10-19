@@ -19,6 +19,18 @@ Item {
     // whole window (nav and parameter panel included); this page drives it.
     property Item dialog: null
     property bool reduceMotionOn: false
+    // G3b — strictly one scrim source at a time. The root owns the value so
+    // GALLERY_SCRIM can seed it before the page exists; these buttons only
+    // request a change. "both" is the intentional violation demo.
+    property string scrimMode: "compositor"
+    readonly property var scrimModes: ["compositor", "qml", "both"]
+    readonly property string scrimNote:
+        page.scrimMode === "compositor"
+            ? "compositor scrim 单一来源：卡片 useKwinEffect + balanced，QML 不画背板"
+            : page.scrimMode === "qml"
+                ? "QML fallback：全窗黑 0.32 背板，卡片走 QML 液态回退"
+                : "违规：compositor scrim × QML 背板同时开，卡片双重变暗（2px 红边）"
+    signal scrimModeSelected(string mode)
     // The 360px card needs the summary column's space; the two are shown
     // one at a time so the in-page card never overlaps the token list.
     property bool notificationShown: false
@@ -186,6 +198,65 @@ Item {
                 }
             }
         }
+    }
+
+    // ── scrim source row (G3b) ──────────────────────────────────────────
+    Row {
+        id: scrimRow
+        x: 0
+        y: 108
+        spacing: 8
+
+        Text {
+            anchors.verticalCenter: parent.verticalCenter
+            text: "scrim"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+
+        Repeater {
+            model: page.scrimModes
+
+            delegate: Rectangle {
+                required property var modelData
+
+                readonly property bool selected: page.scrimMode === modelData
+
+                width: scrimLabel.implicitWidth + 28
+                height: 30
+                radius: 9
+                color: selected
+                    ? Qt.rgba(1, 1, 1, 0.16)
+                    : scrimMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+                border.width: 1
+                border.color: selected ? page.ink : page.inkDim
+
+                Text {
+                    id: scrimLabel
+                    anchors.centerIn: parent
+                    text: modelData
+                    color: page.ink
+                    font.pixelSize: 12
+                    font.weight: selected ? Font.DemiBold : Font.Medium
+                }
+                MouseArea {
+                    id: scrimMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: page.scrimModeSelected(modelData)
+                }
+            }
+        }
+    }
+
+    Text {
+        x: 0
+        y: 146
+        width: parent.width
+        text: page.scrimNote
+        color: page.inkDim
+        font.pixelSize: 11
+        elide: Text.ElideRight
     }
 
     // ── token summary ───────────────────────────────────────────────────

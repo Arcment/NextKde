@@ -19,6 +19,12 @@ Item {
             : Quickshell.env("GALLERY_PAGE") === "scene" ? 5 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
+    // G3b scrim source demo. The default is the legal production pairing:
+    // compositor owns the scrim, QML paints no backdrop.
+    property string scrimMode:
+        Quickshell.env("GALLERY_SCRIM") === "qml" ? "qml"
+            : Quickshell.env("GALLERY_SCRIM") === "both" ? "both"
+            : "compositor"
 
     // Live parameters owned by ParamPanel (declared below); every preview
     // page reads these through its own properties.
@@ -205,6 +211,7 @@ Item {
         id: glassDialog
         anchors.fill: parent
         reduceMotion: root.reduceMotionOn
+        scrimMode: root.scrimMode
     }
 
     Component {
@@ -230,6 +237,8 @@ Item {
         PopupsPage {
             dialog: glassDialog
             reduceMotionOn: root.reduceMotionOn
+            scrimMode: root.scrimMode
+            onScrimModeSelected: function(mode) { root.scrimMode = mode }
         }
     }
     Component {

@@ -263,3 +263,35 @@ G4f 收口：全量截图重拍与逐张目检。
   均可从顶部到达，滚动可达。
 - `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图结束无
   残留 gallery 进程。
+
+G5e 收口：动效页 10 张截图全量重拍与逐张目检。
+
+- 截图（`tmp/glass/`，同名同步到 `docs/design/liquid-glass/`）：
+  `g5-dark-popup` / `g5-light-popup`、`g5-dark-press`、`g5-dark-ambient`、
+  `g5-dark-tooltip`、`g5-dark-toast`、`g5-dark-reduce` / `g5-light-reduce`、
+  `g5-dark-params` / `g5-light-params`。
+- dark popup：OutCubic 开 lane progress 1.000 · effective 150ms · settled；
+  InCubic 关 lane progress 0.578 · effective 140ms · sampled；两 lane 均带
+  t=0/0.25/0.50/0.75/1.00 的 ease/progress 采样列
+  （开 0.000/0.578/0.875/0.984/1.000；关 1.000/0.984/0.875/0.578/0.000），
+  并保留 startScale 0.96 · anchorOffset 20px 标注。
+- light popup：同读数；页标题、lane 标签与读数均为深色墨，浅色主题生效。
+- dark press：idle 0.000 / hovered 0.300 / pressed 1.000 三态并排；
+  live 行读 expansion 0.000、press 200ms OutBack / release 360ms OutQuint、
+  state idle。
+- dark ambient：A/B 起止色样 + 2600ms InOutSine 徽标；mix 50%、
+  progress 0.500、state sampled · target A。
+- dark tooltip：progress 1.000、scale 1.000、effective open 70ms OutCubic /
+  close 70ms InCubic、state shown、锚点侧重叠 6px 标注保留。
+- dark toast：hold 1600ms（effective 1600ms，SPEC §7-① 待裁定）、
+  effective show 150ms / hide 180ms、state shown · remaining 1600ms。
+- dark reduce：顶栏 reduceMotion=on；两 lane effective 0ms（reduceMotion）、
+  开 progress 1.000 settled / 关 progress 0.000 settled，startScale 0.96 与
+  anchorOffset 20px 标注保留。
+- light reduce：同读数，深色墨；`GALLERY_MOTION_REDUCE` 与浅色主题可叠加。
+- params dark/light：tintStrength 0.16 + 三刻度 0.10/0.16/0.24；blurLevel L8
+  + clear 1..5 / regular 6..10 / thick 11..15 三段色带（标记 regular）；
+  radius 24（32/24/16 中 24 选中）、free 滑杆 24、pill off · eff 24；
+  reduceMotion off。参数卡与右侧面板逐项同值；light 组为深色墨。
+- `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；每轮截图后
+  pkill 锚定 `^qs -p shell/gallery.qml`，无残留 gallery 进程。

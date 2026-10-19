@@ -1,10 +1,8 @@
 import QtQuick
+import Quickshell
 import qs.desktop.modules.common
 
 // Gallery root (G1a): fixed left nav + right content Loader.
-// The nav shell is an A-layer LiquidGlassPanel (no compositor effect of its
-// own beyond the panel's own fallback paint; useKwinEffect is off here because
-// the nav is not a B-layer host).
 
 Item {
     id: root
@@ -12,9 +10,30 @@ Item {
     signal toggleBackgroundBoard()
 
     property bool backgroundBoardVisible: true
-    // G1b: open on the surface page so this round's screenshots show it; the
-    // overview becomes the landing page in G1c.
-    property int currentIndex: 1
+    // Overview is the landing page from G1c. GALLERY_PAGE=surfaces lets the
+    // screenshot flow capture the surface page without synthesising a click.
+    property int currentIndex:
+        Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1 : 0
+    property string themeMode:
+        Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
+
+    // Live parameters owned by ParamPanel (declared below); every preview
+    // page reads these through its own properties.
+    readonly property real previewOpacity: paramPanel.previewOpacity
+    readonly property real blurAmount: paramPanel.blurAmount
+    readonly property real previewRadius: paramPanel.previewRadius
+    readonly property bool reduceMotionOn: paramPanel.reduceMotionOn
+
+    function applyTheme(mode) {
+        root.themeMode = mode
+        if (mode === "light") {
+            AppearanceConfigService.updateThemeMode("light")
+            AppearanceConfigService.updateGlassFollowsAppearanceMode(true)
+        } else {
+            AppearanceConfigService.updateThemeMode("dark")
+            AppearanceConfigService.updateGlassFollowsAppearanceMode(false)
+        }
+    }
 
     readonly property var pages: [
         { title: "总览", note: "G1c" },
@@ -145,7 +164,7 @@ Item {
         id: contentRect
         x: 268
         y: 24
-        width: parent.width - 292
+        width: paramPanel.x - x - 16
         height: parent.height - 48
         radius: AppearanceTokens.shape.large
         color: "transparent"
@@ -164,13 +183,33 @@ Item {
         }
     }
 
+    // ── right parameter panel (always mounted) ───────────────────────
+    ParamPanel {
+        id: paramPanel
+        x: parent.width - width - 24
+        y: 24
+        height: parent.height - 48
+        darkMode: root.themeMode === "dark"
+        onThemeRequested: function(mode) { root.applyTheme(mode) }
+    }
+
     Component {
         id: overviewPage
-        PlaceholderPage { title: "总览"; note: "G1c 交付：16 组件缩略卡 + 三档材质并排" }
+        OverviewPage {
+            previewOpacity: root.previewOpacity
+            blurAmount: root.blurAmount
+            previewRadius: root.previewRadius
+            reduceMotionOn: root.reduceMotionOn
+        }
     }
     Component {
         id: surfacesPage
-        SurfacesPage {}
+        SurfacesPage {
+            previewOpacity: root.previewOpacity
+            blurAmount: root.blurAmount
+            previewRadius: root.previewRadius
+            reduceMotionOn: root.reduceMotionOn
+        }
     }
     Component {
         id: popupsPage

@@ -8,10 +8,16 @@ import qs.desktop.modules.bar
 Item {
     id: page
 
+    property real previewOpacity: 1.0
+    property real blurAmount: 0.63
+    property real previewRadius: 24
+    property bool reduceMotionOn: false
+
     readonly property color ink: AppearanceTokens.content.glassInk()
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
     readonly property real colW: (width - 16) / 2
-    readonly property real rowH: (height - 76) / 2
+    readonly property real gridY: 192
+    readonly property real rowH: (height - gridY - 12) / 2
 
     Text {
         x: 0
@@ -32,25 +38,41 @@ Item {
         elide: Text.ElideRight
     }
 
+    // ── 0. three material tiers, same content ───────────────────────────
+    MaterialTrio {
+        x: 0
+        y: 58
+        width: parent.width
+        height: 118
+        previewOpacity: page.previewOpacity
+        previewRadius: page.previewRadius
+        blurAmount: page.blurAmount
+        ink: page.ink
+        inkDim: page.inkDim
+    }
+
     // ── 1. LiquidGlassPanel, KWin glass vs QML fallback ─────────────────
     SurfaceBlock {
         x: 0
-        y: 76
+        y: page.gridY
         width: page.colW
         height: page.rowH
         title: "LiquidGlassPanel"
         badge: "B 层宿主"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius 32 · cornerExponent 2.0 · 阴影 —（由合成器描边）· "
-            + "material regular"
+        caption: "radius " + Math.round(page.previewRadius)
+            + " · cornerExponent 2.0 · 阴影 —（由合成器描边）· material regular"
 
         LiquidGlassPanel {
             anchors.fill: parent
-            radius: 32
+            radius: page.previewRadius
             cornerExponent: 2.0
             useKwinEffect: kwinSwitch.checked
             material: "regular"
+            surfaceOpacity: page.previewOpacity
+            blurOverrideEnabled: true
+            blurStrength: page.blurAmount
 
             Column {
                 anchors.centerIn: parent
@@ -118,21 +140,23 @@ Item {
     // ── 2. LiquidGlassSurface, the A-layer fallback on its own ──────────
     SurfaceBlock {
         x: page.colW + 16
-        y: 76
+        y: page.gridY
         width: page.colW
         height: page.rowH
         title: "LiquidGlassSurface"
         badge: "A 层"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius 24 · 圆形角（Rectangle.radius，无合成器）· "
-            + "阴影 — · material regular"
+        caption: "radius " + Math.round(page.previewRadius)
+            + " · 圆形角（Rectangle.radius，无合成器）· 阴影 — · material regular"
 
         LiquidGlassSurface {
             anchors.fill: parent
-            radius: 24
+            radius: page.previewRadius
             baseColor: Qt.rgba(0, 0, 0, 0.1)
             material: "regular"
+            surfaceOpacity: page.previewOpacity
+            blurStrength: page.blurAmount
 
             Column {
                 anchors.centerIn: parent
@@ -157,19 +181,23 @@ Item {
     // ── 3. ControlCenterGlass recipe ────────────────────────────────────
     SurfaceBlock {
         x: 0
-        y: 76 + page.rowH + 16
+        y: page.gridY + page.rowH + 16
         width: page.colW
         height: page.rowH
         title: "ControlCenterGlass"
         badge: "配方"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius 32（宿主给定）· cornerExponent 2.0 · 阴影 — · "
-            + "material regular / KWin blur L1（实值取 AppearanceTokens）"
+        caption: "radius " + Math.round(page.previewRadius)
+            + "（宿主给定）· cornerExponent 2.0 · 阴影 — · material regular"
+            + " · blur 由参数面板覆盖"
 
         ControlCenterGlass {
             anchors.fill: parent
-            radius: 32
+            radius: page.previewRadius
+            surfaceOpacity: page.previewOpacity
+            blurOverrideEnabled: true
+            blurStrength: page.blurAmount
 
             Column {
                 anchors.centerIn: parent
@@ -194,14 +222,15 @@ Item {
     // ── 4. KosFloatPanel, a separate layer-shell window ─────────────────
     SurfaceBlock {
         x: page.colW + 16
-        y: 76 + page.rowH + 16
+        y: page.gridY + page.rowH + 16
         width: page.colW
         height: page.rowH
         title: "KosFloatPanel"
         badge: "layer-shell"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius 32 · cornerExponent 3.0 · 阴影 0.30 / 12,16 / 18 · "
+        caption: "radius " + Math.round(page.previewRadius)
+            + " · cornerExponent 3.0 · 阴影 0.30 / 12,16 / 18 · "
             + "material regular · 独立 PanelWindow（Overlay）"
 
         Item {
@@ -275,6 +304,7 @@ Item {
 
         KosFloatPanel {
             contentPadding: 24
+            radius: page.previewRadius
 
             Column {
                 width: 340

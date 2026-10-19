@@ -11,7 +11,18 @@ Item {
     property real previewOpacity: 1.0
     property real blurAmount: 0.63
     property real previewRadius: 24
+    property real tintStrength: 0.16
+    property bool radiusPill: false
     property bool reduceMotionOn: false
+
+    readonly property real effectiveRadius: radiusPill ? 999 : previewRadius
+    readonly property string radiusLabel:
+        radiusPill ? "pill" : Math.round(previewRadius)
+    readonly property color tintColor: Qt.rgba(
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        tintStrength)
 
     readonly property color ink: AppearanceTokens.content.glassInk()
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
@@ -47,8 +58,9 @@ Item {
         width: parent.width
         height: 118
         previewOpacity: page.previewOpacity
-        previewRadius: page.previewRadius
+        previewRadius: page.effectiveRadius
         blurAmount: page.blurAmount
+        tintStrength: page.tintStrength
         ink: page.ink
         inkDim: page.inkDim
     }
@@ -63,15 +75,16 @@ Item {
         badge: "B 层宿主"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius " + Math.round(page.previewRadius)
+        caption: "radius " + page.radiusLabel
             + " · cornerExponent 2.0 · 阴影 —（由合成器描边）· material regular"
 
         LiquidGlassPanel {
             anchors.fill: parent
-            radius: page.previewRadius
+            radius: page.effectiveRadius
             cornerExponent: 2.0
             useKwinEffect: kwinSwitch.checked
             material: "regular"
+            baseColor: page.tintColor
             surfaceOpacity: page.previewOpacity
             blurOverrideEnabled: true
             blurStrength: page.blurAmount
@@ -149,13 +162,13 @@ Item {
         badge: "A 层"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius " + Math.round(page.previewRadius)
+        caption: "radius " + page.radiusLabel
             + " · 圆形角（Rectangle.radius，无合成器）· 阴影 — · material regular"
 
         LiquidGlassSurface {
             anchors.fill: parent
-            radius: page.previewRadius
-            baseColor: Qt.rgba(0, 0, 0, 0.1)
+            radius: page.effectiveRadius
+            baseColor: page.tintColor
             material: "regular"
             surfaceOpacity: page.previewOpacity
             blurStrength: page.blurAmount
@@ -190,13 +203,13 @@ Item {
         badge: "配方"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius " + Math.round(page.previewRadius)
+        caption: "radius " + page.radiusLabel
             + "（宿主给定）· cornerExponent 2.0 · 阴影 — · material regular"
             + " · blur 由参数面板覆盖"
 
         ControlCenterGlass {
             anchors.fill: parent
-            radius: page.previewRadius
+            radius: page.effectiveRadius
             surfaceOpacity: page.previewOpacity
             blurOverrideEnabled: true
             blurStrength: page.blurAmount
@@ -231,7 +244,7 @@ Item {
         badge: "layer-shell"
         ink: page.ink
         inkDim: page.inkDim
-        caption: "radius " + Math.round(page.previewRadius)
+        caption: "radius " + page.radiusLabel
             + " · cornerExponent 3.0 · 阴影 0.30 / 12,16 / 18 · "
             + "material regular · 独立 PanelWindow（Overlay）"
 
@@ -306,7 +319,7 @@ Item {
 
         KosFloatPanel {
             contentPadding: 24
-            radius: page.previewRadius
+            radius: page.effectiveRadius
 
             Column {
                 width: 340

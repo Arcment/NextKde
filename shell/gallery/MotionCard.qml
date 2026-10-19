@@ -12,6 +12,8 @@ LiquidGlassPanel {
     property string caption: ""
     property color ink: AppearanceTokens.content.glassInk()
     property color inkDim: AppearanceTokens.content.glassInk(0.62)
+    // G5d — live tint from the parameter panel.
+    property real tintStrength: 0.16
     // Room reserved under the body for the caption (two lines at 11px).
     property real captionHeight: 30
     default property alias body: bodyHost.data
@@ -20,6 +22,11 @@ LiquidGlassPanel {
     cornerExponent: 2.0
     material: "regular"
     useKwinEffect: false
+    baseColor: Qt.rgba(
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        tintStrength)
 
     Text {
         id: titleText

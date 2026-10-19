@@ -12,9 +12,12 @@ Item {
     property real to: 1
     property color ink: "white"
     property color inkDim: Qt.rgba(1, 1, 1, 0.6)
+    // Values inside [from, to] that get a tick mark; a tick also prints its
+    // value under the track so a still screenshot can read the scale.
+    property var ticks: []
     signal moved(real value)
 
-    implicitHeight: 48
+    implicitHeight: root.ticks.length > 0 ? 62 : 48
     width: parent ? parent.width : 200
 
     readonly property real ratio: to > from
@@ -75,6 +78,40 @@ Item {
         function apply(x) {
             const r = Math.max(0, Math.min(1, x / Math.max(1, track.width)))
             root.moved(root.from + r * (root.to - root.from))
+        }
+    }
+
+    // Tick marks + printed values (DEMO §4: tintStrength carries 0.10 / 0.16 /
+    // 0.24). Drawn over the track so the mark stays visible on the filled part.
+    Repeater {
+        model: root.ticks
+
+        delegate: Item {
+            required property var modelData
+
+            readonly property real tickRatio: root.to > root.from
+                ? (Number(modelData) - root.from) / (root.to - root.from) : 0
+            x: Math.max(0, Math.min(root.width - width, root.width * tickRatio))
+            y: 20
+            width: 18
+            height: 32
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: 0
+                width: 2
+                height: 14
+                radius: 1
+                color: Qt.rgba(1, 1, 1, 0.75)
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: 16
+                text: Number(modelData).toFixed(2)
+                color: root.ink
+                font.pixelSize: 9
+                font.family: "monospace"
+            }
         }
     }
 }

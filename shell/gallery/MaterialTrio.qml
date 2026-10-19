@@ -10,8 +10,15 @@ Item {
     property real previewOpacity: 1.0
     property real previewRadius: 24
     property real blurAmount: 0.63
+    property real tintStrength: 0.16
     property color ink: "white"
     property color inkDim: Qt.rgba(1, 1, 1, 0.62)
+
+    readonly property color tintColor: Qt.rgba(
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        tintStrength)
 
     readonly property real gap: 10
     readonly property real cardHeight: 76
@@ -46,6 +53,7 @@ Item {
                     cornerExponent: 2.0
                     material: modelData.key
                     useKwinEffect: true
+                    baseColor: root.tintColor
                     surfaceOpacity: root.previewOpacity
                     blurOverrideEnabled: true
                     blurStrength: root.blurAmount
@@ -76,10 +84,11 @@ Item {
                     width: parent.width
                     height: root.captionHeight
                     text: "material " + modelData.key
-                        + " · tintStrength " + modelData.tint
-                        + "\nradius " + Math.round(root.previewRadius)
-                        + " · KWin blur L" + root.blurLevel
-                        + " · opacity " + Math.round(root.previewOpacity * 100) + "%"
+                        + " · tint " + modelData.tint + "→" + root.tintStrength.toFixed(2)
+                        + "\nradius " + (root.previewRadius > 32
+                            ? "pill" : Math.round(root.previewRadius))
+                        + " · L" + root.blurLevel + " blur"
+                        + " · " + Math.round(root.previewOpacity * 100) + "%"
                     color: root.inkDim
                     font.pixelSize: 11
                     lineHeight: 0.95

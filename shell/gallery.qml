@@ -42,8 +42,16 @@ Item {
     Timer {
         id: themeSettle
         interval: 800
-        repeat: false
-        onTriggered: root.applyTheme()
+        repeat: true
+        // Reapply the requested theme for the first few seconds: the service
+        // loads its persisted file asynchronously and a late load would
+        // otherwise flip a light run back to dark after the first pass.
+        property int remaining: 10
+        onTriggered: {
+            root.applyTheme()
+            if (--remaining <= 0)
+                stop()
+        }
     }
 
     // ── controlled background board ──────────────────────────────────

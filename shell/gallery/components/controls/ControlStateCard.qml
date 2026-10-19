@@ -11,6 +11,11 @@ Item {
 
     property string materialTier: "regular"
     property string stateLabel: "idle"
+    // G5d — live preview parameters (radius already pill-resolved by the page).
+    property real previewRadius: 16
+    property real tintStrength: 0.16
+    property real previewBlur: 0.63
+    property real previewOpacity: 1.0
 
     readonly property color ink: AppearanceTokens.content.glassInk()
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
@@ -22,20 +27,27 @@ Item {
 
     LiquidGlassPanel {
         anchors.fill: parent
-        radius: 16
+        radius: root.previewRadius
         cornerExponent: 2.0
         material: root.materialTier
         // Matrix cells use the QML finish only: the gallery window is one
         // layer surface, per-cell compositor blur does not exist.
         useKwinEffect: false
-        surfaceOpacity: 1.0
+        baseColor: Qt.rgba(
+            AppearanceTokens.isDarkTheme ? 0 : 1,
+            AppearanceTokens.isDarkTheme ? 0 : 1,
+            AppearanceTokens.isDarkTheme ? 0 : 1,
+            root.tintStrength)
+        surfaceOpacity: root.previewOpacity
+        blurOverrideEnabled: true
+        blurStrength: root.previewBlur
     }
 
     // Hairline so the six cells stay readable even on the clear tier, where
     // the liquid finish is nearly transparent over the saturated board.
     Rectangle {
         anchors.fill: parent
-        radius: 16
+        radius: root.previewRadius
         color: "transparent"
         border.width: 1
         border.color: AppearanceTokens.isDarkTheme

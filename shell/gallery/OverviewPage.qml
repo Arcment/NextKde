@@ -9,7 +9,16 @@ Item {
     property real previewOpacity: 1.0
     property real previewRadius: 24
     property real blurAmount: 0.63
+    property real tintStrength: 0.16
+    property bool radiusPill: false
     property bool reduceMotionOn: false
+
+    readonly property real effectiveRadius: radiusPill ? 999 : previewRadius
+    readonly property color tintColor: Qt.rgba(
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        tintStrength)
 
     readonly property color ink: AppearanceTokens.content.glassInk()
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
@@ -62,8 +71,9 @@ Item {
         width: parent.width
         height: 118
         previewOpacity: page.previewOpacity
-        previewRadius: page.previewRadius
+        previewRadius: page.effectiveRadius
         blurAmount: page.blurAmount
+        tintStrength: page.tintStrength
         ink: page.ink
         inkDim: page.inkDim
     }
@@ -90,6 +100,7 @@ Item {
                     anchors.fill: parent
                     radius: 16
                     material: "regular"
+                    baseColor: page.tintColor
                     surfaceOpacity: page.previewOpacity
                     blurStrength: page.blurAmount
                 }

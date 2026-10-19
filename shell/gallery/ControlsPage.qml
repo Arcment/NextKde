@@ -15,6 +15,19 @@ import "components/controls"
 Item {
     id: page
 
+    // G5d — live preview parameters forwarded from ParamPanel.
+    property real previewOpacity: 1.0
+    property real blurAmount: 0.63
+    property real previewRadius: 24
+    property real tintStrength: 0.16
+    property bool radiusPill: false
+
+    readonly property real effectiveRadius: radiusPill ? 999 : previewRadius
+    readonly property color tintColor: Qt.rgba(
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        AppearanceTokens.isDarkTheme ? 0 : 1,
+        tintStrength)
     readonly property color ink: AppearanceTokens.content.glassInk()
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
     readonly property color hairline: AppearanceTokens.isDarkTheme
@@ -335,6 +348,10 @@ Item {
                                     model: page.buttonStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: stateCard
                                         required property string modelData
 
@@ -434,6 +451,10 @@ Item {
                                     model: page.fieldStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: fieldCard
                                         required property string modelData
 
@@ -537,6 +558,10 @@ Item {
                                     model: page.checkboxStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: checkboxCard
                                         required property string modelData
 
@@ -634,6 +659,10 @@ Item {
                                     model: page.comboStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: comboCard
                                         required property string modelData
 
@@ -756,6 +785,10 @@ Item {
                                     model: page.segmentStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: segmentCard
                                         required property string modelData
 
@@ -882,6 +915,10 @@ Item {
                                     model: page.sliderStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: sliderCard
                                         required property string modelData
 
@@ -1026,6 +1063,10 @@ Item {
                                     model: page.switchStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: switchCard
                                         required property string modelData
 
@@ -1172,6 +1213,10 @@ Item {
                                     model: page.scrollStates
 
                                     delegate: ControlStateCard {
+                                        previewRadius: page.effectiveRadius
+                                        tintStrength: page.tintStrength
+                                        previewBlur: page.blurAmount
+                                        previewOpacity: page.previewOpacity
                                         id: scrollCard
                                         required property string modelData
 

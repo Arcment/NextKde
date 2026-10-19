@@ -32,7 +32,11 @@ Item {
     // page reads these through its own properties.
     readonly property real previewOpacity: paramPanel.previewOpacity
     readonly property real blurAmount: paramPanel.blurAmount
+    readonly property int blurLevel: paramPanel.blurLevel
     readonly property real previewRadius: paramPanel.previewRadius
+    readonly property real effectiveRadius: paramPanel.effectiveRadius
+    readonly property bool radiusPill: paramPanel.radiusPill
+    readonly property real tintStrength: paramPanel.tintStrength
     readonly property bool reduceMotionOn: paramPanel.reduceMotionOn
 
     function applyTheme(mode) {
@@ -222,6 +226,8 @@ Item {
             previewOpacity: root.previewOpacity
             blurAmount: root.blurAmount
             previewRadius: root.previewRadius
+            tintStrength: root.tintStrength
+            radiusPill: root.radiusPill
             reduceMotionOn: root.reduceMotionOn
         }
     }
@@ -231,6 +237,8 @@ Item {
             previewOpacity: root.previewOpacity
             blurAmount: root.blurAmount
             previewRadius: root.previewRadius
+            tintStrength: root.tintStrength
+            radiusPill: root.radiusPill
             reduceMotionOn: root.reduceMotionOn
         }
     }
@@ -245,14 +253,23 @@ Item {
     }
     Component {
         id: controlsPage
-        ControlsPage {}
+        ControlsPage {
+            previewOpacity: root.previewOpacity
+            blurAmount: root.blurAmount
+            previewRadius: root.previewRadius
+            tintStrength: root.tintStrength
+            radiusPill: root.radiusPill
+        }
     }
     Component {
         id: motionPage
         MotionPage {
             previewOpacity: root.previewOpacity
             blurAmount: root.blurAmount
+            blurLevel: root.blurLevel
             previewRadius: root.previewRadius
+            tintStrength: root.tintStrength
+            radiusPill: root.radiusPill
             reduceMotionOn: root.reduceMotionOn
         }
     }

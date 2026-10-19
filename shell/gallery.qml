@@ -16,6 +16,7 @@ Item {
 
     property bool showBackgroundBoard: true
 
+
     // Apply the theme requested by run.sh (GALLERY_THEME=light|dark, default dark).
     Component.onCompleted: {
         const theme = Quickshell.env("GALLERY_THEME")
@@ -25,11 +26,12 @@ Item {
 
     // ── controlled background board ──────────────────────────────────
     PanelWindow {
+        anchors { top: true; bottom: true; left: true; right: true }
         visible: root.showBackgroundBoard
         exclusionMode: ExclusionMode.Ignore
         exclusiveZone: 0
         color: "transparent"
-        WlrLayershell.layer: WlrLayer.Background
+        WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
         Rectangle {
@@ -80,10 +82,12 @@ Item {
 
     // ── gallery main window ──────────────────────────────────────────
     PanelWindow {
+        anchors { top: true; bottom: true; left: true; right: true }
+        visible: true
         exclusionMode: ExclusionMode.Ignore
         exclusiveZone: 0
         color: "transparent"
-        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "gallery"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 

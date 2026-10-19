@@ -138,6 +138,7 @@ Item {
 
     // ── right content ────────────────────────────────────────────────
     Rectangle {
+        id: contentRect
         x: 268
         y: 24
         width: parent.width - 292

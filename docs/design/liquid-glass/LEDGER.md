@@ -7,6 +7,32 @@
 3. 极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
+G11g — 文档回填 + 最终截图 + DONE。
+
+截图（`tmp/glass/`）：`g11g-overview-{dark,light}`、`g11g-param-{dark,light}`；
+局部放大图 `tmp/gallery/g11g-param-{dark,light}-zoom.png`。四张均以
+`GALLERY_SCRIM=qml`（QML 兜底路径）拍摄。
+
+- overview dark ✅：nav 红区压成暗红、青区压成暗青；param panel 黄区压成
+  暗橄榄、品红区压成暗酒红；16 张卡片内部与板面均明显不同。白字与次级
+  灰字可读，黄/品红交界为连续渐变，无硬边。
+- overview light ✅：nav 提亮为浅粉/浅青，param panel 浅黄/浅粉，卡片提亮；
+  深色主字与次级字可读，交界连续。
+- param panel dark ✅：放大图内上半（最亮黄区）压成暗橄榄、下半压成暗酒红，
+  与卡外亮黄/品红明显不同；surfaceOpacity / tintStrength / blurLevel /
+  圆角 / 主题 / 动效各读数均可读。
+- param panel light ✅：卡内浅黄/浅粉，与卡外亮黄/品红明显不同；深字主次
+  均可读。
+- 起应用 2 次均成功（`QT_FORCE_STDERR_LOGGING=1`），run.log 仅有与玻璃
+  无关的 wallpaper 采样 WARN。
+- 文档回填：SPEC §1.5 补 G11 panel 默认采样；INVENTORY §12 补
+  `LiquidGlassPanel.backdropItem` 默认值；DEMO 追加 G11 小节；LEDGER 同步
+  最终矩阵。
+
+G11 交付完成：矩阵无「仍差」；surfaces clear/regular/thick 仍为 KWin 路径
+外推（无 KWin 时 dark 亮黄区不可读），如实保留。
+
+## 上一轮（G11f）
 G11f — 修正仍差项：dialog 升 readable，popover 开 scrim + readable（只调 preset，不改曲线）。
 
 改动（仅 gallery 组件）：
@@ -142,7 +168,7 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 - [x] G11d 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light）
 - [x] G11e 极端边界：象限交界、黑白点、最亮黄区
 - [x] G11f 修正仍差项（只调 preset / tint / ink）
-- [ ] G11g 文档回填 + 最终截图 + DONE
+- [x] G11g 文档回填 + 最终截图 + DONE
 
 ## 可读性矩阵（复核时重填；旧结论作废）
 
@@ -181,7 +207,7 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 
 ## Next round
 
-G11g — 文档回填 + 最终截图（dark/light overview + param panel）+ DONE。
+无 — G11 交付完成（DONE）。
 
 ## 注意
 
@@ -194,3 +220,5 @@ G11g — 文档回填 + 最终截图（dark/light overview + param panel）+ DON
   白字不可读，light 玻璃内外几乎无压缩；不作 QML 兜底 ✅。
 - 只改任务书第六节列出的路径。
 - 全部队列项勾完、矩阵无「仍差」后，在下面单独一行写 `DONE`。
+
+DONE

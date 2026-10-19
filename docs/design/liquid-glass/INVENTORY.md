@@ -336,3 +336,9 @@ SPEC §3.2 的「scrim 单一来源」契约成立：默认路径单一（compos
 `sceneSourceRect`；场景采样开启时本体 `color` 透明、自适应 scrim 矩形关闭，
 由 `ShaderEffect` 一次画完采样 + 着色 + SDF 裁剪。`LiquidGlassPanel` 只转发
 有效 preset（`scrimLevel` 默认 `"custom"` 保持旧调用零变化）。
+
+G11 补上 `LiquidGlassPanel.backdropItem` 的默认值（`GlassBackdrop.sourceItem`，
+原为 `null`）：所有走 panel 的表面——nav、param panel、toast、dialog、
+notification、menu、decision 卡片——不再需要逐处接线；`sourceItem` 为 `null`
+时仍回到旧路径，`useKwinEffect: true` 路径不变。`GlassPopup` / `GlassTooltip`
+的显式采样源覆盖保持不变。

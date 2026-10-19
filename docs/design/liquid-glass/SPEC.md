@@ -82,6 +82,11 @@ KWin 不可用（或 `useKwinEffect: false`）时，QML 兜底自己完成「采
   `backdropItem`，用同一 shader 采样。
 - `useKwinEffect: true` 路径与 `backdropItem == null` 路径逐位不变；本机制只在
   gallery 范围内启用（G10 边界）。
+- **G11 补齐 panel 链路**：`LiquidGlassPanel.backdropItem` 默认接
+  `GlassBackdrop.sourceItem`，nav / param panel / toast / dialog / notification /
+  menu / decision 卡片无需逐处接线即进入采样；`GlassPopup` / `GlassTooltip`
+  仍显式传各自的屏幕对齐采样源（独立 Wayland surface，行为不变）。
+  `GlassBackdrop.sourceItem == null` 时仍回到旧路径。
 
 ## 2. Token 表 v1
 

@@ -474,3 +474,18 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
   不做像素 diff、不写断言。G10 结论见 `LEDGER.md` 的可读性矩阵。
 - 边界：surfaces 页 clear/regular/thick 三档是 KWin 路径演示，不参与 QML
   采样对齐（`useKwinEffect: true` 不动）；无 KWin 时其可读性为外推项。
+
+## G11 — panel 采样缺口修正 + 可读性矩阵复核
+
+- 根因：`LiquidGlassPanel.backdropItem` 默认 `null`，只有 `GlassPopup` /
+  `GlassTooltip` 显式传采样源；nav、param panel、toast、dialog、notification、
+  menu、decision 卡片实际未采样，G10 矩阵对这些格的 ✅ 是误判。
+- 修正：`LiquidGlassPanel.backdropItem` 默认改为 `GlassBackdrop.sourceItem`；
+  `sourceItem` 为 `null` 与 `useKwinEffect: true` 路径不变。
+- 复核按更严的三条硬标准（内外颜色明显不同、主次字可读、跨象限连续），
+  逐表面重拍 dark/light 截图；仍差项只调 preset / tint / ink：
+  dialog 升 readable，popover 开 scrim + readable。
+- 最终截图：`g11g-overview-{dark,light}`、`g11g-param-{dark,light}`
+  （`GALLERY_SCRIM=qml`）。矩阵结论见 `LEDGER.md`。
+- 仍为外推：surfaces clear/regular/thick 是 KWin 路径演示，无 KWin 时
+  dark 亮黄区白字不可读、light 无玻璃内外压缩，不作 QML 兜底 ✅。

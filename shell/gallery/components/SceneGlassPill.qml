@@ -32,10 +32,19 @@ Item {
     default property alias content: contentHost.data
 
     // 1/6 in each axis: the capture is cheap and already blurred by bilinear
-    // reconstruction, so the shader's 9 taps finish the job.
+    // reconstruction, so the shader's 9 taps finish the job. The height floor
+    // keeps a 44px capsule from collapsing to 7 texture rows, where the blur
+    // taps and the stripe judge both run out of resolution.
     readonly property size sampleSize: Qt.size(
         Math.max(1, Math.round(width / 6)),
-        Math.max(1, Math.round(height / 6)))
+        Math.max(12, Math.round(height / 6)))
+
+    // The host calls this once the layout has settled. The capture can run on
+    // an early frame, before the sampled subtree has laid out, and then paint
+    // a flat colour; scheduleUpdate forces one fresh render of the source.
+    function refresh() {
+        capture.scheduleUpdate()
+    }
 
     ShaderEffectSource {
         id: capture

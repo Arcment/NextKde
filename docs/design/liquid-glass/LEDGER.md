@@ -1,24 +1,21 @@
 # 液态玻璃 Gallery — G6（G5 收尾修补 + SPEC §7 三项 A/B）
 
 ## 本轮
-G6d 已交付：在 `DecisionsPage.qml` 补齐 SPEC §7-② Tooltip 与 §7-③
-SessionMenu 两段 A/B，替换原「G6d 交付」占位。新增
-`DecisionTooltipLane.qml`（屏幕边缘 hairline + 贴边锚点 chip + tooltip；
-A `gap -6px` 压进锚点 6px，B `gap +4px` 正间隙；读数 gap / anchorB ·
-tipTop / state；悬停 chip 显示、离开隐藏，chip 点击与按钮切换）与
-`DecisionSessionLane.qml`（同一三行动作菜单，两列极端 itemHeight 并排，
-label 固定 Footnote 10；A raw 24 / 72 并注拥挤 / 空旷，B clamp 44–56
-并注 req → clamp；读数 itemHeight 与实际字号；hover 高亮 / 点击选中）。
-浅色主题下 danger 墨改为深红，保证「关机」可读。四张截图
-`g6-{dark,light}-decision-{tooltip,session}` 已出，run.log 无 QML 报错；
-三项均只呈现，无推荐、无裁定。
+G6e 已交付：12 张截图（motion 6 + decision 6）逐张核对完毕。motion 侧与
+decision ②③ 的代码在 G6d 后未变，沿用成片；Toast 两张因 G6d 改过
+`DecisionsPage.qml`，按钩子重拍 `g6-{dark,light}-decision-toast`。
+params off 显示 `effective 150/140 · expansion on · ambient 2600ms`；
+reduce 四段均 effective 0 / expansion 0 / ambient skipped / remaining 0ms；
+裁定页三段 A/B 读数与后果行齐全、无推荐。ledger 三项写「A/B 已呈现，
+待人工裁定」。实测 dark Toast B lane 读数对比度约 2.2:1、后果行约 2.1:1，
+记入仍差。run.log 无 QML 报错，重拍后无残留 gallery 进程。队列全部勾选。
 
 ## 队列（✅=已交付）
 - [x] G6a 修补 params reduceMotion 标签（on/off 分支）+ 重拍 params
 - [x] G6b reduceMotion 其余四段截图（press / ambient / tooltip / toast）
 - [x] G6c 裁定页骨架 + Toast A/B（页序 6、钩子、两栏交互、读数、后果行）
 - [x] G6d Tooltip A/B + SessionMenu A/B（两段各两栏、可交互、读数、后果行）
-- [ ] G6e 12 张截图补齐 + ledger 收口
+- [x] G6e 12 张截图补齐 + ledger 收口
 
 ## 必须做
 1. params 卡 reduceMotion 行：off 时显示 effective 150/140、expansion on、
@@ -39,25 +36,28 @@ label 固定 Footnote 10；A raw 24 / 72 并注拥挤 / 空旷，B clamp 44–56
   共用 `DecisionSessionLane`，仅 mode 不同（G6d 定案）。
 
 ## Ledger（G6e 收口）
-- 已改：`DecisionsPage.qml` ②③ 段；新增 `DecisionTooltipLane.qml`、
-  `DecisionSessionLane.qml`；`DEMO.md` 增 G6d 段。
-- 仍差：见下「仍差」两小节。
+- 已改：params reduceMotion 标签 on/off 分支；reduce 四段截图；裁定页
+  ①②③ 三段 A/B；`DecisionsPage.qml` 页序 6 与三个 `GALLERY_DECISION`
+  钩子；G6d 新增 `DecisionTooltipLane.qml`、`DecisionSessionLane.qml`；
+  G6e 重拍 Toast 两张、逐张核对 12 张；`DEMO.md` 增 G6c/G6d/G6e 段。
+- 仍差：见下「仍差」小节。
 - 外推：三项均为人工裁定项；本页只提供并排交互与读数，不预设结论。
 - ① Toast 存留 1600ms：A/B 已呈现，待人工裁定。
 - ② Tooltip 贴边 -6px：A/B 已呈现，待人工裁定。
 - ③ SessionMenu 极端高度：A/B 已呈现，待人工裁定。
 
 ## 仍差
-- dark 主题 Toast B lane 落在黄色象限时，10px 读数白字对比度约 3:1，
-  仍偏弱；若后续调整 lane 衬底需连带重拍 `g6-dark-decision-toast`。
+- dark 主题 Toast B lane 落在黄色象限时，9px 读数白字实测最大对比度约
+  2.2:1、后果行约 2.1:1（衬底约 rgb 197,168,49，字约 255,251,229），
+  低于 3:1；若后续加深 lane 衬底需连带重拍 3 张 dark decision 截图。
 - Session B 栏两列 clamp 后高度 44 / 56 不同，两列注释行不在同一 y
   （相差约 33px）；读数仍逐列可对应。
 - Tooltip stage 的「屏幕边缘」标签为 8px，仅作位置提示；数值以读数为准。
 
 ## Next round
-G6e — 按 TASK 第五节清单补齐/重拍 12 张截图并逐张核对；ledger 三项保持
-「A/B 已呈现，待人工裁定」；`git add shell docs && git commit` 后在本文件
-队列全部勾选处写 `DONE`。
+无（G6 队列全部完成）。若继续：先由人工对 SPEC §7 三项做裁定，再另开
+队列。可选的视觉修补是把 dark 裁定页 lane 衬底加深到白字 ≥4.5:1，需重拍
+3 张 dark decision 截图；本轮未做，属裁定后的调整项。
 
 ## 上一批（G5 已交付，勿重做）
 - 动效页五段 + ParamPanel 完备已交付；本次只修补 reduceMotion 标签行，
@@ -69,3 +69,5 @@ G6e — 按 TASK 第五节清单补齐/重拍 12 张截图并逐张核对；ledg
 - 不改现役组件、不改 `shell/shell.qml`、不改 CMake、不改 KWin。
 - 每轮结束前：截图 + state.md + commit。
 - 全部队列项勾完，在下面单独一行写 `DONE`。
+
+DONE

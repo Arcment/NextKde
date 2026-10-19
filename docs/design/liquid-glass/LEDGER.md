@@ -7,16 +7,20 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10a 已完成：背景板抽成 `GalleryBackdropBoard`，可见窗口与主窗口隐藏副本共用；
-`GlassBackdrop` 单例（common qmldir）声明 `sourceItem`，gallery 在
-`Component.onCompleted` 与 `showBackgroundBoardChanged` 时切换。
-截图 `tmp/glass/g10-dark-board.png`：四象限与 40 个圆点无回归，`run.log`
-仅有 wallpaper colorquantizer 警告，无 QML 报错。
+G10c 已完成：`LiquidGlassSurface` 增加 `backdropItem`（默认指向
+`GlassBackdrop.sourceItem`）、`scrimEnabled/scrimCap/scrimDecay/scrimTint/
+scrimOpacity`、`sceneSampling` / `sceneSourceRect` 与 1/6 捕获 +
+`scene_liquid.frag.qsb` 的 `ShaderEffect`；场景采样时根 Rectangle 变
+transparent、旧的自适应 scrim 关闭；`backdropItem == null` 时所有新分支
+不生效，保持旧行为。`LiquidGlassPanel` 把 preset 解析后的 cap/decay 与
+tint 转发给 bodySurface（仅 `!useKwinEffect` 时开 scrim）。起应用后
+`run.log` 只有 wallpaper colorquantizer 警告与 ProxyFloatingWindow 旧警告，
+无 QML/shader 报错；nav 等 QML 兜底表面已走采样路径。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
-- [ ] G10b `scene_liquid.frag` + `compile.sh` + 烘焙
-- [ ] G10c `LiquidGlassSurface` 场景采样 + `LiquidGlassPanel` 转发
+- [x] G10b `scene_liquid.frag` + `compile.sh` + 烘焙
+- [x] G10c `LiquidGlassSurface` 场景采样 + `LiquidGlassPanel` 转发
 - [ ] G10d 主窗口表面启用 scrim + 首轮截图
 - [ ] G10e 弹窗窗口局部采样（`GlassPopup` / `GlassTooltip`）
 - [ ] G10f Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim
@@ -60,8 +64,11 @@ G10a 已完成：背景板抽成 `GalleryBackdropBoard`，可见窗口与主窗�
 
 ## Next round
 
-G10b — 逐字写入 `shell/desktop/shaders/scene_liquid.frag`，改 `compile.sh`
-并运行烘焙，确认 `scene_liquid.frag.qsb` 生成。
+G10d — 主窗口表面启用 scrim：`GalleryRoot.qml` nav（balanced）、
+`OverviewPage.qml` 16 张占位卡与 `SurfacesPage.qml` 直接使用的
+`LiquidGlassSurface`（cap 0.47 / decay 0.75 / tint 跟随主题）、
+`ParamPanel.qml`（readable）、`ToastDemo.qml` / `TooltipDemo.qml` 页内面板；
+截图 `g10-dark-sampled.png`、`g10-light-sampled.png` 并目视。
 
 ## 注意
 

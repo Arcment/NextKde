@@ -4,8 +4,8 @@ import qs.desktop.modules.common
 
 // G5 — motion page. G5a ships the page skeleton and the Popup open/close
 // comparison; G5b adds liquid press expansion and the 2600ms ambient
-// transition; G5c/G5d add tooltip, toast and the full parameter panel
-// wiring.
+// transition; G5c adds tooltip 70ms and toast 1600ms; G5d adds the full
+// parameter panel wiring.
 //
 // Screenshot hooks (must be set on the same command line as shot.sh):
 //   GALLERY_PAGE=motion            selects this page
@@ -32,8 +32,10 @@ Item {
     readonly property bool popupVisible: filter === "" || filter === "popup"
     readonly property bool pressVisible: filter === "" || filter === "press"
     readonly property bool ambientVisible: filter === "" || filter === "ambient"
+    readonly property bool tooltipVisible: filter === "" || filter === "tooltip"
+    readonly property bool toastVisible: filter === "" || filter === "toast"
     readonly property bool builtVisible: popupVisible || pressVisible
-        || ambientVisible
+        || ambientVisible || tooltipVisible || toastVisible
 
     Text {
         x: 0
@@ -163,13 +165,55 @@ Item {
                     hairline: page.hairline
                 }
             }
+
+            MotionCard {
+                id: tooltipCard
+                visible: page.tooltipVisible
+                width: column.width
+                height: 306
+                title: "tooltip 显隐"
+                badge: "70ms"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "显隐 70ms（open OutCubic / close InCubic）· 镜像 GlassTooltip"
+                    + " thick / radius 10 · 锚点侧重叠 6px · reduceMotion 下 effective 0"
+
+                TooltipDemo {
+                    anchors.fill: parent
+                    reduceMotion: page.reduceMotionOn
+                    ink: page.ink
+                    inkDim: page.inkDim
+                    hairline: page.hairline
+                }
+            }
+
+            MotionCard {
+                id: toastCard
+                visible: page.toastVisible
+                width: column.width
+                height: 286
+                title: "toast 存留"
+                badge: "1600ms"
+                ink: page.ink
+                inkDim: page.inkDim
+                caption: "show 150 / hide 180ms OutCubic · 存留 1600ms（SPEC §7-① 待裁定）"
+                    + " · reduceMotion 下 show/hide 与存留 effective 0"
+
+                ToastDemo {
+                    anchors.fill: parent
+                    reduceMotion: page.reduceMotionOn
+                    ink: page.ink
+                    inkDim: page.inkDim
+                    hairline: page.hairline
+                }
+            }
         }
     }
 
     Text {
         visible: !page.builtVisible && page.filter !== ""
         anchors.centerIn: parent
-        text: "演示位「" + page.filter + "」将在 G5c–G5d 补齐"
+        text: "演示位「" + page.filter + "」将在 G5d 补齐"
         color: page.inkDim
         font.pixelSize: 13
     }

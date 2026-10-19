@@ -1,24 +1,35 @@
 # 液态玻璃 Gallery — G7（SPEC §7 三项裁定落地 + 裁定页收口）
 
 ## 本轮
-G7b 已交付：
-- `StatusTooltip.qml`：`margins` 四处 -6 → +4。具体：
-  `top`（dockHosted && edge==bottom）→ 4；`bottom`（!dockHosted）→ 4；
-  `left`（dockHosted && edge==right）→ 4；`right`（dockHosted && edge==left）→ 4。
-  其余 0 分支未动。
-- `DockAppNameTooltip.qml`：`margins.top/left/right` 三处 -6 → +4，
-  命中条件（bottom/right/left）不变，其余 0 未动。
-- 验证：两文件 `grep -n -- '-6'` 无命中；`qmllint` 仅报环境导入解析
-  警告（Quickshell/qs 模块路径），无语法错误。`qs -p shell/gallery.qml`
-  启动正常，`run.log` 无 QML 报错（仅既有 wallpaper colorquantizer 警告）。
-- 本轮无截图要求（G7b 的 6 张裁定图归 G7d）；两组件 gallery 不加载，
-  已做代码级核对。
+G7d 已交付（裁定页收口 + 6 张重拍）：
+- `MotionCard.qml`：新增可选 `decision` 属性与右上「已裁定」药丸
+  （`#1E7A4B` 底 + `#FFFFFF` 字，对比 5.3:1）；`decision` 为空时不渲染，
+  MotionPage 的卡片不受影响。
+- `DecisionsPage.qml`：三卡标记 ①B 2600ms+悬停暂停、②B +4px、
+  ③A 固定 Footnote 10；A/B 两栏全部保留、未选项不删、不写推荐。
+  页头改「裁定 G7 · 已裁定 G7」，标题/说明/卡文案同步现行值
+  （A = 原 1600ms / 原 -6px，B = 现行）。页头下新增近不透明条带，
+  修掉注释行横跨黄色饱和区时白字不可读的问题。
+- 对比度（固定 ink，不再用 glassInk(0.62)）：
+  dark ink `#FFFFFF`、dim `#FFFFFF @0.82`；light ink `#14161A`、
+  dim `#14161A @0.86`。
+- `DecisionLane.qml` 衬底由 0.22/0.34 透明度改为近不透明
+  （dark `rgba(0.045,0.05,0.06,0.95)`、light `rgba(0.965,0.97,0.98,0.95)`）。
+  截图实测 lane 复合色：dark 黄区 `#171613` / 红区 `#161013`，
+  light 黄区 `#F7F6F0` / 红区 `#F6EFF0`。
+  WCAG 对比（按最差样本）：dark ink 18.1:1、dim 12.3:1；
+  light ink 16.7:1、dim 11.3:1，均 ≥ 4.5:1。
+- 三个演示 lane 的浅色控件同步：按钮/chip/hover 由白色 over 近白改为
+  深色 0.07/0.08/0.14（否则浅色主题下不可见）。
+- 6 张重拍完成：`g7-{dark,light}-decision-{toast,tooltip,session}.png`，
+  每张 `run.log` 仅既有 wallpaper colorquantizer WARN，无 QML 报错；
+  pkill 锚定，无残留。静态图不判动效，只核对标记、终态与读数。
 
 ## 队列（✅=已交付）
 - [x] G7a Toast 2600ms + 悬停暂停（生产）+ gallery 文案同步
 - [x] G7b Tooltip +4px（StatusTooltip + DockAppNameTooltip）
-- [ ] G7c SPEC / INVENTORY / DEMO 三项裁定回填
-- [ ] G7d 裁定页「已裁定」标记 + 两主题对比度修复 + 6 张截图
+- [x] G7c SPEC / INVENTORY / DEMO 三项裁定回填
+- [x] G7d 裁定页「已裁定」标记 + 两主题对比度修复 + 6 张截图
 - [ ] G7e ledger 收口（含生产侧人工验证项）+ `DONE`
 
 ## 必须做（人工已裁定，不要再论证）
@@ -49,17 +60,32 @@ G7b 已交付：
 - ② Tooltip +4px 已落地：`StatusTooltip.qml` 4 处、`DockAppNameTooltip.qml`
   3 处 -6 → +4，余 0 分支不动；③ SessionMenu A 无需改代码（接受固定
   Footnote 10），文档回填归 G7c。
+- G7c 文档回填已落：SPEC §7 三项为「已裁定」记录，SPEC/INVENTORY 现行值
+  统一 2600ms（悬停暂停）与 +4px，DEMO 增 G7 段；G6 历史读数保留并加注。
+- G7d 已落：三卡「已裁定」标记（①B 2600ms+悬停暂停；②B +4px；
+  ③A 固定 Footnote 10），A/B 两栏保留为记录。对比度修法：lane 衬底
+  近不透明（dark `rgba(.045,.05,.06,.95)`、light `rgba(.965,.97,.98,.95)`）
+  + 固定 ink（dark 白 / light `#14161A`，dim 0.82/0.86）；截图实测
+  lane 复合色 dark `#171613`/`#161013`、light `#F7F6F0`/`#F6EFF0`，
+  对比 dark 18.1:1 / 12.3:1、light 16.7:1 / 11.3:1。页头加同款条带
+  修黄区白字；浅色 lane 的按钮/chip/hover 改深色填充。6 张
+  `g7-{dark,light}-decision-{toast,tooltip,session}` 已重拍（tmp/gallery
+  与 tmp/glass 各一份），run.log 无 QML 报错。
 - 待办（G7e 收口）：StatusTooltip / DockAppNameTooltip 改 +4px 后
   需人工在真实 bar/dock 上悬停验证手感（gallery 不加载两者）。
+- 待办（G7e 收口）：ActionFeedbackToast 悬停暂停需人工在真实桌面点一条
+  通知后悬停验证「暂停 → 离开按剩余继续」；gallery 的 PopupsPage 只覆盖语法。
 
 ## 上一批（G6 已交付，勿重做）
 - 裁定页三段 A/B 已交付；本次只加标记、修对比度、重拍。
 - G5 动效页、G4 控件、G3 弹层不要改。
 
 ## Next round
-G7c — 读 `.loop/TASK.md` 第四节，回填 SPEC / INVENTORY / DEMO：
-toast 存留 2600ms（悬停暂停）、tooltip -6px 全改 +4px 正间隙、
-§7 三项标已裁定，并 grep 清掉冲突旧值。
+G7e — ledger 收口：核对 `ActionFeedbackToast.qml`（2600ms 默认值、悬停暂停
+按剩余续计、不抢焦点）、`StatusTooltip.qml` / `DockAppNameTooltip.qml`
+（-6 已全改 +4、其余 0 未动）、SessionMenu 生产代码未动；确认 6 张
+g7 截图在 `tmp/gallery` 与 `tmp/glass`；把生产侧人工验证项写清楚；
+全部完成后在 state.md 单独一行写 `DONE` 并提交。
 
 ## 注意
 - 不改 `shell/shell.qml`、不改 CMake、不改 KWin。

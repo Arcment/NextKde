@@ -51,8 +51,53 @@ Item {
         Math.floor((scenePill.y - stage.y + scenePill.height / 2
             + flick.contentY) / rowHeight)))
     readonly property bool overLightRow: pillRow % 2 === 1
-    readonly property color declaredInk: overLightRow ? "#16181c" : "#f2f4f7"
+
+    // ── ink selection: the material's colour, not the raw row ─────────
+    // The declared tone used to follow the row colour alone, so in the light
+    // theme a dark row chose white text even though the white tint lifts the
+    // capsule to mid grey. The shader paints
+    //   mix(sampled, tintColor, tintStrength)
+    // so the row only contributes (1 - tintStrength); tintLuminance is 0 for
+    // the black dark-mode tint and 1 for the white light-mode tint. The
+    // weights are the same perceptual formula LiquidGlassSurface uses.
+    readonly property color tintColor: dark ? "#000000" : "#ffffff"
+    readonly property real tintStrength: dark ? 0.18 : 0.32
+    readonly property real tintLuminance: dark ? 0.0 : 1.0
+    // Tuned against the two screenshot rows: light theme + dark row lands at
+    // 0.36 and must be dark ink, dark theme + light row at 0.75.
+    readonly property real inkThreshold: 0.34
+
+    readonly property color rowColorDark: "#0d0f12"
+    readonly property color rowColorLight: "#e8eaee"
+
+    function colorLuminance(c) {
+        return c.r * 0.2126 + c.g * 0.7152 + c.b * 0.0722
+    }
+    function effectiveLuminance(rowLum) {
+        return rowLum * (1.0 - tintStrength) + tintLuminance * tintStrength
+    }
+    function inkFor(rowLum) {
+        return effectiveLuminance(rowLum) < inkThreshold ? "#f2f4f7" : "#16181c"
+    }
+
+    readonly property real sceneRowLuminance:
+        colorLuminance(overLightRow ? rowColorLight : rowColorDark)
+    readonly property real sceneEffectiveLuminance:
+        effectiveLuminance(sceneRowLuminance)
+    readonly property color declaredInk: inkFor(sceneRowLuminance)
     readonly property color sceneInk: declaredTone ? declaredInk : fixedInk
+
+    // The tonal capsule sits exactly one row below the scene capsule. Without
+    // sampling it still needs the same rule; the tint strength above is the
+    // page's closest stand-in for its baseColor overlay.
+    readonly property int tonalRow: Math.min(rowCount - 1, pillRow + 1)
+    readonly property bool tonalOverLightRow: tonalRow % 2 === 1
+    readonly property real tonalRowLuminance:
+        colorLuminance(tonalOverLightRow ? rowColorLight : rowColorDark)
+    readonly property real tonalEffectiveLuminance:
+        effectiveLuminance(tonalRowLuminance)
+    readonly property color tonalInk:
+        declaredTone ? inkFor(tonalRowLuminance) : fixedInk
 
     // ── header ───────────────────────────────────────────────────────
     Text {
@@ -209,8 +254,8 @@ Item {
             const originY = scenePill.y - viewport.y - flick.y + contentY
             return Qt.rect(originX, originY, scenePill.width, scenePill.height)
         }
-        tintColor: page.dark ? "#000000" : "#ffffff"
-        tintStrength: page.dark ? 0.18 : 0.32
+        tintColor: page.tintColor
+        tintStrength: page.tintStrength
         strokeColor: page.dark
             ? Qt.rgba(1, 1, 1, 0.28) : Qt.rgba(0, 0, 0, 0.22)
         highlightStrength: page.dark ? 0.10 : 0.22
@@ -238,13 +283,13 @@ Item {
         material: "regular"
         baseColor: page.dark ? Qt.rgba(0, 0, 0, 0.22) : Qt.rgba(1, 1, 1, 0.26)
 
-        // The panel derives its foreground from the fill it ended up with;
-        // hard-coding the theme ink here is what made the label unreadable on
-        // one of the two materials.
+        // The panel derives its foreground from the theme, but the page knows
+        // the row underneath, so the same effective-luminance rule as the
+        // scene capsule owns the ink here.
         Text {
             anchors.centerIn: parent
             text: "tonal"
-            color: tonalPill.foregroundColor
+            color: page.tonalInk
             font.pixelSize: 14
             font.weight: Font.DemiBold
         }
@@ -365,22 +410,42 @@ Item {
             height: parent.height
             verticalAlignment: Text.AlignVCenter
             text: page.declaredTone
-                ? ("declared · row " + page.pillRow + " · " + (page.overLightRow
-                    ? "浅色内容 · 深字" : "深色内容 · 浅字"))
+                ? ("declared · row " + page.pillRow + " · effective "
+                    + page.sceneEffectiveLuminance.toFixed(2) + " · "
+                    + (page.sceneEffectiveLuminance < page.inkThreshold
+                        ? "浅字" : "深字"))
                 : "fixed · 固定浅字（浅行对比度低）"
             color: page.inkDim
             font.pixelSize: 12
         }
     }
 
+    // Read-only readout for the manual check: the declared row luminance, the
+    // luminance after the tint is mixed in, and the ink each capsule got.
     Text {
         x: 0
-        y: stage.y + stage.height + 86
+        y: stage.y + stage.height + 80
+        text: "scene  rowLum " + page.sceneRowLuminance.toFixed(3)
+            + " / effectiveLum " + page.sceneEffectiveLuminance.toFixed(3)
+            + " / ink " + page.declaredInk
+            + "    tonal  rowLum " + page.tonalRowLuminance.toFixed(3)
+            + " / effectiveLum " + page.tonalEffectiveLuminance.toFixed(3)
+            + " / ink " + page.inkFor(page.tonalRowLuminance)
+        color: page.inkDim
+        font.pixelSize: 12
+        font.family: "monospace"
+    }
+
+    Text {
+        x: 0
+        y: stage.y + stage.height + 104
         width: stage.width
         wrapMode: Text.WordWrap
         text: "上：SceneGlassPill 采样正下方内容，1/6 降采样 + 9 tap 模糊，"
             + "边缘沿 SDF 法线做 3.5px 折射，tint 随主题（深色 0.18 / 浅色 0.32）；"
             + "下：LiquidGlassPanel（useKwinEffect: false），只用自己的环境色。"
+            + "文字 ink 取 mix(rowLum, tintLum, tintStrength) 后与 0.34 比较，"
+            + "浅色主题下深行被 tint 抬到中灰，因此也走深字。"
             + "滚轮或拖拽内容，胶囊内的行号应与下方露出的行号一致；"
             + "竖条带在胶囊左右边缘处应出现可辨认的弯折。"
         color: page.inkDim

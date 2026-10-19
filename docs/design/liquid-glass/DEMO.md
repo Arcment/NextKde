@@ -117,3 +117,17 @@
   供裁定人直接对比选择，裁定结论回填 SPEC 后删除并排演示。
   （原 5 项中 weather tint 与 scrim 链路两项已于 R5 由代码关闭，
   见 SPEC §1.1/§1.4。）
+
+## 7. 场景页 ink 判定（S3）
+
+场景页两枚胶囊的文字 ink 统一由材质亮度决定：
+
+- `rowLuminance` 取胶囊中心所在行的底色（`#0d0f12` / `#e8eaee`）；
+- `tintLuminance` 取 shader 实际 tint（深色黑 = 0，浅色白 = 1）；
+- `effectiveLuminance = mix(rowLuminance, tintLuminance, tintStrength)`
+  （深色 0.18 / 浅色 0.32）；
+- `effectiveLuminance < 0.34` 选浅字 `#f2f4f7`，否则深字 `#16181c`。
+
+阈值 0.34 是实测值：浅色主题下深行被白 tint 抬到 0.359，按验收必须判深字，
+因此不能用 0.45。tonal 胶囊不再依赖 `foregroundColor`，直接用同一判定。
+真正的修法是组件 API 增加「背景 tone」输入（组件变更，不在 gallery 轮范围）。

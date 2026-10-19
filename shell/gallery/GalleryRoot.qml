@@ -17,6 +17,7 @@ Item {
         Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1
             : Quickshell.env("GALLERY_PAGE") === "popups" ? 2
             : Quickshell.env("GALLERY_PAGE") === "controls" ? 3
+            : Quickshell.env("GALLERY_PAGE") === "motion" ? 4
             : Quickshell.env("GALLERY_PAGE") === "scene" ? 5 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
@@ -248,10 +249,22 @@ Item {
     }
     Component {
         id: motionPage
-        PlaceholderPage { title: "动效"; note: "G5" }
+        MotionPage {
+            previewOpacity: root.previewOpacity
+            blurAmount: root.blurAmount
+            previewRadius: root.previewRadius
+            reduceMotionOn: root.reduceMotionOn
+        }
     }
     Component {
         id: scenePage
         ScenePage {}
+    }
+
+    // GALLERY_MOTION_REDUCE=1 seeds the panel switch before the first frame so
+    // the motion page's reduce screenshots need no synthetic click.
+    Component.onCompleted: {
+        if (Quickshell.env("GALLERY_MOTION_REDUCE") === "1")
+            paramPanel.reduceMotionOn = true
     }
 }

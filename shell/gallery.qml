@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.desktop.modules.common
 import "gallery"
 
 // Gallery entry (G1a). Two layer-shell windows:
@@ -14,6 +15,13 @@ Item {
     id: root
 
     property bool showBackgroundBoard: true
+
+    // Apply the theme requested by run.sh (GALLERY_THEME=light|dark, default dark).
+    Component.onCompleted: {
+        const theme = Quickshell.env("GALLERY_THEME")
+        if (theme === "light" || theme === "dark")
+            AppearanceConfigService.updateThemeMode(theme)
+    }
 
     // ── controlled background board ──────────────────────────────────
     PanelWindow {

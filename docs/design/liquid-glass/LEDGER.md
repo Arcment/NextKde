@@ -7,19 +7,26 @@
 3. 极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
-`GlassBackdrop.sourceItem`（原为 `null`），G10e 注释替换为 G10e/G11 注释。
-未改 `GlassPopup` / `GlassTooltip` 的显式传值。
+G11b ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬标准重判。
 
-起应用（dark，`QT_FORCE_STDERR_LOGGING=1`，run.log 无 QML 报错）确认采样已出现：
+- dark `tmp/glass/g11b-overview-dark.png`：nav 红区压成暗红、青区压成暗青，
+  与玻璃外的亮红/亮青明显不同；param panel 黄区压成暗橄榄、品红区压成
+  暗酒红，与玻璃外的亮黄/品红明显不同。白字与次级灰字均可读。
+- light `tmp/glass/g11b-overview-light.png`：nav 红区提亮为浅粉、青区提亮为
+  浅青；param panel 黄区提亮为浅黄、品红区提亮为浅粉。深色主字与次级字
+  均可读，无深字压暗红。
+- 象限交界：nav、param panel 内部红/青、黄/品红过渡均为约 12px 的单调渐变
+  （逐行取样中间色连续），无 1px 硬边或色块断裂。
+- 两轮起应用 run.log 均无 QML 报错（仅 wallpaper 采样 WARN，与玻璃无关）。
 
-- `tmp/glass/g11a-overview-dark.png`：左栏 nav 在红/青象限分别压成暗红/暗青，
-  右参数面板在黄/品红象限分别为暗橄榄/暗酒红；白字与次级字均可读。
-- `tmp/glass/g11a-toast-dark.png`：toast 在品红上压成暗酒红，白字可读。
-- `tmp/glass/g11a-dialog-dark.png`：dialog 跨红/黄/品红三块色带连续过渡，
-  无硬边，白字与次级字均可读。
+结论：nav 与 param panel 的采样与 scrim 均真生效，两格判 ✅。
 
-结论：G10 的「未采样」根因已修复；G11b 起按新硬标准重判矩阵。
+## 上一轮（G11a）
+
+`LiquidGlassPanel.backdropItem` 默认值改为 `GlassBackdrop.sourceItem`
+（原为 `null`），G10e 注释替换为 G10e/G11 注释；未改 `GlassPopup` /
+`GlassTooltip` 的显式传值。起应用确认 nav / param panel / toast / dialog
+出现采样压缩，G10「未采样」根因已修复。
 
 ## 已确认的根因
 
@@ -30,7 +37,7 @@ G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
 
 ## 队列（✅=已交付）
 - [x] G11a `LiquidGlassPanel.backdropItem` 默认接 `GlassBackdrop.sourceItem`
-- [ ] G11b 复核 nav + param panel（dark/light）
+- [x] G11b 复核 nav + param panel（dark/light）
 - [ ] G11c 复核 toast + tooltip + dialog + notification + menu（dark/light）
 - [ ] G11d 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light）
 - [ ] G11e 极端边界：象限交界、黑白点、最亮黄区
@@ -41,7 +48,7 @@ G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
 
 | 表面 | dark | light |
 | --- | --- | --- |
-| 左栏 nav | | |
+| 左栏 nav | ✅ 暗红/暗青，主次字可读 | ✅ 浅粉/浅青，深字可读 |
 | overview 16 卡 | | |
 | surfaces clear/regular/thick | | |
 | popover | | |
@@ -53,7 +60,7 @@ G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
 | motion 页 toast | | |
 | tooltip 页内基准 | | |
 | decision 三条 lane | | |
-| param panel（文字最密） | | |
+| param panel（文字最密） | ✅ 暗橄榄/暗酒红，密文可读 | ✅ 浅黄/浅粉，密文可读 |
 | 象限交界 / 黑白点最坏情况 | | |
 
 ## 判 ✅ 的硬标准
@@ -74,7 +81,8 @@ G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
 
 ## Next round
 
-G11b — 复核 nav + param panel（dark/light），按新硬标准逐格重判。
+G11c — 复核 toast + tooltip + dialog + notification + menu（dark/light），
+逐格按新硬标准重判。
 
 ## 注意
 

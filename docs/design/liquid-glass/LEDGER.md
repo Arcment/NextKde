@@ -1,82 +1,82 @@
-# 液态玻璃 Gallery — G10（无 KWin 场景采样 + 极端背景可读性）
+# 液态玻璃 Gallery — G11（修正 panel 采样缺口 + 矩阵复核）
 
-## 用户裁定（已定，不再论证）
+## 用户裁定（不变）
 
 1. 不需要 KWin 仍是首要原则；QML 兜底必须自己成立。
-2. QML 兜底要按局部背景的颜色/暗度着色，做法对齐 KWin 液态玻璃插件。
-3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
+2. 按局部背景的颜色/暗度着色，对齐 KWin 液态玻璃插件。
+3. 极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10k 已完成，G10 队列收口。补齐矩阵最后 5 格（notification、dialog、
-motion 页 toast、tooltip 页内基准、decision lanes），各取 dark/light 截图并
-目视确认可读；回填 SPEC §1.5、INVENTORY §12、DEMO G10 段与本 ledger。
-本轮不改代码，最终截图沿用 G10i overview 采样（G10j 只统一 preset 来源、视觉未变）。
-`run.log` 全程无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。
+G11a ✅ — `LiquidGlassPanel.backdropItem` 默认值改为
+`GlassBackdrop.sourceItem`（原为 `null`），G10e 注释替换为 G10e/G11 注释。
+未改 `GlassPopup` / `GlassTooltip` 的显式传值。
+
+起应用（dark，`QT_FORCE_STDERR_LOGGING=1`，run.log 无 QML 报错）确认采样已出现：
+
+- `tmp/glass/g11a-overview-dark.png`：左栏 nav 在红/青象限分别压成暗红/暗青，
+  右参数面板在黄/品红象限分别为暗橄榄/暗酒红；白字与次级字均可读。
+- `tmp/glass/g11a-toast-dark.png`：toast 在品红上压成暗酒红，白字可读。
+- `tmp/glass/g11a-dialog-dark.png`：dialog 跨红/黄/品红三块色带连续过渡，
+  无硬边，白字与次级字均可读。
+
+结论：G10 的「未采样」根因已修复；G11b 起按新硬标准重判矩阵。
+
+## 已确认的根因
+
+- `LiquidGlassPanel.qml:66` 的 `backdropItem` 默认 `null`。
+- 只有 `GlassPopup` / `GlassTooltip` 显式传了采样源。
+- 所以 nav、param panel、toast、dialog、notification、menu、decision 卡片
+  都没有走采样；G10 矩阵对这些格的 ✅ 是误判。
 
 ## 队列（✅=已交付）
-- [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
-- [x] G10b `scene_liquid.frag` + `compile.sh` + 烘焙
-- [x] G10c `LiquidGlassSurface` 场景采样 + `LiquidGlassPanel` 转发
-- [x] G10d 主窗口表面启用 scrim + 首轮截图
-- [x] G10e 弹窗窗口局部采样（`GlassPopup` / `GlassTooltip`）
-- [x] G10f Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim
-- [x] G10g 深色主题可读性矩阵（上半）
-- [x] G10h 浅色主题可读性矩阵（下半）
-- [x] G10i 极端边界复检（象限交界 / 黑白点 / 最亮黄区）
-- [x] G10j 与 KWin 预设强度对齐（cap/decay/tint 统一到 `GlassBackdrop`）
-- [x] G10k 文档回填 + 最终截图 + DONE
+- [x] G11a `LiquidGlassPanel.backdropItem` 默认接 `GlassBackdrop.sourceItem`
+- [ ] G11b 复核 nav + param panel（dark/light）
+- [ ] G11c 复核 toast + tooltip + dialog + notification + menu（dark/light）
+- [ ] G11d 复核 decision 三条 lane + motion 页 + tooltip 页内基准（dark/light）
+- [ ] G11e 极端边界：象限交界、黑白点、最亮黄区
+- [ ] G11f 修正仍差项（只调 preset / tint / ink）
+- [ ] G11g 文档回填 + 最终截图 + DONE
 
-## 可读性矩阵（G10g 起每轮至少填一格）
+## 可读性矩阵（复核时重填；旧结论作废）
 
 | 表面 | dark | light |
 | --- | --- | --- |
-| 左栏 nav | ✅ 白字可读（balanced）；青区对比偏低但可辨 | ✅ 深色文字在提亮红底上清晰（balanced 白 tint）；次级项略淡但可辨 |
-| overview 16 卡 | ✅ 采样修复后 16 卡按象限取色（左上红 / 右上黄 / 左下青 / 右下品红），黄区压成橄榄色；白/次级文字全卡可读 | ✅ 16 卡正确随象限变浅（浅红/浅黄/浅青/浅粉），深色标题与副标在全部四区清晰 |
-| surfaces clear/regular/thick | 外推：三档是 KWin 路径演示（useKwinEffect:true），红线不改；无 KWin 时不着色、黄区白字不可读。同页 QML 卡（regular+balanced）采样正确、可读 | 外推：三档及 LiquidGlassPanel/ControlCenterGlass/KosFlowPanel 均为合成器路径演示，无 KWin 时不着色；light 下 clear/regular 白字在亮红上偏弱。同页 QML `LiquidGlassSurface` 跨黄/品红边界采样正确（上黄下品红），深色文字清晰 |
-| popover | ✅ 红区白/次级文字可读（未启用 scrim，旧行为） | ✅ 深色标题清晰，次级灰字在红底上可辨（未启用 scrim，旧行为） |
-| menu | ✅ balanced 黑 tint 压暗红区，白字清晰 | ✅ balanced 白 tint 提亮红区成浅粉卡片，深色文字清晰 |
-| tooltip | ✅ thick + 局部采样，白/次级文字清晰 | ✅ thick + 局部采样，近白卡片 + 深色文字，主/次文字均清晰 |
-| toast | ✅ 基准 GlassToast（readable）白字可读；同组 ActionFeedbackToast 为 KWin 路径（无 KWin 时只剩文字，外推） | ✅ 基准 GlassToast（readable）浅色胶囊 + 深色文字清晰；下层页面密排文字略透出但不干扰；ActionFeedbackToast 仍为 KWin 路径（外推） |
-| notification | ✅ 卡片落在黄区，readable 黑 tint 压暗成深琥珀色；标题/正文白字清晰，时间戳可辨 | ✅ 白 tint 提亮黄区成近白卡片，深色标题/正文/时间清晰 |
-| dialog | ✅ 页内模态 balanced；标题、正文、取消/保存按钮在卡片上均可读，未见不可辨项 | ✅ 近白卡片 + 深色标题/正文/按钮，清晰 |
-| motion 页 toast | ✅ 药丸跨红/黄交界，采样连续（左红右黄无断裂）；readable 压暗后白字清晰 | ✅ 跨界采样连续，浅色药丸 + 深色文字清晰 |
-| tooltip 页内基准 | ✅ 红区局部采样 + balanced，`GlassTooltip` 与参数读数白字清晰 | ✅ 组件为深色厚玻璃卡片，白字清晰；次级说明灰字可辨 |
-| decision 三条 lane | ✅ ①Toast / ②Tooltip 近黑衬底 + 白字，读数与后果行对比充足；③Session 在视口折叠下方，外推（三 lane 共用同一衬底与固定 ink 常量，无独立配色） | ✅ ①② 近白衬底 + 深色文字，全部读数清晰；③Session 同上外推 |
-| param panel（文字最密） | ✅ 跨黄/品红交界玻璃连续渐变，白字与滑杆读数可读；文字最密区无不可辨项 | ✅ 浅黄→浅粉连续渐变，深色文字/读数清晰 |
-| 象限交界 / 黑白点最坏情况 | ✅ 16 卡与 nav、param panel 跨交界处采样连续；黑白点透过玻璃明暗正确，未见色块断裂 | ✅ 同上；白点处玻璃提亮但深色文字仍可读，黑点处仍清晰 |
+| 左栏 nav | | |
+| overview 16 卡 | | |
+| surfaces clear/regular/thick | | |
+| popover | | |
+| menu | | |
+| tooltip | | |
+| toast | | |
+| notification | | |
+| dialog | | |
+| motion 页 toast | | |
+| tooltip 页内基准 | | |
+| decision 三条 lane | | |
+| param panel（文字最密） | | |
+| 象限交界 / 黑白点最坏情况 | | |
 
-## G10k 收口（已交付）
+## 判 ✅ 的硬标准
 
-矩阵最后 5 格补齐，截图在 `tmp/glass/` 并归档到 `docs/design/liquid-glass/`：
-`g10k-notification-{dark,light}`、`g10k-dialog-{dark,light}`、
-`g10k-motion-toast-{dark,light}`、`g10k-motion-tooltip-{dark,light}`、
-`g10k-decisions-{dark,light}`。最终截图为 `g10k-final-{dark,light}`（沿用
-G10i overview 采样；G10j 只统一来源、视觉未变，本轮无代码改动）。
+1. 玻璃内部颜色与玻璃外同一背景明显不同（scrim 真生效）。
+2. 主/次文字都能读。
+3. 跨象限颜色连续。
 
-文档回填：SPEC §1.5（无 KWin 场景采样定案）、INVENTORY §12（四个新组件契约）、
-DEMO G10 段（背景板 toggle + 矩阵截图用法）、LEDGER 同步本文件。
-矩阵无「仍差」；surfaces 三档与 decision ③ 为写明原因的外推项。
+不满足写「仍差」。KWin 路径演示可标外推，但要写明无 KWin 时不可读。
 
 ## 已确认的架构（不要重开）
 
-- 可见背景板窗口保留（KWin 路径需要它）。
-- 主窗口内隐藏副本 + 每个表面 `ShaderEffectSource{ hideSource: true }`。
-- `GlassBackdrop` 单例提供 `sourceItem`；`null` = 旧行为。
+- 可见背景板窗口保留；主窗口内隐藏副本 + `hideSource` 捕获。
+- `GlassBackdrop.sourceItem` 为 `null` 时所有路径回到旧行为。
 - 弹窗用 `GalleryBackdropSample`（按 `anchor.rect.x/y` 平移）。
-- shader 用 KWin 的 `adaptiveScrim` 原式，preset 用
+- shader 用 KWin 的 `adaptiveScrim` 原式；preset
   readable 0.72/1.0、balanced 0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45。
-
-## 上一批（G9 已交付，勿重做）
-
-- `GlassToast` 默认 timeout 已统一 2600。
 
 ## Next round
 
-无。G10 队列全部交付，矩阵无「仍差」。
+G11b — 复核 nav + param panel（dark/light），按新硬标准逐格重判。
 
 ## 注意
 
-- 只改任务书第十一节列出的路径。
+- 只改任务书第六节列出的路径。
 - 全部队列项勾完、矩阵无「仍差」后，在下面单独一行写 `DONE`。
-
-DONE

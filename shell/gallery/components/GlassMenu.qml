@@ -26,6 +26,9 @@ GlassPopup {
     cardWidth: 224
     contentPadding: 8
     contentSpacing: 4
+    // G10f — menu text sits on this surface, so use the balanced scrim.
+    scrimEnabled: true
+    scrimLevel: "balanced"
 
     function firstEnabled() {
         for (let i = 0; i < items.length; i++)

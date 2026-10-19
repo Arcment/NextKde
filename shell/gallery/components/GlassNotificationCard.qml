@@ -41,6 +41,9 @@ LiquidGlassPanel {
     material: "regular"
     cornerExponent: 2.0
     scrimEnabled: AppearanceTokens.surface.usesBackdrop
+    // G10f — dense notification text: fill in near-opaque at the extremes,
+    // the same preset the live toast uses.
+    scrimLevel: "readable"
     // Gallery baseline: paint in QML, never claim the KWin effect.
     useKwinEffect: false
     fallbackEnabled: AppearanceTokens.surface.paintInQml

@@ -23,6 +23,13 @@ AnimatedPopupWindow {
     property real contentSpacing: 0
     property real anchorGap: 8
 
+    // G10f — QML fallback scrim for popup cards. The card already samples the
+    // popup's screen-aligned backdrop copy (G10e); these hand it the same
+    // readability preset the compositor path uses. Off by default so a
+    // subclass opts in and every existing popup keeps its old finish.
+    property bool scrimEnabled: false
+    property string scrimLevel: "transparent"
+
     // Subclass content lands in this Column; the card follows its height.
     default property alias contentData: body.data
 
@@ -101,6 +108,8 @@ AnimatedPopupWindow {
         material: root.material
         useKwinEffect: false
         backdropItem: GlassBackdrop.sourceItem !== null ? backdropSample : null
+        scrimEnabled: root.scrimEnabled
+        scrimLevel: root.scrimLevel
 
         Column {
             id: body

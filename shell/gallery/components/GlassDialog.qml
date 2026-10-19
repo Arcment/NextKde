@@ -155,7 +155,11 @@ Item {
             // compositor scrim mode: KWin owns the finish and the scrim.
             // qml mode: the QML liquid fallback paints the card instead.
             useKwinEffect: root.compositorScrim
-            scrimEnabled: root.compositorScrim
+            // G10f — the QML fallback (qml mode) paints the card itself and
+            // must own its own readability scrim. In compositor mode the panel
+            // publishes the same flag to KWin, exactly as before; in the
+            // intentional "both" violation the compositor still owns the card.
+            scrimEnabled: true
             scrimLevel: "balanced"
 
             Column {

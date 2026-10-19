@@ -38,6 +38,12 @@ Item {
     // selection to the second cell; the first card keeps it on the first.
     readonly property var segmentStates:
         ["idle", "hovered", "pressed", "focusVisible", "selected", "disabled"]
+    // SPEC §3.14 defines four states. The last two cards show the endpoint
+    // values (0 / 1) with forcedState idle; they are value samples, not states.
+    readonly property var sliderStates:
+        ["idle", "hovered", "pressed", "disabled", "value 0%", "value 100%"]
+    readonly property var switchStates:
+        ["off", "on", "hovered", "pressed", "disabled", "focusVisible"]
     readonly property var tiers: ["clear", "regular", "thick"]
 
     readonly property bool buttonVisible: filter === "" || filter === "button"
@@ -49,10 +55,25 @@ Item {
         filter === "" || filter === "combobox"
     readonly property bool segmentedVisible:
         filter === "" || filter === "segmented"
+    readonly property bool sliderVisible: filter === "" || filter === "slider"
+    readonly property bool switchVisible: filter === "" || filter === "switch"
     readonly property var knownFilters:
-        ["button", "textfield", "checkbox", "combobox", "segmented"]
+        ["button", "textfield", "checkbox", "combobox", "segmented",
+            "slider", "switch"]
     readonly property bool unknownFilter:
         filter !== "" && knownFilters.indexOf(filter) === -1
+
+    // ── live contract readouts (G4d) ──────────────────────────────────────
+    // The slider host owns `value`; preview updates it immediately.
+    property real sliderLiveValue: 0.42
+    property real sliderPreviewValue: 0.42
+    property real sliderCommitValue: -1
+    property int sliderCancelCount: 0
+    // The switch host only applies the request when it "confirms" it here.
+    property bool switchChecked: false
+    property bool switchPendingValue: false
+    property string switchRequestedText: "—"
+    property string switchConfirmedText: "关"
 
     function setForm(mode) {
         SharedControls.ControlForm.materialForm = (mode === "material")
@@ -79,6 +100,18 @@ Item {
         interval: 200
         repeat: false
         onTriggered: page.applyOffset()
+    }
+
+    // Simulated async owner: the switch only emits a request; this timer is
+    // the host confirming it and writing `checked` back.
+    Timer {
+        id: switchConfirmTimer
+        interval: 350
+        repeat: false
+        onTriggered: {
+            page.switchChecked = page.switchPendingValue
+            page.switchConfirmedText = page.switchPendingValue ? "开" : "关"
+        }
     }
 
     Flickable {
@@ -181,8 +214,8 @@ Item {
                 visible: page.unknownFilter
                 width: parent.width
                 text: "GALLERY_CONTROLS_FILTER=" + page.filter
-                    + " 尚未交付（G4c 已含 button / textfield / checkbox"
-                    + " / combobox / segmented）"
+                    + " 尚未交付（G4d 已含 button / textfield / checkbox"
+                    + " / combobox / segmented / slider / switch）"
                 color: page.inkDim
                 font.pixelSize: 13
             }
@@ -727,6 +760,285 @@ Item {
                                     ? "height×0.38（card）" : "height/2（pill）")
                             color: page.inkDim
                             font.pixelSize: 11
+                        }
+                    }
+                }
+            }
+
+            // ── GlassSlider ────────────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.sliderVisible ? sliderColumn.height : 0
+                visible: page.sliderVisible
+
+                Column {
+                    id: sliderColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "GlassSlider"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4d"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "高 44 · track 6 · thumb 32×16 · accent 进 token"
+                            + " · 状态 idle/hovered/pressed/disabled"
+                            + " · 悬停 expansion 0.3 · Ctrl+滚轮 0.01/档"
+                            + " · 180ms 去抖 · 提交后 400ms 屏蔽 x 动画"
+                        color: page.inkDim
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    Repeater {
+                        model: page.tiers
+
+                        delegate: Column {
+                            id: sliderTierRow
+                            required property string modelData
+
+                            width: sliderColumn.width
+                            spacing: 6
+
+                            Text {
+                                height: 14
+                                text: "material " + sliderTierRow.modelData
+                                color: page.ink
+                                font.pixelSize: 11
+                            }
+
+                            Row {
+                                id: sliderStateRow
+                                width: parent.width
+                                spacing: 8
+
+                                Repeater {
+                                    model: page.sliderStates
+
+                                    delegate: ControlStateCard {
+                                        id: sliderCard
+                                        required property string modelData
+
+                                        width: (sliderStateRow.width
+                                            - 5 * sliderStateRow.spacing) / 6
+                                        height: 104
+                                        materialTier: sliderTierRow.modelData
+                                        stateLabel: sliderCard.modelData
+
+                                        GlassSlider {
+                                            anchors.centerIn: parent
+                                            width: Math.min(200, parent.width)
+                                            value: sliderCard.modelData === "value 0%"
+                                                    ? 0.0
+                                                : sliderCard.modelData === "value 100%"
+                                                    ? 1.0 : 0.42
+                                            forcedState: sliderCard.modelData === "value 0%"
+                                                    || sliderCard.modelData === "value 100%"
+                                                ? "idle" : sliderCard.modelData
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Live contract row: readings are static text so a
+                    // screenshot can see the last preview / commit / wheel.
+                    Item {
+                        width: parent.width
+                        height: 58
+
+                        GlassSlider {
+                            id: sliderLive
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 240
+                            value: page.sliderLiveValue
+                            onPreviewChanged: (v) => {
+                                page.sliderLiveValue = v
+                                page.sliderPreviewValue = v
+                            }
+                            onCommitRequested: (v) => page.sliderCommitValue = v
+                            onCanceled: page.sliderCancelCount += 1
+                        }
+
+                        Text {
+                            anchors.left: sliderLive.right
+                            anchors.leftMargin: 16
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "preview " + page.sliderPreviewValue.toFixed(2)
+                                + " · commit " + (page.sliderCommitValue < 0
+                                    ? "—" : page.sliderCommitValue.toFixed(2))
+                                + " · wheel " + (sliderLive.wheelValue < 0
+                                    ? "—" : sliderLive.wheelValue.toFixed(2))
+                                + "（" + sliderLive.wheelSteps + " 档）"
+                                + " · canceled " + page.sliderCancelCount
+                                + "\n拖拽 = preview；松手 commit；Ctrl+滚轮按 0.01 步进，"
+                                + "停顿 180ms 提交；提交后 400ms 内 x 动画屏蔽"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                            lineHeight: 1.4
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+
+            // ── GlassSwitch ────────────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.switchVisible ? switchColumn.height : 0
+                visible: page.switchVisible
+
+                Column {
+                    id: switchColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "GlassSwitch"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4d"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "74×32 · thumb 44×26 · travel = width-44-6"
+                            + " · M3 handle 16 off / 24 on，m3Scale=min(1,h/32)"
+                            + " · thumbX 200 OutCubic · 状态 off/on/hovered/pressed"
+                            + "/disabled/focusVisible"
+                        color: page.inkDim
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    Repeater {
+                        model: page.tiers
+
+                        delegate: Column {
+                            id: switchTierRow
+                            required property string modelData
+
+                            width: switchColumn.width
+                            spacing: 6
+
+                            Text {
+                                height: 14
+                                text: "material " + switchTierRow.modelData
+                                color: page.ink
+                                font.pixelSize: 11
+                            }
+
+                            Row {
+                                id: switchStateRow
+                                width: parent.width
+                                spacing: 8
+
+                                Repeater {
+                                    model: page.switchStates
+
+                                    delegate: ControlStateCard {
+                                        id: switchCard
+                                        required property string modelData
+
+                                        width: (switchStateRow.width
+                                            - 5 * switchStateRow.spacing) / 6
+                                        height: 104
+                                        materialTier: switchTierRow.modelData
+                                        stateLabel: switchCard.modelData
+
+                                        GlassSwitch {
+                                            anchors.centerIn: parent
+                                            forcedState: switchCard.modelData
+                                            // Pointer/focus cards show the on
+                                            // value; off and disabled are off.
+                                            checked: switchCard.modelData === "on"
+                                                || switchCard.modelData === "hovered"
+                                                || switchCard.modelData === "pressed"
+                                                || switchCard.modelData === "focusVisible"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Host-confirmed contract row.
+                    Item {
+                        width: parent.width
+                        height: 58
+
+                        GlassSwitch {
+                            id: switchLive
+                            anchors.left: parent.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            checked: page.switchChecked
+                            onToggled: (v) => {
+                                page.switchRequestedText = v ? "开" : "关"
+                                page.switchPendingValue = v
+                                switchConfirmTimer.restart()
+                            }
+                        }
+
+                        Text {
+                            anchors.left: switchLive.right
+                            anchors.leftMargin: 16
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "requested " + page.switchRequestedText
+                                + " · confirmed " + page.switchConfirmedText
+                                + "\n点击只发出 toggled 请求；宿主 350ms 后确认并写回"
+                                + " checked（组件不本地翻转）。Tab 聚焦看 focus 环"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                            lineHeight: 1.4
+                            wrapMode: Text.WordWrap
                         }
                     }
                 }

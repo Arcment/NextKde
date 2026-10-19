@@ -59,6 +59,10 @@ QtObject {
     readonly property int sliderThumbHeight: 16
     readonly property int sliderCommitDebounce: 180
     readonly property int sliderSuppressX: 400
+    // SPEC §3.14 durations: press 270 / release 460, x follow 200.
+    readonly property int sliderPressedDuration: 270
+    readonly property int sliderReleaseDuration: 460
+    readonly property int sliderThumbXDuration: 200
 
     // SPEC §3.15 — GlassSwitch.
     readonly property int switchWidth: 74
@@ -66,6 +70,15 @@ QtObject {
     readonly property int switchThumbWidth: 44
     readonly property int switchThumbHeight: 26
     readonly property int switchTravelInset: 6
+    // SPEC §3.15 durations: thumbX 200 OutCubic, expansion press 120 /
+    // release 200.
+    readonly property int switchThumbXDuration: 200
+    readonly property int switchPressDuration: 120
+    readonly property int switchReleaseDuration: 200
+
+    // SPEC §3.14 / §3.15 — the accent enters the token file; slider and switch
+    // read this instead of hard-coding #0a84ff at the call site.
+    readonly property color accentColor: AppearanceTokens.colors.primary
 
     // SPEC §3.13 — GlassScrollBar.
     readonly property int scrollBarWidth: 6

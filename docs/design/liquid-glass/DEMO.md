@@ -441,3 +441,21 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
 - 重拍 6 张：`g7-{dark,light}-decision-{toast,tooltip,session}`。
 - 验证边界：StatusTooltip / DockAppNameTooltip 不被 gallery 加载，只做
   代码级核对；+4px 手感需人工在真实 bar/dock 上悬停验证。
+
+## G8 — G5 toast 旧标签清理 + 2 张重拍
+
+- `shell/gallery/MotionPage.qml`：顶部注释 / 副标题、toast 卡 badge、
+  caption 的 `1600ms` 与「§7-① 待裁定」统一改为
+  `2600ms（悬停暂停）` / 「§7-① 已裁定 B」。
+- `shell/gallery/ToastDemo.qml`：`holdToken` 1600 → 2600，文案与读数后缀
+  同步为「已裁定 B」；无现成 hover 钩子，注记「悬停暂停见裁定页 B 栏」，
+  未硬造交互。
+- 两文件 grep 无残留 `1600` / `待裁定`。
+- 重拍 2 张（dark）：
+  - `g8-dark-toast`：badge 2600ms；读数 `hold 2600ms · effective 2600ms`、
+    `remaining 2600ms`；caption「存留 2600ms + 悬停暂停（§7-① 已裁定 B）」。
+  - `g8-dark-reduce-toast`：badge 2600ms；读数 `effective 0ms`、
+    `remaining 0ms`、`last reduceMotion`，与 caption 的 `effective 0` 一致。
+- `run.log` 无 QML 报错（仅既有 wallpaper colorquantizer WARN）。
+- 边界：`shell/gallery/components/GlassToast.qml` 的 `timeout: 1600` 属
+  G2d 基准演示（PopupsPage 使用），不在本批清单，留待统一口径时另项处理。

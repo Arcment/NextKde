@@ -13,7 +13,8 @@ Item {
     // Overview is the landing page from G1c. GALLERY_PAGE=surfaces lets the
     // screenshot flow capture the surface page without synthesising a click.
     property int currentIndex:
-        Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1 : 0
+        Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1
+            : Quickshell.env("GALLERY_PAGE") === "popups" ? 2 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
 
@@ -38,9 +39,9 @@ Item {
     readonly property var pages: [
         { title: "总览", note: "G1c" },
         { title: "表面", note: "G1b" },
-        { title: "弹层", note: "G2" },
-        { title: "控件", note: "G3" },
-        { title: "动效", note: "G4" }
+        { title: "弹层", note: "G2/G3" },
+        { title: "控件", note: "G4" },
+        { title: "动效", note: "G5" }
     ]
 
     readonly property string ink: AppearanceTokens.content.glassInk()
@@ -213,7 +214,7 @@ Item {
     }
     Component {
         id: popupsPage
-        PlaceholderPage { title: "弹层"; note: "G2" }
+        PopupsPage {}
     }
     Component {
         id: controlsPage

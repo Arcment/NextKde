@@ -10,7 +10,7 @@
 G10k 已完成，G10 队列收口。补齐矩阵最后 5 格（notification、dialog、
 motion 页 toast、tooltip 页内基准、decision lanes），各取 dark/light 截图并
 目视确认可读；回填 SPEC §1.5、INVENTORY §12、DEMO G10 段与本 ledger。
-本轮不改代码，最终截图沿用 G10j 后的 overview 采样（代码自此未变）。
+本轮不改代码，最终截图沿用 G10i overview 采样（G10j 只统一 preset 来源、视觉未变）。
 `run.log` 全程无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。
 
 ## 队列（✅=已交付）
@@ -45,65 +45,17 @@ motion 页 toast、tooltip 页内基准、decision lanes），各取 dark/light 
 | param panel（文字最密） | ✅ 跨黄/品红交界玻璃连续渐变，白字与滑杆读数可读；文字最密区无不可辨项 | ✅ 浅黄→浅粉连续渐变，深色文字/读数清晰 |
 | 象限交界 / 黑白点最坏情况 | ✅ 16 卡与 nav、param panel 跨交界处采样连续；黑白点透过玻璃明暗正确，未见色块断裂 | ✅ 同上；白点处玻璃提亮但深色文字仍可读，黑点处仍清晰 |
 
-## G10j 预设对齐（已交付）
-
-QML 兜底与合成器路径现在共用同一张表，不再各自写字面量：
-
-- `GlassBackdrop.scrimCap(level)` / `scrimDecay(level)`：readable 0.72/1.0、
-  balanced 0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45。
-- `GlassBackdrop.defaultScrimTint`：随外观开关（开：深色黑 / 浅色白；关：黑）。
-  `LiquidGlassPanel.scrimTint` 与 `LiquidGlassSurface` 的默认 tint 都取它。
-- `LiquidGlassSurface` 新增 `scrimLevel`，默认 `"custom"`（原样取
-  `scrimCap`/`scrimDecay`，旧调用零变化）。面板转发语义不变。
-- `OverviewPage` 16 卡与 `SurfacesPage` 的 QML 卡删除手写 `0.47/0.75` 与
-  tint 三元式，改为 `scrimLevel: "balanced"` + 共享 tint。
-
-每个表面最终取值（QML 路径）：
-
-| 表面 | preset | cap / decay | tint |
-| --- | --- | --- | --- |
-| 左栏 nav（`GalleryRoot`） | balanced | 0.47 / 0.75 | 共享规则 |
-| overview 16 卡 | balanced | 0.47 / 0.75 | 共享规则 |
-| surfaces 页 QML 卡 | balanced | 0.47 / 0.75 | 共享规则 |
-| param panel | readable | 0.72 / 1.0 | 共享规则 |
-| toast 页内基准 | readable | 0.72 / 1.0 | 共享规则 |
-| tooltip 页内基准 | balanced | 0.47 / 0.75 | 共享规则 |
-| `GlassToast` / notification | readable | 0.72 / 1.0 | 共享规则 |
-| menu / dialog | balanced | 0.47 / 0.75 | 共享规则 |
-| decision toast / tooltip lane | readable | 0.72 / 1.0 | 共享规则 |
-| popover | —（未启用，旧行为） | — | — |
-
-surfaces 页 clear/regular/thick 三档是 KWin 路径演示（`useKwinEffect: true`），
-不在本次 QML 对齐范围，保持原样。
-
-截图：`g10j-overview-dark.png`（16 卡按象限、nav/参数面板可读）、
-`g10j-surfaces-light.png`（QML 卡 balanced 白 tint，深色文字清晰）。`run.log`
-无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。视觉与对齐前的字面量
-取值一致——本次是来源统一，不是强度变更。
-
 ## G10k 收口（已交付）
 
-矩阵最后 5 格补齐，截图（`tmp/glass/`，同时归档到 `docs/design/liquid-glass/`）：
+矩阵最后 5 格补齐，截图在 `tmp/glass/` 并归档到 `docs/design/liquid-glass/`：
+`g10k-notification-{dark,light}`、`g10k-dialog-{dark,light}`、
+`g10k-motion-toast-{dark,light}`、`g10k-motion-tooltip-{dark,light}`、
+`g10k-decisions-{dark,light}`。最终截图为 `g10k-final-{dark,light}`（沿用
+G10i overview 采样；G10j 只统一来源、视觉未变，本轮无代码改动）。
 
-| 表面 | dark | light |
-| --- | --- | --- |
-| notification | `g10k-notification-dark.png` | `g10k-notification-light.png` |
-| dialog | `g10k-dialog-dark.png` | `g10k-dialog-light.png` |
-| motion 页 toast | `g10k-motion-toast-dark.png` | `g10k-motion-toast-light.png` |
-| tooltip 页内基准 | `g10k-motion-tooltip-dark.png` | `g10k-motion-tooltip-light.png` |
-| decision lanes | `g10k-decisions-dark.png` | `g10k-decisions-light.png` |
-
-最终截图沿用 G10i overview 采样（G10j 只统一 preset 来源、视觉未变，本轮无代码改动）：
-`g10k-final-dark.png` / `g10k-final-light.png`。
-
-文档回填：
-
-- SPEC 新增 §1.5「无 KWin 场景采样（G10 定案）」：隐藏副本 + `GlassBackdrop`、
-  1/6 捕获 + 9 tap、共用 preset 表、弹窗平移副本、`null`/KWin 路径不变。
-- INVENTORY 新增 §12：`GlassBackdrop` / `scene_liquid.frag` /
-  `GalleryBackdropBoard` / `GalleryBackdropSample` 四个组件的契约与位置。
-- DEMO 新增 G10 段：背景板 toggle、采样演示、矩阵截图用法与「只目视」边界。
-- 本 ledger 矩阵无「仍差」；surfaces 三档与 decision ③ 为写明原因的外推项。
+文档回填：SPEC §1.5（无 KWin 场景采样定案）、INVENTORY §12（四个新组件契约）、
+DEMO G10 段（背景板 toggle + 矩阵截图用法）、LEDGER 同步本文件。
+矩阵无「仍差」；surfaces 三档与 decision ③ 为写明原因的外推项。
 
 ## 已确认的架构（不要重开）
 
@@ -120,9 +72,11 @@ surfaces 页 clear/regular/thick 三档是 KWin 路径演示（`useKwinEffect: t
 
 ## Next round
 
-无。G10 队列全部交付，矩阵无「仍差」，`tmp/glass/state.md` 已写 `DONE`。
+无。G10 队列全部交付，矩阵无「仍差」。
 
 ## 注意
 
 - 只改任务书第十一节列出的路径。
 - 全部队列项勾完、矩阵无「仍差」后，在下面单独一行写 `DONE`。
+
+DONE

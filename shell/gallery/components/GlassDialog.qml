@@ -155,12 +155,15 @@ Item {
             // compositor scrim mode: KWin owns the finish and the scrim.
             // qml mode: the QML liquid fallback paints the card instead.
             useKwinEffect: root.compositorScrim
-            // G10f — the QML fallback (qml mode) paints the card itself and
-            // must own its own readability scrim. In compositor mode the panel
-            // publishes the same flag to KWin, exactly as before; in the
+            // G10f/G11f — the QML fallback (qml mode) paints the card itself
+            // and must own its own readability scrim. In compositor mode the
+            // panel publishes the same flag to KWin, exactly as before; in the
             // intentional "both" violation the compositor still owns the card.
+            // G11f: balanced left the page text behind the card legible enough
+            // to merge with the dim body text, so the dialog takes the same
+            // readable ceiling notifications use.
             scrimEnabled: true
-            scrimLevel: "balanced"
+            scrimLevel: "readable"
 
             Column {
                 id: body

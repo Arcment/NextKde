@@ -12,6 +12,13 @@ GlassPopup {
     cardWidth: 300
     contentSpacing: 6
 
+    // G11f — the card sampled the backdrop but shipped with the scrim off, so
+    // its interior stayed at board colour and failed the hard contrast rule.
+    // Opt in at the same readable ceiling as dialog so the card interior is
+    // visibly compressed against the board behind it.
+    scrimEnabled: true
+    scrimLevel: "readable"
+
     Text {
         width: parent.width
         text: "GlassPopover"

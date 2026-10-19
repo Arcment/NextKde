@@ -313,3 +313,24 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
   避免 `holdEffective` 绑定尚未重算时残留 1600ms。
 - 四张顶栏均读 reduceMotion=on；`run.log` 无 QML 报错（仅 wallpaper
   colorquantizer WARN）。首次重拍 toast 时 quickshell 崩溃一次，重拍成功。
+
+## G6c — 裁定页骨架 + Toast A/B（SPEC §7-①）
+
+- 新增 `shell/gallery/DecisionsPage.qml`，页序 6、导航「裁定 G6」；钩子
+  `GALLERY_PAGE=decisions`、`GALLERY_DECISION=toast|tooltip|session`。
+  页面只呈现 A/B 的交互、读数与后果行，不写推荐；顶部标注「待人工裁定」。
+- `DecisionLane.qml` 为单侧 lane 框架（标题 / 交互体 / 后果行）；
+  `DecisionToastLane.qml` 实现 toast 存留演示：A hold 1600ms 自动消失，
+  B hold 2600ms + hover 暂停（离开继续）；读数并列 total / elapsed /
+  remaining / paused。
+- 截图（`tmp/glass/`）：`g6-dark-decision-toast` / `g6-light-decision-toast`。
+- dark toast：A 栏 total 1600ms · elapsed 0ms · remaining 1600ms ·
+  paused no；B 栏 total 2600ms · remaining 2600ms · paused no；两栏
+  state shown · last seed（截图为演示常显，时钟未启动），发一条 / 关闭可交互。
+- light toast：同读数，深色墨，两栏衬底改为浅色以便在饱和背景板上读清。
+- 后果行：A 写 1600ms 与「立即确认」一致、不可暂停与 HIG「少用定时消失」
+  有距离；B 写 2600ms + 悬停暂停更贴近 HIG、代价是占用更久；无推荐。
+- 仍差：dark 主题 B lane 处于黄色象限时，10px 读数对比度约 3:1，后续可
+  加大 lane 衬底；light 主题两栏黑字可读。
+- `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图后无残留
+  gallery 进程。

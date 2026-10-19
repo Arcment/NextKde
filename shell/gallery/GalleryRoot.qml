@@ -18,7 +18,8 @@ Item {
             : Quickshell.env("GALLERY_PAGE") === "popups" ? 2
             : Quickshell.env("GALLERY_PAGE") === "controls" ? 3
             : Quickshell.env("GALLERY_PAGE") === "motion" ? 4
-            : Quickshell.env("GALLERY_PAGE") === "scene" ? 5 : 0
+            : Quickshell.env("GALLERY_PAGE") === "scene" ? 5
+            : Quickshell.env("GALLERY_PAGE") === "decisions" ? 6 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
     // G3b scrim source demo. The default is the legal production pairing:
@@ -56,7 +57,8 @@ Item {
         { title: "弹层", note: "G2/G3" },
         { title: "控件", note: "G4" },
         { title: "动效", note: "G5" },
-        { title: "场景", note: "S1" }
+        { title: "场景", note: "S1" },
+        { title: "裁定 G6", note: "G6" }
     ]
 
     readonly property string ink: AppearanceTokens.content.glassInk()
@@ -196,7 +198,8 @@ Item {
                 : root.currentIndex === 2 ? popupsPage
                 : root.currentIndex === 3 ? controlsPage
                 : root.currentIndex === 4 ? motionPage
-                : scenePage
+                : root.currentIndex === 5 ? scenePage
+                : decisionsPage
         }
     }
 
@@ -276,6 +279,17 @@ Item {
     Component {
         id: scenePage
         ScenePage {}
+    }
+    Component {
+        id: decisionsPage
+        DecisionsPage {
+            previewOpacity: root.previewOpacity
+            blurAmount: root.blurAmount
+            previewRadius: root.previewRadius
+            tintStrength: root.tintStrength
+            radiusPill: root.radiusPill
+            reduceMotionOn: root.reduceMotionOn
+        }
     }
 
     // GALLERY_MOTION_REDUCE=1 seeds the panel switch before the first frame so

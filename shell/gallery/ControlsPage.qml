@@ -44,6 +44,10 @@ Item {
         ["idle", "hovered", "pressed", "disabled", "value 0%", "value 100%"]
     readonly property var switchStates:
         ["off", "on", "hovered", "pressed", "disabled", "focusVisible"]
+    // SPEC §3.13 defines behaviour, not a state list. The first four cards are
+    // the interaction states; the last two are thumb-position samples.
+    readonly property var scrollStates:
+        ["idle", "scrolling", "hovered", "dragging", "top", "bottom"]
     readonly property var tiers: ["clear", "regular", "thick"]
 
     readonly property bool buttonVisible: filter === "" || filter === "button"
@@ -57,9 +61,11 @@ Item {
         filter === "" || filter === "segmented"
     readonly property bool sliderVisible: filter === "" || filter === "slider"
     readonly property bool switchVisible: filter === "" || filter === "switch"
+    readonly property bool scrollVisible: filter === "" || filter === "scrollbar"
+    readonly property bool typeVisible: filter === "" || filter === "type"
     readonly property var knownFilters:
         ["button", "textfield", "checkbox", "combobox", "segmented",
-            "slider", "switch"]
+            "slider", "switch", "scrollbar", "type"]
     readonly property bool unknownFilter:
         filter !== "" && knownFilters.indexOf(filter) === -1
 
@@ -78,6 +84,42 @@ Item {
     function setForm(mode) {
         SharedControls.ControlForm.materialForm = (mode === "material")
     }
+
+    readonly property var scrollDemoStates: [
+        { state: "idle", label: "idle · 静止淡出（opacity 0）", position: 0.18 },
+        { state: "hovered", label: "hovered · 8 px", position: 0.18 },
+        { state: "dragging", label: "dragging · 0.62", position: 0.62 }
+    ]
+
+    function scrollPositionFor(state) {
+        if (state === "top")
+            return 0.0
+        if (state === "bottom")
+            return 1.0
+        if (state === "dragging")
+            return 0.62
+        if (state === "scrolling")
+            return 0.30
+        return 0.18
+    }
+
+    function scrollHintFor(state) {
+        if (state === "idle")
+            return "→ opacity 0"
+        if (state === "top")
+            return "position 0"
+        if (state === "bottom")
+            return "position 1"
+        if (state === "dragging")
+            return "position 0.62"
+        if (state === "hovered")
+            return "thumb 8 px"
+        if (state === "scrolling")
+            return "thumb 6 px"
+        return ""
+    }
+
+    ControlTokens { id: controlTokens }
 
     function applyOffset() {
         const raw = Quickshell.env("GALLERY_CONTROLS_OFFSET") || ""
@@ -214,8 +256,8 @@ Item {
                 visible: page.unknownFilter
                 width: parent.width
                 text: "GALLERY_CONTROLS_FILTER=" + page.filter
-                    + " 尚未交付（G4d 已含 button / textfield / checkbox"
-                    + " / combobox / segmented / slider / switch）"
+                    + " 尚未交付（已含 button / textfield / checkbox / combobox"
+                    + " / segmented / slider / switch / scrollbar / type）"
                 color: page.inkDim
                 font.pixelSize: 13
             }
@@ -1039,6 +1081,326 @@ Item {
                             font.pixelSize: 11
                             lineHeight: 1.4
                             wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+
+            // ── GlassScrollBar ─────────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.scrollVisible ? scrollColumn.height : 0
+                visible: page.scrollVisible
+
+                Column {
+                    id: scrollColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "GlassScrollBar"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4e"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: 2
+
+                        Text {
+                            width: parent.width
+                            text: "宽 6（hover 8）· radius pill · 滚动/悬停显示"
+                                + " · 静止 260ms 淡出 · thumb 深 #30ffffff / 浅 #22000000"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                        }
+                        Text {
+                            width: parent.width
+                            text: "SPEC §3.13 未定义状态集：前四卡为交互态，"
+                                + "top / bottom 为位置样张；idle 卡 thumb opacity 0 即「静止淡出」终态"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    Repeater {
+                        model: page.tiers
+
+                        delegate: Column {
+                            id: scrollTierRow
+                            required property string modelData
+
+                            width: scrollColumn.width
+                            spacing: 6
+
+                            Text {
+                                height: 14
+                                text: "material " + scrollTierRow.modelData
+                                color: page.ink
+                                font.pixelSize: 11
+                            }
+
+                            Row {
+                                id: scrollStateRow
+                                width: parent.width
+                                spacing: 8
+
+                                Repeater {
+                                    model: page.scrollStates
+
+                                    delegate: ControlStateCard {
+                                        id: scrollCard
+                                        required property string modelData
+
+                                        width: (scrollStateRow.width
+                                            - 5 * scrollStateRow.spacing) / 6
+                                        height: 104
+                                        materialTier: scrollTierRow.modelData
+                                        stateLabel: scrollCard.modelData
+
+                                        ScrollListSample {
+                                            anchors.top: parent.top
+                                            anchors.topMargin: 2
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            width: 62
+                                            height: 56
+                                            forcedState: scrollCard.modelData
+                                            barPosition: page.scrollPositionFor(
+                                                scrollCard.modelData)
+                                            barSize: 0.34
+                                            barActive: true
+                                        }
+                                        Text {
+                                            anchors.bottom: parent.bottom
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            text: page.scrollHintFor(scrollCard.modelData)
+                                            color: page.inkDim
+                                            font.pixelSize: 10
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Small-list demo: the three SPEC behaviours side by side.
+                    Item {
+                        width: parent.width
+                        height: 106
+
+                        Row {
+                            id: scrollDemoRow
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            spacing: 26
+
+                            Repeater {
+                                model: page.scrollDemoStates
+
+                                delegate: Column {
+                                    required property var modelData
+
+                                    spacing: 6
+
+                                    ScrollListSample {
+                                        width: 64
+                                        height: 74
+                                        forcedState: modelData.state
+                                        barPosition: modelData.position
+                                        barSize: 0.34
+                                        barActive: modelData.state !== "idle"
+                                    }
+                                    Text {
+                                        text: modelData.label
+                                        color: page.inkDim
+                                        font.pixelSize: 10
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            anchors.left: scrollDemoRow.right
+                            anchors.leftMargin: 28
+                            anchors.right: parent.right
+                            anchors.verticalCenter: scrollDemoRow.verticalCenter
+                            text: "overlay 式：宽 6 → hover 8（120ms），"
+                                + "静止 260ms 淡出；拖动只发 dragMoved，宿主写回 position\n"
+                                + "thumb 深 #30ffffff / 浅 #22000000 · radius = 宽/2"
+                                + " · size 0.34 · 左起 idle / hovered / dragging"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                            lineHeight: 1.4
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+
+            // ── Type scale ─────────────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.typeVisible ? typeColumn.height : 0
+                visible: page.typeVisible
+
+                Column {
+                    id: typeColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "字阶 / Type Scale"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4e"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "SPEC §2.4 · 十档 · 正文 Body 13/16 · 最小 10"
+                            + " · 行高 32/26/22/20/16/16/15/14/13/13"
+                        color: page.inkDim
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    // Column captions for the ten rows below.
+                    Item {
+                        width: parent.width
+                        height: 18
+
+                        Text {
+                            x: 0
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "名称"
+                            color: page.inkDim
+                            font.pixelSize: 10
+                        }
+                        Text {
+                            x: 124
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "字号 / 行高"
+                            color: page.inkDim
+                            font.pixelSize: 10
+                        }
+                        Text {
+                            x: 208
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "样张"
+                            color: page.inkDim
+                            font.pixelSize: 10
+                        }
+                        Text {
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            horizontalAlignment: Text.AlignRight
+                            text: "归并来源"
+                            color: page.inkDim
+                            font.pixelSize: 10
+                        }
+                    }
+
+                    Repeater {
+                        model: controlTokens.typeScale
+
+                        delegate: Item {
+                            id: typeRow
+                            required property var modelData
+
+                            width: typeColumn.width
+                            height: 48
+
+                            Text {
+                                x: 0
+                                width: 120
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: typeRow.modelData.name
+                                color: page.ink
+                                font.pixelSize: 12
+                                font.weight: Font.DemiBold
+                            }
+                            Text {
+                                x: 124
+                                width: 72
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: typeRow.modelData.size + " / "
+                                    + typeRow.modelData.line
+                                color: page.inkDim
+                                font.pixelSize: 11
+                            }
+                            Text {
+                                x: 208
+                                width: Math.max(60, Math.min(420,
+                                    parent.width - 208 - 260))
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: typeRow.modelData.sample
+                                color: page.ink
+                                font.pixelSize: typeRow.modelData.size
+                                font.weight: typeRow.modelData.bold
+                                    ? Font.Bold : Font.Normal
+                                lineHeightMode: Text.FixedHeight
+                                lineHeight: typeRow.modelData.line
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                anchors.right: parent.right
+                                width: 230
+                                anchors.verticalCenter: parent.verticalCenter
+                                horizontalAlignment: Text.AlignRight
+                                text: typeRow.modelData.source
+                                color: page.inkDim
+                                font.pixelSize: 10
+                                elide: Text.ElideLeft
+                            }
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                width: parent.width
+                                height: 1
+                                color: page.hairline
+                            }
                         }
                     }
                 }

@@ -216,3 +216,29 @@ G4d 已交付：GlassSlider 与 GlassSwitch 的 3 材质 × 6 状态矩阵，同
   `g4-light-slider.png`、`g4-light-switch.png`
   （`GALLERY_CONTROLS_FILTER=slider|switch`，形态 liquid，offset 0）。
   另拍 material 形态 `g4-dark-material-slider/switch.png` 核对 M3 比例。
+
+G4e 已交付：GlassScrollBar 的 3 材质 × 6 状态矩阵与十档字阶对照区。
+
+- `GlassScrollBar.qml`：SPEC §3.13 v1 提案——overlay 式，宽 6（hover 8）、
+  radius pill、滚动/悬停显示、静止淡出；thumb 浅 `#22000000` / 深
+  `#30ffffff`。显示随 `active / hover / drag`，淡出与宽度跟随复用 shell 的
+  `motion.slowDuration`（260ms）与 `motion.fastDuration`（120ms），不新增时长档位。
+  组件为宿主驱动：`position` / `size` 归滚动宿主，拖动只发
+  `dragStarted / dragMoved / dragEnded`，由宿主写回 `position`（与 Switch 的
+  `checked` 契约同构）。最小 thumb 长 24px 为 gallery 外推（SPEC 未给）。
+- `ScrollListSample.qml`：6px 的条单独截图不可读，矩阵卡与演示行都把它放在
+  一个小型线列表面右侧；列表只是 mock，不是控件。
+- ScrollBar 矩阵六卡：idle / scrolling / hovered / dragging / top / bottom。
+  §3.13 只定义行为、未定义状态集：前四者为交互态，top / bottom 为位置样张。
+  卡内 10px 提示依次为 `→ opacity 0`、`thumb 6 px`、`thumb 8 px`、
+  `position 0.62`、`position 0`、`position 1`；idle 卡 thumb 完全透明即
+  「静止淡出」终态，属预期而非空卡。
+- 矩阵下方演示行并排 idle / hovered / dragging 三个小列表，右侧读数写明
+  overlay 行为、颜色与 `size 0.34`。
+- 字阶对照区：`ControlTokens.typeScale` 十档逐行「名称 · 字号/行高 · 样张 ·
+  归并来源」，字号 26/22/17/15/13/13/12/11/10/10、行高
+  32/26/22/20/16/16/15/14/13/13；样张按 `Text.FixedHeight` 使用该行行高，
+  Headline 为 Bold，正文用 Body 13/16、最小 10。
+- 截图钩子新增 `GALLERY_CONTROLS_FILTER=scrollbar|type`。
+- 验收截图：`g4-dark-scrollbar.png`、`g4-dark-type.png`
+  （形态 liquid，offset 0）。

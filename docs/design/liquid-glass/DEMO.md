@@ -365,3 +365,39 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
   8px，仅作位置提示。
 - `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；截图后无残留
   gallery 进程。三项均「A/B 已呈现，待人工裁定」。
+
+## G6e — 收口（12 张截图 + ledger）
+
+- 第四节 12 张截图全部就位：motion 侧 6 张（params 2 + reduce 4）、
+  decision 侧 6 张（toast / tooltip / session 各 2）。motion 侧与 decision
+  ②③ 的代码在 G6c/G6d 后未变，沿用当轮成片；Toast 2 张因 G6d 改过
+  `DecisionsPage.qml`，本次按钩子重拍
+  （`GALLERY_PAGE=decisions GALLERY_DECISION=toast`）。
+- 逐张核对：
+  - params dark/light：`reduceMotion off` → `effective 150/140 ·
+    expansion on · ambient 2600ms`，与右侧参数卡一致。
+  - reduce press：`effective press 0ms OutBack · release 0ms OutQuint`、
+    `expansion 0.000`（idle / hovered / pressed）。
+  - reduce ambient：`effective 0ms (reduceMotion · 跳过)`、`state skipped`、
+    `mix 0%`、`progress 0.000`。
+  - reduce tooltip：`effective open 0ms OutCubic · close 0ms InCubic`、
+    `progress 1.000 · scale 1.000`。
+  - reduce toast：`hold 1600ms → effective 0ms`、`state shown ·
+    remaining 0ms`。
+  - decision toast：A total / remaining 1600ms，B 2600ms；elapsed 0ms、
+    paused no、state shown（seed）；两栏均列 consequence。
+  - decision tooltip：A `gap -6px · anchorB 40 · tipTop 34`，B `gap +4px ·
+    anchorB 40 · tipTop 44`，state shown；两栏均列 consequence。
+  - decision session：A `itemHeight 24 · 72 · font 10px`，B `itemHeight
+    44 · 56 ← req 24 · 72 · font 10px`；两栏均列 consequence。
+- ledger：已改 = params 标签分支、reduce 四段、裁定页三段、Toast 两张重拍；
+  仍差 = 下列三项；外推 = 三项均由人工裁定，页面只给并排交互与读数。
+- ① Toast 存留 1600ms：A/B 已呈现，待人工裁定。
+- ② Tooltip 贴边 -6px：A/B 已呈现，待人工裁定。
+- ③ SessionMenu 极端高度：A/B 已呈现，待人工裁定。
+- 仍差：dark 主题 Toast B lane 落在黄色象限，9px 读数白字实测最大对比度
+  约 2.2:1、后果行约 2.1:1（衬底约 rgb 197,168,49，字约 255,251,229）；
+  Session B 栏两列 clamp 后高 44 / 56，两列注释行 y 相差约 33px；
+  tooltip「屏幕边缘」标签 8px 仅作位置提示。
+- `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；重拍后无残留
+  gallery 进程。

@@ -150,3 +150,20 @@ G4a 已交付：Button 的 3 材质 × 6 状态矩阵 + liquid / material 双形
   均与 `shot.sh` 同行前置。
 - 验收截图：`g4-dark-button.png`、`g4-light-button.png`、
   `g4-light-material-button.png`。
+
+G4b 已交付：TextField 与 Checkbox 的 3 材质 × 6 状态矩阵，同为双形态。
+
+- `GlassTextField.qml`：高 28、regular、Body 13/16；liquid = pill 玻璃体，
+  material = M3 filled、radius 10。focus 同时改变三样东西：2px accent 描边、
+  外移 3px 的 2px 外环（外侧另加 1px ink 发丝保证亮底可见）、tint 加深，
+  因此不靠颜色单独表达。error = 2px 红色描边 + 右端圆形「!」徽标（形状 + 字形）。
+- `GlassCheckbox.qml`：框 20×20、radius 5、label Body 13/16；勾选态由
+  `QtQuick.Shapes` 画两段折线成 √（不是换色）；focusVisible = 外环 + ink 发丝。
+  hover/pressed 为状态层（liquid 玻璃增益 / material 8%·12%），pressed 另有
+  0.90 缩放。
+- TextField 矩阵六卡：normal / hovered / focused / error / filled / disabled。
+  SPEC §3.10 定义前四者，hover 与 filled（带值外观）为补充展示，不是新状态。
+- Checkbox 矩阵六卡与 SPEC §3.11 一一对应：
+  unchecked / checked / hovered / pressed / focusVisible / disabled。
+- 验收截图：`g4-dark-textfield.png`、`g4-dark-checkbox.png`
+  （`GALLERY_CONTROLS_FILTER=textfield|checkbox`，形态 liquid，offset 0）。

@@ -23,7 +23,7 @@
 左侧固定导航（自身用 GlassSurface 普通 A 层壳，展示「无 B 层时也成立」）：
 
 1. **总览页**
-   - 13 个组件各一个缩略卡，浅/深主题并排两列；
+   - 16 个组件各一个缩略卡，浅/深主题并排两列；
    - 顶部一排「材质三档」并排演示块（clear/regular/thick 各一块同内容卡片），
      让三档 tintStrength / opacity / reflection 差异一眼可辨；
    - 角落常驻当前全局参数面板入口（见 §4）。
@@ -34,7 +34,11 @@
    与 QML 背板，展示「双开 = 违规双重变暗」）、GlassPopover、GlassMenu、
    GlassTooltip、GlassToast、GlassNotification。每个弹层可从锚点按钮唤起。
 4. **控件页**：GlassButton / GlassTextField / GlassCheckbox / GlassComboBox /
-   SegmentedControl / GlassScrollBar，每控件一整行状态矩阵（§3）。
+   SegmentedControl / GlassSlider / GlassSwitch / GlassScrollBar，每控件一整行
+   状态矩阵（§3）；每控件提供 liquid / Material 双形态切换
+   （ControlForm.materialForm，INVENTORY §12.1-§12.2）。
+   GlassNavBar（容器契约，SPEC §3.16）在表面页演示——它是导航容器，
+   不进表单控件区。
 5. **动效页**：PopupMotion 开合（OutCubic/InCubic 对比）、液态按压 expansion、
    环境光过渡 2600ms、tooltip 70ms、toast 1600ms 各一个演示位；
    reduceMotion 开关联动（§4）。
@@ -49,8 +53,13 @@
 - **按组件裁剪**：
   - 表面/弹层类（GlassSurface、Popover、Menu、Notification）无 focus/error
     维度 → 6 状态中只呈现 idle/hover/pressed/disabled；
-  - 表单类（Button、TextField、Checkbox、ComboBox、Segmented）呈现全 6 态，
-    focus 态必须展示键盘焦点环（SPEC §2.6：不得只靠颜色）；
+  - 表单类（Button、TextField、Checkbox、ComboBox、Segmented、Slider、Switch）
+    呈现全 6 态，focus 态必须展示键盘焦点环（SPEC §2.6：不得只靠颜色）；
+    Slider 额外演示 preview/commit 两段提交与 Ctrl+滚轮步进
+    （SPEC §3.14 定案行为）；Switch 额外演示宿主确认式 toggled（不本地翻转，
+    SPEC §3.15）；
+  - 容器类（GlassNavBar）呈现 idle/selected/disabled 三态 + 5 档 size preset
+    并排（SPEC §3.16）；
   - Tooltip/Toast/Dialog 无持续交互态，只演示开合动画与终态。
 - **布局约定**：每行 = 一种材质（3 行），每行内 6 个状态卡并排；
   浅/深用页面顶部的主题开关切换后重看同一矩阵（不做 2×3×6 全铺，
@@ -81,7 +90,7 @@
 | G1 | 表面 | GlassSurface + LiquidGlassPanel + 三档材质块；先做基准实现 |
 | G2 | 弹层 | Popover / Menu / Tooltip / Toast / Notification 唤起与运动 |
 | G3 | Dialog | KosDialog 生命周期统一 + scrim 契约演示 |
-| G4 | 控件 | Button / TextField / Checkbox / ComboBox / Segmented / ScrollBar 全状态矩阵 |
+| G4 | 控件 | Button / TextField / Checkbox / ComboBox / Segmented / Slider / Switch / ScrollBar 全状态矩阵（含双形态切换）；NavBar 容器演示放表面页 |
 | G5 | 动效 | 动效页 + reduceMotion 联动 + 参数面板完备 |
 
 每轮流程：**先在 gallery 里落基准实现（对齐 SPEC token）→ 再从清单 app
@@ -96,5 +105,8 @@
 - gallery 中的所有演示参数改动**不回写**真实组件默认值；若比对后确认
   需要改 token，走 SPEC 的变更流程（更新 SPEC §2 并在 INVENTORY 补出处），
   不在 gallery 里就地改。
-- SPEC §7 的 5 项人工裁定项在 gallery 中以「A/B 并排」形式呈现，
+- SPEC §7 的 3 项人工裁定项（Toast 存留 / Tooltip 贴边负 margin /
+  SessionMenu 比例字号）在 gallery 中以「A/B 并排」形式呈现，
   供裁定人直接对比选择，裁定结论回填 SPEC 后删除并排演示。
+  （原 5 项中 weather tint 与 scrim 链路两项已于 R5 由代码关闭，
+  见 SPEC §1.1/§1.4。）

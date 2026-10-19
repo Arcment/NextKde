@@ -215,6 +215,107 @@
 ## 11. §3 结算后的剩余清单（仅人工判断项）
 
 - ~~KWin 默认值~~ / ~~PageMotion~~ / ~~bar 面板配方~~ / ~~liq 差异~~ → 已关闭（§10）。
-- weather `Main.qml` 的 tint/模糊具体公式（仍抽查级：MultiEffect 出现于 :1330,:1362）。
-- LiquidGlassPanel `scrimEnabled/scrimLevel` 下发到合成器的路径（:86 声明，链路未逐行读）。
-- 纯视觉项（需人工）：tooltip 贴边 -6px 手感、Toast 1600ms 时长是否合适、SessionMenu 比例字号在极端高度下的可读性。
+- ~~weather `Main.qml` 的 tint/模糊具体公式~~ → 已关闭（§12.5）。
+- ~~LiquidGlassPanel `scrimEnabled/scrimLevel` 下发到合成器的路径~~ → 已关闭（§12.5）。
+- 纯视觉项（需人工）：tooltip 贴边 -6px 手感、Toast 1600ms 时长是否合适、SessionMenu 比例字号在极端高度下的可读性（对应 SPEC §7 ①②③）。
+
+---
+
+# R5 补全（Slider / Switch / NavBar + 两项工程项关闭）
+
+> 以下为本轮追加，行号基于工作树 WT。
+> 事实更正：任务书所称「LiquidSwitch」实名 **LiquidGlassSwitch**（qmldir 中无
+> LiquidSwitch，`shell/Kos/Ui/controls/qmldir`）；`shell/Kos/Ui/controls/` 与
+> `shared/qml/controls/` 逐文件 diff 一致（`diff -rq` 无输出），下文只记一处，
+> 两处同源。foundation 侧对应物为 KosSlider / KosSwitch（`shell/Kos/Ui/foundation/`
+> 与 `shared/qml/foundation/` 各有同名副本）。
+
+## 12. Slider / Switch / NavBar 盘点
+
+### 12.1 Slider
+
+| 组件 | 来源 | 实现方式 | 关键参数 | 主题适配 | 不一致 |
+|---|---|---|---|---|---|
+| **LiquidSlider** | WT `shell/Kos/Ui/controls/LiquidSlider.qml`（549 行） | 双形态：iOS 玻璃（默认）/ Material 3，由 `ControlForm.materialForm` 切换（:41），互斥不混绘（:178,:236,:428） | implicit 240×44（:13-14）；`trackHeight 6` r=height/2（:27,:187）；thumb 32×16 六层玻璃：环境阴影→磨砂底 pill→折射渐变→顶部镜面→内沿 rim→accent 溢染（+可选 chromatic，:252-418）；accent `#0a84ff`（:18）；trackColor `rgba(.5,.5,.55,.35)`（:19）；thumbColor 深 `rgba(1,1,1,.38)`/浅 `.72`（:24）；M3 形态：`m3Scale=min(1,h/44)`（:430）、inactive 4/active 16/handle 4×44（:431-434）、state layer hover .10/pressed .16（:465） | 深浅由 `SystemPalette.window` 亮度 <0.5 判定（:20-23），色值组件内双分支硬编码，不走 AppearanceTokens/AppTheme | 时长 270/460/200（:66-67,:247）不在 `AppearanceTokens.motion` 三档内；accent 硬编码同 LiquidSelect 但未进 token；悬停 expansion 0.40（:507）与按钮 0.3（`LiquidGlassButton.qml:25`）不同值 |
+| **KosSlider**（foundation，非玻璃） | WT `shell/Kos/Ui/foundation/KosSlider.qml`（103 行） | QtQuick.Controls `Slider` 薄封装 | 220×`AppTheme.controlHeight`（:7-8）；track 高 6 r3 色 `AppTheme.mix(button,mutedText,.12)`（:76-78）；handle 20×20 r10 色 windowRaised、focus 边 3（:88-96）、pressed scale 1.08（:97）；Ctrl+滚轮同协议，`wheelStep` 别名 `stepSize`（量程/100，:19-20）、pixel 10（:22） | AppTheme | 与 LiquidSlider/ColorRampSlider 三份 slider 并行；动效 `AppTheme.motionFast` |
+| **ColorRampSlider** | WT `shell/Kos/Ui/controls/ColorRampSlider.qml` | 渐变坡道专用 slider（rampColors 由宿主传） | 250×26（:9-10）；track 8 r=height/2（:22,:101）；thumb 18（:21）；Ctrl+滚轮同协议 wheelStep 0.01/pixel 10（:31-33） | 自定 thumbColor `#ffffff`（:14） | 特殊用途单点使用，不进通用 slider 收编 |
+
+**结论**：通用 slider 收编目标 = LiquidSlider（双形态契约完整：preview/commit/canceled、
+Ctrl+滚轮、提交去抖 180ms（:153）、提交后 400ms 屏蔽 x 动画防异步写回跳变（:50-54））；
+KosSlider 保留为 foundation 非玻璃形态；ColorRampSlider 维持专用。
+
+### 12.2 Switch
+
+| 组件 | 来源 | 实现方式 | 关键参数 | 主题适配 | 不一致 |
+|---|---|---|---|---|---|
+| **LiquidGlassSwitch** | WT `shell/Kos/Ui/controls/LiquidGlassSwitch.qml`（393 行） | iOS 玻璃（默认）/ Material 3 双形态（:21），玻璃 thumb 按下溶解为透镜 | implicit 74×32（:29-30）；thumb 44×26 r13（:56-59）；`travel = width-44-6`（:58）；track 色 trackColor→accent 按 progress 渐变（:63-68）r=height/2（:112）；accent `#0a84ff`（:13）；M3 形态 handle 16dp off/24dp on、`m3Scale=min(1,h/32)`（:323-324）；layer 门控仅 expansion>0 或半透明时开 FBO+OpacityMask（:42-49） | 无深浅分支（track 只看 progress，:63-68）；handleOn/Off 色固定（:24-25） | 与 KosSwitch 尺寸/动效两套（74×32 vs 48×28）；disabled opacity 0.5（:96）vs LiquidSlider 0.45（:163） |
+| **KosSwitch**（foundation，非玻璃） | WT `shell/Kos/Ui/foundation/KosSwitch.qml`（71 行） | 纯 Rectangle 双态 | 48×28（:10-11）；track r=height/2 色 checked?accent:mix（:34-35）；knob=height-6 圆、边距 3（:44-48）；`motionNormal`/`motionFast` 动效（:41,:56）；无障碍完整（:15-20） | AppTheme | 同名副本在 `shared/qml/foundation/` |
+
+### 12.3 NavBar
+
+| 组件 | 来源 | 实现方式 | 关键参数 | 主题适配 | 不一致 |
+|---|---|---|---|---|---|
+| **LiquidNavBar** | WT `shell/Kos/Ui/controls/LiquidNavBar.qml`（512 行） | 自 vue-web-liquid-glass 移植（:5-6）；玻璃/白色 pill thumb ↔ 透镜切换，弹簧滑动 | **判定：导航容器**（model/currentIndex/selectionChanged 契约，:21-23,:50），非表单控件，但表面做法属玻璃控件家族（与 LiquidGlassSwitch 同款 lens）。5 档 size presets：tiny 34/small 42/medium 54/large 67/XL 80，thumbScale 1.3（:56-62）；track r=height/2 色 `white@0.10`（:38,:233）；thumb 白 pill `#ffffff/#f5f5f7/#e8e8ed`（:344-346）↔ glass lens（chromatic ±0.5px α.25（:372-387）、edge glow .30（:436）、accent 溢染 .10（:443-445））；accent `#ff453a`（:32）；itemColor `#ffffff`（:37）；item 选中 scale 1.05 / 未选 opacity .6（:464-465）；tooltip delay 600（:278） | 前景硬编码白系（itemColor #ffffff :37），无深浅分支——只适合深色玻璃底 | accent 与 Slider/Switch 的 `#0a84ff` 两个硬编码 accent 并存；label 字号由 preset 算（7/8/9/11/13，:57-61），低于 HIG 最小 10；物理层 16ms Timer（:135-143）是全库唯一帧驱动动画控件 |
+
+### 12.4 controls 目录终查（未进矩阵的文件）
+
+- `ControlForm.qml`（singleton）：`materialForm: false`（:15）——全部 Liquid* 控件双形态总开关。
+- `SelectionHighlight.qml`：玻璃选中板（hovered/selected/pressed/dark，cornerRadius=w×0.30、fade 140/press 80，:9-15），自述无模糊/无 shader（:3-5）——玻璃控件家族辅助件。
+- `VectorIcon.qml`：纯路径图标绘制（:3-15），非玻璃件。
+- `LiquidGlassButton / LiquidSegmentedControl / LiquidTextField / LiquidSelect`：已在 §2/§7。
+- 其余（README/qmldir）无组件。
+
+## 12.5 两项工程项关闭（原 §11 前两条）
+
+### weather tint/模糊公式（已解决）
+
+来源 `origin/claude/weather-app:apps/weather/qml/Main.qml`：
+
+- **卡片 tint 公式**（:33-35，拟合依据注释 :30-32）：白天
+  `cardGlassRgb = rgb(0, 0.376, 0.824)`（≈深蓝玻璃 (0,96,210)，由 ref-main 截图
+  逐像素实测拟合），`cardGlassAlpha` 白天 0.30 / hover(hot) 0.36；**夜间白玻璃**
+  α 0.16 / hot 0.21。描边 `white@0.22`（hot 0.32）（:468-469）。`tileRadius 16`
+  （:36）。圆片按钮 GlassCircleBg：`white@0.14`（selected 0.27）、border
+  0.22/0.30（:41-52）。
+- **模糊**：全文件仅两处 `MultiEffect`（:1330-1337、:1362-1369）——上下滚动边缘
+  效果：`blurMax 32 / blur 1.0 / saturation 0.2`，26px 高渐变遮罩渐隐到
+  `AppTheme.sidebar@0.9`（HIG Materials 滚动边缘模式，注释 :1324-1325）。
+- **判定：卡片可迁，滚动边缘不迁**。卡片 = Rectangle+tint+描边，参数
+  （tint / tintStrength / radius 16=card 档）一一映射 GlassSurface 契约；但 tint
+  是**场景驱动**（白天按天空像素拟合的深蓝、夜间白），不是主题深浅角色，须作为
+  显式 tint 传入，不能走 token 默认深浅。滚动边缘 MultiEffect 模糊的是**自身内容**
+  （`source: savedLocations`，:1332），不是 backdrop，与 GlassSurface/B 层机制不同类，
+  保留为独立「滚动边缘」模式（后续可立项 GlassScrollEdge）。
+
+### LiquidGlassPanel scrim 下发链路（已解决）
+
+链路逐跳（全为 WT 工作树）：
+
+1. 声明：`LiquidGlassPanel.qml:132-181` —— `scrimEnabled`（默认 false）、
+   `scrimOpacity 1.0`、`scrimLevel`（默认 "transparent"）→ preset 表（:170-177）：
+   readable cap .72/decay 1.0、balanced .47/.75、transparent .22/.5、subtle .15/.45；
+   `scrimTint` 黑/白由 `glassFollowsAppearanceMode`+`isDarkTheme` 定（:161-165）；
+   `scrimFixed/scrimGraphite/scrimPearl` 变体（:158-160）。
+2. 转发：`LiquidGlassPanel.qml:239-246` —— 无条件交给内部 `KosRoundedBlurRegion`
+   （cap×scrimOpacity；decay：pearl 4 / graphite 3 / fixed 2 / 普通=presetDecay×opacity）。
+3. 协议声明：`KosRoundedBlurRegion.qml:58-61,77-83` —— 交给 `SurfaceShape`
+   （`Kos.SurfaceShape 1.0`，插件在 `shell/native/surface-shape/`）。
+4. Wire：Wayland 协议 v3 `set_scrim` —— `kwin/glass-effect/src/surfaceshapemanager.h:29-34`
+   （SurfaceShape 结构体字段 scrimEnabled/scrimTint/scrimCap/scrimDecay）。
+5. 消费：`kwin/glass-effect/src/blur.cpp:195-199` —— scrimMode/scrimCap/scrimDecay/
+   scrimLuma* shader uniform 下发。**adaptive 模式**（decay≤1.0）按背景亮度采样
+   （scrimLuma framebuffer 链，blur.cpp:1972-2056）；**fixed 模式**（decay>1，
+   2/3/4 编码 fixed/graphite/pearl，老合成器安全降级为 adaptive 1，
+   `LiquidGlassPanel.qml:155-157` 注）。
+
+**判定：scrim 是合成器侧 shader 机制，不是 QML 背板。** QML 侧另有两条独立变暗
+路径，触发条件不同：
+
+- `LiquidGlassSurface.adaptiveDarkScrim`（`LiquidGlassPanel.qml:127` 声明、:283 转发；
+  `LiquidGlassSurface.qml:38` 声明、:86 消费）——默认 false，仅宿主显式开启。
+- tonal/QML fallback 形态（`paintInQml`，:106-111；body visible :260）自绘表面：
+  此时 `shapeEnabled=false`（:237-238）不发布 SurfaceShape，但 scrim 参数仍转发——
+  「合成器 frost+scrim × QML 自绘」同开是该组件唯一的潜在双重变暗组合。
+
+SPEC §3.2 的「scrim 单一来源」契约成立：默认路径单一（compositor），双重变暗需
+显式 opt-in，无需重议。

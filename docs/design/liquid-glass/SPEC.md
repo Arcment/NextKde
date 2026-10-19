@@ -1,14 +1,17 @@
-# 液态玻璃规范 v1（第 0 批续 R4）
+# 液态玻璃规范 v1.1（第 0 批续 R5）
 
-> 事实基础：同目录 `INVENTORY.md`（R1 四源盘点 + R3 补全 §4–§11）。
+> 事实基础：同目录 `INVENTORY.md`（R1 四源盘点 + R3 补全 §4–§11 + R5 §12）。
 > 所有 `文件:行` 出处沿用已核对引用，本文档不引入未经盘点的新事实。
 > v1 相对 v0 的变化：补入 Apple HIG 硬约束、字阶/间距 token（R3 §8 实测）、
 > 深浅 tint 实测对照（R3 §9）、关闭 4 项工程可查项（R3 §10）、
 > 组件 API 扩到 13 个、待人工裁定收敛到 5 项。
+> v1.1 相对 v1 的变化：组件 API 扩到 16 个（+GlassSlider/GlassSwitch/GlassNavBar
+> 容器契约，R5 §12 盘点）；关闭 weather tint 公式与 scrim 下发链路两项工程项
+> （R5 §12.5，回填 §1.1/§1.4）；§7 待人工裁定收敛到 3 项。
 >
 > 决策纪律：凡能由 HIG 数值或现有代码决定的，本文直接定值（标「定案」）；
 > 标「v1 提案」的是在现有值之间做收敛选择，无需人工参与；
-> 只有「视觉等价但产品语义不同」的才进 §7（≤5 项）。
+> 只有「视觉等价但产品语义不同」的才进 §7（≤3 项）。
 
 ## 1. 三层材质模型（沿 v0，定案）
 
@@ -31,6 +34,12 @@
   直用 `LiquidGlassPanel`/`KosFloatPanel`（INVENTORY §10.3）。
   **定案：直用 LiquidGlassPanel 的面板逐步迁到 ControlCenterGlass 配方**；
   KosFloatPanel 路线（layer-shell 单表面）保留给模态浮层。
+- **weather 迁移定案**（R5 §12.5 已核实公式）：weather 卡片（白天深蓝
+  `rgb(0,96,210)`@0.30 / 夜间白@0.16，`Main.qml:33-35`）可迁 GlassSurface——
+  参数一一映射 tint/tintStrength/radius 16（=card 档）；但 tint 是场景驱动
+  （白天/夜间），须作显式 tint 传入，不走 token 默认深浅。滚动边缘 MultiEffect
+  （`Main.qml:1330-1337,1362-1369`）模糊的是自身内容非 backdrop，**不迁**，
+  保留为独立滚动边缘模式。
 
 ### 1.2 C 层折射（定案）
 - kwin 默认值已实测（INVENTORY §10.1）：`RefractionStrength 0.0`、
@@ -39,6 +48,20 @@
   —— **折射默认关闭**。
 - 白名单：中央控制面板、通知中心、锁屏时间卡片；白名单外忽略折射参数。
 - `useKwinEffect=false` / QML fallback 时静默降级 B→A。
+
+### 1.4 scrim 单一来源（R5 已核实链路，定案）
+
+- `scrimEnabled/scrimLevel` 是**合成器侧 shader 机制**，不是 QML 背板。链路
+  （INVENTORY §12.5）：`LiquidGlassPanel.qml:132-181`（preset 表：readable .72/1.0、
+  balanced .47/.75、transparent .22/.5、subtle .15/.45）→ `:239-246` 转发
+  KosRoundedBlurRegion → `KosRoundedBlurRegion.qml:77-83` SurfaceShape →
+  Wayland 协议 v3 `set_scrim`（`surfaceshapemanager.h:29-34`）→ KWin shader
+  uniform（`blur.cpp:195-199`；adaptive=decay≤1.0 按背景亮度采样，fixed=decay 2/3/4）。
+- QML 侧仅有两条独立变暗路径，触发条件不同：`adaptiveDarkScrim`（默认 false，
+  `LiquidGlassPanel.qml:127,283`）与 tonal/paintInQml 自绘 fallback（:260）。
+  「合成器 scrim × QML 自绘」同开是唯一潜在双重变暗组合，需宿主显式 opt-in。
+- **定案：默认路径单一（compositor scrim）；GlassDialog/GlassPopover 等 spec 中
+  「scrim 单一来源 = compositor」契约成立，无需重议。**
 
 ## 2. Token 表 v1
 
@@ -57,7 +80,7 @@ Token 宿主：shell 玻璃体系 = `AppearanceTokens`（`AppearanceTokens.qml:1
 
 > 迁移注记：`ControlCenterGlass` 现为 material regular + KWin level 1
 > （`ControlCenterGlass.qml:9-21`）；迁移到上表后 small 面板应改标
-> `clear` 或按 regular 默认 8 提升。归入 §7-⑤ 之外的机械迁移，不需裁定。
+> `clear` 或按 regular 默认 8 提升。属机械迁移，不需裁定。
 
 **浅/深色值（实测，非提案）**：shell 玻璃的深浅差异不是独立色值——
 `baseColor` 恒为 `rgba(0,0,0,0.1)`（`LiquidGlassSurface.qml:16`、`LiquidGlassPanel.qml:115`），
@@ -145,7 +168,7 @@ Footnote 10/13、Caption 10/13；正文 13pt，**最小 10pt**。
 - 对比度：≤17pt 文本 ≥4.5:1；≥18pt 或粗体 ≥3:1。
 - 命中区：默认 28×28，最小 20×20（SettingsCheckBox 20×20，`SettingsCheckBox.qml:10-11`，达标）。
 - 仅键盘可完成全部操作；不得只靠颜色传达状态（focus 环 + 勾选图形必配）。
-- 支持 Reduce Motion（见 §2.7）；尽量少用定时自动消失（Toast 例外，见 §7-③）。
+- 支持 Reduce Motion（见 §2.7）；尽量少用定时自动消失（Toast 例外，见 §7-①）。
 
 ### 2.7 动效
 
@@ -156,9 +179,11 @@ Footnote 10/13、Caption 10/13；正文 13pt，**最小 10pt**。
 | popup startScale / anchorOffset | 0.96 / 20 | `AppearanceTokens.qml` 同处 |
 | 弹层缓动 | open=OutCubic / close=InCubic，时长按剩余进度等比缩放 | `PopupMotion.qml:9-11,46-57` |
 | 液态按压 expansion | pressed 1.0 / hovered 0.3 / idle 0，进 token，删控件内硬编码 | 现 `LiquidGlassButton.qml:25` |
+| slider expansion / x 跟随 | pressed 270 OutBack / 释放 460 OutQuint / x 200 OutQuint | `LiquidSlider.qml:64-70,245-250`（R5 收进 token） |
+| switch thumbX / expansion | 200 OutCubic / pressed 120·释放 200 | `LiquidGlassSwitch.qml:71-84`（R5 收进 token） |
 | 环境光过渡 | 2600，收进 motion token | 现 `LiquidGlassSurface.qml:45`、`LiquidGlassPanel.qml:119` |
 | tooltip 显隐 | 70ms（= fast 档内短反馈，保留现值） | `StatusTooltip.qml:27-28` |
-| toast 存留 | 1600ms | `ActionFeedbackToast.qml:10`；与 HIG 张力见 §7-③ |
+| toast 存留 | 1600ms | `ActionFeedbackToast.qml:10`；与 HIG 张力见 §7-① |
 | **reduceMotion = 0** | 上述时长全部置 0；C 层折射动画关闭；环境光过渡跳过；expansion 关闭 | 定案 |
 
 **reduceMotion 贯通（定案，非人工项）**：`ApplicationPreferences` 已有键
@@ -168,7 +193,7 @@ Footnote 10/13、Caption 10/13；正文 13pt，**最小 10pt**。
 经 ApplicationPreferences 单例只读绑定补消费点（现 `git grep reduceMotion -- shell`
 无命中），SegmentedTabBar 属性改为绑定全局值。
 
-## 3. 组件 API（13 个）
+## 3. 组件 API（16 个）
 
 命名统一 `Glass*` 前缀；listenfree `GlassSurface.qml:8-30` 升格为全局
 GlassSurface，calendar 局部同名组件（`Main.qml:672`）废弃迁移。
@@ -187,7 +212,7 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 
 ### 3.2 GlassDialog（模态对话框）
 - 属性：`radius: surface 24`、`material: thick`、scrim（**单一来源** = compositor
-  scrim，`KosRoundedBlurRegion.qml:78-81`；QML 背板仅 fallback，废双重变暗）、
+  scrim，链路定案见 §1.4；QML 背板仅 fallback，废双重变暗）、
   标题 Title1 22/26、正文 Body 13/16、按钮高 28、内边距 `space.lg` 20。
 - 状态：`opening / open / closing / closed`。
 - 层级：layer-shell 单表面（KosFloatPanel 路线）；生命周期三模型
@@ -215,14 +240,14 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 - 属性：`material: thick`（小面积最厚档）、`radius: small 10`（收编现值 7/6，
   `StatusTooltip.qml:52`、`DockAppNameTooltip.qml:73`）、primary 字号 Callout 12 +
   secondary Footnote 10（现值 12/10，`StatusTooltip.qml:63,70`）、贴边 margin -6 保留
-  （锚定既定手法，手感见 §7-④）。
+  （锚定既定手法，手感见 §7-②）。
 - **定案：dock tooltip 迁入玻璃配方**（现状 ThemeService 纯色 Rectangle，
   INVENTORY 冲突⑥）。
 
 ### 3.6 GlassToast
 - LiquidGlassPanel 子类：`material: regular`、`scrimLevel: "readable"`、
   `radius: pill`（`ActionFeedbackToast.qml:28-31`）、高 36、字号 Callout 12 Medium、
-  显隐 150/180ms + scale 0.96→1（:38-41）、存留 1600ms（§7-③）。
+  显隐 150/180ms + scale 0.96→1（:38-41）、存留 1600ms（§7-①）。
 
 ### 3.7 GlassNotification（通知卡片族）
 - 容器卡片 `radius: surface 24`（`NotificationHistoryCard.qml:78,93`）；
@@ -275,6 +300,52 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
   （浅 `#22000000` / 深 `#30ffffff`，`AppTheme.qml:120`）。数值无代码依据，
   标 v1 提案；shell 侧保留 KosKineticScroll 作为行为层。
 
+### 3.14 GlassSlider（R5 §12.1 盘点后新增）
+- 收编对象：LiquidSlider（双形态收编目标）；KosSlider 保留为 foundation 非玻璃
+  形态；ColorRampSlider 维持专用（不收编，INVENTORY §12.1）。
+- 属性：`value 0..1`、`wheelStep 0.01` / `wheelPixelStep 10`（Ctrl+滚轮协议，
+  `LiquidSlider.qml:107-112`）、`trackHeight 6`、thumb 32×16（:27-29）、
+  `accentColor`（进 token，废 `#0a84ff` 硬编码，:18）。
+- 信号契约：`previewChanged / commitRequested / canceled`；提交去抖 180ms、
+  提交后 400ms 屏蔽 x 动画（:50-54,:153）——异步写回不跳变，为定案行为。
+- 形态：双形态沿用 `ControlForm.materialForm`（:41）——iOS 玻璃 thumb（六层，
+  :252-418）/ M3 竖把手（`m3Scale=min(1,h/44)`，:430-434）；高度 44 默认，
+  M3 随宿主高度 30–44 缩放。
+- 状态：`idle / hovered / pressed / disabled`；expansion 读 token（§2.7），
+  **悬停 expansion 收敛 0.3**（slider 现 0.40 `:507` vs button 0.3——v1 提案取 0.3）。
+- 时长：pressed 270/释放 460、x 跟随 200（:66-67,:247）进 motion token
+  （§2.7 增补行）。
+
+### 3.15 GlassSwitch（R5 §12.2 盘点后新增）
+- 收编对象：LiquidGlassSwitch（注意实名，无 "LiquidSwitch"，qmldir 为证）；
+  KosSwitch 保留为 foundation 非玻璃形态（无障碍实现完整，`KosSwitch.qml:15-20`，
+  其无障碍做法为 GlassSwitch 必须具备）。
+- 属性：`checked` / `toggled(bool)`（宿主确认值，组件不本地赋值，:98-104 定案
+  行为）；尺寸 74×32、thumb 44×26、`travel = width-44-6`（:29-30,:56-58）；
+  M3 形态 handle 16dp off/24dp on、`m3Scale=min(1,h/32)`（:323-324）。
+- 状态：`off / on / hovered / pressed / disabled / focusVisible`；focus 环必配
+  （§2.6，KosSwitch :36-38 的描边做法收编）。
+- 时长：thumbX 200 OutCubic、expansion pressed 120/释放 200（:71-84）进 motion
+  token；layer 门控（仅 expansion>0 或半透明开 FBO，:42-49）为性能定案行为。
+- 主题：玻璃形态无深浅分支（track 只看 progress，:63-68）——保持现状，深浅由
+  材质三档与 scrim 承担（§2.1）。
+
+### 3.16 GlassNavBar（导航容器契约，R5 §12.3 判定：容器）
+- **判定为导航容器**（model/currentIndex/selectionChanged 契约，:21-23,:50），
+  非表单控件；表面做法属玻璃控件家族，归入弹层页/表面页演示而非控件页表单区。
+- 属性：`model [{id,label?,icon}]`、`currentIndex`、`selectionChanged(index)`、
+  5 档 size presets（tiny 34 / small 42 / medium 54 / large 67 / XL 80，
+  :56-62）、`barHeight`（比例缩放，:65）、`itemDelegate` 可覆写（:453）。
+- 字阶：label 字号 preset 7/8/9/11/13 **低于 HIG 最小 10** → label 最小 Footnote
+  10（icon 为符号文本，豁免字阶但 iconSize 保持 preset 14–28）。
+- 颜色：accent 进 token（废 `#ff453a` 硬编码，:32）；itemColor `#ffffff`（:37）
+  仅适配深色玻璃底 → 浅色底改走 AppearanceTokens 前景角色（机械迁移）。
+- 动效：弹簧 physics（velocity=diff×0.5，:160-180）+ 显示层 100ms OutCubic
+  （:115-117）+ lens 280ms 自动隐（:148）；reduceMotion 时 physics/100ms 过渡
+  关闭、直接落位。
+- 状态：`idle / selected / disabled`；item 命中区 = itemWidth×barHeight，
+  最小档 56×34 ≥ HIG 28×28（达标）。
+
 ## 4. 性能规则（沿 v0 定案）
 
 1. 禁止每组件独立 `layer.enabled` + ShaderEffect；玻璃收尾由 GlassSurface 系承担，
@@ -287,10 +358,12 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 ## 5. 与 HIG 的差异登记（不裁定，仅登记）
 
 - Toast 定时消失 1600ms：HIG 建议尽量少用定时自动消失，但 Toast 本质是
-  定时反馈，保留 → 后果见 §7-③。
+  定时反馈，保留 → 后果见 §7-①。
 - ComboBox 高 36：超 HIG 默认 28，但属允许范围（≥最小 20）且为现值。
 - 通知 Entry 9 号字、SessionMenu 比例字号：违规已定迁移方案（§2.4），
-  极端情况可读性见 §7-⑤。
+  极端情况可读性见 §7-③。
+- NavBar label 字号 preset 7/8/9（`LiquidNavBar.qml:57-59`）：低于 HIG 最小
+  10pt，迁 Footnote 10（§3.16）。
 
 ## 6. 迁移清单（机械项，不需裁定）
 
@@ -299,26 +372,27 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 3. 菜单四来源（listenfree ContextMenu / MusicMenu / WallpaperValueMenu / SessionMenu）
   → GlassMenu（§3.4）。
 4. ComboBox 三份 → GlassComboBox；CheckBox 三份 → GlassCheckbox；Segmented 两套 →
-  统一比例制（§3.8）；ScrollBar 四做法 → GlassScrollBar + KosKineticScroll。
+  统一比例制（§3.8）；ScrollBar 四做法 → GlassScrollBar + KosKineticScroll；
+  Slider 收编 LiquidSlider（KosSlider/ColorRampSlider 保留，§3.14）、
+  Switch 收编 LiquidGlassSwitch（§3.15）、NavBar 立容器契约 GlassNavBar（§3.16）。
 5. Dialog 三生命周期模型 → KosDialog + PopupMotion（§3.2）；圆角/字号散值归档。
 6. 字号 9→10、比例字号废除、硬编码字族移除（§2.4）。
 7. 间距散值 1/3/5/6/7/9/10/14 → 四档（§2.5）。
 8. 液态 expansion / ambientTransitionDuration 进 token，删硬编码（§2.7）。
 9. shell QML 补 reduceMotion 消费点（§2.7）。
 10. calendar 局部 GlassSurface 废弃迁移到全局 GlassSurface（§3 开头）。
+11. weather 卡片 → GlassSurface 显式 tint（昼夜场景值传参，§1.1）；
+    滚动边缘 MultiEffect 保留为独立模式，不迁（INVENTORY §12.5）。
 
-## 7. 待人工裁定（5 项，均为视觉/产品语义）
+## 7. 待人工裁定（3 项，均为视觉/产品语义）
 
-1. **weather `Main.qml` tint/模糊配方**：仅抽查级（MultiEffect 出现于 :1330,:1362，
-   INVENTORY §11）。A. 整体迁 GlassSurface 放弃局部公式；B. 提炼公式进 tint token。
-   后果：weather 视觉是否与全局一致。
-2. **`LiquidGlassPanel` scrim 下发链路**：`scrimEnabled/scrimLevel` 在 :86 声明，
-   到合成器的路径未逐行读（INVENTORY §11）。A. 确认后沿用；B. 若走 QML 背板
-   则与 compositor scrim 二选一需重议。后果：弹层变暗是否双重。
-3. **Toast 存留 1600ms**：`ActionFeedbackToast.qml:10`。A. 保留（快反馈惯例）；
+> R5 已由代码关闭 2 项：weather tint 公式（→ §1.1 定案，INVENTORY §12.5）、
+> scrim 下发链路（→ §1.4 定案）。以下仅剩「视觉等价但产品语义不同」的项。
+
+1. **Toast 存留 1600ms**：`ActionFeedbackToast.qml:10`。A. 保留（快反馈惯例）；
    B. 延长/改为可悬停暂停。后果：HIG「少用定时消失」的符合程度。
-4. **Tooltip 贴边 -6px 负 margin**（`StatusTooltip.qml:40-43`、
+2. **Tooltip 贴边 -6px 负 margin**（`StatusTooltip.qml:40-43`、
    `DockAppNameTooltip.qml:67-69`）：A. 保留；B. 改正偏移。后果：贴边手感。
-5. **SessionMenu 比例字号废除后的极端高度表现**：固定 Footnote 10 在
+3. **SessionMenu 比例字号废除后的极端高度表现**：固定 Footnote 10 在
    itemHeight 极端值下是否可读（:286 现值 `itemHeight*0.34`）。A. 接受固定档；
    B. 对 SessionMenu 单独设定 itemHeight 范围。后果：锁屏会话菜单可读性。

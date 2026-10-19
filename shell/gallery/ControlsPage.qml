@@ -30,6 +30,14 @@ Item {
         ["normal", "hovered", "focused", "error", "filled", "disabled"]
     readonly property var checkboxStates:
         ["unchecked", "checked", "hovered", "pressed", "focusVisible", "disabled"]
+    // SPEC §3.12 defines no state list; these six are the closed, keyboard,
+    // expanded final state and disabled states the gallery needs to show.
+    readonly property var comboStates:
+        ["idle", "hovered", "pressed", "focusVisible", "open", "disabled"]
+    // SPEC §3.8 defines the ratio system, not states. "selected" moves the
+    // selection to the second cell; the first card keeps it on the first.
+    readonly property var segmentStates:
+        ["idle", "hovered", "pressed", "focusVisible", "selected", "disabled"]
     readonly property var tiers: ["clear", "regular", "thick"]
 
     readonly property bool buttonVisible: filter === "" || filter === "button"
@@ -37,8 +45,12 @@ Item {
         filter === "" || filter === "textfield"
     readonly property bool checkboxVisible:
         filter === "" || filter === "checkbox"
+    readonly property bool comboVisible:
+        filter === "" || filter === "combobox"
+    readonly property bool segmentedVisible:
+        filter === "" || filter === "segmented"
     readonly property var knownFilters:
-        ["button", "textfield", "checkbox"]
+        ["button", "textfield", "checkbox", "combobox", "segmented"]
     readonly property bool unknownFilter:
         filter !== "" && knownFilters.indexOf(filter) === -1
 
@@ -169,7 +181,8 @@ Item {
                 visible: page.unknownFilter
                 width: parent.width
                 text: "GALLERY_CONTROLS_FILTER=" + page.filter
-                    + " 尚未交付（G4b 已含 button / textfield / checkbox）"
+                    + " 尚未交付（G4c 已含 button / textfield / checkbox"
+                    + " / combobox / segmented）"
                 color: page.inkDim
                 font.pixelSize: 13
             }
@@ -466,6 +479,254 @@ Item {
                                     }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // ── GlassComboBox ──────────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.comboVisible ? comboColumn.height : 0
+                visible: page.comboVisible
+
+                Column {
+                    id: comboColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "GlassComboBox"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4c"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "高 36 · radius pill · Body 13/16 · 描边 α 0.16 深 / 0.12 浅"
+                            + " · sheet 深 #262b31 / 浅 #f6f8fb · 弹层 radius 16"
+                            + " · offset 5 · padding 8 · 高 min(360, 内容+12)"
+                            + " · 状态 idle/hovered/pressed/focusVisible/open/disabled"
+                        color: page.inkDim
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    Repeater {
+                        model: page.tiers
+
+                        delegate: Column {
+                            id: comboTierRow
+                            required property string modelData
+
+                            width: comboColumn.width
+                            spacing: 6
+
+                            Text {
+                                height: 14
+                                text: "material " + comboTierRow.modelData
+                                color: page.ink
+                                font.pixelSize: 11
+                            }
+
+                            Row {
+                                id: comboStateRow
+                                width: parent.width
+                                spacing: 8
+
+                                Repeater {
+                                    model: page.comboStates
+
+                                    delegate: ControlStateCard {
+                                        id: comboCard
+                                        required property string modelData
+
+                                        width: (comboStateRow.width
+                                            - 5 * comboStateRow.spacing) / 6
+                                        // Tall enough for field + offset 5 +
+                                        // the 3-row popup (118) inside the card.
+                                        height: 196
+                                        materialTier: comboTierRow.modelData
+                                        stateLabel: comboCard.modelData
+
+                                        GlassComboBox {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            y: 10
+                                            width: Math.min(184, parent.width)
+                                            forcedState: comboCard.modelData
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Full-size live sample; the matrix cells are only ~88 px
+                    // wide, which is narrower than a comfortable field.
+                    Item {
+                        width: parent.width
+                        height: 44
+
+                        GlassComboBox {
+                            id: comboLive
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 220
+                        }
+                        Text {
+                            anchors.left: comboLive.right
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "全尺寸 live · 高 36 · 点击展开；"
+                                + "弹层终态见上方 open 卡（行高 30 · 偏移 5 · padding 8）"
+                            color: page.inkDim
+                            font.pixelSize: 11
+                        }
+                    }
+                }
+            }
+
+            // ── SegmentedControl ───────────────────────────────────────
+            Item {
+                width: column.width
+                height: page.segmentedVisible ? segmentColumn.height : 0
+                visible: page.segmentedVisible
+
+                Column {
+                    id: segmentColumn
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        width: parent.width
+                        height: 20
+                        spacing: 8
+
+                        Text {
+                            height: parent.height
+                            verticalAlignment: Text.AlignVCenter
+                            text: "SegmentedControl"
+                            color: page.ink
+                            font.pixelSize: 15
+                            font.weight: Font.DemiBold
+                        }
+                        Rectangle {
+                            width: 34
+                            height: 20
+                            radius: 10
+                            color: Qt.rgba(1, 1, 1, 0.14)
+                            Text {
+                                anchors.centerIn: parent
+                                text: "G4c"
+                                color: page.inkDim
+                                font.pixelSize: 10
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: "cell 72×40 · outerPadding 2 · Body 13/16"
+                            + " · liquid = pill（radius height/2）"
+                            + " · material = card（radius height×0.38）"
+                            + " · 状态 idle/hovered/pressed/focusVisible/selected/disabled"
+                        color: page.inkDim
+                        font.pixelSize: 11
+                        elide: Text.ElideRight
+                    }
+
+                    Repeater {
+                        model: page.tiers
+
+                        delegate: Column {
+                            id: segmentTierRow
+                            required property string modelData
+
+                            width: segmentColumn.width
+                            spacing: 6
+
+                            Text {
+                                height: 14
+                                text: "material " + segmentTierRow.modelData
+                                color: page.ink
+                                font.pixelSize: 11
+                            }
+
+                            Row {
+                                id: segmentStateRow
+                                width: parent.width
+                                spacing: 8
+
+                                Repeater {
+                                    model: page.segmentStates
+
+                                    delegate: ControlStateCard {
+                                        id: segmentCard
+                                        required property string modelData
+
+                                        width: (segmentStateRow.width
+                                            - 5 * segmentStateRow.spacing) / 6
+                                        height: 104
+                                        materialTier: segmentTierRow.modelData
+                                        stateLabel: segmentCard.modelData
+
+                                        // Two compact cells (40×26) so the
+                                        // control fits the ~88 px card; the
+                                        // full-size sample sits below.
+                                        GlassSegmentedControl {
+                                            anchors.centerIn: parent
+                                            model: ["日", "周"]
+                                            cellWidth: 40
+                                            cellHeight: 26
+                                            currentIndex: segmentCard.modelData === "selected"
+                                                ? 1 : 0
+                                            forcedState: segmentCard.modelData
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        width: parent.width
+                        height: 44
+
+                        GlassSegmentedControl {
+                            id: segmentLive
+                            anchors.verticalCenter: parent.verticalCenter
+                            model: ["日", "周", "月"]
+                            currentIndex: 1
+                        }
+                        Text {
+                            anchors.left: segmentLive.right
+                            anchors.leftMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "全尺寸 live · 3 × 72×40 + outerPadding 2"
+                                + " · 当前 radius = " + (page.materialForm
+                                    ? "height×0.38（card）" : "height/2（pill）")
+                            color: page.inkDim
+                            font.pixelSize: 11
                         }
                     }
                 }

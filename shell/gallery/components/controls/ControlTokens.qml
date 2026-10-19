@@ -41,11 +41,16 @@ QtObject {
     readonly property int comboPopupOffset: 5
     readonly property int comboPopupPadding: 8
     readonly property int comboPopupMaxHeight: 360
+    // SPEC gives the popup height as min(360, content + 12) but no row
+    // height; 30 keeps Body 13 with a comfortable touch row (G4c extrapolation).
+    readonly property int comboItemHeight: 30
 
     // SPEC §3.8 — SegmentedControl.
     readonly property int segmentCellWidth: 72
     readonly property int segmentCellHeight: 40
     readonly property int segmentOuterPadding: 2
+    // Card form ratio from §3.8; pill form is height / 2.
+    readonly property real segmentCardRadiusRatio: 0.38
 
     // SPEC §3.14 — GlassSlider.
     readonly property int sliderHeight: 44

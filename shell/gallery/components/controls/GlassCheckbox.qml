@@ -77,27 +77,6 @@ Item {
 
     activeFocusOnTab: true
 
-    // ── focus ring: shape around the box, plus ink hairline ───────────────
-    Rectangle {
-        anchors.fill: box
-        anchors.margins: -3
-        radius: tokens.checkBoxRadius + 3
-        color: "transparent"
-        border.width: 2
-        border.color: root.primaryColor
-        visible: root.focusVisible
-    }
-    Rectangle {
-        anchors.fill: box
-        anchors.margins: -1
-        radius: tokens.checkBoxRadius + 1
-        color: "transparent"
-        border.width: 1
-        border.color: AppearanceTokens.isDarkTheme
-            ? Qt.rgba(1, 1, 1, 0.9) : Qt.rgba(0, 0, 0, 0.75)
-        visible: root.focusVisible
-    }
-
     Row {
         id: row
         anchors.verticalCenter: parent.verticalCenter
@@ -108,6 +87,29 @@ Item {
             id: box
             width: tokens.checkBoxSize
             height: tokens.checkBoxSize
+
+            // Focus ring: shape around the box, plus ink hairline. Declared
+            // inside the box so they can anchor to it (root-level rings would
+            // anchor across parents, which QML rejects).
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: -3
+                radius: tokens.checkBoxRadius + 3
+                color: "transparent"
+                border.width: 2
+                border.color: root.primaryColor
+                visible: root.focusVisible
+            }
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: -1
+                radius: tokens.checkBoxRadius + 1
+                color: "transparent"
+                border.width: 1
+                border.color: AppearanceTokens.isDarkTheme
+                    ? Qt.rgba(1, 1, 1, 0.9) : Qt.rgba(0, 0, 0, 0.75)
+                visible: root.focusVisible
+            }
 
             Rectangle {
                 id: boxBody

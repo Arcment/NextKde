@@ -56,6 +56,9 @@ Item {
         anchors.right: parent.right
         anchors.topMargin: 7
         anchors.rightMargin: 8
+        width: parent.width - 12
+        horizontalAlignment: Text.AlignRight
+        elide: Text.ElideRight
         text: root.materialTier + " · " + root.stateLabel
         color: root.ink
         font.pixelSize: 10

@@ -167,3 +167,27 @@ G4b 已交付：TextField 与 Checkbox 的 3 材质 × 6 状态矩阵，同为�
   unchecked / checked / hovered / pressed / focusVisible / disabled。
 - 验收截图：`g4-dark-textfield.png`、`g4-dark-checkbox.png`
   （`GALLERY_CONTROLS_FILTER=textfield|checkbox`，形态 liquid，offset 0）。
+
+G4c 已交付：ComboBox 与 SegmentedControl 的 3 材质 × 6 状态矩阵，同为双形态。
+
+- `GlassComboBox.qml`：高 36、radius pill、Body 13/16。liquid 描边按 §3.12
+  （深色 white α0.16 / 浅色 black α0.12）；material 为 M3 filled + outline。
+  弹层用 sheetColor 深 `#262b31` / 浅 `#f6f8fb`、radius 16、字段下偏移 5、
+  padding 8、高 `min(360, 内容+12)`；弹层在组件内绘制且不裁剪，矩阵的
+  `open` 卡直接呈现展开终态（含选中 √ 与行高亮）。
+- `GlassSegmentedControl.qml`：统一比例制 pill `height/2`、
+  card `height×0.38`；cell 72×40、outerPadding 2、Body 13/16。
+  gallery 映射为 liquid → pill、material → card；选中段为抬升玻璃胶囊
+  （material 为 accent 填充），focusVisible 为 2px 环 + ink 发丝（形状，不只颜色）。
+- ComboBox 矩阵六卡：idle / hovered / pressed / focusVisible / open / disabled。
+  `open` 即 §3.12 弹层终态。卡片高 196，容下字段 + 偏移 + 118px 弹层。
+- Segmented 矩阵六卡：idle / hovered / pressed / focusVisible / selected /
+  disabled；`selected` 卡把选中移到第二格。因状态卡宽约 88px，矩阵内用
+  compact 样本 `cellWidth 40 × cellHeight 26`（两格），矩阵下方另有
+  全尺寸 live 样本 `3 × 72×40 + outerPadding 2`，尺寸 token 未改。
+- `ControlStateCard` 右上角标注改为限宽 + 右对齐 + elide，长状态名
+  （focusVisible）不再越出卡边。
+- `GlassCheckbox` 的两个 focus 环移入 box 内部锚定（此前锚到非兄弟节点，
+  run.log 会产生 QML 警告）；形状与尺寸不变。
+- 验收截图：`g4-dark-combobox.png`、`g4-dark-segmented.png`
+  （`GALLERY_CONTROLS_FILTER=combobox|segmented`，形态 liquid，offset 0）。

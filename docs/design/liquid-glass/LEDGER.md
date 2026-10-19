@@ -1,52 +1,77 @@
 # 液态玻璃 Gallery — G4（控件矩阵）
 
 ## 本轮
-G4b 已交付（2026-10-19）：GlassTextField + GlassCheckbox，
-各自 3 材质 × 6 状态矩阵，随 `ControlForm.materialForm` 双形态切换。
+G4d 代码已落地但**未验收**（2026-10-19）：GlassSlider + GlassSwitch 双组件、
+各自 3×6 矩阵、交互契约演示行均已写入，`qmllint` 无语法错误；但本轮所有
+gallery 启动都在 EGL 上下文创建处崩溃（vmwgfx / libgallium），拿不到任何
+控件页截图，因此 G4d **不勾选**。
 
 ## 队列（✅=已交付）
 - [x] G4a 控件页骨架 + ControlStateCard + GlassButton + 双形态切换
 - [x] G4b GlassTextField + GlassCheckbox
-- [ ] G4c GlassComboBox + GlassSegmentedControl
-- [ ] G4d GlassSlider + GlassSwitch（行为契约演示）
+- [x] G4c GlassComboBox + GlassSegmentedControl
+- [ ] G4d GlassSlider + GlassSwitch（代码已写，截图/目检受阻）
 - [ ] G4e GlassScrollBar + 字阶对照区
 - [ ] G4f 全部截图补齐 + ledger 收口
 
 ## 本轮已改
-- `shell/gallery/components/controls/GlassTextField.qml`：高 28、Body 13/16。
-  liquid = pill 玻璃体；material = M3 filled、radius 10。focus = 2px accent
-  描边 + 外移 3px 的 2px 外环 + 1px ink 发丝 + tint 加深；error = 2px 红描边
-  + 右侧圆形「!」徽标。live 模式是真实 TextInput（可输入、可 Tab 聚焦）。
-- `shell/gallery/components/controls/GlassCheckbox.qml`：框 20×20、radius 5、
-  label Body 13/16；勾选为 QtQuick.Shapes 两段折线 √；focusVisible = 外环 +
-  ink 发丝；hover/pressed 状态层 + pressed 0.90 缩放；点击切换并 `toggled`。
-- `shell/gallery/ControlsPage.qml`：新增 TextField / Checkbox 两段 3×6 矩阵；
-  `GALLERY_CONTROLS_FILTER` 接受 textfield / checkbox；unknownFilter 列表更新。
-- `docs/design/liquid-glass/g4-{dark-textfield,dark-checkbox}.png`；
-  DEMO.md 追加 G4b 进度。
+- `shell/gallery/components/controls/ControlTokens.qml`：新增 slider 时长
+  （press 270 / release 460 / x 200）、switch 时长（thumbX 200、press 120 /
+  release 200）与 `accentColor` token（slider/switch 不再在调用点写
+  `#0a84ff`）。既有 `sliderCommitDebounce 180`、`sliderSuppressX 400` 等沿用。
+- `shell/gallery/components/controls/GlassSlider.qml`：value 0..1、高 44、
+  track 6、thumb 32×16；iOS 玻璃 thumb（磨砂底/折射/高光/内沿/accent 溢染）
+  与 M3 形态（`m3Scale=min(1,h/44)`、inactive 4 / active 16 / handle 4×44）。
+  hover expansion 0.3、pressed 1.0；`previewChanged / commitRequested /
+  canceled`；松手提交当前显示值，提交后 400ms 屏蔽 thumb x 动画；Ctrl+滚轮
+  `wheelStep 0.01` / `wheelPixelStep 10`，180ms 去抖提交。为读数行额外暴露
+  `wheelValue` / `wheelSteps`（仅 gallery 展示，不是契约）。
+- `shell/gallery/components/controls/GlassSwitch.qml`：74×32、thumb 44×26、
+  `travel = width-44-6`；`checked` 归宿主，`toggle()` 只发 `toggled(!checked)`，
+  组件不本地赋值；thumbX 200 OutCubic、press expansion 120 / 释放 200；
+  M3 track + handle 16 off / 24 on、`m3Scale=min(1,h/32)`；focusVisible =
+  2px accent 环 + ink 发丝；Space/Enter 可切换。**偏差**：生产件用 pill
+  OpacityMask 裁剪放大后的透镜，gallery 基线改为把展开高度夹到
+  `height-2`（宽度仍 1.4×，61.6px，仍在 74px track 内），避免每卡一个离屏层。
+- `shell/gallery/ControlsPage.qml`：新增 Slider 段（6 卡：
+  idle/hovered/pressed/disabled + `value 0%` / `value 100%` 两个取值样张）
+  与 Switch 段（off/on/hovered/pressed/disabled/focusVisible 正好 6 态）；
+  两段下方各有 live 行与只读读数：slider `preview / commit / wheel（档数）/
+  canceled`，switch `requested / confirmed`（350ms 模拟宿主异步确认）。
+  `GALLERY_CONTROLS_FILTER` 增加 slider / switch。
 
 ## 仍差
-- Checkbox 的 focusVisible 外环与 checked 的 accent 填充同色，20px 框上环距
-  仅 1px（外环 -3px / ink 发丝 -1px），远看近似一圈；形状仍在、非纯色，
-  但若要求更醒目需加大环距（本轮未再改，按小步纪律停手）。
-- 背景板 36px 黑白圆点仍会透过 clear 档卡片（既有问题，未为本轮改动）。
-- 静态图不能判 hover/pressed 动效，也不能判 TextInput 光标闪烁。
-- 字段在窄卡（约 95px 内容宽）内 placeholder 与值都被裁剪；矩阵用途只看
-  形态与状态，live 演示需等整页截图轮（G4f）再核对宽度。
+- **G4d 四张验收截图全部缺失**：`g4-dark-slider`、`g4-dark-switch`、
+  `g4-light-slider`、`g4-light-switch`（环境阻塞，见下）。
+- G4d 未做目检：矩阵卡内约 88px 宽下滑块的可读性、thumb 在 0/1 端点与卡边
+  距、Switch 三档材质上的 track 对比、M3 形态比例、live 读数行是否溢出。
+- 静态图不能判 preview/commit 动效、180ms 去抖、400ms 屏蔽 x 动画、
+  thumbX OutCubic、宿主确认窗口。
+- G4c 遗留：ComboBox `open` 卡高 196 导致整段高于视口，待 G4f 整页图核对；
+  clear 档仍会透出背景板 36px 圆点；Segmented 矩阵为 compact 40×26。
+- 字阶对照区尚未实现（G4e）。
+
+## 环境（本轮阻塞）
+- 连续 5 次启动均在 EGL 上下文创建处崩溃：
+  `QtWaylandClient::QWaylandGLContext::QWaylandGLContext` →
+  `QSGRhiSupport::maybeCreateOffscreenSurface`，崩溃帧全在
+  `libgallium-26.0.8`（vmwgfx 2.21.0）。`run.log` 均以
+  `Configuration Loaded` 结束，**无 QML / TypeError / 加载失败**；截图始终是
+  普通桌面（PNG 字节数完全相同）。
+- 已排除的措施：间隔 6s / 15s 重启；移除 Switch 的 OpacityMask 离屏层
+  （该简化已保留）；`QT_QUICK_BACKEND=software`；`LIBGL_ALWAYS_SOFTWARE=1`。
+  均在同一栈崩溃。
+- 18:11 遗留的 quickshell crash-handler 曾把崩溃弹窗盖在桌面上，已结束该
+  孤儿进程后再试，仍复现。
+- 按纪律停止重试，未做无上限重启。
 
 ## 外推（已写进代码注释）
-- SPEC §3.10 只列 normal/focused/error/disabled；矩阵补 hovered 与 filled
-  （带值外观）两卡，均非新增状态。
-- SPEC 未给 TextField 圆角：liquid 取 pill（height/2），material 取 Button
-  同款 small 10。
-- Checkbox 的 material 勾选框保留 SPEC 的 radius 5（不改成 M3 的 2）。
-- focus 卡统一采用「描边 + 外环」双形状，满足 HIG §2.6 不只靠颜色。
-
-## 环境
-- 两次截图 `run.log` 均只有 wallpaper colorquantizer WARN，无 QML 报错。
-- 截图均与 `shot.sh` 同行前置 `GALLERY_PAGE` / `GALLERY_CONTROLS_FILTER` /
-  `GALLERY_CONTROLS_OFFSET` / `GALLERY_CONTROL_FORM`。
-- 桌面未再停留在 KWin Overview；无需 DBus 干预。
+- Switch 用高度夹取代替生产件的 pill mask（见上），是 gallery 渲染折衷，
+  不改变 token / 状态集。
+- Slider 的 `wheelValue` / `wheelSteps` 只为 live 读数，不进入契约。
+- Slider 矩阵的 `value 0%` / `value 100%` 是取值样张，不是新增状态；
+  SPEC §3.14 的状态集仍是 idle/hovered/pressed/disabled。
+- 静态读数区初始显示 `commit — / wheel —（0 档）`，由交互后填充。
 
 ## 必须做（来自 DEMO.md / SPEC §3.8–§3.15）
 1. 每控件 3 材质 × 6 状态矩阵；卡片标注「材质 · 状态」。
@@ -62,16 +87,26 @@ G4b 已交付（2026-10-19）：GlassTextField + GlassCheckbox，
   `GALLERY_CONTROLS_FILTER`、`GALLERY_CONTROL_FORM`，与 shot.sh 同行前置。
 - 静态截图不能判动效；只核对终态与读数。
 
-## 上一批（G4a / G3 已交付，勿重做）
+## 上一批（G4a / G4b / G4c / G3 已交付，勿重做）
 - G4a：ControlsPage 骨架 + ControlStateCard + GlassButton 3×6 矩阵 +
   顶部 liquid/material 切换；gallery 本地 ControlTokens。
+- G4b：GlassTextField + GlassCheckbox 3×6 矩阵；focus 双形状、error 图标、
+  checkbox √ 路径。
+- G4c：GlassComboBox（含 open 弹层终态）+ SegmentedControl 3×6 矩阵；
+  ComboBox 弹层按 §3.12，Segmented 双比例制。
 - G3：GlassDialog + scrim 三模式；compositor 全窗变暗不可见已记「仍差」。
 
 ## Next round
-G4c — GlassComboBox + GlassSegmentedControl：弹层按 §3.12（radius 16、
-高 min(360, 内容+12)、偏移 5、padding 8、sheetColor 深 #262b31 / 浅 #f6f8fb）；
-Segmented pill 形态 height/2、card 形态 height×0.38、cell 72×40、outerPadding 2。
-截图 `g4-dark-combobox`、`g4-dark-segmented`。
+先恢复环境再验收 G4d（不要重写组件）：
+1. 启动一次并检查 `run.log` 是否越过 `Configuration Loaded`；若仍在
+   libgallium EGL 崩，继续按环境阻塞记录，不无限重试。
+2. 能起后依次截图并目检：
+   - `GALLERY_CONTROLS_FILTER=slider`，dark / light，liquid / material；
+   - `GALLERY_CONTROLS_FILTER=switch`，dark / light，liquid / material；
+   - 重点看：滑块 thumb 端点、读数行溢出、Switch 三档材质、M3 形态、
+     focusVisible 环。
+3. 修正问题（≤2 次迭代）后勾选 G4d，再进入 G4e
+   （GlassScrollBar + 字阶对照区）。
 
 ## 注意
 - 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。

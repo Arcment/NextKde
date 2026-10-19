@@ -9,37 +9,48 @@
 ## 本轮
 G11d — 复核 decision 三条 lane + motion 页 toast + tooltip 页内基准（dark/light）。
 
-截图（`tmp/glass/`）：`g11d-decision-toast-{dark,light}`、
-`g11d-decision-tooltip-{dark,light}`、`g11d-decision-session-{dark,light}`、
+截图（`tmp/glass/`）：`g11d-decision-{toast,tooltip,session}-{dark,light}`、
 `g11d-motion-toast-{dark,light}`、`g11d-tooltip-baseline-{dark,light}`；
-局部放大图在 `tmp/gallery/g11d-toast-{dark,light}-zoom.png`。
+局部放大图 `tmp/gallery/g11d-toast-{dark,light}-zoom.png`。
 
-- decision ① toast lane ✅：dark 药丸压成暗酒红、白字可读；light 提亮为
-  浅粉、深字可读，A/B 两栏一致。卡片玻璃表头跨红/黄为连续暗红→暗橄榄
-  （dark）/ 浅粉→浅黄（light）渐变，无硬边。total / elapsed / remaining /
-  paused 读数与 consequence 行落在近不透明 lane 上，可读。
-- decision ② tooltip lane ✅：dark 药丸暗红 + 白字；light 浅粉 + 深字；
-  均与近黑 / 近白 stage 明显不同。anchor chip、gap / anchorB / tipTop /
-  state 读数可读，A/B 的 -6 / +4 间隙与读数一致。
-- decision ③ session lane ✅：dark 菜单近黑底白字、关机浅红可读；light
-  近白底深字、关机深红可读；raw 24/72 与 clamp 44–56 读数均可读，卡片
-  玻璃表头跨红/黄连续。
-- motion 页 toast ✅：dark 暗红→暗橄榄 stage、药丸暗酒红白字；light
-  浅粉→浅黄、药丸浅粉深字；跨红/黄边界连续，hold / effective / state
-  读数可读。
+- decision ① toast ✅：dark 药丸压成暗酒红、白字可读；light 提亮为浅粉、
+  深字可读；A/B 两栏一致。卡片玻璃表头跨红/黄连续（dark 暗红→暗橄榄、
+  light 浅粉→浅黄），无硬边。total/elapsed/remaining/paused 与 consequence
+  行落在近不透明 lane 上，可读。
+- decision ② tooltip ✅：dark 暗红药丸 + 白字；light 浅粉药丸 + 深字，
+  均与近黑/近白 stage 明显不同。anchor chip、gap/anchorB/tipTop/state
+  读数可读；A/B 的 -6/+4 间隙与读数一致。
+- decision ③ session ✅：dark 近黑菜单白字、关机浅红可读；light 近白菜单
+  深字、关机深红可读；raw 24/72 与 clamp 44–56 读数可读；表头跨象限连续。
+- motion 页 toast ✅：dark 暗红→暗橄榄 stage、暗酒红药丸白字；light
+  浅粉→浅黄、浅粉药丸深字；hold/effective/state 读数可读，边界连续。
 - tooltip 页内基准 ✅：dark 暗酒红药丸、白字与浅灰次级可读；light 浅粉
-  药丸、深字可读；progress / scale / effective 读数可读，跨象限连续。
+  药丸、深字可读；progress/scale/effective 读数可读，跨象限连续。
 
 运行：10 次起应用均成功，run.log 仅有与玻璃无关的 wallpaper 采样 WARN。
+decision 三条 lane、motion 页 toast、tooltip 页内基准六格全部判 ✅。
 
 ## 上一轮（G11c）
+G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）。
 
-- toast ✅：dark 暗酒红/暗青、白字可读；light 浅粉/浅青、深字可读；
-  跨青/品红边界连续。
-- tooltip ✅：dark 暗红 + 白字；light 浅粉 + 深字。
-- menu ✅：dark 暗酒红、light 浅粉，主字与禁用灰字均可读。
-- notification ✅：dark 暗红→暗橄榄、light 浅粉→浅黄，跨象限连续。
-- dialog **仍差**：balanced scrim 压不住页内文字，次级正文浑浊；G11f 修。
+截图（`tmp/glass/`）：`g11c-toast-{dark,light}`、`g11c-tooltip-{dark,light}`、
+`g11c-menu-{dark,light}`、`g11c-notification-{dark,light}`、
+`g11c-dialog-{dark,light}`；局部放大图在 `tmp/gallery/g11c-*zoom.png`。
+
+- toast ✅：dark 玻璃压成暗酒红/暗青、白字可读；light 提亮为浅粉/浅青、
+  深字可读。ActionFeedbackToast 与基准 GlassToast 两枚都出现采样压缩；
+  跨青/品红边界的内部颜色为连续渐变，无硬边。
+- tooltip ✅：dark 暗红玻璃 + 白字；light 浅粉玻璃 + 深字，均与玻璃外
+  亮红明显不同，主/次行可读。
+- menu ✅：dark 暗酒红玻璃、白字与禁用灰字可读；light 浅粉玻璃、深字与
+  禁用灰字可读；均无旧兜底平涂。
+- notification ✅：dark 暗红→暗橄榄跨红/黄边界连续，白字与灰字可读；
+  light 浅粉→浅黄连续，深字可读。底部 “+2 条” 分组 pill 跨象限仍连续。
+- dialog **仍差**：卡片内部确有采样（dark 暗暖、light 浅暖，均与亮背景
+  明显不同），但 balanced scrim 压不住背后的页内文字：dark 下页内白字
+  透过玻璃与次级正文（浅灰）连成一片；light 下页内深字与次级正文混在
+  一起。主标题可读，次级正文读起来浑浊，不满足硬标准 2。留待 G11f
+  按允许范围把该表面 preset 升到 readable 或加深 tint 后重拍。
 
 ## 上一轮（G11b）
 ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬标准重判。
@@ -94,7 +105,7 @@ G11d — 复核 decision 三条 lane + motion 页 toast + tooltip 页内基准�
 | dialog | 仍差：balanced scrim 压不住页内白字，次级正文浑浊 | 仍差：页内深字与次级正文混在一起 |
 | motion 页 toast | ✅ 暗红→暗橄榄，药丸暗酒红白字可读 | ✅ 浅粉→浅黄，浅粉药丸深字可读 |
 | tooltip 页内基准 | ✅ 暗酒红药丸，白/灰次级字可读 | ✅ 浅粉药丸，深字可读 |
-| decision 三条 lane | ✅ 三 lane 均采样：①暗酒红药丸白字，②暗红药丸白字，③近黑菜单白字；读数可读 | ✅ ①浅粉药丸，②浅粉药丸，③近白菜单深字；读数可读 |
+| decision 三条 lane | ✅ ①暗酒红药丸白字，②暗红药丸白字，③近黑菜单白字；读数可读 | ✅ ①浅粉药丸，②浅粉药丸，③近白菜单深字；读数可读 |
 | param panel（文字最密） | ✅ 暗橄榄/暗酒红，密文可读 | ✅ 浅黄/浅粉，密文可读 |
 | 象限交界 / 黑白点最坏情况 | | |
 

@@ -1,51 +1,49 @@
-# 液态玻璃 Gallery — G1
+# 液态玻璃 Gallery — G2（弹层页）
 
-## 本轮（G1d 收口 · 通过）
-- `docs/design/liquid-glass/DEMO.md` §1 已改为实测定案：入口
-  `shell/gallery.qml` + 页面 `shell/gallery/`，启动 `qs -p shell/gallery.qml`；
-  写明原因（真实组件依赖 Quickshell；`qs.*` 根必须是 `shell/`）；
-  原 `apps/gallery/` + `KOS_BUILD_GALLERY` 方案标注作废。§2 及其后未动。
-- 本轮无代码改动、无截图（收口轮）。
+## 本轮
+G2a 已交付：弹层页骨架 + GlassPopover。
 
-## 已改（G1 全程）
-- 新增 `shell/gallery.qml`（背景板 + gallery 两个 PanelWindow，主题按
-  `GALLERY_THEME` 应用）。
-- 新增 `shell/gallery/`：`GalleryRoot.qml`（220 宽导航）、`SurfacesPage.qml`、
-  `OverviewPage.qml`、`ParamPanel.qml`、占位页。
-- 更新 `docs/design/liquid-glass/DEMO.md` §1（本轮）。
-- state.md 滚动记录。
+## 队列（✅=已交付）
+- [x] G2a 弹层页骨架 + GlassPopover（宿主 / 阴影 / 自动演示开关）
+- [ ] G2b GlassMenu（项高 28 / radius 8 / padding 8 / 键盘导航）
+- [ ] G2c GlassTooltip（thick / radius 10 / 70ms / 贴边 -6）
+- [ ] G2d GlassToast（regular / readable / pill / 1600ms，与现役并排）
+- [ ] G2e GlassNotification 卡片族（卡片 24 / entry 16 / 字阶 17-13-11-10）
+- [ ] G2f 收口：五类 light/dark 截图 + 仍差清单
 
-## 仍差（top 6）
-1. 三档卡片横跨背景板四象限（x=640 竖缝穿过 regular 卡），
-   clear/regular/thick 的 tint 对比被底色差异干扰；G2 润色时可在三卡后加
-   一条统一底色预览条。
-2. 三档共用参数面板的 blur 覆盖（G1c 要求实时作用于全部预览），
-   SPEC §2.1 每档默认模糊 3/8/12 未呈现；caption 如实标同一 L8。
-3. 现役 `KosFloatPanel` cornerExponent = 3.0 ≠ SPEC §2.2 玻璃系 2.0，
-   G1 不改现役组件，caption 如实标 3.0，待 G2 统一。
-4. `KosFloatPanel` 打开按钮与 `ControlCenterGlass` blur 覆盖未经交互/截图确认
-   （静态截图无法验证点击路径）。
-5. A 层 `LiquidGlassSurface` 在隔离进程中 ambient 为 transparent，
-   深色下 tint 偏弱（既有环境限制）。
-6. 参数面板下方「动效」区压到背景板象限分界（y=400），
-   黄/品红交界穿过面板，观感偏花；非功能问题，G2 可调整背景板分区。
+## 已改（G2a）
+- 新增 `shell/gallery/PopupsPage.qml`：5 个锚点按钮行 + token 摘要区；
+  `GALLERY_POPUP=popover` 加载后 300ms 自动打开；Esc 关闭。
+- 新增 `shell/gallery/components/GlassPopover.qml`：AnimatedPopupWindow +
+  PopupAnchorBinding；LiquidGlassPanel radius 16 / regular / 内边距 12 /
+  cornerExponent 2.0；KosCardShadow 0.30 / 12,16 / 18；1px 描边。
+  窗口 = 卡片 + 阴影余量；锚点边距按 `shadowMargin - 8` 补偿，
+  实测卡片与按钮底边间距 8–9px（token 8）。
+- `GalleryRoot.qml`：`GALLERY_PAGE=popups` → index 2；弹层页接入；
+  导航注记改为 弹层 G2/G3、控件 G4、动效 G5。
+- 截图：`tmp/glass/g2a-popover-dark.png`、`g2a-popover-light.png`。
 
-## 外推待确认
-- 受控背景板只证明「有壁纸内容时」的透光差异；真实桌面壁纸（明暗不均、
-  高频细节）下三档材质的可辨识度未验证，需在 G2/G5 实机桌面复核。
-- 本次均在隔离配置进程中截图；隔离进程的 ambient 与现役桌面外壳不同，
-  A 层表现可能偏弱（见仍差 5），迁移结论以实机外壳为准。
-- 交互路径（按钮点击、Esc 关闭、参数实时联动）仅有代码依据，静态截图未覆盖，
-  需 G2 人工交互确认。
+## 仍差 top 6（G2a 遗留）
+1. 截图时首屏若为纯白（4142B），是显示器 DPMS 关闭所致，与代码无关；
+   截图前先 `kscreen-doctor --dpms on`。
+2. 弹层页说明区固定 y=300，后续 G2b–G2e 按钮/演示变多时需重排。
+3. Popover 打开时覆盖左侧导航（锚定在首按钮）；属浮层正常行为，未改。
+4. 阴影在浅色下偏灰，未与 SPEC 逐像素比对。
+5. `GALLERY_POPUP=menu|tooltip|toast|notification` 目前无动作，待后续轮次。
+6. 弹层窗口的透明阴影余量也计入输入区域（未做 mask），交互待验证。
 
-## 已定案（不要再论证）
-- gallery 是 Quickshell 配置：入口 `shell/gallery.qml`，页面 `shell/gallery/`。
-- 两个 `PanelWindow`：背景板 `WlrLayer.Top`，主体 `WlrLayer.Overlay`。
-- 主题应用必须晚于 `AppearanceConfigService._load()` 异步回调。
-- 截图全透明 = DPMS 黑屏；先 `ydotool mousemove --absolute` 唤醒。
-- 截图脚本 `pkill` 必须 `^qs -p shell/gallery.qml` 锚定；裁图用 PIL。
+## 环境检查点
+- 本 VM 屏幕 1280×800；qs 日志中 `ext-background-effect-v1 is not supported`
+  为预期噪声；wallpaper colorquantizer 警告无关。
+- `magick` / `convert` 不存在，裁图用 PIL：`python3 -c "from PIL import ..."`。
 
 ## Next round
-G2（待任务书下发）。
+G2b — 读 `.loop/TASK.md` G2b 条目，复用 G2a 宿主与运动，做 GlassMenu
+（5 项 / 1 disabled / 1 分隔线 / 项高 28 / radius 8 / Body 13 / padding 8 /
+项间距 4 / Up-Down-Enter-Esc / focus 环），截图 `GALLERY_POPUP=menu`。
 
-DONE
+## 注意
+- 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
+- 不改现役组件、不改 `shell/shell.qml`、不改 CMake。
+- 每轮结束前：截图 + state.md + commit。
+- 队列全部完成后，在下面单独一行写 `DONE`。

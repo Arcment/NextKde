@@ -7,15 +7,14 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10e 已完成：新建 `shell/gallery/components/GalleryBackdropSample.qml`，
-按 `anchor.rect.x/y` 与屏幕尺寸平移隐藏背景板副本；`GlassPopup` /
-`GlassTooltip` 各自持有一份，卡片 `LiquidGlassPanel` 新增 `backdropItem`
-并转发给 bodySurface。副本只在背景板开启且弹窗 shown 时可见，由卡片捕获的
-`hideSource` 隐藏；背景板关闭时 `backdropItem` 为 null，弹窗与改动前完全
-一致。G10d（主窗口表面 scrim）截图 `g10-dark-sampled.png` /
-`g10-light-sampled.png` 与 G10e 的 `g10-popover-dark.png` /
-`g10-menu-light.png` / `g10-tooltip-dark.png` 均已在 gallery 运行后目视：
-采样与本地点阵连续、文字可读，`run.log` 无 QML/shader 报错。
+G10e 已完成：新建 `GalleryBackdropSample.qml`（按 `anchor.rect.x/y` 与屏幕尺寸
+平移的隐藏背景板副本），`GlassPopup` / `GlassTooltip` 各自在窗口内放一份，
+卡片 `LiquidGlassPanel` 新增 `backdropItem` 并转发给 bodySurface。副本仅在
+背景板开启且弹窗 shown 时可见，由卡片捕获的 `hideSource` 隐藏；背景板关闭
+时 `backdropItem` 为 null，弹窗完全走旧路径。截图 `g10-popover-dark.png`、
+`g10-menu-light.png`、`g10-tooltip-dark.png` 已目视：三种弹窗内透出的四色
+背景与黑白点阵与弹窗外点阵位置连续，文字可读；`run.log` 无 QML/shader
+报错（仅 wallpaper colorquantizer 警告）。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
@@ -64,9 +63,9 @@ G10e 已完成：新建 `shell/gallery/components/GalleryBackdropSample.qml`，
 
 ## Next round
 
-G10f — Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim：`ToastDemo.qml`
-（toast readable）、`TooltipDemo.qml`（tooltip balanced）页内面板，以及通知、
-菜单、对话框页的玻璃面加 `scrimEnabled` 并截图目视。
+G10f — Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim：给
+`ToastDemo.qml` / `TooltipDemo.qml` 页内面板与通知、菜单、对话框页的玻璃面
+加 `scrimEnabled`（toast readable、tooltip balanced、其余按任务书），截图目视。
 
 ## 注意
 

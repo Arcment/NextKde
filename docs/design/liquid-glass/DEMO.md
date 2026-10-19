@@ -47,7 +47,7 @@
    GlassNavBar（容器契约，SPEC §3.16）在表面页演示——它是导航容器，
    不进表单控件区。
 5. **动效页**：PopupMotion 开合（OutCubic/InCubic 对比）、液态按压 expansion、
-   环境光过渡 2600ms、tooltip 70ms、toast 1600ms 各一个演示位；
+   环境光过渡 2600ms、tooltip 70ms、toast 2600ms（悬停暂停）各一个演示位；
    reduceMotion 开关联动（§4）。
 
 ## 3. 组件状态矩阵（每控件的呈现方式）
@@ -112,9 +112,9 @@
 - gallery 中的所有演示参数改动**不回写**真实组件默认值；若比对后确认
   需要改 token，走 SPEC 的变更流程（更新 SPEC §2 并在 INVENTORY 补出处），
   不在 gallery 里就地改。
-- SPEC §7 的 3 项人工裁定项（Toast 存留 / Tooltip 贴边负 margin /
-  SessionMenu 比例字号）在 gallery 中以「A/B 并排」形式呈现，
-  供裁定人直接对比选择，裁定结论回填 SPEC 后删除并排演示。
+- SPEC §7 的 3 项裁定项（Toast 存留 / Tooltip 贴边 / SessionMenu 字号）
+  已在 gallery 中以「A/B 并排」形式呈现并完成人工裁定；A/B 两栏保留为
+  记录并标注「已裁定」，不删未选项、不写推荐（结果见 SPEC §7 与文末 G7 段）。
   （原 5 项中 weather tint 与 scrim 链路两项已于 R5 由代码关闭，
   见 SPEC §1.1/§1.4。）
 
@@ -395,9 +395,49 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
 - ① Toast 存留 1600ms：A/B 已呈现，待人工裁定。
 - ② Tooltip 贴边 -6px：A/B 已呈现，待人工裁定。
 - ③ SessionMenu 极端高度：A/B 已呈现，待人工裁定。
+- 三项已于 G7 人工裁定（① B / ② B / ③ A，见文末 G7 段）；
+  上述 A/B 状态与读数是 G6e 当时记录，保留不改写。
 - 仍差：dark 主题 Toast B lane 落在黄色象限，9px 读数白字实测最大对比度
   约 2.2:1、后果行约 2.1:1（衬底约 rgb 197,168,49，字约 255,251,229）；
   Session B 栏两列 clamp 后高 44 / 56，两列注释行 y 相差约 33px；
   tooltip「屏幕边缘」标签 8px 仅作位置提示。
 - `run.log` 无 QML 报错（仅 wallpaper colorquantizer WARN）；重拍后无残留
   gallery 进程。
+
+## G7 — 三项裁定落地 + 裁定页收口
+
+人工裁定（SPEC §7 已回填为「已裁定」记录）：
+
+- ① Toast → **B**：存留 2600ms（原 1600ms）+ 悬停暂停、离开按剩余继续。
+- ② Tooltip → **B**：贴边 +4px 正间隙（原 -6px 负 margin）。
+- ③ SessionMenu → **A**：接受固定 Footnote 10，不单独设 itemHeight 范围，
+  生产代码不改。
+
+生产改动（仅三个点名文件 + gallery 文案）：
+
+- `shell/desktop/modules/common/ActionFeedbackToast.qml`：`timeout` 2600；
+  `HoverHandler` 悬停暂停，`dismissAt` 记录 deadline，离开按剩余时间续计
+  （不重置 2600ms）；`enabled: shown`，仍不响应点击、不抢焦点。
+- `shell/desktop/modules/bar/StatusTooltip.qml`：`margins` 四处 -6 → +4
+  （dockHosted / 对应边条件命中处），其余 0 分支不变。
+- `shell/desktop/modules/dock/DockAppNameTooltip.qml`：`margins.top/left/right`
+  三处 -6 → +4，其余 0 分支不变。
+- `shell/gallery/PopupsPage.qml`：1600 文案与注释同步 2600
+  （gallery 演示覆盖 600000 保留）。
+- 固有代价：toast 可见期间其 36px 药丸区域接收悬停（点击不再穿透），
+  以换取悬停暂停；区域小且短暂。
+
+文档回填：SPEC §2.7 token 表 / §3.5 / §3.6 / §5 / §7 已改为 2600ms +
+悬停暂停与 +4px 正间隙；INVENTORY §4 现值与 §8.2 margins 行同步，
+§11 三项标为已关闭；本文件补 G7 段。
+
+裁定页收口（G7d）：
+
+- 三段卡各加「已裁定」标记：① B · 2600ms + 悬停暂停；② B · +4px；
+  ③ A · 固定 Footnote 10。
+- 保留 A/B 两栏作为记录，不删未选项、不写推荐。
+- dark / light 两主题下读数行、后果行、注释行与 lane 衬底对比度 ≥ 4.5:1
+  （实测十六进制记入 ledger）。
+- 重拍 6 张：`g7-{dark,light}-decision-{toast,tooltip,session}`。
+- 验证边界：StatusTooltip / DockAppNameTooltip 不被 gallery 加载，只做
+  代码级核对；+4px 手感需人工在真实 bar/dock 上悬停验证。

@@ -183,7 +183,7 @@ Footnote 10/13、Caption 10/13；正文 13pt，**最小 10pt**。
 | switch thumbX / expansion | 200 OutCubic / pressed 120·释放 200 | `LiquidGlassSwitch.qml:71-84`（R5 收进 token） |
 | 环境光过渡 | 2600，收进 motion token | 现 `LiquidGlassSurface.qml:45`、`LiquidGlassPanel.qml:119` |
 | tooltip 显隐 | 70ms（= fast 档内短反馈，保留现值） | `StatusTooltip.qml:27-28` |
-| toast 存留 | 1600ms | `ActionFeedbackToast.qml:10`；与 HIG 张力见 §7-① |
+| toast 存留 | 2600ms（悬停暂停，离开按剩余继续） | `ActionFeedbackToast.qml:10`；§7-① 已裁定 B |
 | **reduceMotion = 0** | 上述时长全部置 0；C 层折射动画关闭；环境光过渡跳过；expansion 关闭 | 定案 |
 
 **reduceMotion 贯通（定案，非人工项）**：`ApplicationPreferences` 已有键
@@ -239,15 +239,15 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 ### 3.5 GlassTooltip
 - 属性：`material: thick`（小面积最厚档）、`radius: small 10`（收编现值 7/6，
   `StatusTooltip.qml:52`、`DockAppNameTooltip.qml:73`）、primary 字号 Callout 12 +
-  secondary Footnote 10（现值 12/10，`StatusTooltip.qml:63,70`）、贴边 margin -6 保留
-  （锚定既定手法，手感见 §7-②）。
+  secondary Footnote 10（现值 12/10，`StatusTooltip.qml:63,70`）、贴边 margin +4
+  正间隙（§7-② 已裁定 B，手感需真实 bar/dock 悬停复核）。
 - **定案：dock tooltip 迁入玻璃配方**（现状 ThemeService 纯色 Rectangle，
   INVENTORY 冲突⑥）。
 
 ### 3.6 GlassToast
 - LiquidGlassPanel 子类：`material: regular`、`scrimLevel: "readable"`、
   `radius: pill`（`ActionFeedbackToast.qml:28-31`）、高 36、字号 Callout 12 Medium、
-  显隐 150/180ms + scale 0.96→1（:38-41）、存留 1600ms（§7-①）。
+  显隐 150/180ms + scale 0.96→1（:38-41）、存留 2600ms + 悬停暂停（§7-① 已裁定 B）。
 
 ### 3.7 GlassNotification（通知卡片族）
 - 容器卡片 `radius: surface 24`（`NotificationHistoryCard.qml:78,93`）；
@@ -357,8 +357,8 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 
 ## 5. 与 HIG 的差异登记（不裁定，仅登记）
 
-- Toast 定时消失 1600ms：HIG 建议尽量少用定时自动消失，但 Toast 本质是
-  定时反馈，保留 → 后果见 §7-①。
+- Toast 定时消失 2600ms（悬停暂停）：HIG 建议尽量少用定时自动消失；
+  已裁定 B 采用 2600ms + 悬停暂停，比 1600ms 更贴近 HIG → 后果见 §7-①。
 - ComboBox 高 36：超 HIG 默认 28，但属允许范围（≥最小 20）且为现值。
 - 通知 Entry 9 号字、SessionMenu 比例字号：违规已定迁移方案（§2.4），
   极端情况可读性见 §7-③。
@@ -384,15 +384,21 @@ reduceMotion 继承全局、状态不得仅用颜色区分。
 11. weather 卡片 → GlassSurface 显式 tint（昼夜场景值传参，§1.1）；
     滚动边缘 MultiEffect 保留为独立模式，不迁（INVENTORY §12.5）。
 
-## 7. 待人工裁定（3 项，均为视觉/产品语义）
+## 7. 已裁定（3 项，均为视觉/产品语义）
 
 > R5 已由代码关闭 2 项：weather tint 公式（→ §1.1 定案，INVENTORY §12.5）、
-> scrim 下发链路（→ §1.4 定案）。以下仅剩「视觉等价但产品语义不同」的项。
+> scrim 下发链路（→ §1.4 定案）。以下 3 项已人工裁定；A/B 两栏保留在
+> gallery 裁定页作为记录（带「已裁定」标记），不删未选项、不写推荐。
 
-1. **Toast 存留 1600ms**：`ActionFeedbackToast.qml:10`。A. 保留（快反馈惯例）；
-   B. 延长/改为可悬停暂停。后果：HIG「少用定时消失」的符合程度。
-2. **Tooltip 贴边 -6px 负 margin**（`StatusTooltip.qml:40-43`、
-   `DockAppNameTooltip.qml:67-69`）：A. 保留；B. 改正偏移。后果：贴边手感。
-3. **SessionMenu 比例字号废除后的极端高度表现**：固定 Footnote 10 在
-   itemHeight 极端值下是否可读（:286 现值 `itemHeight*0.34`）。A. 接受固定档；
-   B. 对 SessionMenu 单独设定 itemHeight 范围。后果：锁屏会话菜单可读性。
+1. **① Toast 存留 → B（已裁定）**：2600ms（原 1600ms）+ 悬停暂停、
+   离开按剩余时间继续（不重置）；`ActionFeedbackToast.qml:10`。
+   后果：更贴近 HIG「少用定时消失」；代价是 toast 可见期间其 36px 药丸
+   区域接收悬停（点击不再穿透），并比原值多占用屏幕约 1s。
+2. **② Tooltip 贴边 → B（已裁定）**：+4px 正间隙（原 -6px 负 margin）；
+   `StatusTooltip.qml:40-43`、`DockAppNameTooltip.qml:67-69`。
+   后果：tooltip 不再压进锚点，贴边处露出细缝；真实 bar/dock 悬停手感
+   需人工复核。
+3. **③ SessionMenu 极端高度 → A（已裁定）**：接受固定 Footnote 10，
+   不为 SessionMenu 单独设定 itemHeight 范围；生产代码不改。
+   后果：字号不再随 itemHeight 比例缩放，极矮行偏拥挤、极高行偏空，
+   可读性由固定 10pt 兜底。

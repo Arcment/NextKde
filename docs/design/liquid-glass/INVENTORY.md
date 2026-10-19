@@ -98,9 +98,9 @@
 
 | 组件 | 来源 | 实现方式 | 关键参数 | 主题适配 | 不一致 |
 |---|---|---|---|---|---|
-| **StatusTooltip** | WT `shell/desktop/modules/bar/StatusTooltip.qml:9-74` | AnimatedPopupWindow + **ControlCenterGlass** | `radius:7`(:52)、open/closeDuration 70(:27-28)、primary 字号 12 DemiBold(:63)、secondary 10 Medium(:70)、列 spacing 3(:57)、隐式宽/高 = 内容 +18/+12(:24-25)、贴边 margin -6(:40-43) | `tooltipSurface.foregroundColor/secondaryForegroundColor`（ControlCenterGlass 导出） | — |
-| **DockAppNameTooltip** | WT `shell/desktop/modules/dock/DockAppNameTooltip.qml:73-89` | PopupWindow + 普通 **Rectangle**（非玻璃） | `radius:6`(:73)、border 1(:75)、字号 11 DemiBold(:85-87) | `ThemeService.tooltipBackground/borderColor/foregroundColor`(:74-81) | **与 StatusTooltip 不同配方**：bar tooltip 走 ControlCenterGlass，dock tooltip 走 ThemeService 纯色 Rectangle（冲突⑥） |
-| **ActionFeedbackToast** | WT `shell/desktop/modules/common/ActionFeedbackToast.qml:5-66` | **LiquidGlassPanel** 子类 | `radius:height/2`(:28)、material regular(:29)、scrimLevel "readable"(:31)、timeout 1600ms(:10)、opacity 150ms / scale 180ms OutCubic(:40-41)、字号 12 Medium(:57-58)、spacing 7(:46)、高 36 宽=内容+28(:24-25)、`scale: shown?1:0.96`(:38) | `AppearanceTokens.surface.usesBackdrop/usesKwinBlur/paintInQml`(:30-33) | — |
+| **StatusTooltip** | WT `shell/desktop/modules/bar/StatusTooltip.qml:9-74` | AnimatedPopupWindow + **ControlCenterGlass** | `radius:7`(:52)、open/closeDuration 70(:27-28)、primary 字号 12 DemiBold(:63)、secondary 10 Medium(:70)、列 spacing 3(:57)、隐式宽/高 = 内容 +18/+12(:24-25)、贴边 margin +4(:40-43，G7 裁定 B) | `tooltipSurface.foregroundColor/secondaryForegroundColor`（ControlCenterGlass 导出） | — |
+| **DockAppNameTooltip** | WT `shell/desktop/modules/dock/DockAppNameTooltip.qml:73-89` | PopupWindow + 普通 **Rectangle**（非玻璃） | `radius:6`(:73)、border 1(:75)、字号 11 DemiBold(:85-87)、贴边 margin +4(:67-69，G7 裁定 B) | `ThemeService.tooltipBackground/borderColor/foregroundColor`(:74-81) | **与 StatusTooltip 不同配方**：bar tooltip 走 ControlCenterGlass，dock tooltip 走 ThemeService 纯色 Rectangle（冲突⑥） |
+| **ActionFeedbackToast** | WT `shell/desktop/modules/common/ActionFeedbackToast.qml:5-66` | **LiquidGlassPanel** 子类 | `radius:height/2`(:28)、material regular(:29)、scrimLevel "readable"(:31)、timeout 2600ms(:10，悬停暂停/离开按剩余继续)、opacity 150ms / scale 180ms OutCubic(:40-41)、字号 12 Medium(:57-58)、spacing 7(:46)、高 36 宽=内容+28(:24-25)、`scale: shown?1:0.96`(:38) | `AppearanceTokens.surface.usesBackdrop/usesKwinBlur/paintInQml`(:30-33) | — |
 | **NotificationHistoryCard** | WT `shell/desktop/modules/bar/NotificationHistoryCard.qml` (201 行) | ControlCenterGlass 宿主内卡片 | 卡片 `radius:24`(:78,93)、图标底 22×22 r7(:101)、字号 11(:129)/13(:155)/17(:187)/10(:199)、spacing 4(:135) | ControlCenterGlass（`git grep` 确认） | — |
 | **NotificationHistoryEntry** | WT `…/NotificationHistoryEntry.qml` (168 行) | 列表项 | `radius:18`(:66)、字号 9(:108)/12(:135)/11(:144)/18(:164)、spacing 4(:114)、内 pill radius 14(:154) | — | 字号 9 与 HIG 最小 10pt 相悖 |
 | **NotificationHistoryGroup** | WT `…/NotificationHistoryGroup.qml` (212 行) | 分组头 | 字号 11(:121,135)、`radius:18`(:159)、spacing 6(:176) | — | — |
@@ -172,7 +172,7 @@
 |---|---|---|
 | padding | 0（ContextMenu:53）、6（MusicMenu:7、WallpaperValueMenu:67、KosComboBox:35）、8（SessionMenu:138）、14（EventDetailsPopover:31、MusicDialog:27）、20（MusicDialog:7、KosFloatPanel contentPadding:20） | 弹层内边距 4 档并存：0/6/8/14（+20） |
 | spacing | 1（GlobalMenu:182）、3（StatusTooltip:57）、4（NotificationHistoryCard:135）、5-7（MusicEditorDialog/AlertDialog/Toast）、8-10（dialogs/MusicMenuItem）、12（dialogs 表单） | 1..12 连续值，无档位收敛 |
-| margins | -6（tooltip 贴边负 margin，StatusTooltip:40-43、DockAppNameTooltip:67-69）、12/16（KosFloatPanel shadowOffset） | 负 margin 是 tooltip 锚定的既定手法 |
+| margins | +4（tooltip 贴边正间隙，StatusTooltip:40-43、DockAppNameTooltip:67-69；原 -6 负 margin 经 G7 裁定 B 改为 +4）、12/16（KosFloatPanel shadowOffset） | 贴边保留正间隙，不再压进锚点 |
 
 ## 9. 深浅主题 tint 实测对照表（代码值）
 
@@ -217,7 +217,7 @@
 - ~~KWin 默认值~~ / ~~PageMotion~~ / ~~bar 面板配方~~ / ~~liq 差异~~ → 已关闭（§10）。
 - ~~weather `Main.qml` 的 tint/模糊具体公式~~ → 已关闭（§12.5）。
 - ~~LiquidGlassPanel `scrimEnabled/scrimLevel` 下发到合成器的路径~~ → 已关闭（§12.5）。
-- 纯视觉项（需人工）：tooltip 贴边 -6px 手感、Toast 1600ms 时长是否合适、SessionMenu 比例字号在极端高度下的可读性（对应 SPEC §7 ①②③）。
+- ~~纯视觉项（需人工）：tooltip 贴边 -6px 手感、Toast 1600ms 时长是否合适、SessionMenu 比例字号在极端高度下的可读性（对应 SPEC §7 ①②③）~~ → 已关闭（G7 裁定：① Toast B 2600ms + 悬停暂停；② Tooltip B +4px 正间隙；③ SessionMenu A 固定 Footnote 10、生产不改）。
 
 ---
 

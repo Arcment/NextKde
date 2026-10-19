@@ -7,17 +7,11 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10j 已完成。**QML 兜底与合成器路径现在共用同一张 preset 表**：
-`GlassBackdrop` 新增 `scrimCap(level)` / `scrimDecay(level)` /
-`defaultScrimTint`（readable 0.72/1.0、balanced 0.47/0.75、transparent 0.22/0.5、
-subtle 0.15/0.45；tint 随 `glassFollowsAppearanceMode`，关时黑）。
-`LiquidGlassPanel` 的 `_presetCap/_presetDecay/scrimTint` 改从该表取值；
-`LiquidGlassSurface` 新增 `scrimLevel`（默认 `"custom"`，旧调用零变化），
-shader 用解析后的有效值；`OverviewPage` 16 卡与 `SurfacesPage` QML 卡删除手写
-`0.47/0.75` 与 tint 三元式，改为 `scrimLevel: "balanced"`。
-逐表面 preset 见下节。截图：`g10j-overview-dark.png`、
-`g10j-surfaces-light.png`；`run.log` 无 QML/shader 报错（仅 wallpaper
-colorquantizer 警告）。视觉与对齐前一致（本次只统一来源，不改强度）。
+G10k 已完成，G10 队列收口。补齐矩阵最后 5 格（notification、dialog、
+motion 页 toast、tooltip 页内基准、decision lanes），各取 dark/light 截图并
+目视确认可读；回填 SPEC §1.5、INVENTORY §12、DEMO G10 段与本 ledger。
+本轮不改代码，最终截图沿用 G10j 后的 overview 采样（代码自此未变）。
+`run.log` 全程无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
@@ -30,7 +24,7 @@ colorquantizer 警告）。视觉与对齐前一致（本次只统一来源，�
 - [x] G10h 浅色主题可读性矩阵（下半）
 - [x] G10i 极端边界复检（象限交界 / 黑白点 / 最亮黄区）
 - [x] G10j 与 KWin 预设强度对齐（cap/decay/tint 统一到 `GlassBackdrop`）
-- [ ] G10k 文档回填 + 最终截图 + DONE
+- [x] G10k 文档回填 + 最终截图 + DONE
 
 ## 可读性矩阵（G10g 起每轮至少填一格）
 
@@ -43,11 +37,11 @@ colorquantizer 警告）。视觉与对齐前一致（本次只统一来源，�
 | menu | ✅ balanced 黑 tint 压暗红区，白字清晰 | ✅ balanced 白 tint 提亮红区成浅粉卡片，深色文字清晰 |
 | tooltip | ✅ thick + 局部采样，白/次级文字清晰 | ✅ thick + 局部采样，近白卡片 + 深色文字，主/次文字均清晰 |
 | toast | ✅ 基准 GlassToast（readable）白字可读；同组 ActionFeedbackToast 为 KWin 路径（无 KWin 时只剩文字，外推） | ✅ 基准 GlassToast（readable）浅色胶囊 + 深色文字清晰；下层页面密排文字略透出但不干扰；ActionFeedbackToast 仍为 KWin 路径（外推） |
-| notification | | |
-| dialog | | |
-| motion 页 toast | | |
-| tooltip 页内基准 | | |
-| decision 三条 lane | | |
+| notification | ✅ 卡片落在黄区，readable 黑 tint 压暗成深琥珀色；标题/正文白字清晰，时间戳可辨 | ✅ 白 tint 提亮黄区成近白卡片，深色标题/正文/时间清晰 |
+| dialog | ✅ 页内模态 balanced；标题、正文、取消/保存按钮在卡片上均可读，未见不可辨项 | ✅ 近白卡片 + 深色标题/正文/按钮，清晰 |
+| motion 页 toast | ✅ 药丸跨红/黄交界，采样连续（左红右黄无断裂）；readable 压暗后白字清晰 | ✅ 跨界采样连续，浅色药丸 + 深色文字清晰 |
+| tooltip 页内基准 | ✅ 红区局部采样 + balanced，`GlassTooltip` 与参数读数白字清晰 | ✅ 组件为深色厚玻璃卡片，白字清晰；次级说明灰字可辨 |
+| decision 三条 lane | ✅ ①Toast / ②Tooltip 近黑衬底 + 白字，读数与后果行对比充足；③Session 在视口折叠下方，外推（三 lane 共用同一衬底与固定 ink 常量，无独立配色） | ✅ ①② 近白衬底 + 深色文字，全部读数清晰；③Session 同上外推 |
 | param panel（文字最密） | ✅ 跨黄/品红交界玻璃连续渐变，白字与滑杆读数可读；文字最密区无不可辨项 | ✅ 浅黄→浅粉连续渐变，深色文字/读数清晰 |
 | 象限交界 / 黑白点最坏情况 | ✅ 16 卡与 nav、param panel 跨交界处采样连续；黑白点透过玻璃明暗正确，未见色块断裂 | ✅ 同上；白点处玻璃提亮但深色文字仍可读，黑点处仍清晰 |
 
@@ -87,6 +81,30 @@ surfaces 页 clear/regular/thick 三档是 KWin 路径演示（`useKwinEffect: t
 无 QML/shader 报错（仅 wallpaper colorquantizer 警告）。视觉与对齐前的字面量
 取值一致——本次是来源统一，不是强度变更。
 
+## G10k 收口（已交付）
+
+矩阵最后 5 格补齐，截图（`tmp/glass/`，同时归档到 `docs/design/liquid-glass/`）：
+
+| 表面 | dark | light |
+| --- | --- | --- |
+| notification | `g10k-notification-dark.png` | `g10k-notification-light.png` |
+| dialog | `g10k-dialog-dark.png` | `g10k-dialog-light.png` |
+| motion 页 toast | `g10k-motion-toast-dark.png` | `g10k-motion-toast-light.png` |
+| tooltip 页内基准 | `g10k-motion-tooltip-dark.png` | `g10k-motion-tooltip-light.png` |
+| decision lanes | `g10k-decisions-dark.png` | `g10k-decisions-light.png` |
+
+最终截图沿用 G10i overview 采样（G10j 只统一 preset 来源、视觉未变，本轮无代码改动）：
+`g10k-final-dark.png` / `g10k-final-light.png`。
+
+文档回填：
+
+- SPEC 新增 §1.5「无 KWin 场景采样（G10 定案）」：隐藏副本 + `GlassBackdrop`、
+  1/6 捕获 + 9 tap、共用 preset 表、弹窗平移副本、`null`/KWin 路径不变。
+- INVENTORY 新增 §12：`GlassBackdrop` / `scene_liquid.frag` /
+  `GalleryBackdropBoard` / `GalleryBackdropSample` 四个组件的契约与位置。
+- DEMO 新增 G10 段：背景板 toggle、采样演示、矩阵截图用法与「只目视」边界。
+- 本 ledger 矩阵无「仍差」；surfaces 三档与 decision ③ 为写明原因的外推项。
+
 ## 已确认的架构（不要重开）
 
 - 可见背景板窗口保留（KWin 路径需要它）。
@@ -102,10 +120,7 @@ surfaces 页 clear/regular/thick 三档是 KWin 路径演示（`useKwinEffect: t
 
 ## Next round
 
-G10k — 文档回填 + 最终截图 + DONE。先补齐矩阵中仍空着的格子（notification、
-dialog、motion 页 toast、tooltip 页内基准、decision 三条 lane），各取 dark/light
-截图并写结论；随后回填 SPEC / INVENTORY / DEMO / LEDGER，更新最终 dark/light
-截图。矩阵无「仍差」后才在 `tmp/glass/state.md` 单独一行写 `DONE`。
+无。G10 队列全部交付，矩阵无「仍差」，`tmp/glass/state.md` 已写 `DONE`。
 
 ## 注意
 

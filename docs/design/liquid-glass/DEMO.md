@@ -459,3 +459,18 @@ G5e 收口：动效页 10 张截图全量重拍与逐张目检。
 - `run.log` 无 QML 报错（仅既有 wallpaper colorquantizer WARN）。
 - 边界：`shell/gallery/components/GlassToast.qml` 的 `timeout: 1600` 属
   G2d 基准演示（PopupsPage 使用），不在本批清单，留待统一口径时另项处理。
+
+## G10 — 无 KWin 场景采样 / 极端背景可读性
+
+- 新增「背景板」演示环境：四色高饱和象限 + 40 个黑白点，可见窗口与主窗口内
+  隐藏副本共用 `GalleryBackdropBoard`；左侧「背景板」开关同时控制可见板与
+  `GlassBackdrop.sourceItem`，关闭即回到改动前路径。
+- 无 KWin 时，所有启用采样的 QML 表面从隐藏副本取样（1/6 + 9 tap 模糊），
+  由 `adaptiveScrim` 按局部亮度压暗/提亮；scrim preset 与合成器同表。
+- 弹窗（popover/menu/tooltip）与页内面板（toast/tooltip 基准、notification、
+  dialog、decision lanes）各自用局部采样或近不透明衬底保证文字可读。
+- 矩阵用法：逐表面取 dark/light 截图（`tmp/gallery/shot.sh` 前缀钩子
+  `GALLERY_PAGE` / `GALLERY_POPUP` / `GALLERY_MOTION_DEMO`），只做肉眼判定，
+  不做像素 diff、不写断言。G10 结论见 `LEDGER.md` 的可读性矩阵。
+- 边界：surfaces 页 clear/regular/thick 三档是 KWin 路径演示，不参与 QML
+  采样对齐（`useKwinEffect: true` 不动）；无 KWin 时其可读性为外推项。

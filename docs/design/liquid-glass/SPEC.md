@@ -63,6 +63,26 @@
 - **定案：默认路径单一（compositor scrim）；GlassDialog/GlassPopover 等 spec 中
   「scrim 单一来源 = compositor」契约成立，无需重议。**
 
+## 1.5 无 KWin 场景采样（G10 定案）
+
+KWin 不可用（或 `useKwinEffect: false`）时，QML 兜底自己完成「采样 + 着色 + scrim」：
+
+- 可见背景板窗口保留（KWin 路径需要它作为合成器背景）；gallery 主窗口内另放
+  一份同内容隐藏副本（`GalleryBackdropBoard`），由 `GlassBackdrop` 单例声明
+  `sourceItem`。`sourceItem == null` 时所有表面保持旧行为。
+- `LiquidGlassSurface.backdropItem != null` 且非 tonal 时，用
+  `ShaderEffectSource`（1/6 尺寸、`hideSource: true`、`live: true`）捕获
+  `sourceRect`；`scene_liquid.frag` 复用 `scene_glass` 的 9 tap 模糊，并移植
+  KWin `adaptiveScrim`（`kwin/glass-effect/src/generated/onscreen_rounded_core.frag`）。
+- scrim preset 与合成器共用一张表（`GlassBackdrop.scrimCap/scrimDecay`）：
+  readable 0.72/1.0、balanced 0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45。
+  tint 随外观开关（深色黑 / 浅色白），不新增曲线。
+- 弹窗是独立 Wayland surface，不能采样主窗口；`GlassPopup` / `GlassTooltip`
+  在窗口内放按屏幕坐标平移的 `GalleryBackdropSample`，卡片显式设置
+  `backdropItem`，用同一 shader 采样。
+- `useKwinEffect: true` 路径与 `backdropItem == null` 路径逐位不变；本机制只在
+  gallery 范围内启用（G10 边界）。
+
 ## 2. Token 表 v1
 
 Token 宿主：shell 玻璃体系 = `AppearanceTokens`（`AppearanceTokens.qml:17-94`）；

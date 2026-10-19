@@ -11,7 +11,7 @@ LiquidGlassPanel {
 
     property string message: ""
     property string iconName: "check"
-    property int timeout: 1600
+    property int timeout: 2600
     property bool shown: false
 
     function show(text, icon) {

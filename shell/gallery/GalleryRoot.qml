@@ -16,6 +16,7 @@ Item {
     property int currentIndex:
         Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1
             : Quickshell.env("GALLERY_PAGE") === "popups" ? 2
+            : Quickshell.env("GALLERY_PAGE") === "controls" ? 3
             : Quickshell.env("GALLERY_PAGE") === "scene" ? 5 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
@@ -243,7 +244,7 @@ Item {
     }
     Component {
         id: controlsPage
-        PlaceholderPage { title: "控件"; note: "G4" }
+        ControlsPage {}
     }
     Component {
         id: motionPage

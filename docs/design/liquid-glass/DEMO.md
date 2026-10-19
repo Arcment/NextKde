@@ -131,3 +131,22 @@
 阈值 0.34 是实测值：浅色主题下深行被白 tint 抬到 0.359，按验收必须判深字，
 因此不能用 0.45。tonal 胶囊不再依赖 `foregroundColor`，直接用同一判定。
 真正的修法是组件 API 增加「背景 tone」输入（组件变更，不在 gallery 轮范围）。
+
+## 8. 控件页（G4）
+
+G4a 已交付：Button 的 3 材质 × 6 状态矩阵 + liquid / material 双形态切换。
+
+- 页面 `shell/gallery/ControlsPage.qml`，整页 Flickable；顶部切换写
+  `ControlForm.materialForm`，所有控件基线随之换形态。
+- 状态卡 `ControlStateCard.qml`：QML 玻璃壳（`useKwinEffect:false`，矩阵中
+  不建 compositor blur region）+ 1px 发丝边，右上角标注「材质 · 状态」。
+- 控件基线 `GlassButton.qml`：高 28、Body 13/16；liquid = pill，expansion
+  0 / 0.3 / 1.0 读 gallery 本地 `ControlTokens`；material = M3 filled、
+  radius small 10、状态层 8%/12%。focus 是双环形状，不只换颜色。
+- SPEC §3.9 只定义 4 个状态；矩阵第 5/6 卡展示 icon 形态与 keyboard focus
+  （HIG §2.6 可达性），不是新增状态。
+- 截图钩子：`GALLERY_PAGE=controls`、`GALLERY_CONTROLS_FILTER=button|…`、
+  `GALLERY_CONTROLS_OFFSET`、`GALLERY_CONTROL_FORM=liquid|material`，
+  均与 `shot.sh` 同行前置。
+- 验收截图：`g4-dark-button.png`、`g4-light-button.png`、
+  `g4-light-material-button.png`。

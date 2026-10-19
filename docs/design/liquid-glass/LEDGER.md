@@ -7,23 +7,18 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10h 已完成（light 下半 7 格）。截图：`g10h-overview-light.png`（nav +
-overview 16 卡）、`g10h-surfaces-light.png`、`g10h-popover-light.png`、
-`g10h-menu-light.png`、`g10h-tooltip-light.png`、`g10h-toast-light.png`。
-逐格结论见下方矩阵 light 列。`run.log` 无 QML/shader 报错（仅 wallpaper
-colorquantizer 警告）。light 下 scrim 选白 tint，弹窗/主窗口表面均转为浅色玻璃
-+ 深色文字，七格均可读；G10g 记录的 16 卡采样错位在 light 下复现（16 卡仍为
-统一粉色，不随象限变色），留待 G10i 定位。
-
-**上一轮 G10g 发现的采样缺陷（未修，已回退尝试）**：overview 的 16 个 Repeater/Grid
-卡片无论位于红/黄/青/品红哪个象限，玻璃面色都几乎相同（约 `rgb(152,42,41)`，
-即顶左红区被压暗后的颜色）；像素采样证明 col3/col4 的卡片跨到黄区也不变色。
-对照同页直接实例化的 `LiquidGlassSurface`（surface 页 regular 卡）能正确采到
-黄区，说明问题只在 positioner 摆放的 delegate 上。曾按「mapToItem 非响应式、
-定位后 sourceRect 未刷新」假设在 `Component.onCompleted` 里加
-`Qt.callLater(_sceneRevision++)`，重截 `g10g-overview-dark2.png` 后像素完全相同，
-已回退该改动。需在 G10i/G10x 继续定位（候选：delegate 定位后 mapToItem 仍返回
-旧值；或同一 sourceItem 的多个 ShaderEffectSource 纹理复用错误）。
+G10i 已完成。**采样错位已定位并修复**：`sceneSourceRect` 的绑定此前只依赖
+`_sceneRevision`（在 x/y/width/height 变化时自增），但 Grid 是在 delegate 创建
+早期（坐标 0/12/24/36）完成首次求值，之后 delegate 移到真实格位时被 anchors
+布局的卡面没有触发重算，`mapToItem` 结果一直停在顶左红区——因此 16 卡同色。
+定时日志证明：3 秒后 delegate 的 parent 坐标已是正确格位（0/169/338/507），
+而缓存 rect 仍是每列仅差 gap 的旧值。修复：让 `sceneSourceRect` 绑定显式读
+`parent.x` / `parent.y` 与背景板宽高，建立真实依赖
+（`LiquidGlassSurface.qml`）。重截后 16 卡按象限正确取色。截图：
+`g10i-overview-dark.png`、`g10i-overview-light.png`（overview 16 卡 + nav +
+param panel，覆盖象限交界与黑白点）。`run.log` 无 QML/shader 报错（仅
+wallpaper colorquantizer 警告）。dark/light 下 nav 与 param panel 横跨
+红/青、黄/品红交界处玻璃连续渐变，文字可读；黑白点透过玻璃明暗正确。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
@@ -34,7 +29,7 @@ colorquantizer 警告）。light 下 scrim 选白 tint，弹窗/主窗口表面�
 - [x] G10f Toast/Tooltip 页内基准 + 通知/菜单/对话框页启用 scrim
 - [x] G10g 深色主题可读性矩阵（上半）
 - [x] G10h 浅色主题可读性矩阵（下半）
-- [ ] G10i 极端边界复检（象限交界 / 黑白点 / 最亮黄区）
+- [x] G10i 极端边界复检（象限交界 / 黑白点 / 最亮黄区）
 - [ ] G10j 与 KWin 预设强度对齐
 - [ ] G10k 文档回填 + 最终截图 + DONE
 
@@ -43,7 +38,7 @@ colorquantizer 警告）。light 下 scrim 选白 tint，弹窗/主窗口表面�
 | 表面 | dark | light |
 | --- | --- | --- |
 | 左栏 nav | ✅ 白字可读（balanced）；青区对比偏低但可辨 | ✅ 深色文字在提亮红底上清晰（balanced 白 tint）；次级项略淡但可辨 |
-| overview 16 卡 | ⚠ 文字可读，但 16 卡采样错位（均取顶左红区，见缺陷记录） | ⚠ 深色标题/副标可读；16 卡仍统一粉色，跨红/黄象限不变色（同一缺陷复现） |
+| overview 16 卡 | ✅ 采样修复后 16 卡按象限取色（左上红 / 右上黄 / 左下青 / 右下品红），黄区压成橄榄色；白/次级文字全卡可读 | ✅ 16 卡正确随象限变浅（浅红/浅黄/浅青/浅粉），深色标题与副标在全部四区清晰 |
 | surfaces clear/regular/thick | 外推：三档是 KWin 路径演示（useKwinEffect:true），红线不改；无 KWin 时不着色、黄区白字不可读。同页 QML 卡（regular+balanced）采样正确、可读 | 外推：三档及 LiquidGlassPanel/ControlCenterGlass/KosFlowPanel 均为合成器路径演示，无 KWin 时不着色；light 下 clear/regular 白字在亮红上偏弱。同页 QML `LiquidGlassSurface` 跨黄/品红边界采样正确（上黄下品红），深色文字清晰 |
 | popover | ✅ 红区白/次级文字可读（未启用 scrim，旧行为） | ✅ 深色标题清晰，次级灰字在红底上可辨（未启用 scrim，旧行为） |
 | menu | ✅ balanced 黑 tint 压暗红区，白字清晰 | ✅ balanced 白 tint 提亮红区成浅粉卡片，深色文字清晰 |
@@ -54,8 +49,8 @@ colorquantizer 警告）。light 下 scrim 选白 tint，弹窗/主窗口表面�
 | motion 页 toast | | |
 | tooltip 页内基准 | | |
 | decision 三条 lane | | |
-| param panel（文字最密） | | |
-| 象限交界 / 黑白点最坏情况 | | |
+| param panel（文字最密） | ✅ 跨黄/品红交界玻璃连续渐变，白字与滑杆读数可读；文字最密区无不可辨项 | ✅ 浅黄→浅粉连续渐变，深色文字/读数清晰 |
+| 象限交界 / 黑白点最坏情况 | ✅ 16 卡与 nav、param panel 跨交界处采样连续；黑白点透过玻璃明暗正确，未见色块断裂 | ✅ 同上；白点处玻璃提亮但深色文字仍可读，黑点处仍清晰 |
 
 ## 已确认的架构（不要重开）
 
@@ -72,10 +67,11 @@ colorquantizer 警告）。light 下 scrim 选白 tint，弹窗/主窗口表面�
 
 ## Next round
 
-G10i — 极端边界复检：先定位 overview 16 卡「跨象限不变色」缺陷（dark/light
-均复现，仅 positioner delegate；候选：delegate 定位后 `mapToItem` 返回旧值、
-或同一 `sourceItem` 多 `ShaderEffectSource` 纹理复用），再截象限交界 /
-黑白点 / 最亮黄区（nav、overview、param panel）并逐格记录。
+G10j — 与 KWin 预设强度对齐：对照
+`LiquidGlassPanel._presetCap/_presetDecay`（readable 0.72/1.0、balanced
+0.47/0.75、transparent 0.22/0.5、subtle 0.15/0.45），逐表面核对 QML 路径实际传入的
+`scrimCap` / `scrimDecay` / tint，把 G10d/G10f 里手写的 cap 统一到 preset 来源，
+并在 ledger 记录每个表面最终 preset 与截图。
 
 ## 注意
 

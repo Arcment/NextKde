@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.desktop.modules.common
+import "components"
 
 // Gallery root (G1a): fixed left nav + right content Loader.
 
@@ -197,6 +198,15 @@ Item {
         onThemeRequested: function(mode) { root.applyTheme(mode) }
     }
 
+    // ── modal dialog overlay (G3a) ───────────────────────────────────
+    // Declared at root level rather than inside PopupsPage so the scrim can
+    // cover the whole gallery window, nav and parameter panel included.
+    GlassDialog {
+        id: glassDialog
+        anchors.fill: parent
+        reduceMotion: root.reduceMotionOn
+    }
+
     Component {
         id: overviewPage
         OverviewPage {
@@ -217,7 +227,10 @@ Item {
     }
     Component {
         id: popupsPage
-        PopupsPage {}
+        PopupsPage {
+            dialog: glassDialog
+            reduceMotionOn: root.reduceMotionOn
+        }
     }
     Component {
         id: controlsPage

@@ -14,7 +14,11 @@ Item {
     // Screenshot hook: run.sh only exports GALLERY_THEME, so shot.sh exports
     // GALLERY_POPUP in front of the call and it is inherited here.
     readonly property string demo: Quickshell.env("GALLERY_POPUP") || ""
-    readonly property var demoNames: ["Popover", "Menu", "Tooltip", "Toast", "Notification"]
+    readonly property var demoNames: ["Popover", "Menu", "Tooltip", "Toast", "Notification", "Dialog"]
+    // GlassDialog is declared at GalleryRoot level so its scrim can cover the
+    // whole window (nav and parameter panel included); this page drives it.
+    property Item dialog: null
+    property bool reduceMotionOn: false
     // The 360px card needs the summary column's space; the two are shown
     // one at a time so the in-page card never overlaps the token list.
     property bool notificationShown: false
@@ -37,6 +41,10 @@ Item {
     function showNotification() {
         notificationShown = true
     }
+    function showDialog() {
+        if (page.dialog)
+            page.dialog.open()
+    }
     function closeActive() {
         popover.close()
         menu.close()
@@ -44,6 +52,10 @@ Item {
         feedbackToast.dismiss()
         glassToast.dismiss()
         notificationShown = false
+        // Esc also closes the modal; its shortcut stays here because the
+        // gallery window owns keyboard focus.
+        if (page.dialog)
+            page.dialog.close()
     }
     function openDemo(index) {
         page.closeActive()
@@ -57,6 +69,8 @@ Item {
             page.showToasts()
         else if (index === 4)
             page.showNotification()
+        else if (index === 5)
+            page.showDialog()
     }
     // Tooltip hover contract: 700ms dwell opens, leaving closes at once.
     // 700ms is extrapolated (SPEC does not fix a dwell time).
@@ -84,12 +98,13 @@ Item {
         interval: 300
         running: page.demo === "popover" || page.demo === "menu"
             || page.demo === "tooltip" || page.demo === "toast"
-            || page.demo === "notification"
+            || page.demo === "notification" || page.demo === "dialog"
         repeat: false
         onTriggered: page.openDemo(page.demo === "notification" ? 4
             : page.demo === "toast" ? 3
             : page.demo === "tooltip" ? 2
-            : page.demo === "menu" ? 1 : 0)
+            : page.demo === "menu" ? 1
+            : page.demo === "dialog" ? 5 : 0)
     }
 
     Shortcut {
@@ -251,6 +266,30 @@ Item {
         }
         Text {
             text: "regular · scrim readable · h 36 / radius 18 · Callout 12 Medium · 显 150 / 隐 180 · 存留 1600ms"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+
+        Item { width: 1; height: 8 }
+
+        Text {
+            text: "GlassDialog（G3a 基准 · 页内模态）"
+            color: page.ink
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+        }
+        Text {
+            text: "thick · radius 24 · padding 20 · 标题 22/26 SemiBold · 正文 13/16"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+        Text {
+            text: "按钮高 28 · 行 gap 8 · 宽 360（外推，SPEC 未定）· 点背板关闭（外推）"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+        Text {
+            text: "四态 opening / open / closing / closed · open 150 OutCubic · close 140 InCubic · scale 0.96→1"
             color: page.inkDim
             font.pixelSize: 12
         }

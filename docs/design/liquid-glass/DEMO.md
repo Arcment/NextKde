@@ -6,17 +6,24 @@
 
 ## 1. 身份与位置
 
-- **位置**：`apps/gallery/`，与 `apps/settings`、`apps/music` 等并列的普通 QML 应用
-  （apps 目录现有 calendar/common/listenfree/lockscreen/music/sddm/settings/todo/weather）。
-- **构建关系**：按仓库既有模式注册——顶层 `CMakeLists.txt` 已用
-  `add_subdirectory(apps/<name>)` 按条件挂载各 app（`CMakeLists.txt:636,641,698`）；
-  gallery 同样走 `add_subdirectory(apps/gallery)`，但放在**默认关闭的 dev 选项**
-  （如 `-DKOS_BUILD_GALLERY=ON`）之后，确保不进发行镜像、不影响常规构建产物。
+- **位置（实测定案）**：`shell/gallery.qml`（入口）+ `shell/gallery/`（页面），
+  **不是** `apps/gallery/` 的普通 QML 应用。启动方式为
+  `qs -p shell/gallery.qml`。
+- **原因**：gallery 必须直接实例化现役玻璃组件——`LiquidGlassPanel` 依赖
+  `AppearanceConfigService`（`import Quickshell`）、`KosFloatPanel` 依赖
+  `Quickshell.Wayland`、`ControlCenterGlass` 依赖 `qs.desktop.modules.dock`，
+  普通 `QGuiApplication` 加载不了 `Quickshell`，这些真实组件一个都用不上；
+  而 Quickshell 的 `qs.*` 导入前缀固定映射到配置根目录，只有配置根为 `shell/`
+  时 `import qs.desktop.modules.common` 才能原样解析。
+- **构建关系**：不注册 CMake、不加构建开关、不进安装产物、不改任何构建文件
+  （原「`add_subdirectory(apps/gallery)` + `-DKOS_BUILD_GALLERY=ON`」方案
+  已被上述实测证伪，作废）。
 - **复用**：直接引用 `shell/Kos/Ui/`、`shell/desktop/modules/common/` 的真实组件
   （GlassSurface / LiquidGlassPanel / PopupMotion 等），**不复制副本**——
   gallery 的意义就是让规范组件在受控环境下显示。
 - **颜色入口**：gallery 自身接 AppearanceTokens（SPEC §2 定案的玻璃色值出口），
-  主题切换用 SystemPalette 深浅，不引入第二套色板。
+  主题切换走 `AppearanceConfigService.updateThemeMode("light"|"dark")`，
+  不引入第二套色板。
 
 ## 2. 页面结构
 

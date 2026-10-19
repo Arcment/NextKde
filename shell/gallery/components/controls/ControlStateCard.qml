@@ -58,7 +58,12 @@ Item {
         anchors.rightMargin: 8
         width: parent.width - 12
         horizontalAlignment: Text.AlignRight
+        // Long state names (focusVisible) wrap to a second line instead of
+        // eliding: the material·state annotation is part of the matrix.
+        wrapMode: Text.WordWrap
+        maximumLineCount: 2
         elide: Text.ElideRight
+        lineHeight: 1.05
         text: root.materialTier + " · " + root.stateLabel
         color: root.ink
         font.pixelSize: 10

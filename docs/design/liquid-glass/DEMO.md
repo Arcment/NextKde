@@ -191,3 +191,28 @@ G4c 已交付：ComboBox 与 SegmentedControl 的 3 材质 × 6 状态矩阵，�
   run.log 会产生 QML 警告）；形状与尺寸不变。
 - 验收截图：`g4-dark-combobox.png`、`g4-dark-segmented.png`
   （`GALLERY_CONTROLS_FILTER=combobox|segmented`，形态 liquid，offset 0）。
+
+G4d 已交付：GlassSlider 与 GlassSwitch 的 3 材质 × 6 状态矩阵，同为双形态。
+
+- `GlassSlider.qml`：value 0..1、高 44、track 6、thumb 32×16、accent 读
+  `ControlTokens.accentColor`。liquid = iOS 玻璃 thumb（磨砂底 + 折射/高光 +
+  内沿 + accent 溢染，hover expansion 0.3 / pressed 1.0）；material = M3
+  （`m3Scale=min(1,h/44)`、inactive 4 / active 16 / handle 4×44）。
+  契约：拖拽发 `previewChanged`，松手发 `commitRequested` 并把 thumb x 动画
+  屏蔽 400ms；Ctrl+滚轮按 0.01/档（像素累积 10）步进、180ms 去抖提交；
+  disabled/hidden 发 `canceled`。矩阵六卡为 idle / hovered / pressed /
+  disabled + 两个取值样张（0% / 100%，forcedState idle，不是新状态）。
+- `GlassSwitch.qml`：74×32、thumb 44×26、`travel = width-44-6`；liquid thumb
+  展开高度夹到 `height-2`（gallery 以高度夹取代替生产件的 pill mask，宽度
+  仍 1.4×），material = M3 track + handle 16 off / 24 on、
+  `m3Scale=min(1,h/32)`。`checked` 归宿主，`toggle()` 只发
+  `toggled(!checked)`，组件不本地翻转；thumbX 200 OutCubic、press 120 /
+  释放 200。focusVisible = 2px accent 环 + 1px ink 发丝（形状 + 对比，不只颜色）。
+- 两段矩阵下方各有一行 live 控件与只读读数：slider `preview / commit / wheel
+  （档数）/ canceled`；switch `requested / confirmed`（350ms 模拟宿主异步确认）。
+- `ControlStateCard` 右上角标注由 G4c 的 elide 改为最多两行换行，
+  `clear · focusVisible` 不再截断成 `focusVisi…`；两行仍右对齐、10px。
+- 验收截图：`g4-dark-slider.png`、`g4-dark-switch.png`、
+  `g4-light-slider.png`、`g4-light-switch.png`
+  （`GALLERY_CONTROLS_FILTER=slider|switch`，形态 liquid，offset 0）。
+  另拍 material 形态 `g4-dark-material-slider/switch.png` 核对 M3 比例。

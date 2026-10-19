@@ -1,35 +1,33 @@
-# 液态玻璃组件规范 — R5
+# 液态玻璃 Gallery — G1
 
 ## 本轮
-R5 完成：
-1. `INVENTORY.md` 追加 §12 —— Slider（LiquidSlider/KosSlider/ColorRampSlider）、
-   Switch（LiquidGlassSwitch，实名更正：无 "LiquidSwitch" / KosSwitch）、
-   NavBar（LiquidNavBar，判定为导航容器）三表 + controls 目录终查
-   （ControlForm/SelectionHighlight/VectorIcon）+ 两项工程项关闭
-   （weather tint/模糊公式、LiquidGlassPanel scrim 逐跳链路）；§11 结算。
-2. `SPEC.md` 升 v1.1 —— API 13→16（+GlassSlider/GlassSwitch/GlassNavBar 容器
-   契约）；weather/scrim 结论回填 §1.1/§1.4；§2.7 动效表补 slider/switch 时长；
-   §7 收敛到 3 项（Toast 1600ms / Tooltip -6 / SessionMenu 比例字号）并重编号；
-   §5/§6 交叉引用同步。
-3. `DEMO.md` 同步 —— 组件数 16、控件页清单 +Slider/Switch/NavBar（NavBar 演示
-   归表面页）、状态矩阵裁剪规则、G4 轮次内容、§7 3 项 A/B 并排。
+*（未开始 — 等 G1a）*
 
 ## 队列（✅=已交付）
-- [x] R5 补 Slider/Switch/NavBar 盘点与 API；关闭 weather tint 与 scrim 链路两项；
-      SPEC v1.1 + DEMO 同步
+- [ ] G1a 骨架：`shell/gallery.qml` + 导航 + 背景板，能起能截图
+- [ ] G1b 表面页：LiquidGlassPanel(B 宿主) / LiquidGlassSurface(A) /
+      ControlCenterGlass / KosFloatPanel
+- [ ] G1c 三档材质并排 + 参数面板 + 总览页占位
+- [ ] G1d 收口：DEMO.md §1 改成实际定案 + 仍差清单
 
-## 上一批已交付
-- [x] R1 `INVENTORY.md` 初版
-- [x] R2 `SPEC.md` v0
-- [x] R3 `INVENTORY.md` §4-§11 补全
-- [x] R4 `SPEC.md` v1 + `DEMO.md`
+## 已定案（不要再论证）
+- gallery 是 Quickshell 配置：入口 `shell/gallery.qml`，页面 `shell/gallery/`。
+  原因：真实玻璃组件依赖 Quickshell；`qs.*` 导入根固定为 `shell/`。
+  原 `apps/gallery/` + CMake 开关方案已证伪，G1d 回写 DEMO.md。
+- 窗口：`PanelWindow` 全屏（`ExclusionMode.Ignore` / `WlrLayer.Top`）。
+  `FloatingWindow` 会被加装饰并整窗模糊，禁用。
+- `ext-background-effect-v1` 警告是预期噪声，KWin 走 SurfaceShape。
+- 受控背景：Background 层全屏 PanelWindow（高饱和色块），保证截图可比。
+
+## 上一批已交付（R 系列）
+- [x] R1 INVENTORY / R2 SPEC v0 / R3 INVENTORY §4-§11 / R4 SPEC v1 + DEMO
+- [x] R5 INVENTORY §12 + SPEC v1.1（16 组件 API，人工项收敛到 3）
 
 ## Next round
-无 —— 队列已清空。
+G1a — 先读 `.loop/TASK.md` 第一节与 G1a 条目，按第三节的脚本启动截图。
 
 ## 注意
-- 只写文档，不改源码、不构建、不启动、不截图。
-- 禁止 checkout 其他分支；用 `git show <branch>:<file>` 读取。
-- 完成后在下面单独一行写 `DONE`。
-
-DONE
+- 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
+- 不改现役组件、不改 `shell/shell.qml`、不改 CMake。
+- 每轮结束前：截图 + state.md + commit。
+- 队列全部完成后，在下面单独一行写 `DONE`。

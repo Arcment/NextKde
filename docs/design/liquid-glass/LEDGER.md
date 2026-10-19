@@ -1,42 +1,36 @@
 # 液态玻璃 Gallery — G5（动效 + 参数面板）
 
 ## 本轮
-G5d 已交付（2026-10-19 19:20）：参数面板完备 + reduceMotion 联动。
-参数面板新增 tintStrength（0–0.40，刻度 0.10/0.16/0.24）、blurLevel
-（1–15 整数 + clear 1..5 / regular 6..10 / thick 11..15 三段色带 + 当前档
-标记）、radius pill 开关（三档 32/24/16 + 0–32 自由滑杆保留）。
-tint / radius / blur 已从 ParamPanel 经 GalleryRoot 实时下发到 表面、
-控件、动效三页：表面页 MaterialTrio 与各 LiquidGlassPanel/Surface 用
-主题色 baseColor（深色黑 / 浅色白，α = tintStrength），控件页 8 组
-ControlStateCard 全部接 previewRadius/tint/previewBlur/previewOpacity，
-动效页 6 张 MotionCard（含新增 params 卡）同样接收。
-`GALLERY_MOTION_DEMO=params` 新增一张只读参数卡（与右侧面板同源），
-单独出图时其余卡片隐藏。动效页五段均读 reduceMotionOn。
-另修 `shell/gallery.qml` 的主题播种竞态：themeSettle 由单次 800ms 改为
-10 次 × 800ms 重放（避免异步持久化加载把浅色运行翻回深色）。
+G5e 已交付（2026-10-19 19:25）：动效页 10 张截图按 TASK 第五节全量重拍、
+逐张目检，并同步到 `docs/design/liquid-glass/`。`run.log` 无 QML 报错
+（仅 wallpaper colorquantizer WARN）。G5 队列全部勾完，文末写 DONE。
 
-截图：`g5-dark-params.png`、`g5-light-params.png`、
-`g5-dark-reduce.png`、`g5-light-reduce.png`（`tmp/glass/`，并复制到
-`docs/design/liquid-glass/`）。`run.log` 无 QML 报错；仅 wallpaper
-colorquantizer WARN 与既有的 ProxyFloatingWindow 弃用 WARN。
-
-静态读数（本次四张截图）：
-- dark params：tintStrength 0.16 · 刻度 0.10/0.16/0.24 可见；
-  blurLevel L8 · band regular；radius 24（预设 32/24/16 中 24 选中）；
-  pill off · eff 24；reduceMotion off。参数卡同步读出同一组值。
-- light params：同一组值；浅色墨色（页标题与读数均为深字），
-  面板底色随浅色 tint 变浅；参数卡与右侧面板读数一致。
-- dark reduce：popup 双 lane effective 均为 0ms（reduceMotion），
-  开 progress 1.000 settled / 关 progress 0.000 settled，
-  startScale 0.96 · anchorOffset 20px 标注保留；顶栏 reduceMotion=on。
-- light reduce：同读数（0ms / 1.000 / 0.000），浅色墨色。
+重拍静态读数（逐张明细见 DEMO.md「G5e 收口」）：
+- dark/light popup：开 OutCubic progress 1.000 · 150ms · settled；
+  关 InCubic progress 0.578 · 140ms · sampled；两 lane 的
+  t=0/0.25/0.50/0.75/1.00 采样列完整，startScale 0.96 / anchorOffset 20px
+  标注保留。
+- dark press：idle 0.000 / hovered 0.300 / pressed 1.000；live 行
+  expansion 0.000、press 200ms OutBack / release 360ms OutQuint、state idle。
+- dark ambient：mix 50% · progress 0.500 · 2600ms InOutSine · target A。
+- dark tooltip：progress 1.000 · scale 1.000 · open/close effective 70ms ·
+  state shown。
+- dark toast：remaining 1600ms · effective show 150 / hide 180ms ·
+  state shown · SPEC §7-① 待裁定。
+- dark/light reduce：两 lane effective 0ms（reduceMotion）、开 1.000 settled /
+  关 0.000 settled；顶栏 reduceMotion=on。
+- dark/light params：tintStrength 0.16 + 刻度 0.10/0.16/0.24；blurLevel L8 +
+  三段色带（band regular）；radius 24（24 选中）/ free 24 / pill off · eff 24；
+  reduceMotion off；参数卡与右侧面板逐项同值。
+- 浅色组复核：整图缩略时白字难辨，裁切放大左侧标题区确认
+  `Liquid Glass Gallery` 与导航项均为深色墨，`GALLERY_THEME=light` 生效。
 
 ## 队列（✅=已交付）
 - [x] G5a 动效页骨架 + Popup 开合对比（OutCubic / InCubic）
 - [x] G5b 液态按压 expansion + 环境光过渡 2600ms
 - [x] G5c tooltip 70ms + toast 1600ms
 - [x] G5d 参数面板完备 + reduceMotion 联动
-- [ ] G5e 10 张截图补齐 + ledger 收口
+- [x] G5e 10 张截图补齐 + ledger 收口
 
 ## G5a 验收
 - `MotionPage.qml` 为 Flickable + Column，每个演示位一张 `MotionCard`
@@ -103,6 +97,21 @@ colorquantizer WARN 与既有的 ProxyFloatingWindow 弃用 WARN。
   AppearanceConfigService 的异步持久化加载在首帧后把 GALLERY_THEME
   覆盖掉（浅色截图曾复现）。
 
+## G5e 验收
+- 10 张截图全部在当前代码上重拍，逐张目检 token 标注、终态与读数；
+  文件同时落在 `tmp/glass/` 与 `docs/design/liquid-glass/`（同名覆盖）。
+  逐张读数见 DEMO.md「G5e 收口」与上方「本轮」。
+- 截图命令严格按 TASK 第五节；`GALLERY_PAGE` / `GALLERY_MOTION_DEMO` /
+  `GALLERY_MOTION_REDUCE` 均与 shot.sh 同行前置。
+- 每次 shot.sh 的 run.log 扫描仅见 wallpaper colorquantizer WARN
+  （`Kubuntu#day-night` 无法加载），无 ERROR / TypeError / Non-existent /
+  ReferenceError。
+- 每次 pkill 均锚定 `^qs -p shell/gallery.qml`；收尾无残留 gallery 进程。
+- 已改：仅 `docs/design/liquid-glass/DEMO.md`（G5e 收口记录）与 10 张
+  `docs/design/liquid-glass/g5-*.png`；本轮未改任何 QML。
+- 仍差 / 外推：见下节；均为静态截图的能力边界或生产组件边界，
+  不阻塞 G5 收口。
+
 ## 仍差
 - 静态截图不能判动效：按压回弹（OutBack 过冲 / OutQuint 回落）、
   popup 150/140ms 曲线与环境光 2600ms 渐变的实际播放只核对了 token、
@@ -143,13 +152,13 @@ colorquantizer WARN 与既有的 ProxyFloatingWindow 弃用 WARN。
   preview 参数转发，未改任何控件行为。
 
 ## Next round
-G5e — 收口：按 TASK 第五节 10 张清单补齐/重拍（popup dark/light、
-press、ambient、tooltip、toast、reduce dark/light、params dark/light），
-逐张核对 token 标注与静态读数；确认 run.log 无 QML 报错；更新
-DEMO/LEDGER（如需要）；提交后在本文件写 `DONE`。
+无 — G5a–G5e 全部交付，本节以下写 DONE。后续若继续，只做动态目检
+（需真人交互）与既有「仍差」中列出的生产组件边界项，不在 gallery 内改现役组件。
 
 ## 注意
 - 只改 `shell/gallery.qml`、`shell/gallery/**`、`docs/design/liquid-glass/DEMO.md`。
 - 不改现役组件、不改 `shell/shell.qml`、不改 CMake、不改 KWin。
 - 每轮结束前：截图 + state.md + commit。
 - 全部队列项勾完，在下面单独一行写 `DONE`。
+
+DONE

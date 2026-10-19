@@ -33,8 +33,8 @@ Item {
         x: 0
         y: 32
         width: parent.width
-        text: "LiquidGlassPanel（B 层宿主）· LiquidGlassSurface（A 层）· "
-            + "ControlCenterGlass 配方 · KosFloatPanel（独立 layer-shell 窗口）"
+        text: "LiquidGlassPanel（B 宿主）· LiquidGlassSurface（A 层）· "
+            + "ControlCenterGlass · KosFloatPanel（layer-shell）"
         color: page.inkDim
         font.pixelSize: 12
         elide: Text.ElideRight

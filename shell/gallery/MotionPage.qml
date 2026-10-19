@@ -4,7 +4,7 @@ import qs.desktop.modules.common
 
 // G5 — motion page. G5a ships the page skeleton and the Popup open/close
 // comparison; G5b adds liquid press expansion and the 2600ms ambient
-// transition; G5c adds tooltip 70ms and toast 1600ms; G5d adds the full
+// transition; G5c adds tooltip 70ms and toast 2600ms（悬停暂停）; G5d adds the full
 // parameter panel wiring.
 //
 // Screenshot hooks (must be set on the same command line as shot.sh):
@@ -56,7 +56,7 @@ Item {
         y: 32
         width: parent.width
         text: "PopupMotion 开合（OutCubic / InCubic）· 按压 expansion · 环境光 2600ms"
-            + " · tooltip 70ms · toast 1600ms · 参数面板（tint / blur / radius / reduceMotion）"
+            + " · tooltip 70ms · toast 2600ms（悬停暂停）· 参数面板（tint / blur / radius / reduceMotion）"
         color: page.inkDim
         font.pixelSize: 12
         elide: Text.ElideRight
@@ -291,10 +291,10 @@ Item {
                 blurStrength: page.blurAmount
                 height: 286
                 title: "toast 存留"
-                badge: "1600ms"
+                badge: "2600ms"
                 ink: page.ink
                 inkDim: page.inkDim
-                caption: "show 150 / hide 180ms OutCubic · 存留 1600ms（SPEC §7-① 待裁定）"
+                caption: "show 150 / hide 180ms OutCubic · 存留 2600ms + 悬停暂停（SPEC §7-① 已裁定 B）"
                     + " · reduceMotion 下 show/hide 与存留 effective 0"
 
                 ToastDemo {

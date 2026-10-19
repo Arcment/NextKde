@@ -1,17 +1,17 @@
 import QtQuick
 import qs.desktop.modules.common
 
-// G5c — toast retention (SPEC §2.7): 1600ms hold.
+// G5c — toast retention (SPEC §2.7): 2600ms hold + hover pause.
 //
 // Mirrors the G2d gallery baseline GlassToast surface (material regular,
 // scrim readable, 36px tall, pill radius, Callout 12 Medium) and its entry
 // motion (show 150ms / hide 180ms OutCubic, 0.96 -> 1 scale). The retention
-// clock is the token under test: 1600ms. That ruling is still open in
-// SPEC §7-①, so the demo labels it rather than settling it.
+// clock is the token under test: 2600ms. SPEC §7-① has ruled B (2600ms with
+// hover pause), so the demo labels that ruling and keeps the static hold.
 //
 // The toast is seeded shown and the hold clock is not started, matching the
 // existing toast demo's "演示常显" convention: a static screenshot can show
-// the surface and the token but cannot prove the 1600ms hold. Clicking
+// the surface and the token but cannot prove the 2600ms hold. Clicking
 // 发一条 restarts the real clock. reduceMotion makes show/hide and the hold
 // duration effective 0, so the toast appears and dismisses in the same frame.
 Item {
@@ -24,7 +24,7 @@ Item {
 
     readonly property int showToken: 150
     readonly property int hideToken: 180
-    readonly property int holdToken: 1600
+    readonly property int holdToken: 2600
     readonly property int showEffective: reduceMotion ? 0 : showToken
     readonly property int hideEffective: reduceMotion ? 0 : hideToken
     readonly property int holdEffective: reduceMotion ? 0 : holdToken
@@ -74,7 +74,7 @@ Item {
         root.holding = false
         // Read the switch directly: holdEffective's binding may not have
         // re-evaluated yet when this handler runs, which would leave the
-        // readout on the 1600ms token value.
+        // readout on the 2600ms token value.
         root.remaining = root.reduceMotion ? 0 : root.holdToken
         if (root.reduceMotion)
             root.lastEvent = "reduceMotion · 时长 0"
@@ -179,7 +179,7 @@ Item {
 
             Text {
                 text: "hold  " + root.holdToken + "ms → effective "
-                    + root.holdEffective + "ms · §7-① 待裁定"
+                    + root.holdEffective + "ms · §7-① 已裁定 B"
                 color: root.ink
                 font.pixelSize: 10
                 font.family: "monospace"
@@ -255,7 +255,7 @@ Item {
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "发一条后按 1600ms 存留倒计时；截图为演示常显"
+                text: "发一条后按 2600ms 存留倒计时 · 悬停暂停见裁定页 B 栏；截图为演示常显"
                 color: root.inkDim
                 font.pixelSize: 10
             }

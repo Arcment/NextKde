@@ -1,0 +1,182 @@
+import QtQuick
+import qs.desktop.modules.common
+
+// Gallery root (G1a): fixed left nav + right content Loader.
+// The nav shell is an A-layer LiquidGlassPanel (no compositor effect of its
+// own beyond the panel's own fallback paint; useKwinEffect is off here because
+// the nav is not a B-layer host).
+
+Item {
+    id: root
+
+    signal toggleBackgroundBoard()
+
+    property bool backgroundBoardVisible: true
+    property int currentIndex: 0
+
+    readonly property var pages: [
+        { title: "总览", note: "G1c" },
+        { title: "表面", note: "G1b" },
+        { title: "弹层", note: "G2" },
+        { title: "控件", note: "G3" },
+        { title: "动效", note: "G4" }
+    ]
+
+    readonly property string ink: AppearanceTokens.content.glassInk()
+    readonly property string inkDim: AppearanceTokens.content.glassInk(0.55)
+
+    // ── left nav ─────────────────────────────────────────────────────
+    LiquidGlassPanel {
+        id: nav
+
+        x: 24
+        y: 24
+        width: 220
+        height: parent.height - 48
+        radius: AppearanceTokens.shape.large
+        cornerExponent: AppearanceTokens.shape.cornerExponent
+        useKwinEffect: false
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 4
+
+            Text {
+                text: "Liquid Glass Gallery"
+                color: root.ink
+                font.pixelSize: 15
+                font.weight: Font.DemiBold
+            }
+            Text {
+                text: "G1 骨架"
+                color: root.inkDim
+                font.pixelSize: 12
+            }
+
+            Item { width: 1; height: 12 }
+
+            Repeater {
+                model: root.pages
+
+                delegate: Rectangle {
+                    required property var modelData
+                    required property int index
+
+                    width: parent.width
+                    height: 40
+                    radius: 10
+                    color: root.currentIndex === index
+                        ? Qt.rgba(1, 1, 1, 0.18)
+                        : "transparent"
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 8
+
+                        Text {
+                            text: modelData.title
+                            color: root.currentIndex === index ? root.ink : root.inkDim
+                            font.pixelSize: 14
+                            font.weight: root.currentIndex === index ? Font.DemiBold : Font.Normal
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                        Text {
+                            text: modelData.note
+                            color: root.inkDim
+                            font.pixelSize: 11
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.currentIndex = index
+                    }
+                }
+            }
+
+            Item { width: 1; height: 12 }
+
+            // Background board toggle (on by default).
+            Row {
+                spacing: 8
+                Text {
+                    text: "背景板"
+                    color: root.inkDim
+                    font.pixelSize: 12
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Rectangle {
+                    width: 36
+                    height: 20
+                    radius: 10
+                    color: root.backgroundBoardVisible
+                        ? Qt.rgba(1, 1, 1, 0.35)
+                        : Qt.rgba(1, 1, 1, 0.12)
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Rectangle {
+                        x: root.backgroundBoardVisible ? 18 : 2
+                        y: 2
+                        width: 16
+                        height: 16
+                        radius: 8
+                        color: "#ffffff"
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: root.toggleBackgroundBoard()
+                    }
+                }
+            }
+        }
+    }
+
+    // ── right content ────────────────────────────────────────────────
+    Rectangle {
+        x: 268
+        y: 24
+        width: parent.width - 292
+        height: parent.height - 48
+        radius: AppearanceTokens.shape.large
+        color: "transparent"
+        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.width: 1
+
+        Loader {
+            id: pageLoader
+            anchors.fill: parent
+            anchors.margins: 24
+            sourceComponent: root.currentIndex === 0 ? overviewPage
+                : root.currentIndex === 1 ? surfacesPage
+                : root.currentIndex === 2 ? popupsPage
+                : root.currentIndex === 3 ? controlsPage
+                : motionPage
+        }
+    }
+
+    Component {
+        id: overviewPage
+        PlaceholderPage { title: "总览"; note: "G1c 交付：16 组件缩略卡 + 三档材质并排" }
+    }
+    Component {
+        id: surfacesPage
+        PlaceholderPage { title: "表面"; note: "G1b 交付：Panel / Surface / ControlCenterGlass / KosFloatPanel" }
+    }
+    Component {
+        id: popupsPage
+        PlaceholderPage { title: "弹层"; note: "G2" }
+    }
+    Component {
+        id: controlsPage
+        PlaceholderPage { title: "控件"; note: "G3" }
+    }
+    Component {
+        id: motionPage
+        PlaceholderPage { title: "动效"; note: "G4" }
+    }
+}

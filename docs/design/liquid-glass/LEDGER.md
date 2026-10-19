@@ -7,24 +7,21 @@
 3. 在四色高饱和背景板上做到极端场景可读，scrim 强度对齐 KWin preset。
 
 ## 本轮
-G10f + G10g。G10f：`GlassPopup` 增加 `scrimEnabled` / `scrimLevel` 并转发到
-卡片，`GlassMenu` 用 balanced，`GlassNotificationCard` 用 readable，
-`GlassDialog` 在 qml 模式下 `scrimEnabled: true` 走 balanced 场景 scrim
-（compositor 模式 `useKwinEffect` 仍为 true，KWin 路径不变）；ToastDemo /
-TooltipDemo 页内基准复核已是 readable / balanced。
+G10g 已完成（dark 上半 7 格）。截图：`g10g-overview-dark.png`（nav +
+overview 16 卡）、`g10g-surfaces-dark.png`、`g10g-popover-dark.png`、
+`g10g-menu-dark.png`、`g10g-tooltip-dark.png`、`g10g-toast-dark.png`。
+逐格结论见下方矩阵 dark 列。`run.log` 无 QML/shader 报错（仅 wallpaper
+colorquantizer 警告）。
 
-G10g（dark 上半）：截图 `g10g-overview-dark.png`、`g10g-surfaces-dark.png`、
-`g10g-popover-dark.png`、`g10g-menu-dark.png`、`g10g-tooltip-dark.png`、
-`g10g-toast-dark.png` 已逐格目视，结论见矩阵 dark 列；`run.log` 无
-QML/shader 报错（仅 wallpaper colorquantizer 警告）。
-
-G10g 发现一个采样缺陷（未修）：overview 的 16 个 Repeater/Grid 卡片无论
-位于哪个象限都呈同一暗红色（约 `rgb(152,42,41)`，即顶左红区压暗值），像素
-采样确认跨到黄区也不变色；同页直接实例化的 `LiquidGlassSurface` 采样正常，
-问题只出现在 positioner 摆放的 delegate 上。按「定位后 sourceRect 未刷新」
-假设加过 `Qt.callLater(_sceneRevision++)`，重截后像素不变，已回退；留待
-G10i/G10x 定位。三档材质条是 `useKwinEffect: true` 的 KWin 路径演示，按红线
-不改，无 KWin 运行时不着色属外推项。
+**本轮发现的采样缺陷（未修，已回退尝试）**：overview 的 16 个 Repeater/Grid
+卡片无论位于红/黄/青/品红哪个象限，玻璃面色都几乎相同（约 `rgb(152,42,41)`，
+即顶左红区被压暗后的颜色）；像素采样证明 col3/col4 的卡片跨到黄区也不变色。
+对照同页直接实例化的 `LiquidGlassSurface`（surface 页 regular 卡）能正确采到
+黄区，说明问题只在 positioner 摆放的 delegate 上。曾按「mapToItem 非响应式、
+定位后 sourceRect 未刷新」假设在 `Component.onCompleted` 里加
+`Qt.callLater(_sceneRevision++)`，重截 `g10g-overview-dark2.png` 后像素完全相同，
+已回退该改动。需在 G10i/G10x 继续定位（候选：delegate 定位后 mapToItem 仍返回
+旧值；或同一 sourceItem 的多个 ShaderEffectSource 纹理复用错误）。
 
 ## 队列（✅=已交付）
 - [x] G10a 背景板组件化 + 主窗口隐藏采样副本 + `GlassBackdrop` 单例
@@ -44,12 +41,12 @@ G10i/G10x 定位。三档材质条是 `useKwinEffect: true` 的 KWin 路径演�
 | 表面 | dark | light |
 | --- | --- | --- |
 | 左栏 nav | ✅ 白字可读（balanced）；青区对比偏低但可辨 | |
-| overview 16 卡 | ⚠ 文字可读，但 16 卡采样错位（均取顶左红区） | |
-| surfaces clear/regular/thick | 外推：KWin 路径演示（useKwinEffect:true，红线不改）；无 KWin 时不着色。同页 QML regular 卡采样正确、可读 | |
+| overview 16 卡 | ⚠ 文字可读，但 16 卡采样错位（均取顶左红区，见本轮缺陷记录） | |
+| surfaces clear/regular/thick | 外推：三档是 KWin 路径演示（useKwinEffect:true），红线不改；无 KWin 时不着色、黄区白字不可读。同页 QML 卡（regular+balanced）采样正确、可读 | |
 | popover | ✅ 红区白/次级文字可读（未启用 scrim，旧行为） | |
 | menu | ✅ balanced 黑 tint 压暗红区，白字清晰 | |
 | tooltip | ✅ thick + 局部采样，白/次级文字清晰 | |
-| toast | ✅ 基准 GlassToast（readable）白字可读；ActionFeedbackToast 为 KWin 路径（外推） | |
+| toast | ✅ 基准 GlassToast（readable）白字可读；同组 ActionFeedbackToast 为 KWin 路径（无 KWin 时只剩文字，外推） | |
 | notification | | |
 | dialog | | |
 | motion 页 toast | | |
@@ -73,9 +70,11 @@ G10i/G10x 定位。三档材质条是 `useKwinEffect: true` 的 KWin 路径演�
 
 ## Next round
 
-G10h — light 可读性矩阵（下半）：以 `shot.sh light` 按第九节表格填 light 列
-（nav / overview / surfaces / popover / menu / tooltip / toast），逐格记录
-preset 与结论；同时记录 16 卡采样错位在 light 下是否复现，G10i 一并定位。
+G10h — 浅色主题可读性矩阵（下半）：`GALLERY_THEME` 走 shot.sh 的 light 参数，
+按任务书第九节表格填 light 列，优先 nav / overview / surfaces / popover /
+menu / tooltip / toast（与 G10g 对称）。注意 `GALLERY_POPUP` 用小写值。
+同时留意 G10g 记录的 16 卡采样错位缺陷：若 light 下同样出现「跨象限不变色」，
+在 ledger 对应格注明，并准备在 G10i 一并定位（不要在 G10h 里展开调试）。
 
 ## 注意
 

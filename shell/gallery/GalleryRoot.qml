@@ -14,7 +14,8 @@ Item {
     // screenshot flow capture the surface page without synthesising a click.
     property int currentIndex:
         Quickshell.env("GALLERY_PAGE") === "surfaces" ? 1
-            : Quickshell.env("GALLERY_PAGE") === "popups" ? 2 : 0
+            : Quickshell.env("GALLERY_PAGE") === "popups" ? 2
+            : Quickshell.env("GALLERY_PAGE") === "scene" ? 5 : 0
     property string themeMode:
         Quickshell.env("GALLERY_THEME") === "light" ? "light" : "dark"
 
@@ -41,7 +42,8 @@ Item {
         { title: "表面", note: "G1b" },
         { title: "弹层", note: "G2/G3" },
         { title: "控件", note: "G4" },
-        { title: "动效", note: "G5" }
+        { title: "动效", note: "G5" },
+        { title: "场景", note: "S1" }
     ]
 
     readonly property string ink: AppearanceTokens.content.glassInk()
@@ -180,7 +182,8 @@ Item {
                 : root.currentIndex === 1 ? surfacesPage
                 : root.currentIndex === 2 ? popupsPage
                 : root.currentIndex === 3 ? controlsPage
-                : motionPage
+                : root.currentIndex === 4 ? motionPage
+                : scenePage
         }
     }
 
@@ -223,5 +226,9 @@ Item {
     Component {
         id: motionPage
         PlaceholderPage { title: "动效"; note: "G5" }
+    }
+    Component {
+        id: scenePage
+        ScenePage {}
     }
 }

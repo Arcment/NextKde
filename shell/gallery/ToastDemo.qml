@@ -126,7 +126,7 @@ Item {
                 height: 36
                 radius: height / 2
                 material: "regular"
-                scrimEnabled: AppearanceTokens.surface.usesBackdrop
+                scrimEnabled: true
                 scrimLevel: "readable"
                 useKwinEffect: false
                 fallbackEnabled: AppearanceTokens.surface.paintInQml

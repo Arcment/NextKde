@@ -77,6 +77,8 @@ Item {
         radius: 24
         cornerExponent: 2.0
         useKwinEffect: false
+        scrimEnabled: true
+        scrimLevel: "balanced"
 
         Column {
             anchors.fill: parent

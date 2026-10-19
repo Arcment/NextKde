@@ -131,6 +131,8 @@ Item {
                 cornerExponent: 2.0
                 material: "thick"
                 useKwinEffect: false
+                scrimEnabled: true
+                scrimLevel: "balanced"
                 opacity: root.progress
                 scale: root.startScaleToken
                     + (1 - root.startScaleToken) * root.progress

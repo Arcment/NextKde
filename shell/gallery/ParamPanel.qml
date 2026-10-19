@@ -37,6 +37,8 @@ LiquidGlassPanel {
     cornerExponent: 2.0
     useKwinEffect: false
     material: "regular"
+    scrimEnabled: true
+    scrimLevel: "readable"
 
     // ── header ───────────────────────────────────────────────────────
     Text {

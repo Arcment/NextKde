@@ -4,8 +4,8 @@ import qs.desktop.modules.common
 import "components"
 
 // G2 — popup page. G2a ships the skeleton and GlassPopover, G2b adds
-// GlassMenu, G2c adds GlassTooltip; Toast / Notification are still
-// placeholders for G2d–G2e.
+// GlassMenu, G2c adds GlassTooltip, G2d adds GlassToast; Notification is
+// still a placeholder for G2e.
 Item {
     id: page
 
@@ -26,10 +26,17 @@ Item {
     function showTooltip() {
         tooltip.open(anchorRepeater.itemAt(2))
     }
+    // Both toasts share the same copy so only the surface differs.
+    function showToasts() {
+        feedbackToast.show("已保存到相册", "check")
+        glassToast.show("已保存到相册", "check")
+    }
     function closeActive() {
         popover.close()
         menu.close()
         tooltip.close()
+        feedbackToast.dismiss()
+        glassToast.dismiss()
     }
     function openDemo(index) {
         page.closeActive()
@@ -39,6 +46,8 @@ Item {
             page.showMenu()
         else if (index === 2)
             page.showTooltip()
+        else if (index === 3)
+            page.showToasts()
     }
     // Tooltip hover contract: 700ms dwell opens, leaving closes at once.
     // 700ms is extrapolated (SPEC does not fix a dwell time).
@@ -64,9 +73,12 @@ Item {
     // anchor to a zero-size item and place the popup at the output origin.
     Timer {
         interval: 300
-        running: page.demo === "popover" || page.demo === "menu" || page.demo === "tooltip"
+        running: page.demo === "popover" || page.demo === "menu"
+            || page.demo === "tooltip" || page.demo === "toast"
         repeat: false
-        onTriggered: page.openDemo(page.demo === "tooltip" ? 2 : page.demo === "menu" ? 1 : 0)
+        onTriggered: page.openDemo(page.demo === "toast" ? 3
+            : page.demo === "tooltip" ? 2
+            : page.demo === "menu" ? 1 : 0)
     }
 
     Shortcut {
@@ -153,9 +165,9 @@ Item {
     // ── token summary ───────────────────────────────────────────────────
     Column {
         x: 0
-        y: 300
+        y: 294
         width: page.width
-        spacing: 6
+        spacing: 5
 
         Text {
             text: "GlassPopover（gallery 基准）"
@@ -174,7 +186,7 @@ Item {
             font.pixelSize: 12
         }
 
-        Item { width: 1; height: 10 }
+        Item { width: 1; height: 8 }
 
         Text {
             text: "GlassMenu（gallery 基准）"
@@ -198,7 +210,7 @@ Item {
             font.pixelSize: 12
         }
 
-        Item { width: 1; height: 10 }
+        Item { width: 1; height: 8 }
 
         Text {
             text: "GlassTooltip（gallery 基准）"
@@ -217,9 +229,99 @@ Item {
             font.pixelSize: 12
         }
 
+        Item { width: 1; height: 8 }
+
         Text {
-            visible: page.demo.length > 0
-            text: "自动演示：GALLERY_POPUP=" + page.demo
+            text: "GlassToast（gallery 基准）"
+            color: page.ink
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+        }
+        Text {
+            text: "regular · scrim readable · h 36 / radius 18 · Callout 12 Medium · 显 150 / 隐 180 · 存留 1600ms"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+    }
+
+    // ── toast host (bottom centre) ──────────────────────────────────────
+    // Persistent host for G2d. The two toasts share the copy so the surface
+    // is the only difference; captions label the active and baseline pair.
+    Column {
+        id: toastHost
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        spacing: 6
+
+        Row {
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 16
+
+            Rectangle {
+                width: 76
+                height: 36
+                radius: 18
+                color: sendMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent"
+                border.width: 1
+                border.color: page.inkDim
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "发一条"
+                    color: page.ink
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                }
+                MouseArea {
+                    id: sendMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: page.showToasts()
+                }
+            }
+
+            Column {
+                spacing: 4
+
+                ActionFeedbackToast {
+                    id: feedbackToast
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    // Gallery window paints in QML, not through the KWin effect.
+                    useKwinEffect: false
+                    fallbackEnabled: true
+                    // Demo mode holds it on screen; the real timeout is 1600ms.
+                    timeout: page.demo === "toast" ? 600000 : 1600
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "现役 ActionFeedbackToast"
+                    color: page.inkDim
+                    font.pixelSize: 11
+                }
+            }
+
+            Column {
+                spacing: 4
+
+                GlassToast {
+                    id: glassToast
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    // timeout 0 = demo hold (SPEC §7-① pending).
+                    timeout: page.demo === "toast" ? 0 : 1600
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "基准 GlassToast"
+                    color: page.inkDim
+                    font.pixelSize: 11
+                }
+            }
+        }
+
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            visible: page.demo === "toast"
+            text: "演示模式常显；实际存留 1600ms（SPEC §7-① 待裁定）"
             color: page.inkDim
             font.pixelSize: 11
         }

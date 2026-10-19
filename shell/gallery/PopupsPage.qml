@@ -3,8 +3,8 @@ import Quickshell
 import qs.desktop.modules.common
 import "components"
 
-// G2 — popup page. G2a ships the skeleton and GlassPopover; the remaining
-// anchors are placeholders for G2b–G2e and open their demo in later rounds.
+// G2 — popup page. G2a ships the skeleton and GlassPopover, G2b adds
+// GlassMenu; the remaining anchors are placeholders for G2c–G2e.
 Item {
     id: page
 
@@ -18,24 +18,51 @@ Item {
     function showPopover() {
         popover.open(anchorRepeater.itemAt(0))
     }
-    function closeActive() { popover.close() }
+    function showMenu() {
+        menu.resetFocus()
+        menu.open(anchorRepeater.itemAt(1))
+    }
+    function closeActive() {
+        popover.close()
+        menu.close()
+    }
     function openDemo(index) {
+        page.closeActive()
         if (index === 0)
             page.showPopover()
+        else if (index === 1)
+            page.showMenu()
     }
 
     // The gallery window has laid out by then; opening on completion alone can
     // anchor to a zero-size item and place the popup at the output origin.
     Timer {
         interval: 300
-        running: page.demo === "popover"
+        running: page.demo === "popover" || page.demo === "menu"
         repeat: false
-        onTriggered: page.showPopover()
+        onTriggered: page.openDemo(page.demo === "menu" ? 1 : 0)
     }
 
     Shortcut {
         sequence: "Esc"
         onActivated: page.closeActive()
+    }
+    // Menu keyboard contract. The gallery window owns keyboard focus after
+    // the anchor click, so the shortcuts live here rather than in the popup.
+    Shortcut {
+        sequence: "Up"
+        enabled: menu.shown
+        onActivated: menu.move(-1)
+    }
+    Shortcut {
+        sequence: "Down"
+        enabled: menu.shown
+        onActivated: menu.move(1)
+    }
+    Shortcut {
+        sequence: "Return"
+        enabled: menu.shown
+        onActivated: menu.activate()
     }
 
     Text {
@@ -100,6 +127,7 @@ Item {
     Column {
         x: 0
         y: 300
+        width: page.width
         spacing: 6
 
         Text {
@@ -118,11 +146,31 @@ Item {
             color: page.inkDim
             font.pixelSize: 12
         }
+
+        Item { width: 1; height: 10 }
+
         Text {
-            text: "宿主 AnimatedPopupWindow + PopupAnchorBinding · open 150 / close 140 · startScale 0.96"
+            text: "GlassMenu（gallery 基准）"
+            color: page.ink
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+        }
+        Text {
+            text: "padding 8 · 项高 28 · item radius 8 · 项间距 4 · Body 13 · 分隔线 1px"
             color: page.inkDim
             font.pixelSize: 12
         }
+        Text {
+            text: "Esc 关闭 · Up/Down 移动焦点 · Enter 触发 · focus 环 = 1px 描边 + 提亮"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+        Text {
+            text: "同一宿主 AnimatedPopupWindow · open 150 / close 140 · startScale 0.96"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+
         Text {
             visible: page.demo.length > 0
             text: "自动演示：GALLERY_POPUP=" + page.demo
@@ -133,5 +181,9 @@ Item {
 
     GlassPopover {
         id: popover
+    }
+
+    GlassMenu {
+        id: menu
     }
 }

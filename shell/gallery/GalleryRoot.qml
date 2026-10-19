@@ -218,10 +218,10 @@ Item {
     }
     Component {
         id: controlsPage
-        PlaceholderPage { title: "控件"; note: "G3" }
+        PlaceholderPage { title: "控件"; note: "G4" }
     }
     Component {
         id: motionPage
-        PlaceholderPage { title: "动效"; note: "G4" }
+        PlaceholderPage { title: "动效"; note: "G5" }
     }
 }

@@ -37,7 +37,7 @@
 2. **表面页**：GlassSurface、LiquidGlassPanel（B 层宿主）、
    KosFloatPanel（layer-shell 路线）、ControlCenterGlass 配方四块，
    每块标注其 radius / exponent / 阴影档（对照 SPEC §2.2-§2.3）。
-3. **弹层页**：GlassDialog（含 scrim 单一来源演示：开关 compositor scrim
+3. **弹层页**：GlassDialog（G3；含 scrim 单一来源演示：开关 compositor scrim
    与 QML 背板，展示「双开 = 违规双重变暗」）、GlassPopover、GlassMenu、
    GlassTooltip、GlassToast、GlassNotification。每个弹层可从锚点按钮唤起。
 4. **控件页**：GlassButton / GlassTextField / GlassCheckbox / GlassComboBox /

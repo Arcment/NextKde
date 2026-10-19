@@ -4,7 +4,8 @@ import qs.desktop.modules.common
 import "components"
 
 // G2 — popup page. G2a ships the skeleton and GlassPopover, G2b adds
-// GlassMenu; the remaining anchors are placeholders for G2c–G2e.
+// GlassMenu, G2c adds GlassTooltip; Toast / Notification are still
+// placeholders for G2d–G2e.
 Item {
     id: page
 
@@ -22,9 +23,13 @@ Item {
         menu.resetFocus()
         menu.open(anchorRepeater.itemAt(1))
     }
+    function showTooltip() {
+        tooltip.open(anchorRepeater.itemAt(2))
+    }
     function closeActive() {
         popover.close()
         menu.close()
+        tooltip.close()
     }
     function openDemo(index) {
         page.closeActive()
@@ -32,15 +37,36 @@ Item {
             page.showPopover()
         else if (index === 1)
             page.showMenu()
+        else if (index === 2)
+            page.showTooltip()
+    }
+    // Tooltip hover contract: 700ms dwell opens, leaving closes at once.
+    // 700ms is extrapolated (SPEC does not fix a dwell time).
+    function anchorHoverChanged(index, hovered) {
+        if (index !== 2)
+            return
+        if (hovered) {
+            tooltipHoverTimer.restart()
+        } else {
+            tooltipHoverTimer.stop()
+            tooltip.close()
+        }
+    }
+
+    Timer {
+        id: tooltipHoverTimer
+        interval: 700
+        repeat: false
+        onTriggered: page.showTooltip()
     }
 
     // The gallery window has laid out by then; opening on completion alone can
     // anchor to a zero-size item and place the popup at the output origin.
     Timer {
         interval: 300
-        running: page.demo === "popover" || page.demo === "menu"
+        running: page.demo === "popover" || page.demo === "menu" || page.demo === "tooltip"
         repeat: false
-        onTriggered: page.openDemo(page.demo === "menu" ? 1 : 0)
+        onTriggered: page.openDemo(page.demo === "tooltip" ? 2 : page.demo === "menu" ? 1 : 0)
     }
 
     Shortcut {
@@ -117,6 +143,7 @@ Item {
                     id: mouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    onContainsMouseChanged: page.anchorHoverChanged(index, containsMouse)
                     onClicked: page.openDemo(index)
                 }
             }
@@ -171,6 +198,25 @@ Item {
             font.pixelSize: 12
         }
 
+        Item { width: 1; height: 10 }
+
+        Text {
+            text: "GlassTooltip（gallery 基准）"
+            color: page.ink
+            font.pixelSize: 15
+            font.weight: Font.DemiBold
+        }
+        Text {
+            text: "material thick · radius 10 · Callout 12 SemiBold · Footnote 10 Medium"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+        Text {
+            text: "显隐 70ms · 朝向锚点 margin -6（SPEC §7 裁定项）· 悬停 700ms 显示（外推）· 移出即关"
+            color: page.inkDim
+            font.pixelSize: 12
+        }
+
         Text {
             visible: page.demo.length > 0
             text: "自动演示：GALLERY_POPUP=" + page.demo
@@ -185,5 +231,9 @@ Item {
 
     GlassMenu {
         id: menu
+    }
+
+    GlassTooltip {
+        id: tooltip
     }
 }

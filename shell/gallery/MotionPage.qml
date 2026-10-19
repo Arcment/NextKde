@@ -141,7 +141,9 @@ Item {
                     }
                     Text {
                         text: "reduceMotion   " + (page.reduceMotionOn ? "on" : "off")
-                            + "   effective 0 · expansion 0 · ambient skipped"
+                            + (page.reduceMotionOn
+                                ? "   effective 0 · expansion 0 · ambient skipped"
+                                : "   effective 150/140 · expansion on · ambient 2600ms")
                         color: page.ink
                         font.pixelSize: 11
                         font.family: "monospace"

@@ -17,7 +17,9 @@ Item {
     readonly property color inkDim: AppearanceTokens.content.glassInk(0.62)
     readonly property real colW: (width - 16) / 2
     readonly property real gridY: 192
-    readonly property real rowH: (height - gridY - 12) / 2
+    // Two rows with a 16px gutter (same as the column gap): the row height must
+    // leave that 16px at the bottom, not 12, or row two ends 4px below the page.
+    readonly property real rowH: (height - gridY - 16) / 2
 
     Text {
         x: 0

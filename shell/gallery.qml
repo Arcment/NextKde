@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.desktop.modules.common
 import "gallery"
+import "gallery/components"
 
 // Gallery entry (G1a). Two layer-shell windows:
 //   1. A controlled background board (Background layer) so the three glass
@@ -16,6 +17,8 @@ Item {
 
     property bool showBackgroundBoard: true
 
+    onShowBackgroundBoardChanged: GlassBackdrop.sourceItem =
+        showBackgroundBoard ? sampleBoard : null
 
     // Apply the theme requested by run.sh (GALLERY_THEME=light|dark, default dark).
     // Glass keeps its dark presentation unless "follows appearance" is on, so a
@@ -37,6 +40,7 @@ Item {
     Component.onCompleted: {
         applyTheme()
         themeSettle.restart()
+        GlassBackdrop.sourceItem = root.showBackgroundBoard ? sampleBoard : null
     }
 
     Timer {
@@ -64,49 +68,8 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
-        Rectangle {
+        GalleryBackdropBoard {
             anchors.fill: parent
-
-            // Saturated quadrants so blur/tint differences are obvious.
-            Rectangle {
-                x: 0; y: 0
-                width: parent.width * 0.5
-                height: parent.height * 0.5
-                color: "#e53935"
-            }
-            Rectangle {
-                x: parent.width * 0.5; y: 0
-                width: parent.width * 0.5
-                height: parent.height * 0.5
-                color: "#fdd835"
-            }
-            Rectangle {
-                x: 0; y: parent.height * 0.5
-                width: parent.width * 0.5
-                height: parent.height * 0.5
-                color: "#00acc1"
-            }
-            Rectangle {
-                x: parent.width * 0.5; y: parent.height * 0.5
-                width: parent.width * 0.5
-                height: parent.height * 0.5
-                color: "#d81b60"
-            }
-
-            // White / black dots to read edge behaviour and transparency.
-            Repeater {
-                model: 40
-                Rectangle {
-                    required property int index
-                    x: (index % 8) * (parent.width / 8) + parent.width / 16 - 18
-                    y: Math.floor(index / 8) * (parent.height / 5) + parent.height / 10 - 18
-                    width: 36
-                    height: 36
-                    radius: 18
-                    color: index % 2 === 0 ? "#ffffff" : "#000000"
-                    opacity: 0.85
-                }
-            }
         }
     }
 
@@ -120,6 +83,19 @@ Item {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "gallery"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+
+        // Hidden pixel-identical copy of the visible board. Glass surfaces
+        // capture it with hideSource, so it feeds the QML fallback sampling
+        // without painting a second board over the scene (G10).
+        Item {
+            id: sampleBoard
+            anchors.fill: parent
+            visible: root.showBackgroundBoard
+
+            GalleryBackdropBoard {
+                anchors.fill: parent
+            }
+        }
 
         GalleryRoot {
             anchors.fill: parent

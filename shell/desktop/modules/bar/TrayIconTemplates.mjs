@@ -8,9 +8,10 @@ const templates = new Map([
     ["腾讯qq", "qq.svg"], ["com.tencent.qq", "qq.svg"], ["com.qq.qq", "qq.svg"],
     ["workbuddy", "workbuddy.png"], ["com.tencent.workbuddy", "workbuddy.png"],
     ["clash-verge", "clash-verge.png"], ["clash verge", "clash-verge.png"],
+    ["clashverge", "clash-verge.png"], ["clash_verge", "clash-verge.png"],
     ["clash-verge-rev", "clash-verge.png"], ["clash-verge-rev-tray", "clash-verge.png"],
     ["wechat", "wechat.svg"], ["weixin", "wechat.svg"], ["微信", "wechat.svg"],
-    ["splayer-next", "music.svg"], ["splayer next", "music.svg"],
+    ["splayer-next", "music.svg"], ["splayer next", "music.svg"], ["splayer_next", "music.svg"],
     ["top.imsyy.splayer_next", "music.svg"]
 ]);
 

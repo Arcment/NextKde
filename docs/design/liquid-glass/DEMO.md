@@ -148,8 +148,8 @@ G4a 已交付：Button 的 3 材质 × 6 状态矩阵 + liquid / material 双形
 - 截图钩子：`GALLERY_PAGE=controls`、`GALLERY_CONTROLS_FILTER=button|…`、
   `GALLERY_CONTROLS_OFFSET`、`GALLERY_CONTROL_FORM=liquid|material`，
   均与 `shot.sh` 同行前置。
-- 验收截图：`g4-dark-button.png`、`g4-light-button.png`、
-  `g4-light-material-button.png`。
+- 验收截图曾归档于 `docs/design/liquid-glass/`，已随截图清理删除；矩阵可由
+  `GALLERY_PAGE=controls` + `GALLERY_CONTROLS_FILTER=button` 重新生成。
 
 G4b 已交付：TextField 与 Checkbox 的 3 材质 × 6 状态矩阵，同为双形态。
 
@@ -165,8 +165,8 @@ G4b 已交付：TextField 与 Checkbox 的 3 材质 × 6 状态矩阵，同为�
   SPEC §3.10 定义前四者，hover 与 filled（带值外观）为补充展示，不是新状态。
 - Checkbox 矩阵六卡与 SPEC §3.11 一一对应：
   unchecked / checked / hovered / pressed / focusVisible / disabled。
-- 验收截图：`g4-dark-textfield.png`、`g4-dark-checkbox.png`
-  （`GALLERY_CONTROLS_FILTER=textfield|checkbox`，形态 liquid，offset 0）。
+- 验收截图曾归档于 `docs/design/liquid-glass/`，已随截图清理删除；可由
+  `GALLERY_CONTROLS_FILTER=textfield|checkbox`（形态 liquid，offset 0）重新生成。
 
 G4c 已交付：ComboBox 与 SegmentedControl 的 3 材质 × 6 状态矩阵，同为双形态。
 
@@ -189,8 +189,8 @@ G4c 已交付：ComboBox 与 SegmentedControl 的 3 材质 × 6 状态矩阵，�
   （focusVisible）不再越出卡边。
 - `GlassCheckbox` 的两个 focus 环移入 box 内部锚定（此前锚到非兄弟节点，
   run.log 会产生 QML 警告）；形状与尺寸不变。
-- 验收截图：`g4-dark-combobox.png`、`g4-dark-segmented.png`
-  （`GALLERY_CONTROLS_FILTER=combobox|segmented`，形态 liquid，offset 0）。
+- 验收截图曾归档于 `docs/design/liquid-glass/`，已随截图清理删除；可由
+  `GALLERY_CONTROLS_FILTER=combobox|segmented`（形态 liquid，offset 0）重新生成。
 
 G4d 已交付：GlassSlider 与 GlassSwitch 的 3 材质 × 6 状态矩阵，同为双形态。
 
@@ -212,10 +212,9 @@ G4d 已交付：GlassSlider 与 GlassSwitch 的 3 材质 × 6 状态矩阵，同
   （档数）/ canceled`；switch `requested / confirmed`（350ms 模拟宿主异步确认）。
 - `ControlStateCard` 右上角标注由 G4c 的 elide 改为最多两行换行，
   `clear · focusVisible` 不再截断成 `focusVisi…`；两行仍右对齐、10px。
-- 验收截图：`g4-dark-slider.png`、`g4-dark-switch.png`、
-  `g4-light-slider.png`、`g4-light-switch.png`
-  （`GALLERY_CONTROLS_FILTER=slider|switch`，形态 liquid，offset 0）。
-  另拍 material 形态 `g4-dark-material-slider/switch.png` 核对 M3 比例。
+- 验收截图曾归档于 `docs/design/liquid-glass/`，已随截图清理删除；可由
+  `GALLERY_CONTROLS_FILTER=slider|switch`（形态 liquid，offset 0）重新生成，
+  material 形态另用 `GALLERY_CONTROL_FORM=material` 核对 M3 比例。
 
 G4e 已交付：GlassScrollBar 的 3 材质 × 6 状态矩阵与十档字阶对照区。
 
@@ -240,12 +239,12 @@ G4e 已交付：GlassScrollBar 的 3 材质 × 6 状态矩阵与十档字阶对�
   32/26/22/20/16/16/15/14/13/13；样张按 `Text.FixedHeight` 使用该行行高，
   Headline 为 Bold，正文用 Body 13/16、最小 10。
 - 截图钩子新增 `GALLERY_CONTROLS_FILTER=scrollbar|type`。
-- 验收截图：`g4-dark-scrollbar.png`、`g4-dark-type.png`
-  （形态 liquid，offset 0）。
+- 验收截图曾归档于 `docs/design/liquid-glass/`，已随截图清理删除；可由
+  `GALLERY_CONTROLS_FILTER=scrollbar|type`（形态 liquid，offset 0）重新生成。
 
 G4f 收口：全量截图重拍与逐张目检。
 
-- 截图（`tmp/glass/`，除注明外 form=liquid、offset 0）：
+- 截图（原 `tmp/glass/`，未入库；除注明外 form=liquid、offset 0）：
   `g4-dark-top` / `g4-light-top`（整页顶部）、`g4-dark-button` /
   `g4-light-button` / `g4-light-material-button`、`g4-dark-textfield`、
   `g4-dark-checkbox`、`g4-dark-combobox`、`g4-dark-segmented`、
@@ -266,7 +265,7 @@ G4f 收口：全量截图重拍与逐张目检。
 
 G5e 收口：动效页 10 张截图全量重拍与逐张目检。
 
-- 截图（`tmp/glass/`，同名同步到 `docs/design/liquid-glass/`）：
+- 截图（原 `tmp/glass/`，曾同步到 `docs/design/liquid-glass/`，已删除）：
   `g5-dark-popup` / `g5-light-popup`、`g5-dark-press`、`g5-dark-ambient`、
   `g5-dark-tooltip`、`g5-dark-toast`、`g5-dark-reduce` / `g5-light-reduce`、
   `g5-dark-params` / `g5-light-params`。

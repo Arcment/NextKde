@@ -9,9 +9,10 @@
 ## 本轮
 G11g — 文档回填 + 最终截图 + DONE。
 
-截图（`tmp/glass/`）：`g11g-overview-{dark,light}`、`g11g-param-{dark,light}`；
+截图（原 `tmp/glass/`）：`g11g-overview-{dark,light}`、`g11g-param-{dark,light}`；
 局部放大图 `tmp/gallery/g11g-param-{dark,light}-zoom.png`。四张均以
-`GALLERY_SCRIM=qml`（QML 兜底路径）拍摄。
+`GALLERY_SCRIM=qml`（QML 兜底路径）拍摄。归档副本已从
+`docs/design/liquid-glass/` 删除（2026-10-20）。
 
 - overview dark ✅：nav 红区压成暗红、青区压成暗青；param panel 黄区压成
   暗橄榄、品红区压成暗酒红；16 张卡片内部与板面均明显不同。白字与次级
@@ -40,9 +41,9 @@ G11f — 修正仍差项：dialog 升 readable，popover 开 scrim + readable（
 - `shell/gallery/components/GlassPopover.qml`：新增 `scrimEnabled: true`、
   `scrimLevel: "readable"`。
 
-截图（`tmp/glass/`）：`g11f-dialog-{dark,light}`、`g11f-popover-{dark,light}`；
+截图（原 `tmp/glass/`）：`g11f-dialog-{dark,light}`、`g11f-popover-{dark,light}`；
 局部放大图 `tmp/gallery/g11f-{dialog,popover}-{dark,light}-zoom.png`。
-四张均以 `GALLERY_SCRIM=qml`（QML 兜底路径）拍摄。
+四张均以 `GALLERY_SCRIM=qml`（QML 兜底路径）拍摄。归档副本已删除。
 
 - dialog dark ✅：卡内上半为暗红→暗橄榄、下半为暗青/暗酒红，与卡外亮红
   /亮黄明显不同；标题白字与次级灰字均可读，G11c 的页内文字透叠不再出现。
@@ -63,8 +64,9 @@ clear/regular/thick 仍为 KWin 路径外推（无 KWin 时 dark 亮黄区不可
 ## 上一轮（G11e）
 G11e — 极端边界：象限交界、黑白点、最亮黄区，逐格重判（dark/light）。
 
-截图（`tmp/glass/`）：`g11e-overview-{dark,light}`、`g11e-popover-{dark,light}`；
+截图（原 `tmp/glass/`）：`g11e-overview-{dark,light}`、`g11e-popover-{dark,light}`；
 局部放大图 `tmp/gallery/g11e-{dark,light}-{junction,nav,param,yellow,trio,paramtop,navtop}-zoom.png`。
+归档副本已删除。
 
 - nav ✅：红/青象限交界在玻璃内为 y 390→406 的 16px 单调渐变（逐行取样），
   无 1px 硬边；40 个黑白点被采样成连续软斑，白点落在 “G1 骨架” 行下方时
@@ -89,9 +91,9 @@ G11e — 极端边界：象限交界、黑白点、最亮黄区，逐格重判�
 ## 上一轮（G11d）
 G11d — 复核 decision 三条 lane + motion 页 toast + tooltip 页内基准（dark/light）。
 
-截图（`tmp/glass/`）：`g11d-decision-{toast,tooltip,session}-{dark,light}`、
+截图（原 `tmp/glass/`）：`g11d-decision-{toast,tooltip,session}-{dark,light}`、
 `g11d-motion-toast-{dark,light}`、`g11d-tooltip-baseline-{dark,light}`；
-局部放大图 `tmp/gallery/g11d-toast-{dark,light}-zoom.png`。
+局部放大图 `tmp/gallery/g11d-toast-{dark,light}-zoom.png`。归档副本已删除。
 
 - decision ① toast ✅：dark 药丸压成暗酒红、白字可读；light 提亮为浅粉、
   深字可读；A/B 两栏一致。卡片玻璃表头跨红/黄连续（dark 暗红→暗橄榄、
@@ -113,9 +115,10 @@ decision 三条 lane、motion 页 toast、tooltip 页内基准六格全部判 �
 ## 上一轮（G11c）
 G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）。
 
-截图（`tmp/glass/`）：`g11c-toast-{dark,light}`、`g11c-tooltip-{dark,light}`、
+截图（原 `tmp/glass/`）：`g11c-toast-{dark,light}`、`g11c-tooltip-{dark,light}`、
 `g11c-menu-{dark,light}`、`g11c-notification-{dark,light}`、
 `g11c-dialog-{dark,light}`；局部放大图在 `tmp/gallery/g11c-*zoom.png`。
+归档副本已删除。
 
 - toast ✅：dark 玻璃压成暗酒红/暗青、白字可读；light 提亮为浅粉/浅青、
   深字可读。ActionFeedbackToast 与基准 GlassToast 两枚都出现采样压缩；
@@ -135,10 +138,10 @@ G11c — 复核 toast / tooltip / menu / notification / dialog（dark/light）�
 ## 上一轮（G11b）
 ✅ — 复核左栏 nav 与右栏 param panel（dark/light），按新硬标准重判。
 
-- dark `tmp/glass/g11b-overview-dark.png`：nav 红区压成暗红、青区压成暗青，
+- dark `tmp/glass/g11b-overview-dark.png`（归档副本已删除）：nav 红区压成暗红、青区压成暗青，
   与玻璃外的亮红/亮青明显不同；param panel 黄区压成暗橄榄、品红区压成
   暗酒红，与玻璃外的亮黄/品红明显不同。白字与次级灰字均可读。
-- light `tmp/glass/g11b-overview-light.png`：nav 红区提亮为浅粉、青区提亮为
+- light `tmp/glass/g11b-overview-light.png`（归档副本已删除）：nav 红区提亮为浅粉、青区提亮为
   浅青；param panel 黄区提亮为浅黄、品红区提亮为浅粉。深色主字与次级字
   均可读，无深字压暗红。
 - 象限交界：nav、param panel 内部红/青、黄/品红过渡均为约 12px 的单调渐变

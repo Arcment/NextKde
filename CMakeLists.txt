@@ -161,6 +161,10 @@ if(BUILD_TESTING)
                 ${CMAKE_CURRENT_SOURCE_DIR}/shell/desktop/modules/common/test_tray_attention_match.mjs
         )
         set_tests_properties(kos-shell.tray-attention-match PROPERTIES TIMEOUT 10)
+        add_test(NAME kos-shell.tray-identity
+            COMMAND ${KOS_NODE_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/shell/desktop/modules/bar/test_tray_identity.mjs)
+        set_tests_properties(kos-shell.tray-identity PROPERTIES TIMEOUT 10 LABELS logic)
         add_test(NAME kos-shell.notification-count-match
             COMMAND ${KOS_NODE_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/shell/desktop/modules/common/test_notification_count_match.mjs
@@ -517,7 +521,9 @@ if(BUILD_TESTING)
     if(KOS_PYTHON_EXECUTABLE AND KOS_INTERACTION_QUICKSHELL AND KOS_TEST_KWIN AND KOS_TEST_DBUS_RUN)
         add_test(NAME kos-ui.tray-color
             COMMAND ${KOS_PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/tray-color/run.py)
-        set_tests_properties(kos-ui.tray-color PROPERTIES
+        add_test(NAME kos-ui.tray-template-fallback
+            COMMAND ${KOS_PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/tray-color/run.py --missing-template)
+        set_tests_properties(kos-ui.tray-color kos-ui.tray-template-fallback PROPERTIES
             ENVIRONMENT "QML_IMPORT_PATH=${CMAKE_BINARY_DIR}/qml;QML2_IMPORT_PATH=${CMAKE_BINARY_DIR}/qml"
             LABELS "ui;compositor" TIMEOUT 30 RUN_SERIAL TRUE)
         add_test(NAME kos-ui.status-panels

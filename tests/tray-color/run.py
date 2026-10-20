@@ -8,12 +8,13 @@ import subprocess
 import sys
 import tempfile
 import time
-from PIL import Image
+from PIL import Image, ImageChops
 
 REPO = Path(__file__).resolve().parents[2]
 
 
 def main():
+    missing_template = "--missing-template" in sys.argv
     if "--private-bus" not in sys.argv:
         with tempfile.TemporaryDirectory(prefix="kos-tray-color-bus-") as directory:
             config = Path(directory) / "bus.conf"
@@ -21,7 +22,8 @@ def main():
                 '<policy context="default"><allow send_destination="*"/>'
                 '<allow receive_sender="*"/><allow own="*"/></policy></busconfig>')
             subprocess.run(["dbus-run-session", "--config-file=" + str(config), "--",
-                sys.executable, __file__, "--private-bus"], check=True)
+                sys.executable, __file__, "--private-bus", *(
+                    ["--missing-template"] if missing_template else [])], check=True)
         return
     with tempfile.TemporaryDirectory(prefix="kos-tray-color-") as directory:
         root = Path(directory)
@@ -29,6 +31,8 @@ def main():
         common = root / "desktop/modules/common"
         platform = root / "desktop/modules/platform"
         shutil.copytree(REPO / "shell/desktop", root / "desktop", symlinks=True)
+        if missing_template:
+            (root / "desktop/assets/tray/workbuddy.png").unlink()
         for name in ["Kos", "shared"]:
             (root / name).symlink_to(REPO / "shell" / name, target_is_directory=True)
         shutil.copy(REPO / "tests/status-area/PlatformFixture.qml", platform / "PlatformClient.qml")
@@ -47,6 +51,7 @@ def main():
             icon.paste(color, (index * 8, 0, index * 8 + 8, 24))
         icon.save(root / "icon.png")
         env = dict(os.environ, QT_QPA_PLATFORM="wayland", QSG_RHI_BACKEND="opengl",
+            TRAY_TEST_MISSING_TEMPLATE="1" if missing_template else "0",
             LIBGL_ALWAYS_SOFTWARE="1", CAPTURE_DIR=str(root), TRAY_TEST_ICON=(root / "icon.png").as_uri(),
             TRAY_SETTINGS_SECTION=(REPO / "apps/settings/pages/IconAppearanceSection.qml").as_uri(),
             XDG_STATE_HOME=str(root / "state"), XDG_CONFIG_HOME=str(root / "config"),
@@ -55,6 +60,7 @@ def main():
             QML_IMPORT_PATH=os.environ.get("QML_IMPORT_PATH", str(REPO / ".build/kosctl/qml")),
             XDG_RUNTIME_DIR=str(root / "runtime"), WAYLAND_DISPLAY="tray-color-test", DISPLAY="")
         env.pop("QT_QUICK_BACKEND", None)
+        client_output = ""
         with (root / "kwin.log").open("w+") as log:
             compositor = subprocess.Popen(["kwin_wayland", "--virtual", "--width", "800",
                 "--height", "600", "--no-lockscreen", "--no-global-shortcuts", "--no-kactivities",
@@ -70,6 +76,11 @@ def main():
                     time.sleep(0.05)
                 result = subprocess.run(["quickshell", "-p", str(root), "--no-color"],
                     env=env, capture_output=True, text=True, timeout=15)
+                client_output = result.stdout + result.stderr
+            except subprocess.TimeoutExpired as error:
+                client_output = "\n".join(part.decode(errors="replace") if isinstance(part, bytes) else part
+                    for part in [error.stdout, error.stderr] if part)
+                raise
             finally:
                 compositor.terminate()
                 try:
@@ -77,14 +88,31 @@ def main():
                 except subprocess.TimeoutExpired:
                     compositor.kill()
                     compositor.wait()
+                logs = {"kwin.log": (root / "kwin.log").read_text(), "quickshell.log": client_output}
+                for name, text in logs.items():
+                    print(f"\n--- {name} ---\n{text}", flush=True)
+                if os.environ.get("KOS_TRAY_COLOR_QA"):
+                    qa = Path(os.environ["KOS_TRAY_COLOR_QA"])
+                    if missing_template:
+                        qa = qa / "missing-template"
+                    qa.mkdir(parents=True, exist_ok=True)
+                    for name, text in logs.items():
+                        (qa / name).write_text(text)
         output = result.stdout + result.stderr
+        if missing_template:
+            # This missing file is deliberate. All other image/runtime errors
+            # and binding loops still fail the same checks as the normal case.
+            output = "\n".join(line for line in output.splitlines()
+                if not ("Cannot open" in line and "/desktop/assets/tray/workbuddy.png" in line))
         if os.environ.get("KOS_TRAY_COLOR_QA"):
             qa = Path(os.environ["KOS_TRAY_COLOR_QA"])
+            if missing_template:
+                qa = qa / "missing-template"
             qa.mkdir(parents=True, exist_ok=True)
             for path in root.glob("*.png"):
                 shutil.copy(path, qa / path.name)
         assert result.returncode == 0 and "TRAY_COLOR_PASS" in output, output
-        assert not re.search(r"TRAY_COLOR_FAIL|ReferenceError|TypeError|Cannot assign|Unable to assign|"
+        assert not re.search(r"TRAY_COLOR_FAIL|ReferenceError|TypeError|Binding loop|Cannot assign|Unable to assign|"
             r"Failed to (create|compile)|Cannot open|Shader.*error|is not a type", output), output
         frames = {name: Image.open(root / f"{name}.png").convert("RGB")
             for name in ["original", "white", "black", "restored", "reloaded", "tinted", "color"]}
@@ -110,15 +138,27 @@ def main():
                 crop = frame.crop((int(x * scale), int(4 * scale), int((x + width) * scale), int(28 * scale)))
                 assert sum(count for count, color in crop.getcolors(crop.width * crop.height) if color == ink) > 8, (name, x, "missing opaque ink")
         assert frames["original"].crop((0, 0, 80, 32)).tobytes() == frames["restored"].crop((0, 0, 80, 32)).tobytes()
-        assert frames["white"].tobytes() == frames["reloaded"].tobytes()
-        assert frames["white"].tobytes() == frames["tinted"].tobytes() == frames["color"].tobytes()
+        # The two synthetic "101°" labels are appearance references, not tray
+        # artwork. On CI their glyph rasterization changes after a light/dark
+        # round-trip, while every icon pixel remains identical. Exclude only
+        # those Text item bounds; retain exact equality everywhere else.
+        for name in ["reloaded", "tinted", "color"]:
+            difference = ImageChops.difference(frames["white"], frames[name])
+            scale = frames[name].width / 320
+            for box in [(104, 4, 146, 28), (104, 44, 146, 68)]:
+                difference.paste((0, 0, 0), tuple(int(value * scale) for value in box))
+            assert difference.getbbox() is None, (name, "tray artwork changed", difference.getbbox())
         for name, ink, backdrop in [("white", (255, 255, 255), (22, 54, 113)), ("black", (0, 0, 0), (240, 240, 240))]:
             gallery = Image.open(root / f"applications-{name}.png").convert("RGB")
-            for x in [4, 36, 68]:
-                colors = dict((color, count) for count, color in gallery.crop((x, 4, x + 24, 28)).getcolors(576))
+            cells = [(4, 4), (36, 4), (68, 4)]
+            if not missing_template:
+                cells.append((4, 36))
+            for x, y in cells:
+                colors = dict((color, count) for count, color in gallery.crop((x, y, x + 24, y + 24)).getcolors(576))
                 assert colors.get(ink, 0) > 20, (name, x, "template is not opaque ink")
                 assert colors.get(backdrop, 0) > 20, (name, x, "template lost transparent details")
-        print("PASS: tray and production status controls share opaque appearance ink in color/grayscale/tint; alpha and settings round-trip")
+        print("PASS: tray and production status controls share opaque appearance ink in color/grayscale/tint; alpha and settings round-trip"
+            + ("; missing template restored original artwork without binding loops" if missing_template else ""))
 
 
 if __name__ == "__main__":

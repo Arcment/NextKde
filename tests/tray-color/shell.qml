@@ -16,6 +16,11 @@ ShellRoot {
         property string icon: Quickshell.env("TRAY_TEST_ICON")
         property int status: SystemTrayItem.Active
     }
+    QtObject {
+        id: mockClashItem
+        property string icon: Quickshell.env("TRAY_TEST_ICON")
+        property int status: SystemTrayItem.Active
+    }
     Component.onCompleted: {
         test.check(IconAppearanceService.trayFollowsBarColor, "tray defaults to a monochrome template")
         IconAppearanceService.trayFollowsBarColor = false
@@ -81,7 +86,7 @@ ShellRoot {
     FloatingWindow {
         visible: true
         implicitWidth: 320
-        implicitHeight: 80
+        implicitHeight: 112
         Rectangle {
             id: scene
             anchors.fill: parent
@@ -111,7 +116,7 @@ ShellRoot {
             NotificationHistoryToggle { x: 280; y: 4; iconSize: 24 }
             Rectangle {
                 id: applicationGallery
-                y: 40; width: 320; height: 32
+                y: 40; width: 320; height: 64
                 color: ThemeService.isDark ? "#163671" : "#f0f0f0"
                 TrayIcon {
                     id: codexTemplate
@@ -132,6 +137,13 @@ ShellRoot {
                     x: 68; y: 4; width: 24; height: 24
                     applicationId: "tray-icon tray app clash-verge-rev-tray"
                     applicationName: "clash-verge"
+                    entry: mockClashItem
+                }
+                TrayIcon {
+                    id: workbuddyTemplate
+                    x: 4; y: 36; width: 24; height: 24
+                    applicationId: "chrome_status_icon_1"
+                    applicationName: "WorkBuddy"
                     originalSource: Quickshell.env("TRAY_TEST_ICON")
                 }
                 Text {
@@ -173,6 +185,16 @@ ShellRoot {
                     test.stage++
                     break
                 case 2:
+                    if (Quickshell.env("TRAY_TEST_MISSING_TEMPLATE") === "1") {
+                        test.check(workbuddyTemplate.templateLoadFailed
+                            && workbuddyTemplate.source === workbuddyTemplate.originalSource
+                            && workbuddyTemplate.imageStatus === Image.Ready,
+                            "missing template restores the application's original artwork")
+                    } else {
+                        test.check(workbuddyTemplate.source !== workbuddyTemplate.originalSource
+                            && workbuddyTemplate.imageStatus === Image.Ready,
+                            "WorkBuddy template loads")
+                    }
                     test.check(monochromeBattery.fillColor === ThemeService.barInk
                         && monochromeBattery.boltColor === ThemeService.barInk
                         && monochromeBattery.opacity === 1, "battery shares full appearance ink")
@@ -219,6 +241,16 @@ ShellRoot {
                     break
                 case 12: test.capture("color"); break
                 case 13:
+                    const clashSource = clashTemplate.source
+                    mockClashItem.icon = qqTemplate.source
+                    test.check(clashTemplate.source === clashSource && clashTemplate.scale === 0.85,
+                        "normal Clash icon refresh keeps its detailed template and size")
+                    mockClashItem.status = SystemTrayItem.NeedsAttention
+                    test.check(clashTemplate.source === mockClashItem.icon,
+                        "Clash attention still uses live application artwork")
+                    mockClashItem.status = SystemTrayItem.Active
+                    test.check(clashTemplate.source === clashSource,
+                        "Clash restores its template after attention ends")
                     mockTrayItem.status = SystemTrayItem.NeedsAttention
                     test.check(codexTemplate.source === mockTrayItem.icon,
                         "attention uses the application's live artwork")

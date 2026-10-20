@@ -11,3 +11,6 @@ These templates keep internal details transparent. The renderer replaces RGB wit
 wechat.svg: Papirus icon theme, 24x24/panel/wechat-tray.svg, GPL-3.0 (see repository LICENSE).
 https://github.com/PapirusDevelopmentTeam/papirus-icon-theme
 music.svg: project-authored monochrome music note used for SPlayer Next.
+
+workbuddy.png: WorkBuddy installed application resource, app.asar.unpacked/resources/trayTemplate@2x.png.
+Official monochrome tray template; application logo and trademark belong to Tencent.

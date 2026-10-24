@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls as Basic
+import Kos.Ui
 
 // Match ListenFree's LoadingIndicator: a rounded three-quarter arc, with
 // rotation on the render thread instead of repainting the canvas each frame.
@@ -37,7 +38,7 @@ Basic.BusyIndicator {
             to: 360
             duration: 900
             loops: Animation.Infinite
-            running: control.running && control.visible
+            running: control.running && control.visible && !AppTheme.reduceMotion
         }
     }
 }
